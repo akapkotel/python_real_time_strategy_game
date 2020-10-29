@@ -1,0 +1,639 @@
+DEBUG: 10/29/2020 11:31:57 PM bytecode dump:
+>          0	NOP(arg=None, lineno=147)
+           2	LOAD_GLOBAL(arg=0, lineno=147)
+           4	LOAD_FAST(arg=2, lineno=147)
+           6	LOAD_CONST(arg=1, lineno=147)
+           8	BINARY_FLOOR_DIVIDE(arg=None, lineno=147)
+          10	CALL_FUNCTION(arg=1, lineno=147)
+          12	STORE_FAST(arg=3, lineno=147)
+          14	BUILD_LIST(arg=0, lineno=148)
+          16	STORE_FAST(arg=4, lineno=148)
+          18	LOAD_FAST(arg=4, lineno=149)
+          20	LOAD_ATTR(arg=1, lineno=149)
+          22	STORE_FAST(arg=5, lineno=149)
+          24	LOAD_GLOBAL(arg=2, lineno=150)
+          26	LOAD_FAST(arg=3, lineno=150)
+          28	UNARY_NEGATIVE(arg=None, lineno=150)
+          30	LOAD_FAST(arg=3, lineno=150)
+          32	CALL_FUNCTION(arg=2, lineno=150)
+          34	GET_ITER(arg=None, lineno=150)
+>         36	FOR_ITER(arg=78, lineno=150)
+          38	STORE_FAST(arg=6, lineno=150)
+          40	LOAD_FAST(arg=0, lineno=151)
+          42	LOAD_FAST(arg=6, lineno=151)
+          44	BINARY_ADD(arg=None, lineno=151)
+          46	STORE_FAST(arg=7, lineno=151)
+          48	LOAD_GLOBAL(arg=3, lineno=152)
+          50	LOAD_FAST(arg=6, lineno=152)
+          52	CALL_FUNCTION(arg=1, lineno=152)
+          54	STORE_FAST(arg=8, lineno=152)
+          56	LOAD_GLOBAL(arg=2, lineno=153)
+          58	LOAD_FAST(arg=3, lineno=153)
+          60	UNARY_NEGATIVE(arg=None, lineno=153)
+          62	LOAD_FAST(arg=3, lineno=153)
+          64	CALL_FUNCTION(arg=2, lineno=153)
+          66	GET_ITER(arg=None, lineno=153)
+>         68	FOR_ITER(arg=44, lineno=153)
+          70	STORE_FAST(arg=9, lineno=153)
+          72	LOAD_FAST(arg=8, lineno=154)
+          74	LOAD_GLOBAL(arg=3, lineno=154)
+          76	LOAD_FAST(arg=9, lineno=154)
+          78	CALL_FUNCTION(arg=1, lineno=154)
+          80	BINARY_ADD(arg=None, lineno=154)
+          82	STORE_FAST(arg=10, lineno=154)
+          84	LOAD_FAST(arg=10, lineno=155)
+          86	LOAD_FAST(arg=2, lineno=155)
+          88	COMPARE_OP(arg=0, lineno=155)
+          90	POP_JUMP_IF_FALSE(arg=68, lineno=155)
+          92	LOAD_FAST(arg=1, lineno=156)
+          94	LOAD_FAST(arg=9, lineno=156)
+          96	BINARY_ADD(arg=None, lineno=156)
+          98	STORE_FAST(arg=11, lineno=156)
+         100	LOAD_FAST(arg=5, lineno=157)
+         102	LOAD_FAST(arg=7, lineno=157)
+         104	LOAD_FAST(arg=11, lineno=157)
+         106	BUILD_TUPLE(arg=2, lineno=157)
+         108	CALL_FUNCTION(arg=1, lineno=157)
+         110	POP_TOP(arg=None, lineno=157)
+         112	JUMP_ABSOLUTE(arg=68, lineno=157)
+>        114	JUMP_ABSOLUTE(arg=36, lineno=157)
+>        116	LOAD_FAST(arg=4, lineno=158)
+         118	RETURN_VALUE(arg=None, lineno=158)
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=0 nstack_initial=0)])
+DEBUG: 10/29/2020 11:31:57 PM stack: []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=0, inst=NOP(arg=None, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=2, inst=LOAD_GLOBAL(arg=0, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=4, inst=LOAD_FAST(arg=2, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$2load_global.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=6, inst=LOAD_CONST(arg=1, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$2load_global.0', '$visibility4.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=8, inst=BINARY_FLOOR_DIVIDE(arg=None, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$2load_global.0', '$visibility4.1', '$const6.2']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=10, inst=CALL_FUNCTION(arg=1, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$2load_global.0', '$8binary_floor_divide.3']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=12, inst=STORE_FAST(arg=3, lineno=147)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$10call_function.4']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=14, inst=BUILD_LIST(arg=0, lineno=148)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=16, inst=STORE_FAST(arg=4, lineno=148)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$14build_list.5']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=18, inst=LOAD_FAST(arg=4, lineno=149)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=20, inst=LOAD_ATTR(arg=1, lineno=149)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$observable_pixels18.6']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=22, inst=STORE_FAST(arg=5, lineno=149)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$20load_attr.7']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=24, inst=LOAD_GLOBAL(arg=2, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=26, inst=LOAD_FAST(arg=3, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$24load_global.8']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=28, inst=UNARY_NEGATIVE(arg=None, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$24load_global.8', '$visibility_radius26.9']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=30, inst=LOAD_FAST(arg=3, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$24load_global.8', '$28unary_negative.10']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=32, inst=CALL_FUNCTION(arg=2, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$24load_global.8', '$28unary_negative.10', '$visibility_radius30.11']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=34, inst=GET_ITER(arg=None, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$32call_function.12']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=36, stack=('$34get_iter.13',), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=36 nstack_initial=1)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi36.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=36, inst=FOR_ITER(arg=78, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi36.0']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=116, stack=(), blockstack=(), npush=0), Edge(pc=38, stack=('$phi36.0', '$36for_iter.2'), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=116 nstack_initial=0), State(pc_initial=38 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM stack: []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=116, inst=LOAD_FAST(arg=4, lineno=158)
+DEBUG: 10/29/2020 11:31:57 PM stack []
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=118, inst=RETURN_VALUE(arg=None, lineno=158)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$observable_pixels116.0']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=38 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi38.0', '$phi38.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=38, inst=STORE_FAST(arg=6, lineno=150)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$phi38.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=40, inst=LOAD_FAST(arg=0, lineno=151)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=42, inst=LOAD_FAST(arg=6, lineno=151)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$pixel_x40.2']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=44, inst=BINARY_ADD(arg=None, lineno=151)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$pixel_x40.2', '$x42.3']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=46, inst=STORE_FAST(arg=7, lineno=151)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$44binary_add.4']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=48, inst=LOAD_GLOBAL(arg=3, lineno=152)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=50, inst=LOAD_FAST(arg=6, lineno=152)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$48load_global.5']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=52, inst=CALL_FUNCTION(arg=1, lineno=152)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$48load_global.5', '$x50.6']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=54, inst=STORE_FAST(arg=8, lineno=152)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$52call_function.7']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=56, inst=LOAD_GLOBAL(arg=2, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=58, inst=LOAD_FAST(arg=3, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$56load_global.8']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=60, inst=UNARY_NEGATIVE(arg=None, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$56load_global.8', '$visibility_radius58.9']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=62, inst=LOAD_FAST(arg=3, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$56load_global.8', '$60unary_negative.10']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=64, inst=CALL_FUNCTION(arg=2, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$56load_global.8', '$60unary_negative.10', '$visibility_radius62.11']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=66, inst=GET_ITER(arg=None, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi38.0', '$64call_function.12']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=68, stack=('$phi38.0', '$66get_iter.13'), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=68 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi68.0', '$phi68.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=68, inst=FOR_ITER(arg=44, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi68.0', '$phi68.1']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=114, stack=('$phi68.0',), blockstack=(), npush=0), Edge(pc=70, stack=('$phi68.0', '$phi68.1', '$68for_iter.3'), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=114 nstack_initial=1), State(pc_initial=70 nstack_initial=3)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi114.0']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=114, inst=JUMP_ABSOLUTE(arg=36, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi114.0']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=36, stack=('$phi114.0',), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=70 nstack_initial=3), State(pc_initial=36 nstack_initial=1)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi70.0', '$phi70.1', '$phi70.2']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=70, inst=STORE_FAST(arg=9, lineno=153)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$phi70.2']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=72, inst=LOAD_FAST(arg=8, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=74, inst=LOAD_GLOBAL(arg=3, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$abs_x72.3']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=76, inst=LOAD_FAST(arg=9, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$abs_x72.3', '$74load_global.4']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=78, inst=CALL_FUNCTION(arg=1, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$abs_x72.3', '$74load_global.4', '$y76.5']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=80, inst=BINARY_ADD(arg=None, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$abs_x72.3', '$78call_function.6']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=82, inst=STORE_FAST(arg=10, lineno=154)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$80binary_add.7']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=84, inst=LOAD_FAST(arg=10, lineno=155)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=86, inst=LOAD_FAST(arg=2, lineno=155)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$radius84.8']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=88, inst=COMPARE_OP(arg=0, lineno=155)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$radius84.8', '$visibility86.9']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=90, inst=POP_JUMP_IF_FALSE(arg=68, lineno=155)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi70.0', '$phi70.1', '$88compare_op.10']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=92, stack=('$phi70.0', '$phi70.1'), blockstack=(), npush=0), Edge(pc=68, stack=('$phi70.0', '$phi70.1'), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=36 nstack_initial=1), State(pc_initial=92 nstack_initial=2), State(pc_initial=68 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=92 nstack_initial=2), State(pc_initial=68 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM stack: ['$phi92.0', '$phi92.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=92, inst=LOAD_FAST(arg=1, lineno=156)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=94, inst=LOAD_FAST(arg=9, lineno=156)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$pixel_y92.2']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=96, inst=BINARY_ADD(arg=None, lineno=156)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$pixel_y92.2', '$y94.3']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=98, inst=STORE_FAST(arg=11, lineno=156)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$96binary_add.4']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=100, inst=LOAD_FAST(arg=5, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=102, inst=LOAD_FAST(arg=7, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$add_to_observable100.5']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=104, inst=LOAD_FAST(arg=11, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$add_to_observable100.5', '$px102.6']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=106, inst=BUILD_TUPLE(arg=2, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$add_to_observable100.5', '$px102.6', '$py104.7']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=108, inst=CALL_FUNCTION(arg=1, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$add_to_observable100.5', '$106build_tuple.8']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=110, inst=POP_TOP(arg=None, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1', '$108call_function.9']
+DEBUG: 10/29/2020 11:31:57 PM dispatch pc=112, inst=JUMP_ABSOLUTE(arg=68, lineno=157)
+DEBUG: 10/29/2020 11:31:57 PM stack ['$phi92.0', '$phi92.1']
+DEBUG: 10/29/2020 11:31:57 PM end state. edges=[Edge(pc=68, stack=('$phi92.0', '$phi92.1'), blockstack=(), npush=0)]
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=68 nstack_initial=2), State(pc_initial=68 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM pending: deque([State(pc_initial=68 nstack_initial=2)])
+DEBUG: 10/29/2020 11:31:57 PM -------------------------Prune PHIs-------------------------
+DEBUG: 10/29/2020 11:31:57 PM Used_phis: defaultdict(<class 'set'>,
+            {State(pc_initial=0 nstack_initial=0): set(),
+             State(pc_initial=36 nstack_initial=1): {'$phi36.0'},
+             State(pc_initial=38 nstack_initial=2): {'$phi38.1'},
+             State(pc_initial=68 nstack_initial=2): {'$phi68.1'},
+             State(pc_initial=70 nstack_initial=3): {'$phi70.2'},
+             State(pc_initial=92 nstack_initial=2): set(),
+             State(pc_initial=114 nstack_initial=1): set(),
+             State(pc_initial=116 nstack_initial=0): set()})
+DEBUG: 10/29/2020 11:31:57 PM defmap: {'$phi36.0': State(pc_initial=0 nstack_initial=0),
+ '$phi38.1': State(pc_initial=36 nstack_initial=1),
+ '$phi68.1': State(pc_initial=38 nstack_initial=2),
+ '$phi70.2': State(pc_initial=68 nstack_initial=2)}
+DEBUG: 10/29/2020 11:31:57 PM phismap: defaultdict(<class 'set'>,
+            {'$phi114.0': {('$phi68.0', State(pc_initial=68 nstack_initial=2))},
+             '$phi36.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0)),
+                          ('$phi114.0',
+                           State(pc_initial=114 nstack_initial=1))},
+             '$phi38.0': {('$phi36.0', State(pc_initial=36 nstack_initial=1))},
+             '$phi38.1': {('$36for_iter.2',
+                           State(pc_initial=36 nstack_initial=1))},
+             '$phi68.0': {('$phi38.0', State(pc_initial=38 nstack_initial=2)),
+                          ('$phi70.0', State(pc_initial=70 nstack_initial=3)),
+                          ('$phi92.0', State(pc_initial=92 nstack_initial=2))},
+             '$phi68.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2)),
+                          ('$phi70.1', State(pc_initial=70 nstack_initial=3)),
+                          ('$phi92.1', State(pc_initial=92 nstack_initial=2))},
+             '$phi70.0': {('$phi68.0', State(pc_initial=68 nstack_initial=2))},
+             '$phi70.1': {('$phi68.1', State(pc_initial=68 nstack_initial=2))},
+             '$phi70.2': {('$68for_iter.3',
+                           State(pc_initial=68 nstack_initial=2))},
+             '$phi92.0': {('$phi70.0', State(pc_initial=70 nstack_initial=3))},
+             '$phi92.1': {('$phi70.1', State(pc_initial=70 nstack_initial=3))}})
+DEBUG: 10/29/2020 11:31:57 PM changing phismap: defaultdict(<class 'set'>,
+            {'$phi114.0': {('$phi38.0', State(pc_initial=38 nstack_initial=2)),
+                           ('$phi70.0', State(pc_initial=70 nstack_initial=3)),
+                           ('$phi92.0', State(pc_initial=92 nstack_initial=2))},
+             '$phi36.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0)),
+                          ('$phi38.0', State(pc_initial=38 nstack_initial=2)),
+                          ('$phi70.0', State(pc_initial=70 nstack_initial=3)),
+                          ('$phi92.0', State(pc_initial=92 nstack_initial=2))},
+             '$phi38.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0)),
+                          ('$phi38.0', State(pc_initial=38 nstack_initial=2)),
+                          ('$phi70.0', State(pc_initial=70 nstack_initial=3)),
+                          ('$phi92.0', State(pc_initial=92 nstack_initial=2))},
+             '$phi38.1': {('$36for_iter.2',
+                           State(pc_initial=36 nstack_initial=1))},
+             '$phi68.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0)),
+                          ('$phi68.0', State(pc_initial=68 nstack_initial=2))},
+             '$phi68.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2)),
+                          ('$phi68.1', State(pc_initial=68 nstack_initial=2))},
+             '$phi70.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi70.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))},
+             '$phi70.2': {('$68for_iter.3',
+                           State(pc_initial=68 nstack_initial=2))},
+             '$phi92.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi92.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))}})
+DEBUG: 10/29/2020 11:31:57 PM changing phismap: defaultdict(<class 'set'>,
+            {'$phi114.0': {('$34get_iter.13',
+                            State(pc_initial=0 nstack_initial=0))},
+             '$phi36.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi38.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi38.1': {('$36for_iter.2',
+                           State(pc_initial=36 nstack_initial=1))},
+             '$phi68.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi68.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))},
+             '$phi70.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi70.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))},
+             '$phi70.2': {('$68for_iter.3',
+                           State(pc_initial=68 nstack_initial=2))},
+             '$phi92.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi92.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))}})
+DEBUG: 10/29/2020 11:31:57 PM changing phismap: defaultdict(<class 'set'>,
+            {'$phi114.0': {('$34get_iter.13',
+                            State(pc_initial=0 nstack_initial=0))},
+             '$phi36.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi38.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi38.1': {('$36for_iter.2',
+                           State(pc_initial=36 nstack_initial=1))},
+             '$phi68.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi68.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))},
+             '$phi70.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi70.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))},
+             '$phi70.2': {('$68for_iter.3',
+                           State(pc_initial=68 nstack_initial=2))},
+             '$phi92.0': {('$34get_iter.13',
+                           State(pc_initial=0 nstack_initial=0))},
+             '$phi92.1': {('$66get_iter.13',
+                           State(pc_initial=38 nstack_initial=2))}})
+DEBUG: 10/29/2020 11:31:57 PM keep phismap: {'$phi36.0': {('$34get_iter.13', State(pc_initial=0 nstack_initial=0))},
+ '$phi38.1': {('$36for_iter.2', State(pc_initial=36 nstack_initial=1))},
+ '$phi68.1': {('$66get_iter.13', State(pc_initial=38 nstack_initial=2))},
+ '$phi70.2': {('$68for_iter.3', State(pc_initial=68 nstack_initial=2))}}
+DEBUG: 10/29/2020 11:31:57 PM new_out: defaultdict(<class 'dict'>,
+            {State(pc_initial=0 nstack_initial=0): {'$phi36.0': '$34get_iter.13'},
+             State(pc_initial=36 nstack_initial=1): {'$phi38.1': '$36for_iter.2'},
+             State(pc_initial=38 nstack_initial=2): {'$phi68.1': '$66get_iter.13'},
+             State(pc_initial=68 nstack_initial=2): {'$phi70.2': '$68for_iter.3'}})
+DEBUG: 10/29/2020 11:31:57 PM ----------------------DONE Prune PHIs-----------------------
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=0 nstack_initial=0):
+AdaptBlockInfo(insts=((0, {}), (2, {'res': '$2load_global.0'}), (4, {'res': '$visibility4.1'}), (6, {'res': '$const6.2'}), (8, {'lhs': '$visibility4.1', 'rhs': '$const6.2', 'res': '$8binary_floor_divide.3'}), (10, {'func': '$2load_global.0', 'args': ['$8binary_floor_divide.3'], 'res': '$10call_function.4'}), (12, {'value': '$10call_function.4'}), (14, {'items': [], 'res': '$14build_list.5'}), (16, {'value': '$14build_list.5'}), (18, {'res': '$observable_pixels18.6'}), (20, {'item': '$observable_pixels18.6', 'res': '$20load_attr.7'}), (22, {'value': '$20load_attr.7'}), (24, {'res': '$24load_global.8'}), (26, {'res': '$visibility_radius26.9'}), (28, {'value': '$visibility_radius26.9', 'res': '$28unary_negative.10'}), (30, {'res': '$visibility_radius30.11'}), (32, {'func': '$24load_global.8', 'args': ['$28unary_negative.10', '$visibility_radius30.11'], 'res': '$32call_function.12'}), (34, {'value': '$32call_function.12', 'res': '$34get_iter.13'})), outgoing_phis={'$phi36.0': '$34get_iter.13'}, blockstack=(), active_try_block=None, outgoing_edgepushed={36: ('$34get_iter.13',)})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=36 nstack_initial=1):
+AdaptBlockInfo(insts=((36, {'iterator': '$phi36.0', 'pair': '$36for_iter.1', 'indval': '$36for_iter.2', 'pred': '$36for_iter.3'}),), outgoing_phis={'$phi38.1': '$36for_iter.2'}, blockstack=(), active_try_block=None, outgoing_edgepushed={116: (), 38: ('$phi36.0', '$36for_iter.2')})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=38 nstack_initial=2):
+AdaptBlockInfo(insts=((38, {'value': '$phi38.1'}), (40, {'res': '$pixel_x40.2'}), (42, {'res': '$x42.3'}), (44, {'lhs': '$pixel_x40.2', 'rhs': '$x42.3', 'res': '$44binary_add.4'}), (46, {'value': '$44binary_add.4'}), (48, {'res': '$48load_global.5'}), (50, {'res': '$x50.6'}), (52, {'func': '$48load_global.5', 'args': ['$x50.6'], 'res': '$52call_function.7'}), (54, {'value': '$52call_function.7'}), (56, {'res': '$56load_global.8'}), (58, {'res': '$visibility_radius58.9'}), (60, {'value': '$visibility_radius58.9', 'res': '$60unary_negative.10'}), (62, {'res': '$visibility_radius62.11'}), (64, {'func': '$56load_global.8', 'args': ['$60unary_negative.10', '$visibility_radius62.11'], 'res': '$64call_function.12'}), (66, {'value': '$64call_function.12', 'res': '$66get_iter.13'})), outgoing_phis={'$phi68.1': '$66get_iter.13'}, blockstack=(), active_try_block=None, outgoing_edgepushed={68: ('$phi38.0', '$66get_iter.13')})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=68 nstack_initial=2):
+AdaptBlockInfo(insts=((68, {'iterator': '$phi68.1', 'pair': '$68for_iter.2', 'indval': '$68for_iter.3', 'pred': '$68for_iter.4'}),), outgoing_phis={'$phi70.2': '$68for_iter.3'}, blockstack=(), active_try_block=None, outgoing_edgepushed={114: ('$phi68.0',), 70: ('$phi68.0', '$phi68.1', '$68for_iter.3')})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=70 nstack_initial=3):
+AdaptBlockInfo(insts=((70, {'value': '$phi70.2'}), (72, {'res': '$abs_x72.3'}), (74, {'res': '$74load_global.4'}), (76, {'res': '$y76.5'}), (78, {'func': '$74load_global.4', 'args': ['$y76.5'], 'res': '$78call_function.6'}), (80, {'lhs': '$abs_x72.3', 'rhs': '$78call_function.6', 'res': '$80binary_add.7'}), (82, {'value': '$80binary_add.7'}), (84, {'res': '$radius84.8'}), (86, {'res': '$visibility86.9'}), (88, {'lhs': '$radius84.8', 'rhs': '$visibility86.9', 'res': '$88compare_op.10'}), (90, {'pred': '$88compare_op.10'})), outgoing_phis={}, blockstack=(), active_try_block=None, outgoing_edgepushed={92: ('$phi70.0', '$phi70.1'), 68: ('$phi70.0', '$phi70.1')})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=92 nstack_initial=2):
+AdaptBlockInfo(insts=((92, {'res': '$pixel_y92.2'}), (94, {'res': '$y94.3'}), (96, {'lhs': '$pixel_y92.2', 'rhs': '$y94.3', 'res': '$96binary_add.4'}), (98, {'value': '$96binary_add.4'}), (100, {'res': '$add_to_observable100.5'}), (102, {'res': '$px102.6'}), (104, {'res': '$py104.7'}), (106, {'items': ['$px102.6', '$py104.7'], 'res': '$106build_tuple.8'}), (108, {'func': '$add_to_observable100.5', 'args': ['$106build_tuple.8'], 'res': '$108call_function.9'}), (112, {})), outgoing_phis={}, blockstack=(), active_try_block=None, outgoing_edgepushed={68: ('$phi92.0', '$phi92.1')})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=114 nstack_initial=1):
+AdaptBlockInfo(insts=((114, {}),), outgoing_phis={}, blockstack=(), active_try_block=None, outgoing_edgepushed={36: ('$phi114.0',)})
+DEBUG: 10/29/2020 11:31:57 PM block_infos State(pc_initial=116 nstack_initial=0):
+AdaptBlockInfo(insts=((116, {'res': '$observable_pixels116.0'}), (118, {'retval': '$observable_pixels116.0', 'castval': '$118return_value.1'})), outgoing_phis={}, blockstack=(), active_try_block=None, outgoing_edgepushed={})
+DEBUG: 10/29/2020 11:31:57 PM label 0:
+    pixel_x = arg(0, name=pixel_x)           ['pixel_x']
+    pixel_y = arg(1, name=pixel_y)           ['pixel_y']
+    visibility = arg(2, name=visibility)     ['visibility']
+    $2load_global.0 = global(int: <class 'int'>) ['$2load_global.0']
+    $const6.2 = const(float, 1.5)            ['$const6.2']
+    $8binary_floor_divide.3 = visibility // $const6.2 ['$8binary_floor_divide.3', '$const6.2', 'visibility']
+    $10call_function.4 = call $2load_global.0($8binary_floor_divide.3, func=$2load_global.0, args=[Var($8binary_floor_divide.3, fog_of_war.py:147)], kws=(), vararg=None) ['$10call_function.4', '$2load_global.0', '$8binary_floor_divide.3']
+    visibility_radius = $10call_function.4   ['$10call_function.4', 'visibility_radius']
+    $14build_list.5 = build_list(items=[])   ['$14build_list.5']
+    observable_pixels = $14build_list.5      ['$14build_list.5', 'observable_pixels']
+    $20load_attr.7 = getattr(value=observable_pixels, attr=append) ['$20load_attr.7', 'observable_pixels']
+    add_to_observable = $20load_attr.7       ['$20load_attr.7', 'add_to_observable']
+    $24load_global.8 = global(range: <class 'range'>) ['$24load_global.8']
+    $28unary_negative.10 = unary(fn=<built-in function neg>, value=visibility_radius) ['$28unary_negative.10', 'visibility_radius']
+    $32call_function.12 = call $24load_global.8($28unary_negative.10, visibility_radius, func=$24load_global.8, args=[Var($28unary_negative.10, fog_of_war.py:150), Var(visibility_radius, fog_of_war.py:147)], kws=(), vararg=None) ['$24load_global.8', '$28unary_negative.10', '$32call_function.12', 'visibility_radius']
+    $34get_iter.13 = getiter(value=$32call_function.12) ['$32call_function.12', '$34get_iter.13']
+    $phi36.0 = $34get_iter.13                ['$34get_iter.13', '$phi36.0']
+    jump 36                                  []
+label 36:
+    $36for_iter.1 = iternext(value=$phi36.0) ['$36for_iter.1', '$phi36.0']
+    $36for_iter.2 = pair_first(value=$36for_iter.1) ['$36for_iter.1', '$36for_iter.2']
+    $36for_iter.3 = pair_second(value=$36for_iter.1) ['$36for_iter.1', '$36for_iter.3']
+    $phi38.1 = $36for_iter.2                 ['$36for_iter.2', '$phi38.1']
+    branch $36for_iter.3, 38, 116            ['$36for_iter.3']
+label 38:
+    x = $phi38.1                             ['$phi38.1', 'x']
+    $44binary_add.4 = pixel_x + x            ['$44binary_add.4', 'pixel_x', 'x']
+    px = $44binary_add.4                     ['$44binary_add.4', 'px']
+    $48load_global.5 = global(abs: <built-in function abs>) ['$48load_global.5']
+    $52call_function.7 = call $48load_global.5(x, func=$48load_global.5, args=[Var(x, fog_of_war.py:150)], kws=(), vararg=None) ['$48load_global.5', '$52call_function.7', 'x']
+    abs_x = $52call_function.7               ['$52call_function.7', 'abs_x']
+    $56load_global.8 = global(range: <class 'range'>) ['$56load_global.8']
+    $60unary_negative.10 = unary(fn=<built-in function neg>, value=visibility_radius) ['$60unary_negative.10', 'visibility_radius']
+    $64call_function.12 = call $56load_global.8($60unary_negative.10, visibility_radius, func=$56load_global.8, args=[Var($60unary_negative.10, fog_of_war.py:153), Var(visibility_radius, fog_of_war.py:147)], kws=(), vararg=None) ['$56load_global.8', '$60unary_negative.10', '$64call_function.12', 'visibility_radius']
+    $66get_iter.13 = getiter(value=$64call_function.12) ['$64call_function.12', '$66get_iter.13']
+    $phi68.1 = $66get_iter.13                ['$66get_iter.13', '$phi68.1']
+    jump 68                                  []
+label 68:
+    $68for_iter.2 = iternext(value=$phi68.1) ['$68for_iter.2', '$phi68.1']
+    $68for_iter.3 = pair_first(value=$68for_iter.2) ['$68for_iter.2', '$68for_iter.3']
+    $68for_iter.4 = pair_second(value=$68for_iter.2) ['$68for_iter.2', '$68for_iter.4']
+    $phi70.2 = $68for_iter.3                 ['$68for_iter.3', '$phi70.2']
+    branch $68for_iter.4, 70, 114            ['$68for_iter.4']
+label 70:
+    y = $phi70.2                             ['$phi70.2', 'y']
+    $74load_global.4 = global(abs: <built-in function abs>) ['$74load_global.4']
+    $78call_function.6 = call $74load_global.4(y, func=$74load_global.4, args=[Var(y, fog_of_war.py:153)], kws=(), vararg=None) ['$74load_global.4', '$78call_function.6', 'y']
+    $80binary_add.7 = abs_x + $78call_function.6 ['$78call_function.6', '$80binary_add.7', 'abs_x']
+    radius = $80binary_add.7                 ['$80binary_add.7', 'radius']
+    $88compare_op.10 = radius < visibility   ['$88compare_op.10', 'radius', 'visibility']
+    bool90 = global(bool: <class 'bool'>)    ['bool90']
+    $90pred = call bool90($88compare_op.10, func=bool90, args=(Var($88compare_op.10, fog_of_war.py:155),), kws=(), vararg=None) ['$88compare_op.10', '$90pred', 'bool90']
+    branch $90pred, 92, 68                   ['$90pred']
+label 92:
+    $96binary_add.4 = pixel_y + y            ['$96binary_add.4', 'pixel_y', 'y']
+    py = $96binary_add.4                     ['$96binary_add.4', 'py']
+    $106build_tuple.8 = build_tuple(items=[Var(px, fog_of_war.py:151), Var(py, fog_of_war.py:156)]) ['$106build_tuple.8', 'px', 'py']
+    $108call_function.9 = call add_to_observable($106build_tuple.8, func=add_to_observable, args=[Var($106build_tuple.8, fog_of_war.py:157)], kws=(), vararg=None) ['$106build_tuple.8', '$108call_function.9', 'add_to_observable']
+    jump 68                                  []
+label 114:
+    jump 36                                  []
+label 116:
+    $118return_value.1 = cast(value=observable_pixels) ['$118return_value.1', 'observable_pixels']
+    return $118return_value.1                ['$118return_value.1']
+
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 0
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: pixel_x = arg(0, name=pixel_x)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: pixel_y = arg(1, name=pixel_y)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: visibility = arg(2, name=visibility)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $2load_global.0 = global(int: <class 'int'>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $const6.2 = const(float, 1.5)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $8binary_floor_divide.3 = visibility // $const6.2
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $10call_function.4 = call $2load_global.0($8binary_floor_divide.3, func=$2load_global.0, args=[Var($8binary_floor_divide.3, fog_of_war.py:147)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: visibility_radius = $10call_function.4
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $14build_list.5 = build_list(items=[])
+DEBUG: 10/29/2020 11:31:57 PM on stmt: observable_pixels = $14build_list.5
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $20load_attr.7 = getattr(value=observable_pixels, attr=append)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: add_to_observable = $20load_attr.7
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $24load_global.8 = global(range: <class 'range'>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $28unary_negative.10 = unary(fn=<built-in function neg>, value=visibility_radius)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $32call_function.12 = call $24load_global.8($28unary_negative.10, visibility_radius, func=$24load_global.8, args=[Var($28unary_negative.10, fog_of_war.py:150), Var(visibility_radius, fog_of_war.py:147)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $34get_iter.13 = getiter(value=$32call_function.12)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $phi36.0 = $34get_iter.13
+DEBUG: 10/29/2020 11:31:57 PM on stmt: jump 36
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 36
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $36for_iter.1 = iternext(value=$phi36.0)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $36for_iter.2 = pair_first(value=$36for_iter.1)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $36for_iter.3 = pair_second(value=$36for_iter.1)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $phi38.1 = $36for_iter.2
+DEBUG: 10/29/2020 11:31:57 PM on stmt: branch $36for_iter.3, 38, 116
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 38
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: x = $phi38.1
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $44binary_add.4 = pixel_x + x
+DEBUG: 10/29/2020 11:31:57 PM on stmt: px = $44binary_add.4
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $48load_global.5 = global(abs: <built-in function abs>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $52call_function.7 = call $48load_global.5(x, func=$48load_global.5, args=[Var(x, fog_of_war.py:150)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: abs_x = $52call_function.7
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $56load_global.8 = global(range: <class 'range'>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $60unary_negative.10 = unary(fn=<built-in function neg>, value=visibility_radius)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $64call_function.12 = call $56load_global.8($60unary_negative.10, visibility_radius, func=$56load_global.8, args=[Var($60unary_negative.10, fog_of_war.py:153), Var(visibility_radius, fog_of_war.py:147)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $66get_iter.13 = getiter(value=$64call_function.12)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $phi68.1 = $66get_iter.13
+DEBUG: 10/29/2020 11:31:57 PM on stmt: jump 68
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 68
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $68for_iter.2 = iternext(value=$phi68.1)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $68for_iter.3 = pair_first(value=$68for_iter.2)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $68for_iter.4 = pair_second(value=$68for_iter.2)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $phi70.2 = $68for_iter.3
+DEBUG: 10/29/2020 11:31:57 PM on stmt: branch $68for_iter.4, 70, 114
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 70
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: y = $phi70.2
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $74load_global.4 = global(abs: <built-in function abs>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $78call_function.6 = call $74load_global.4(y, func=$74load_global.4, args=[Var(y, fog_of_war.py:153)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $80binary_add.7 = abs_x + $78call_function.6
+DEBUG: 10/29/2020 11:31:57 PM on stmt: radius = $80binary_add.7
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $88compare_op.10 = radius < visibility
+DEBUG: 10/29/2020 11:31:57 PM on stmt: bool90 = global(bool: <class 'bool'>)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $90pred = call bool90($88compare_op.10, func=bool90, args=(Var($88compare_op.10, fog_of_war.py:155),), kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: branch $90pred, 92, 117
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 92
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $96binary_add.4 = pixel_y + y
+DEBUG: 10/29/2020 11:31:57 PM on stmt: py = $96binary_add.4
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $106build_tuple.8 = build_tuple(items=[Var(px, fog_of_war.py:151), Var(py, fog_of_war.py:156)])
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $108call_function.9 = call add_to_observable($106build_tuple.8, func=add_to_observable, args=[Var($106build_tuple.8, fog_of_war.py:157)], kws=(), vararg=None)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: jump 117
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 114
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: jump 36
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 116
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: $118return_value.1 = cast(value=observable_pixels)
+DEBUG: 10/29/2020 11:31:57 PM on stmt: return $118return_value.1
+DEBUG: 10/29/2020 11:31:57 PM ==== SSA block analysis pass on 117
+DEBUG: 10/29/2020 11:31:57 PM Running <numba.core.ssa._GatherDefsHandler object at 0x7fad1d335d00>
+DEBUG: 10/29/2020 11:31:57 PM on stmt: jump 68
+DEBUG: 10/29/2020 11:31:57 PM defs defaultdict(<class 'list'>,
+            {'$106build_tuple.8': [<numba.core.ir.Assign object at 0x7fad1d2f2dc0>],
+             '$108call_function.9': [<numba.core.ir.Assign object at 0x7fad1d2f2f40>],
+             '$10call_function.4': [<numba.core.ir.Assign object at 0x7fad1d367520>],
+             '$118return_value.1': [<numba.core.ir.Assign object at 0x7fad1d2f5310>],
+             '$14build_list.5': [<numba.core.ir.Assign object at 0x7fad1d3677c0>],
+             '$20load_attr.7': [<numba.core.ir.Assign object at 0x7fad1d367b50>],
+             '$24load_global.8': [<numba.core.ir.Assign object at 0x7fad1d367df0>],
+             '$28unary_negative.10': [<numba.core.ir.Assign object at 0x7fad1d2ea0d0>],
+             '$2load_global.0': [<numba.core.ir.Assign object at 0x7fad1d335130>],
+             '$32call_function.12': [<numba.core.ir.Assign object at 0x7fad1d2ea3a0>],
+             '$34get_iter.13': [<numba.core.ir.Assign object at 0x7fad1d2ea4f0>],
+             '$36for_iter.1': [<numba.core.ir.Assign object at 0x7fad1d2ea730>],
+             '$36for_iter.2': [<numba.core.ir.Assign object at 0x7fad1d2ea850>],
+             '$36for_iter.3': [<numba.core.ir.Assign object at 0x7fad1d2ea970>],
+             '$44binary_add.4': [<numba.core.ir.Assign object at 0x7fad1d2eafd0>],
+             '$48load_global.5': [<numba.core.ir.Assign object at 0x7fad1d2ed2b0>],
+             '$52call_function.7': [<numba.core.ir.Assign object at 0x7fad1d2ed580>],
+             '$56load_global.8': [<numba.core.ir.Assign object at 0x7fad1d2ed7f0>],
+             '$60unary_negative.10': [<numba.core.ir.Assign object at 0x7fad1d2eda90>],
+             '$64call_function.12': [<numba.core.ir.Assign object at 0x7fad1d2edd60>],
+             '$66get_iter.13': [<numba.core.ir.Assign object at 0x7fad1d2edeb0>],
+             '$68for_iter.2': [<numba.core.ir.Assign object at 0x7fad1d2ef0d0>],
+             '$68for_iter.3': [<numba.core.ir.Assign object at 0x7fad1d2ef1f0>],
+             '$68for_iter.4': [<numba.core.ir.Assign object at 0x7fad1d2ef310>],
+             '$74load_global.4': [<numba.core.ir.Assign object at 0x7fad1d2ef850>],
+             '$78call_function.6': [<numba.core.ir.Assign object at 0x7fad1d2efb20>],
+             '$80binary_add.7': [<numba.core.ir.Assign object at 0x7fad1d2efc70>],
+             '$88compare_op.10': [<numba.core.ir.Assign object at 0x7fad1d2f2190>],
+             '$8binary_floor_divide.3': [<numba.core.ir.Assign object at 0x7fad1d367370>],
+             '$90pred': [<numba.core.ir.Assign object at 0x7fad1d2f2430>],
+             '$96binary_add.4': [<numba.core.ir.Assign object at 0x7fad1d2f2790>],
+             '$const6.2': [<numba.core.ir.Assign object at 0x7fad1d3671f0>],
+             '$phi36.0': [<numba.core.ir.Assign object at 0x7fad1d3679d0>],
+             '$phi38.1': [<numba.core.ir.Assign object at 0x7fad1d2ea640>],
+             '$phi68.1': [<numba.core.ir.Assign object at 0x7fad1d2eae50>],
+             '$phi70.2': [<numba.core.ir.Assign object at 0x7fad1d2edfa0>],
+             'abs_x': [<numba.core.ir.Assign object at 0x7fad1d2ed670>],
+             'add_to_observable': [<numba.core.ir.Assign object at 0x7fad1d367c70>],
+             'bool90': [<numba.core.ir.Assign object at 0x7fad1d2f2310>],
+             'observable_pixels': [<numba.core.ir.Assign object at 0x7fad1d3678b0>],
+             'pixel_x': [<numba.core.ir.Assign object at 0x7fad1d335e80>],
+             'pixel_y': [<numba.core.ir.Assign object at 0x7fad1d3351f0>],
+             'px': [<numba.core.ir.Assign object at 0x7fad1d2ed130>],
+             'py': [<numba.core.ir.Assign object at 0x7fad1d2f28b0>],
+             'radius': [<numba.core.ir.Assign object at 0x7fad1d2efd90>],
+             'visibility': [<numba.core.ir.Assign object at 0x7fad1d3352b0>],
+             'visibility_radius': [<numba.core.ir.Assign object at 0x7fad1d367610>],
+             'x': [<numba.core.ir.Assign object at 0x7fad1d2eac10>],
+             'y': [<numba.core.ir.Assign object at 0x7fad1d2ef5b0>]})
+DEBUG: 10/29/2020 11:31:57 PM SSA violators set()
+DEBUG: 10/29/2020 11:31:57 PM [140381495574048] Creating SpriteList use_spatial_hash=True is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493619056] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381750001040] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620112] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620208] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620256] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620160] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620304] Creating SpriteList use_spatial_hash=False is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381493620400] Creating SpriteList use_spatial_hash=None is_static=True
+DEBUG: 10/29/2020 11:31:57 PM [140381493620496] Creating SpriteList use_spatial_hash=None is_static=True
+DEBUG: 10/29/2020 11:31:57 PM FogOfWar created. Fog objects: 2
+DEBUG: 10/29/2020 11:31:57 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7fad2c577be0>, function: scheduling_test, args: (), kwargs: {}
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'IHDR' 16 13
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'gAMA' 41 4
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'bKGD' 57 6
+DEBUG: 10/29/2020 11:31:57 PM b'bKGD' 57 6 (unknown)
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'pHYs' 75 9
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'tIME' 96 7
+DEBUG: 10/29/2020 11:31:57 PM b'tIME' 96 7 (unknown)
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'IDAT' 115 2845
+DEBUG: 10/29/2020 11:31:57 PM Registered new observer: GameObject: medic_truck_red id: 1
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'IHDR' 16 13
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'bKGD' 41 6
+DEBUG: 10/29/2020 11:31:57 PM b'bKGD' 41 6 (unknown)
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'pHYs' 59 9
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'tIME' 80 7
+DEBUG: 10/29/2020 11:31:57 PM b'tIME' 80 7 (unknown)
+DEBUG: 10/29/2020 11:31:57 PM STREAM b'IDAT' 99 505
+DEBUG: 10/29/2020 11:31:57 PM [140381484456688] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:57 PM [140381484456688] _calculate_sprite_buffer: 0.003617574999225326 sec
+DEBUG: 10/29/2020 11:31:58 PM Click UIManager
+DEBUG: 10/29/2020 11:31:58 PM Clicked at x:634, y: 529
+DEBUG: 10/29/2020 11:31:58 PM [140381493618672] Creating SpriteList use_spatial_hash=None is_static=True
+DEBUG: 10/29/2020 11:31:58 PM [140381493618672] _calculate_sprite_buffer: 0.002009116999943217 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381493618336] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381493618336] _calculate_sprite_buffer: 0.0018334240003241575 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381493619776] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381493619776] _calculate_sprite_buffer: 0.0008605799994256813 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494083488] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494083488] _calculate_sprite_buffer: 0.0007590900004288414 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494079888] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494079888] _calculate_sprite_buffer: 0.0009124660000452423 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494083200] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494083200] _calculate_sprite_buffer: 0.0007539930002167239 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494082432] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494082432] _calculate_sprite_buffer: 0.0007332530003623106 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494081088] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494081088] _calculate_sprite_buffer: 0.0012781719997292385 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494080224] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494080224] _calculate_sprite_buffer: 0.0008409940001001814 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494079840] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494079840] _calculate_sprite_buffer: 0.0007348589997491217 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494063216] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494063216] _calculate_sprite_buffer: 0.000738824999643839 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494066432] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494066432] _calculate_sprite_buffer: 0.0007894999998825369 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494066672] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494066672] _calculate_sprite_buffer: 0.0007415410000248812 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494066768] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494066768] _calculate_sprite_buffer: 0.0007541260001744376 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494063936] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494063936] _calculate_sprite_buffer: 0.0008233919998019701 sec
+DEBUG: 10/29/2020 11:31:58 PM [140381494064272] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:58 PM [140381494064272] _calculate_sprite_buffer: 0.000760939999963739 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493955792] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493955792] _calculate_sprite_buffer: 0.0007371059991783113 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493955744] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493955744] _calculate_sprite_buffer: 0.0007470130003639497 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493954928] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493954928] _calculate_sprite_buffer: 0.0007800630000929232 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493953104] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493953104] _calculate_sprite_buffer: 0.0007383339998341398 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493953776] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493953776] _calculate_sprite_buffer: 0.0008429039999100496 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493954448] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381493954448] _calculate_sprite_buffer: 0.0007893330002843868 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381494238752] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381494238752] _calculate_sprite_buffer: 0.0007576990001325612 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381494236928] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381494236928] _calculate_sprite_buffer: 0.000782920000347076 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381494239136] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381494239136] _calculate_sprite_buffer: 0.0007333539997489424 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381494236736] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381494236736] _calculate_sprite_buffer: 0.0007289200002560392 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381484454816] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381484454816] _calculate_sprite_buffer: 0.0007514799999626121 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381484455584] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381484455584] _calculate_sprite_buffer: 0.0009708360003060079 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381484454672] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381484454672] _calculate_sprite_buffer: 0.0007465929993486498 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381484456112] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381484456112] _calculate_sprite_buffer: 0.0007730480001555406 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381479801520] Creating SpriteList use_spatial_hash=None is_static=False
+DEBUG: 10/29/2020 11:31:59 PM [140381479801520] _calculate_sprite_buffer: 0.0007606839999425574 sec
+DEBUG: 10/29/2020 11:31:59 PM [140381493620208] _calculate_sprite_buffer: 0.0009220640004059533 sec
+DEBUG: 10/29/2020 11:32:03 PM Click UIManager
+DEBUG: 10/29/2020 11:32:03 PM Clicked at x:495, y: 482
+DEBUG: 10/29/2020 11:32:03 PM Clicked at {GameObject: medic_truck_red id: 1}
