@@ -5,7 +5,7 @@ import logging
 import arcade
 
 from typing import (
-    List, Dict, Any, Optional, Union
+    List, Dict, Set, Any, Optional, Union
 )
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler, log
@@ -25,7 +25,7 @@ SpriteList = arcade.SpriteList
 logging.basicConfig(
     filename='resources/logfile.txt',
     filemode='w',
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(levelname)s: %(asctime)s %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p'
 )
@@ -57,28 +57,51 @@ class Window(arcade.Window, EventsCreator):
 
         self.menu_view = Menu()
         self.game_view = Game()
-        self.show_view(self.menu_view)
+        self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
-        self.cursor = MouseCursor(get_path_to_file('normal.png'))
+        self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
+        self.keyboard = KeyboardHandler()
 
     def on_update(self, delta_time: float):
         self.current_view.on_update(delta_time)
-        self.cursor.update()
+        if (cursor := self.cursor).active:
+            cursor.update()
 
     def on_draw(self):
         self.clear()
         self.current_view.on_draw()
-        self.cursor.draw()
+        if (cursor := self.cursor).visible:
+            cursor.draw()
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        self.cursor.on_mouse_motion(x, y, dx, dy)
+        if self.cursor.active:
+            self.cursor.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        self.cursor.on_mouse_press(x, y, button, modifiers)
+        if self.cursor.active:
+            self.cursor.on_mouse_press(x, y, button, modifiers)
+            self.toggle_view()
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if self.keyboard.active:
+            self.keyboard.on_key_press(symbol, modifiers)
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        self.keyboard.on_key_release(symbol, modifiers)
+
+    def toggle_view(self):
         if self.current_view is self.menu_view:
             self.show_view(LoadingScreen(self.game_view))
         else:
             self.show_view(self.menu_view)
+
+    def toggle_mouse_and_keyboard(self, value: bool):
+        try:
+            self.cursor.active = value
+            self.cursor.visible = value
+            self.keyboard.active = value
+        except AttributeError:
+            pass
 
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
@@ -89,16 +112,20 @@ class Window(arcade.Window, EventsCreator):
 
     def show_view(self, new_view: WindowView):
         super().show_view(new_view)
-        print(self.updated, self.drawn)
 
 
-class Menu(WindowView):
+class Menu(WindowView, ObjectsOwner):
 
     def __init__(self):
         super().__init__()
+        ObjectsOwner.__init__(self)
         self.set_updated_and_drawn_lists()
+        self.submenus: Set[WindowView] = set()
+        self.current_submenu = None
 
     def on_show_view(self):
+        super().on_show_view()
+        self.window.toggle_mouse_and_keyboard(True)
         self.window.background_color = (75, 0, 25)
 
     def on_update(self, delta_time: float):
@@ -106,6 +133,17 @@ class Menu(WindowView):
 
     def on_draw(self):
         super().on_draw()
+
+    def register(self, acquired: OwnedObject):
+        acquired: WindowView
+        self.submenus.add(acquired)
+
+    def unregister(self, owned: OwnedObject):
+        owned: WindowView
+        self.submenus.discard(owned)
+
+    def get_notified(self, *args, **kwargs):
+        pass
 
 
 class Game(WindowView, EventsCreator, ObjectsOwner):
@@ -144,6 +182,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def on_show_view(self):
         super().on_show_view()
+        self.window.toggle_mouse_and_keyboard(True)
         self.window.background_color = (0, 0, 120)
 
     def test_methods(self):
@@ -157,9 +196,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def test_units_spawning(self):
         unit = spawn_test_unit()
         self.units.append(unit)
-
-    def create_new_faction(self, player: Player) -> Faction:
-        return Faction([player])
 
     def load_player_configs(self) -> Dict[str, Any]:
         configs: Dict[str, Any] = {}
@@ -205,7 +241,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         else:
             del self.factions[owned.id]
 
-    def notify(self, *args, **kwargs):
+    def get_notified(self, *args, **kwargs):
         pass
 
 
@@ -236,6 +272,7 @@ class LoadingScreen(WindowView):
 
     def on_show_view(self):
         super().on_show_view()
+        self.window.toggle_mouse_and_keyboard(False)
         self.window.background_color = (0, 0, 0)
 
     def on_update(self, delta_time: float):
@@ -265,6 +302,7 @@ class LoadingScreen(WindowView):
 
 if __name__ == '__main__':
     from mouse_handling import MouseCursor, MouseSelection
+    from keyboard_handling import KeyboardHandler
     from player import Faction, Player, PlayerEntity
     from buildings import Building
     from units import Unit, UnitWeight, PermanentUnitsGroup

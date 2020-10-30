@@ -2,34 +2,42 @@
 
 from typing import Optional, Set, List, Union
 from arcade import (
-    SpriteList, Sprite, draw_lrtb_rectangle_filled,
+    Window, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline
 )
 
+from gameobject import GameObject, get_gameobjects_at_position
 from scheduling import EventsCreator, ScheduledEvent, log
 from data_containers import DividedSpriteList
 from functions import first_object_of_type
+from colors import GREEN, CLEAR_GREEN
+from user_interface import UiElement
 from player import PlayerEntity
-from gameobject import GameObject, get_gameobjects_at_position
+from buildings import Building
 from game import Game, Menu
 from units import Unit
-from buildings import Building
-from colors import GREEN, CLEAR_GREEN
 
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 
 
-class MouseCursor(Sprite, EventsCreator):
-    game: Optional[Game] = None
+class MouseCursor(UiElement, EventsCreator):
+    # window: Optional[Window] = None
+    # game: Optional[Game] = None
     menu: Optional[Menu] = None
 
-    def __init__(self, texture_name: str):
-        super().__init__(texture_name)
+    def __init__(self, window: Window, texture_name: str):
+        UiElement.__init__(self, texture_name)
         EventsCreator.__init__(self)
+        self.window = window
         self.drawn_and_update = List[DrawnAndUpdated]
         self.pointed_objects: Set[GameObject] = set()
-        self.game.window.set_mouse_visible(False)
+        self.pointed_ui_elements: Set[UiElement] = set()
+
+        self.menu = self.window.menu_view
+
+        # hide system mouse cursor, since we render our own Sprite as cursor:
+        self.window.set_mouse_visible(False)
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
@@ -40,9 +48,9 @@ class MouseCursor(Sprite, EventsCreator):
             log(f'Clicked at {self.pointed_objects}')
 
     def update(self):
-        sprite_lists = self.game.window.updated
-        if self.game.is_running:
-            self.update_pointed_gameobjects(sprite_lists)
+        sprite_lists = self.window.updated
+        self.update_pointed_gameobjects(sprite_lists)
+        self.update_pointed_ui_elements(sprite_lists)
 
     def update_pointed_gameobjects(self, sprite_lists):
         self.pointed_objects = get_gameobjects_at_position(self.position,
@@ -50,6 +58,9 @@ class MouseCursor(Sprite, EventsCreator):
         unit = self.pointed_unit()
         building = self.pointed_building()
         # print(f'Pointed unit: {unit}, pointed building: {building}')
+
+    def update_pointed_ui_elements(self, sprite_lists):
+        pass
 
     def pointed_unit(self) -> Optional[Unit]:
         return first_object_of_type(self.pointed_objects, Unit)

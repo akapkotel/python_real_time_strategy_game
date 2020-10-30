@@ -11,37 +11,52 @@ from gameobject import GameObject, Robustness
 from game import Game
 
 
-class Faction:
+class Faction(EventsCreator, ObjectsOwner, OwnedObject):
     """
     Faction bundles several Players into one team of allies and helps tracking
     who is fighting against whom.
     """
     game: Optional[Game] = None
 
-    def __init__(self, players: Sequence[Player], id: Optional[int] = None):
+    def __init__(self, id: Optional[int] = None):
+        EventsCreator.__init__(self)
+        ObjectsOwner.__init__(self)
+        OwnedObject.__init__(self)
         self.id = id or len(self.game.players)
         self.friendly_factions: Set[Faction] = set()
-        self.players = set(players)
-        for player in self.players:
-            player.faction = self
+        self.players = set()
+
+    def register(self, acquired: OwnedObject):
+        acquired: Player
+        self.players.add(acquired)
+
+    def unregister(self, owned: OwnedObject):
+        owned: Player
+        self.players.discard(owned)
+
+    def get_notified(self, *args, **kwargs):
+        pass
 
 
-class Player(EventsCreator, ObjectsOwner):
+class Player(EventsCreator, ObjectsOwner, OwnedObject):
     game: Optional[Game] = None
 
     def __init__(self, color: Color, faction: None, cpu: True):
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
+        OwnedObject.__init__(self)
         self.id = len(self.game.players)
         self.cpu = cpu
         self.color = color
-        self.faction: Faction = faction or self.game.create_new_faction(self)
+        self.faction: Faction = faction or Faction()
 
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
 
         self.known_enemies: Set[PlayerEntity] = set()
-
+        
+        self.register_to_objectsowners(self.game, self.faction)
+        
     def register(self, acquired: OwnedObject):
         acquired: Union[Unit, Building]
         if isinstance(acquired, Unit):
@@ -56,7 +71,7 @@ class Player(EventsCreator, ObjectsOwner):
         except KeyError:
             self.buildings.discard(owned)
 
-    def notify(self, *args, **kwargs):
+    def get_notified(self, *args, **kwargs):
         pass
 
     def is_enemy(self, other: Player):
@@ -89,10 +104,9 @@ class PlayerEntity(GameObject, EventsCreator):
         self.faction: Faction = self.player.faction
         self.known_enemies: Set[PlayerEntity] = set()
 
-        self.visbility_radius = 0
+        self.visibility_radius = 0
 
-        self.register(self.game, self.player, self.game.fog_of_war)
-
+        self.register_to_objectsowners(self.game, self.player, self.game.fog_of_war)
 
     def update_known_enemies_set(self):
         # get new set of visible and alive enemies:

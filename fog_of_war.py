@@ -65,7 +65,7 @@ class FogOfWar(ObjectsOwner):
         if isinstance(owned, PlayerEntity):
             self.map_observers.remove(owned)
 
-    def notify(self, *args, **kwargs):
+    def get_notified(self, *args, **kwargs):
         pass
 
     @property
@@ -103,7 +103,7 @@ class FogOfWar(ObjectsOwner):
         observed_rectangles = []
         for observer in self.map_observers:
             x, y = observer.center_x, observer.center_y
-            w = h = observer.visbility_radius
+            w = h = observer.visibility_radius
             observed_rect = ((x-w, y-h), (x+w, y-h), (x+w, y+h), (x-w, y+h))
             observed_rectangles.append(observed_rect)
         return observed_rectangles

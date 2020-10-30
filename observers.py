@@ -6,23 +6,38 @@ from abc import abstractmethod
 
 
 class OwnedObject:
+    """
+    My implementation of Observer Pattern which main reason is to provide an
+    abstract interface for game objects to work with owner-subject relations.
+    Each ObjectsOwner can 'possess' (observe) many OwnedObjects. OwnedObject is
+    responsible for registering itself in the proper ObjectsOwners, and they
+    are responsible for handling the registering implementation.
+    """
 
-    def __init__(self):
-        self._owners: Set[ObjectsOwner] = set()
+    def __init__(self, owners=False):
+        """
+        :param owners: bool : default: False. Change it to True if you want
+        this OwnedObjects to use default Set[ObjectsOwner] to keep track of
+        the objects owning this instance. If implementing your own collection,
+        leave it False.
+        """
+        self._owners: Set[ObjectsOwner] = set() if owners else None
         self._state = None
 
-    def register(self, *owners: ObjectsOwner):
+    def register_to_objectsowners(self, *owners: ObjectsOwner):
         for owner in owners:
-            self._owners.add(owner)
+            if self._owners is not None:
+                self._owners.add(owner)
             owner.register(self)
 
-    def unregister(self, owner: ObjectsOwner):
-        self._owners.discard(owner)
+    def unregister_from_objectsowner(self, owner: ObjectsOwner):
+        if self._owners is not None:
+            self._owners.discard(owner)
         owner.unregister(self)
 
     def notify_owners(self, *args, **kwargs):
         for owner in self._owners:
-            owner.notify(*args, **kwargs)
+            owner.get_notified(*args, **kwargs)
 
     @property
     def state(self):
@@ -36,14 +51,20 @@ class OwnedObject:
     def unregister_from_all_owners(self):
         """Remember to call this method in objects __kill__."""
         for owner in self._owners:
-            self.unregister(owner)
+            self.unregister_from_objectsowner(owner)
 
 
 class ObjectsOwner:
     """
     ObjectsOwner has only a bunch of abstract methods used to add new
     OwnedObjects and remove them. These methods must be implemented for each
-    subclass individually.
+    subclass individually, since each type of ObjectsOwner will handle
+    different types of OwnedObjects for various reasons and use them for it's
+    own purposes.
+    CLasses inheriting from ObjectsOwner must keep their own containers for
+    their registered OwnedObjects, since this class does not provide default
+    one. Reason for that is to force subclasses to name their data-attributes
+    properly to their usage and type of OwnedObjects stored inside.
     """
 
     @abstractmethod
@@ -55,5 +76,5 @@ class ObjectsOwner:
         raise NotImplementedError
 
     @abstractmethod
-    def notify(self, *args, **kwargs):
+    def get_notified(self, *args, **kwargs):
         raise NotImplementedError

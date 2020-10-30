@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Any, Optional, Callable
 
 def log(logged_message: str):
     print(logged_message)
-    logging.debug(logged_message)
+    logging.info(logged_message)
 
 
 @dataclass
