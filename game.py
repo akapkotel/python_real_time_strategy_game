@@ -56,11 +56,19 @@ class Window(arcade.Window, EventsCreator):
         self.drawn: List = []
 
         self.menu_view = Menu()
-        self.game_view = Game()
+        self.game_view = None
+
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
         self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
         self.keyboard = KeyboardHandler()
+
+    def create_new_game(self):
+        self.game_view = Game()
+
+    def start_new_game(self):
+        if self.game_view is not None:
+            self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
         self.current_view.on_update(delta_time)
@@ -80,7 +88,21 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.cursor.active:
             self.cursor.on_mouse_press(x, y, button, modifiers)
-            self.toggle_view()
+            self.toggle_view()  # TODO: replace with interface interaction
+
+    def on_mouse_release(self, x: float, y: float, button: int,
+                         modifiers: int):
+        if self.cursor.active:
+            self.cursor.on_mouse_release(x, y, button, modifiers)
+
+    def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
+                      buttons: int, modifiers: int):
+        if self.cursor.active:
+            self.cursor.on_mouse_drag(x, y, dx, dy, buttons, modifiers)
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if self.cursor.active:
+            self.cursor.on_mouse_scroll(x, y, scroll_x, scroll_y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
@@ -89,9 +111,16 @@ class Window(arcade.Window, EventsCreator):
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
 
+    def show_view(self, new_view: WindowView):
+        if new_view.requires_loading:
+            self.show_view(LoadingScreen(loaded_view=new_view))
+        else:
+            super().show_view(new_view)
+
     def toggle_view(self):
         if self.current_view is self.menu_view:
-            self.show_view(LoadingScreen(self.game_view))
+            self.create_new_game()
+            self.start_new_game()
         else:
             self.show_view(self.menu_view)
 
@@ -109,9 +138,6 @@ class Window(arcade.Window, EventsCreator):
 
     def load_game(self):
         raise NotImplementedError
-
-    def show_view(self, new_view: WindowView):
-        super().show_view(new_view)
 
 
 class Menu(WindowView, ObjectsOwner):
@@ -150,7 +176,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
     def __init__(self):
-        super().__init__()
+        WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         self.assign_reference_to_self_for_all_classes()
 
@@ -291,7 +317,7 @@ class LoadingScreen(WindowView):
     def update_progress(self, delta_time: float):
         self.progress += 50 * delta_time
         if self.progress >= 100:
-            self.progress = 0
+            self.loaded_view.loaded = True
             self.window.show_view(self.loaded_view)
 
     def update_progress_bar(self):

@@ -3,7 +3,7 @@
 from typing import Optional, Set, List, Union
 from arcade import (
     Window, SpriteList, draw_lrtb_rectangle_filled,
-    draw_lrtb_rectangle_outline
+    draw_lrtb_rectangle_outline, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT
 )
 
 from gameobject import GameObject, get_gameobjects_at_position
@@ -30,9 +30,12 @@ class MouseCursor(UiElement, EventsCreator):
         UiElement.__init__(self, texture_name)
         EventsCreator.__init__(self)
         self.window = window
-        self.drawn_and_update = List[DrawnAndUpdated]
+
         self.pointed_objects: Set[GameObject] = set()
         self.pointed_ui_elements: Set[UiElement] = set()
+
+        self.potentially_selected: Set[Unit] = set()  # drag-selection
+        self.selected_units: Set[Unit] = set()  # after mouse released
 
         self.menu = self.window.menu_view
 
@@ -43,9 +46,33 @@ class MouseCursor(UiElement, EventsCreator):
         self.position = x, y
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        log(f'Clicked at x:{x}, y: {y}')
+        if button is MOUSE_BUTTON_LEFT:
+            self.on_left_click(x, y, modifiers)
+        elif button is MOUSE_BUTTON_RIGHT:
+            self.on_right_click(x, y, modifiers)
+
+    def on_left_click(self, x: float, y: float, modifiers: int):
         if self.pointed_objects:
+            log(f'Left-clicked at x:{x}, y: {y}')
             log(f'Clicked at {self.pointed_objects}')
+
+    def on_right_click(self, x: float, y: float, modifiers: int):
+        log(f'Right-clicked at x:{x}, y: {y}')
+        # TODO: clearing selections, context menu?
+
+    def on_mouse_release(self, x: float, y: float, button: int,
+                         modifiers: int):
+        # TODO: closing MouseSelection
+        pass
+
+    def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
+                      buttons: int, modifiers: int):
+        self.on_mouse_motion(x, y, dx, dy)
+        # TODO: dragging selections logic
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        # TODO
+        raise NotImplementedError
 
     def update(self):
         sprite_lists = self.window.updated

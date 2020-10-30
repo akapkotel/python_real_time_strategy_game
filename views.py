@@ -12,15 +12,16 @@ Updateable = Drawable = Union[SpriteList, DividedSpriteList, Sprite]
 
 class WindowView(View):
 
-    def __init__(self):
+    def __init__(self, requires_loading: bool = False):
         super().__init__()
+        self.loaded = False
+        self._requires_loading = requires_loading
         self.updated: List[Updateable] = []
         self.drawn: List[Drawable] = []
-        self.spritelist = SpriteList()
-        self.add_to_updated(self.spritelist)
 
-    def add_to_updated(self, obj: Updateable):
-        self.updated.append(obj)
+    @property
+    def requires_loading(self):
+        return self._requires_loading and not self.loaded
 
     @property
     def is_running(self):

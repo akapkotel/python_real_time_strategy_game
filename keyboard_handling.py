@@ -17,3 +17,6 @@ class KeyboardHandler(ToggledElement):
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keys_pressed.discard(symbol)
+
+    def key_to_letter(self, symbol: int) -> str:
+        return chr(symbol)

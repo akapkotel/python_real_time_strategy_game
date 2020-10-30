@@ -1,8 +1,10 @@
-INFO: 10/30/2020 02:11:11 PM FogOfWar created. Fog objects: 2
-INFO: 10/30/2020 02:11:11 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7fdfc616a8e0>, function: scheduling_test, args: (), kwargs: {}
-INFO: 10/30/2020 02:11:11 PM Registered new observer: GameObject: medic_truck_red id: 1
-INFO: 10/30/2020 02:11:15 PM Clicked at x:680, y: 469
-INFO: 10/30/2020 02:11:16 PM Clicked at x:819, y: 302
-INFO: 10/30/2020 02:11:17 PM Clicked at x:818, y: 301
-INFO: 10/30/2020 02:11:20 PM Clicked at x:583, y: 428
-INFO: 10/30/2020 02:11:21 PM Clicked at x:542, y: 454
+INFO: 10/30/2020 04:06:20 PM FogOfWar created. Fog objects: 2
+INFO: 10/30/2020 04:06:20 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7f26482b3220>, function: scheduling_test, args: (), kwargs: {}
+INFO: 10/30/2020 04:06:20 PM Registered new observer: GameObject: medic_truck_red id: 1
+INFO: 10/30/2020 04:06:22 PM Right-clicked at x:641, y: 313
+INFO: 10/30/2020 04:06:23 PM Right-clicked at x:641, y: 313
+INFO: 10/30/2020 04:06:23 PM FogOfWar created. Fog objects: 2
+INFO: 10/30/2020 04:06:23 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7f264825be50>, function: scheduling_test, args: (), kwargs: {}
+INFO: 10/30/2020 04:06:23 PM Registered new observer: GameObject: medic_truck_red id: 2
+INFO: 10/30/2020 04:06:47 PM Left-clicked at x:500, y: 497
+INFO: 10/30/2020 04:06:47 PM Clicked at {GameObject: medic_truck_red id: 2}
