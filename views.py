@@ -1,17 +1,26 @@
 #!/usr/bin/env python
 
-from typing import List
-from arcade import Window, View, SpriteList
+from typing import List, Union
+from arcade import Window, View, SpriteList, Sprite
 
 from functions import get_attributes_with_attribute
+from data_containers import DividedSpriteList
+
+
+Updateable = Drawable = Union[SpriteList, DividedSpriteList, Sprite]
 
 
 class WindowView(View):
 
     def __init__(self):
         super().__init__()
-        self.updated: List[SpriteList] = []
-        self.drawn: List[SpriteList] = []
+        self.updated: List[Updateable] = []
+        self.drawn: List[Drawable] = []
+        self.spritelist = SpriteList()
+        self.add_to_updated(self.spritelist)
+
+    def add_to_updated(self, obj: Updateable):
+        self.updated.append(obj)
 
     @property
     def is_running(self):

@@ -8,10 +8,10 @@ from typing import (
     List, Dict, Set, Any, Optional, Union
 )
 
-from scheduling import EventsCreator, ScheduledEvent, EventsScheduler, log
+from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from data_containers import DividedSpriteList
 from functions import get_path_to_file
-from colors import GREEN, WHITE, BLACK
+from colors import GREEN, WHITE
 from observers import ObjectsOwner, OwnedObject
 from views import WindowView
 
@@ -301,11 +301,11 @@ class LoadingScreen(WindowView):
 
 
 if __name__ == '__main__':
-    from mouse_handling import MouseCursor, MouseSelection
+    from mouse_handling import MouseCursor
     from keyboard_handling import KeyboardHandler
     from player import Faction, Player, PlayerEntity
     from buildings import Building
-    from units import Unit, UnitWeight, PermanentUnitsGroup
+    from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
