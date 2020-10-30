@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Set, Union, Optional, Sequence
+from typing import Set, Optional, Sequence
 from arcade.arcade_types import Point
-from arcade.sprite import get_distance_between_sprites
 from statemachine import State, StateMachine
 
 from game import Game
-from buildings import Building
 
 from functions import average_position_of_points_group
-from player import PlayerEntity, Faction, Player
-from scheduling import ScheduledEvent
+from player import PlayerEntity, Player
 
 from enums import UnitWeight
 

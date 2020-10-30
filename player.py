@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Sequence, Set, Union, Optional
+from typing import Set, Union, Optional
 from arcade.arcade_types import Color, Point
 
-from scheduling import EventsCreator, ScheduledEvent, log
+from scheduling import EventsCreator
 from observers import ObjectsOwner, OwnedObject
 from gameobject import GameObject, Robustness
 from game import Game

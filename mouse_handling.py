@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from typing import Optional, Set, List, Union
+from typing import Optional, Set, Union
 from arcade import (
     Window, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT
 )
 
 from gameobject import GameObject, get_gameobjects_at_position
-from scheduling import EventsCreator, ScheduledEvent, log
+from scheduling import EventsCreator, log
 from data_containers import DividedSpriteList
 from functions import first_object_of_type
 from colors import GREEN, CLEAR_GREEN

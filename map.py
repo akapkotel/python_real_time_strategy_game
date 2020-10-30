@@ -4,7 +4,6 @@ from __future__ import annotations
 from functools import wraps
 from typing import Optional, Tuple, List, Set, Dict
 
-from data_containers import PriorityQueue
 from gameobject import GameObject
 from buildings import Building
 from units import Unit, UnitWeight

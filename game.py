@@ -5,15 +5,19 @@ import logging
 import arcade
 
 from typing import (
-    List, Dict, Set, Any, Optional, Union
+    List, Dict, Any, Optional, Union
 )
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
-from data_containers import DividedSpriteList
-from functions import get_path_to_file
-from colors import GREEN, WHITE
 from observers import ObjectsOwner, OwnedObject
-from views import WindowView
+from data_containers import DividedSpriteList
+from views import WindowView, LoadingScreen
+from functions import get_path_to_file
+from user_interface import (
+    Frame, Button, CheckButton, ListBox, TextInputField
+)
+from colors import GRASS_GREEN, RED, BROWN
+from menu import Menu, SubMenu
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
@@ -58,10 +62,16 @@ class Window(arcade.Window, EventsCreator):
         self.menu_view = Menu()
         self.game_view = None
 
+        self.create_submenus()
+
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
         self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
         self.keyboard = KeyboardHandler()
+
+    def create_submenus(self):
+        sound_submenu = SubMenu('Sound', background_color=RED),
+        graphics_submenu = SubMenu('Graphics', background_color=BROWN)
 
     def create_new_game(self):
         self.game_view = Game()
@@ -140,38 +150,6 @@ class Window(arcade.Window, EventsCreator):
         raise NotImplementedError
 
 
-class Menu(WindowView, ObjectsOwner):
-
-    def __init__(self):
-        super().__init__()
-        ObjectsOwner.__init__(self)
-        self.set_updated_and_drawn_lists()
-        self.submenus: Set[WindowView] = set()
-        self.current_submenu = None
-
-    def on_show_view(self):
-        super().on_show_view()
-        self.window.toggle_mouse_and_keyboard(True)
-        self.window.background_color = (75, 0, 25)
-
-    def on_update(self, delta_time: float):
-        super().on_update(delta_time)
-
-    def on_draw(self):
-        super().on_draw()
-
-    def register(self, acquired: OwnedObject):
-        acquired: WindowView
-        self.submenus.add(acquired)
-
-    def unregister(self, owned: OwnedObject):
-        owned: WindowView
-        self.submenus.discard(owned)
-
-    def get_notified(self, *args, **kwargs):
-        pass
-
-
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
@@ -209,7 +187,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
-        self.window.background_color = (0, 0, 120)
+        self.window.background_color = GRASS_GREEN
 
     def test_methods(self):
         self.test_scheduling_events()
@@ -271,68 +249,13 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         pass
 
 
-class LoadingScreen(WindowView):
-
-    def __init__(self,
-                 loaded_view: WindowView,
-                 loading_text: str = 'Loading',
-                 background_name: Optional[str] = None):
-        super().__init__()
-        self.sprite_list = SpriteList(is_static=True)
-        self.loading_text = loading_text
-        self.progress = 0
-        self.progress_bar = self.create_progress_bar()
-        self.loading_background = arcade.Sprite(background_name) if background_name else None
-        self.sprite_list.extend(
-            [e for e in (self.progress_bar, self.loading_background) if e]
-        )
-        self.set_updated_and_drawn_lists()
-        self.loaded_view = loaded_view
-
-    def create_progress_bar(self) -> arcade.SpriteSolidColor:
-        bar_width = 1
-        bar_height = int(SCREEN_HEIGHT * 0.025)
-        bar = arcade.SpriteSolidColor(bar_width, bar_height, GREEN)
-        bar.center_y = SCREEN_HEIGHT / 2
-        return bar
-
-    def on_show_view(self):
-        super().on_show_view()
-        self.window.toggle_mouse_and_keyboard(False)
-        self.window.background_color = (0, 0, 0)
-
-    def on_update(self, delta_time: float):
-        super().on_update(delta_time)
-        self.update_progress(delta_time)
-        self.update_progress_bar()
-
-    def on_draw(self):
-        super().on_draw()
-        self.draw_loading_text()
-
-    def draw_loading_text(self):
-        text = ' '.join([self.loading_text, str(int(self.progress))])
-        arcade.draw_text(text, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 10, WHITE, 20)
-
-    def update_progress(self, delta_time: float):
-        self.progress += 50 * delta_time
-        if self.progress >= 100:
-            self.loaded_view.loaded = True
-            self.window.show_view(self.loaded_view)
-
-    def update_progress_bar(self):
-        progress = self.progress
-        self.progress_bar.center_x = center = progress * (SCREEN_WIDTH / 200)
-        self.progress_bar.width = center * 2
-
-
 if __name__ == '__main__':
-    from mouse_handling import MouseCursor
-    from keyboard_handling import KeyboardHandler
     from player import Faction, Player, PlayerEntity
-    from buildings import Building
+    from keyboard_handling import KeyboardHandler
+    from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
+    from buildings import Building
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()

@@ -2,8 +2,6 @@
 
 from typing import Set
 
-from arcade.key import *
-
 from user_interface import ToggledElement
 from scheduling import log
 

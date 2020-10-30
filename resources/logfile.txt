@@ -1,10 +1,6 @@
-INFO: 10/30/2020 04:06:20 PM FogOfWar created. Fog objects: 2
-INFO: 10/30/2020 04:06:20 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7f26482b3220>, function: scheduling_test, args: (), kwargs: {}
-INFO: 10/30/2020 04:06:20 PM Registered new observer: GameObject: medic_truck_red id: 1
-INFO: 10/30/2020 04:06:22 PM Right-clicked at x:641, y: 313
-INFO: 10/30/2020 04:06:23 PM Right-clicked at x:641, y: 313
-INFO: 10/30/2020 04:06:23 PM FogOfWar created. Fog objects: 2
-INFO: 10/30/2020 04:06:23 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7f264825be50>, function: scheduling_test, args: (), kwargs: {}
-INFO: 10/30/2020 04:06:23 PM Registered new observer: GameObject: medic_truck_red id: 2
-INFO: 10/30/2020 04:06:47 PM Left-clicked at x:500, y: 497
-INFO: 10/30/2020 04:06:47 PM Clicked at {GameObject: medic_truck_red id: 2}
+INFO: 10/30/2020 07:01:12 PM FogOfWar created. Fog objects: 2
+INFO: 10/30/2020 07:01:12 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7fc88e1f0a00>, function: scheduling_test, args: (), kwargs: {}
+INFO: 10/30/2020 07:01:15 PM Right-clicked at x:500, y: 496
+INFO: 10/30/2020 07:01:16 PM Right-clicked at x:825, y: 203
+INFO: 10/30/2020 07:01:16 PM FogOfWar created. Fog objects: 2
+INFO: 10/30/2020 07:01:16 PM Scheduled event: ScheduledEvent: scheduled by <__main__.Game object at 0x7fc88e110df0>, function: scheduling_test, args: (), kwargs: {}

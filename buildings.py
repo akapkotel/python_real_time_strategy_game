@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional
 from arcade.arcade_types import Point
 
 from player import PlayerEntity, Player
-from scheduling import ScheduledEvent
-from game import Game
 
 
 class Building(PlayerEntity):

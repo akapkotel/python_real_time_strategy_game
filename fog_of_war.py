@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Sequence, List, Set, Tuple, Optional
 from numba import njit
 from arcade import SpriteSolidColor, SpriteList, ShapeElementList, are_polygons_intersecting
-from arcade.arcade_types import Point, Color
+from arcade.arcade_types import Point
 
 from game import Game, SCREEN_WIDTH, SCREEN_HEIGHT
 from observers import ObjectsOwner, OwnedObject

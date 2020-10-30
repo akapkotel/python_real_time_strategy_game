@@ -25,10 +25,10 @@ class OwnedObject:
         self._state = None
 
     def register_to_objectsowners(self, *owners: ObjectsOwner):
-        for owner in owners:
-            if self._owners is not None:
+        if self._owners is not None:
+            for owner in owners:
                 self._owners.add(owner)
-            owner.register(self)
+                owner.register(self)
 
     def unregister_from_objectsowner(self, owner: ObjectsOwner):
         if self._owners is not None:

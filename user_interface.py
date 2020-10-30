@@ -5,6 +5,8 @@ from typing import Optional, Callable, Set
 
 from arcade import Sprite
 
+from observers import OwnedObject
+
 
 class Hierarchical:
     """
@@ -31,11 +33,6 @@ class Hierarchical:
         else:
             parent.add_child(self)
         self._parent = parent
-
-    @parent.deleter
-    def parent(self):
-        self._parent.discard_child(self)
-        self._parent = None
 
     @property
     def children(self):
@@ -131,7 +128,7 @@ class ToggledElement:
         self._visible = value
 
 
-class UiElement(Sprite, ToggledElement):
+class UiElement(Sprite, ToggledElement, OwnedObject):
     """
     Basic class for all user-interface and menu objects, like buttons,
     scrollbars, mouse-cursors etc.
@@ -143,3 +140,31 @@ class UiElement(Sprite, ToggledElement):
                  visible: bool = True):
         super().__init__(texture_name)
         ToggledElement.__init__(self, active, visible)
+
+
+class Frame(UiElement):
+    ...
+
+
+class TabsGroup():
+    ...
+
+
+class Button(UiElement, CursorInteractive):
+    ...
+
+
+class CheckButton(UiElement, CursorInteractive):
+    ...
+
+
+class ListBox(UiElement, CursorInteractive):
+    ...
+
+
+class TextInputField(UiElement, CursorInteractive):
+    ...
+
+
+class ScrollBar(UiElement, CursorInteractive):
+    ...
