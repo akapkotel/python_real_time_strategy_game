@@ -7,7 +7,7 @@ from arcade import SpriteList
 from arcade.arcade_types import Color
 
 from observers import ObjectsOwner, OwnedObject
-from user_interface import UiElement
+from user_interface import UiElement, Hierarchical
 from views import WindowView
 from colors import WHITE
 
@@ -59,9 +59,10 @@ class Menu(WindowView, ObjectsOwner):
 
     def toggle_submenu(self, submenu: Optional[SubMenu] = None):
         self.current_submenu = submenu
+        self.window.show_view(self.current_submenu)
 
 
-class SubMenu(WindowView, ObjectsOwner, OwnedObject):
+class SubMenu(WindowView, ObjectsOwner, OwnedObject, Hierarchical):
 
     def __init__(self,
                  name: str,
@@ -69,6 +70,7 @@ class SubMenu(WindowView, ObjectsOwner, OwnedObject):
         WindowView.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self, owners=True)
+        Hierarchical.__init__(self)
 
         self.name = name
         self.background_color = background_color

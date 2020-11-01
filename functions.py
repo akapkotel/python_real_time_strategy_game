@@ -56,7 +56,7 @@ def get_path_to_file(filename: str) -> str:
     import os
     for directory in os.walk(os.getcwd() + '/resources'):
         if filename in directory[2]:
-            return directory[0] + f'/{filename}'
+            return f'{directory[0]}/{filename}'
 
 
 def get_object_name(filename: str) -> str:
@@ -83,3 +83,22 @@ def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
 def distance_2d(coord_a: Point, coord_b: Point) -> float:
     """Calculate distance between two points in 2D space."""
     return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
+
+
+def get_enemies(war: int) -> Tuple[int, int]:
+    """
+    Since each Player id attribute is a power of 2, id's can
+    be combined to sum, being an unique identifier, for eg.
+    Player with id 8 and Player with id 128 make unique sum
+    136. To save pairs of hostile Players you can sum their
+    id's and this function allows to retrieve pair from the
+    saved value. Limit of Players in game is 16, since 2^32
+    gives 8589934592, which is highest id checked by function.
+    """
+    index = 8589934592  # 2 to power of 32
+    while index > 2:
+        if war < index:
+            index = index // 2
+        else:
+            break
+    return index, war - index

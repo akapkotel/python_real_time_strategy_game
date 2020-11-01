@@ -7,6 +7,7 @@ import arcade
 from typing import (
     List, Dict, Any, Optional, Union
 )
+from arcade.arcade_types import Color
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
@@ -16,7 +17,7 @@ from functions import get_path_to_file
 from user_interface import (
     Frame, Button, CheckButton, ListBox, TextInputField
 )
-from colors import GRASS_GREEN, RED, BROWN
+from colors import GRASS_GREEN, RED, BROWN, BLACK
 from menu import Menu, SubMenu
 
 SCREEN_WIDTH = 1200
@@ -56,22 +57,61 @@ class Window(arcade.Window, EventsCreator):
         self.center_window()
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
-        self.updated: List = []
-        self.drawn: List = []
+        self._updated: List = []
+        self._drawn: List = []
 
         self.menu_view = Menu()
-        self.game_view = None
+        self.game_view: Optional[Game] = None
 
         self.create_submenus()
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
+        # cursor-related:
+        # store viewport data to avoid redundant get_viewport() calls and call
+        # get_viewport only when viewport is actually changed:
+        self.current_viewport = self.get_viewport()
         self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
+
+        # keyboard-related:
         self.keyboard = KeyboardHandler()
 
+    @property
+    def updated(self):
+        return self._updated
+
+    @updated.setter
+    def updated(self, value: List[SpriteList]):
+        self._updated = value
+        try:
+            # update MouseCursor reference to updated spritelists only when
+            # they actually changes
+            self.cursor.updated_spritelists = value
+        except AttributeError:
+            pass
+
+    @property
+    def drawn(self):
+        return self._drawn
+
+    @drawn.setter
+    def drawn(self, value: List[SpriteList]):
+        self._drawn = value
+
     def create_submenus(self):
-        sound_submenu = SubMenu('Sound', background_color=RED),
+        sound_submenu = SubMenu('Sound', background_color=RED)
         graphics_submenu = SubMenu('Graphics', background_color=BROWN)
+        game_setting = SubMenu('Game setting', background_color=BLACK)
+
+        ui_element_texture = get_path_to_file('medic_truck_red.png')
+        sound_ui_elements = [
+            Button(ui_element_texture),
+            CheckButton(ui_element_texture),
+            TextInputField(ui_element_texture)
+        ]
+        for element in sound_ui_elements:
+            element.register_to_objectsowners()
+        sound_submenu.set_updated_and_drawn_lists()
 
     def create_new_game(self):
         self.game_view = Game()
@@ -84,6 +124,8 @@ class Window(arcade.Window, EventsCreator):
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
+            print(f'Pointed unit: {self.cursor.pointed_unit}')
+        self.events_scheduler.update()
 
     def on_draw(self):
         self.clear()
@@ -93,7 +135,11 @@ class Window(arcade.Window, EventsCreator):
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         if self.cursor.active:
-            self.cursor.on_mouse_motion(x, y, dx, dy)
+            if self.current_view is self.game_view:
+                left, _, bottom, _ = self.current_viewport
+                self.cursor.on_mouse_motion(x + left, y + bottom, dx, dy)
+            else:
+                self.cursor.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.cursor.active:
@@ -108,7 +154,8 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
         if self.cursor.active:
-            self.cursor.on_mouse_drag(x, y, dx, dy, buttons, modifiers)
+            left, _, bottom, _ = self.current_viewport
+            self.cursor.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         if self.cursor.active:
@@ -128,9 +175,11 @@ class Window(arcade.Window, EventsCreator):
             super().show_view(new_view)
 
     def toggle_view(self):
+        # debug method to be replaced with callbacks of UiElements
         if self.current_view is self.menu_view:
             self.create_new_game()
             self.start_new_game()
+            # self.menu_view.toggle_submenu(self.sound_submenu)
         else:
             self.show_view(self.menu_view)
 
@@ -150,6 +199,11 @@ class Window(arcade.Window, EventsCreator):
         raise NotImplementedError
 
 
+def spawn_test_player() -> Player:
+    # TODO: remove it when spawning eal Player instances is done
+    return Player(BLACK, None, False)
+
+
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
@@ -165,16 +219,17 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
         self.fog_of_war = FogOfWar()
 
+        self.set_updated_and_drawn_lists()
+
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
         self.players: Dict[int, Player] = {}
-        self.local_human_player: Optional[Player] = None
-
-        self.players: Dict[int, Player] = {}
+        self.local_human_player: Optional[Player] = spawn_test_player()  # TODO
         self.factions: Dict[int, Faction] = {}
 
-        self.set_updated_and_drawn_lists()
+        self.missions: Dict[int, Mission] = {}
+        self.curent_mission: Optional[Mission] = None
 
         self.test_methods()
 
@@ -190,7 +245,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.window.background_color = GRASS_GREEN
 
     def test_methods(self):
-        self.test_scheduling_events()
+        # self.test_scheduling_events()
         self.test_units_spawning()
 
     def test_scheduling_events(self):
@@ -205,6 +260,10 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         configs: Dict[str, Any] = {}
         # TODO
         return configs
+
+    @staticmethod
+    def next_free_player_color() -> Color:
+        return 0, 0, 0
 
     def register(self, acquired: OwnedObject):
         acquired: Union[Unit, Building, Player, Faction]
@@ -256,6 +315,7 @@ if __name__ == '__main__':
     from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
     from buildings import Building
+    from missions import Mission
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()

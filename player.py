@@ -40,13 +40,13 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
 class Player(EventsCreator, ObjectsOwner, OwnedObject):
     game: Optional[Game] = None
 
-    def __init__(self, color: Color, faction: None, cpu: True):
+    def __init__(self, id=None, color=None, faction=None, cpu=True):
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self)
         self.id = len(self.game.players)
         self.cpu = cpu
-        self.color = color
+        self.color = color or self.game.next_free_player_color()
         self.faction: Faction = faction or Faction()
 
         self.units: Set[Unit] = set()
@@ -80,6 +80,11 @@ class Player(EventsCreator, ObjectsOwner, OwnedObject):
         self.known_enemies.clear()
         for unit in self.units:
             self.known_enemies.update(unit.known_enemies)
+
+
+class CpuPlayer(Player):
+    # TODO: all Cpu-controlled Player logic!
+    pass
 
 
 class PlayerEntity(GameObject, EventsCreator):

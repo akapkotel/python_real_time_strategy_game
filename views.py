@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import List, Union, Optional
+from typing import List, Set, Dict, Union, Optional
 from arcade import (
     Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
 )
@@ -31,10 +31,9 @@ class WindowView(View):
     def is_running(self):
         return self.window.current_view is self
 
-    def set_updated_and_drawn_lists(self):
+    def set_updated_and_drawn_lists(self, ignored=(Window, Set, Dict)):
         # to draw and update everything with one instruction in on_draw()
         # and on_update() methods:
-        ignored = (Window, )
         self.drawn = get_attributes_with_attribute(self, 'draw', ignored)
         self.updated = get_attributes_with_attribute(self, 'update', ignored)
 
@@ -58,7 +57,7 @@ class LoadingScreen(WindowView):
                  loading_text: str = 'Loading',
                  background_name: Optional[str] = None):
         super().__init__()
-        self.sprite_list = SpriteList(is_static=True)
+        self.sprite_list = SpriteList()
         self.loading_text = loading_text
         self.progress = 0
         self.progress_bar = self.create_progress_bar()

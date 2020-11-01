@@ -39,6 +39,7 @@ class Hierarchical:
         return self._children
 
     def add_child(self, child: Hierarchical):
+        print(child)
         if self._children is None:
             self._children = set()
         self._children.add(child)
@@ -128,10 +129,17 @@ class ToggledElement:
         self._visible = value
 
 
-class UiElement(Sprite, ToggledElement, OwnedObject):
+class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     """
     Basic class for all user-interface and menu objects, like buttons,
     scrollbars, mouse-cursors etc.
+    UiElement interacts with other UiElements through Hierarchical interface,
+    and with other objects in game through OwnedObject interface.
+    To add an UiElement to the WindowView register it with OwnedObject method
+    register_to_objectsowners.
+    To create relation with other UiElement set this UiElement as parent with
+    add_child method ot as child of another object by setting it as parent with
+    parent property.
     """
 
     def __init__(self,
@@ -140,31 +148,36 @@ class UiElement(Sprite, ToggledElement, OwnedObject):
                  visible: bool = True):
         super().__init__(texture_name)
         ToggledElement.__init__(self, active, visible)
+        OwnedObject.__init__(self, owners=True)
 
 
 class Frame(UiElement):
     ...
 
 
-class TabsGroup():
+class TabsGroup(UiElement):
     ...
 
 
-class Button(UiElement, CursorInteractive):
+class Tab(UiElement):
     ...
 
 
-class CheckButton(UiElement, CursorInteractive):
+class Button(UiElement):
     ...
 
 
-class ListBox(UiElement, CursorInteractive):
+class CheckButton(UiElement):
     ...
 
 
-class TextInputField(UiElement, CursorInteractive):
+class ListBox(UiElement):
     ...
 
 
-class ScrollBar(UiElement, CursorInteractive):
+class TextInputField(UiElement):
+    ...
+
+
+class ScrollBar(UiElement):
     ...
