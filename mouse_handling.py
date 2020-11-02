@@ -11,7 +11,7 @@ from user_interface import ToggledElement, UiElement, CursorInteractive
 from data_containers import DividedSpriteList
 from scheduling import EventsCreator, log
 from colors import GREEN, CLEAR_GREEN
-from gameobject import GameObject
+from gameobject import GameObject, get_gameobjects_at_position
 from player import PlayerEntity
 from buildings import Building
 from game import Game, Menu
@@ -61,6 +61,8 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
 
+        self.last_selected = False
+
     @property
     def updated_spritelists(self):
         return self._updated_spritelists
@@ -75,6 +77,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         self.position = x, y
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        # x, y = self.game.map.normalize_position(x, y)
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
@@ -82,6 +85,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
 
     def on_left_button_click(self, x: float, y: float, modifiers: int):
         log(f'Left-clicked at x:{x}, y: {y}')
+        log(f'selected unit: {self.selected_units}')
 
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
@@ -95,13 +99,19 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
-        if self.mouse_drag_selection is not None:
-            # TODO: closing MouseSelection
-            pass
-        elif self.selected_units:
-            self.on_click_with_selected_units(x, y, modifiers)
-        elif (gameobject := self.pointed_gameobject) is not None:
-            self.on_gameobject_clicked(gameobject)
+        log(f'on_left_button_release, {x, y}')
+        if self.mouse_drag_selection is None:
+            if self.selected_units:
+                self.on_click_with_selected_units(x, y, modifiers)
+            elif (gameobject := self.pointed_gameobject) is not None:
+                self.on_gameobject_clicked(gameobject)
+        else:
+            self.close_drag_selection()
+
+    def close_drag_selection(self):
+        log(f'Closing drag-selection...')
+        self.selected_units = self.mouse_drag_selection.units
+        self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
         pass
@@ -112,9 +122,10 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.on_player_entity_clicked(clicked)
 
     def on_click_with_selected_units(self, x, y, modifiers):
+        log(f'on_click_with_selected_units')
         for unit in self.selected_units:
             destination = self.game.map.position_to_grid(x, y)
-            unit.find_path(destination)
+            unit.move_to(destination)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'PlayerEntity: {clicked}')
@@ -139,7 +150,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         if self.mouse_drag_selection is not None:
             self.mouse_drag_selection.update(x, y)
         else:
-            self.mouse_drag_selection = MouseDragSelection(x, y)
+            self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # TODO
@@ -150,8 +161,6 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         Search all Spritelists and DividedSpriteLists for any UiElements or
         GameObjects placed at the MouseCursor position.
         """
-        if self.game is None:
-            MouseDragSelection.game = self.game = self.window.game_view
         if pointed := self.get_pointed_sprite(*self.position):
             if isinstance(pointed, UiElement) and pointed.active:
                 self.update_mouse_pointed(pointed)
@@ -159,9 +168,6 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
                 self.pointed_gameobject = pointed
         else:
             self.pointed_gameobject = self.pointed_ui_element = None
-        if self.game is not None and self.game.is_running:
-            print(f'Pointede: {self.pointed_gameobject}')
-            print(f'Selected: {self.selected_units}')
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[GameObject, UiElement]]:
         # Since we have many spritelists which are drawn in some
@@ -169,7 +175,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         # cursor-pointed elements in backward order: last draw, is first to
         # be mouse-pointed (it lies on the top)
         if (pointed_sprite := self.dragged_ui_element) is None:
-            for drawn in reversed(self.updated_spritelists):
+            for drawn in reversed(self._updated_spritelists):
                 if not (pointed_sprite := self.cursor_points(drawn, x, y)):
                     continue
                 else:
@@ -210,17 +216,17 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
 
 class MouseDragSelection:
     """Class for mouse-selected_units rectangle-areas."""
-    game: Optional[Game] = None
 
-    __slots__ = ["start", "end", "left", "right", "top", "bottom", "units"]
+    __slots__ = ["game", "start", "end", "left", "right", "top", "bottom", "units"]
 
-    def __init__(self, x: float, y: float):
+    def __init__(self, game: Game, x: float, y: float):
         """
         Initialize new Selection with empty list of selected_units Units.
 
         :param x: float -- x coordinate of selection starting corner
         :param y: float -- y coordinate of selection starting corner
         """
+        self.game = game
         self.start = (x, y)
         self.end = (x, y)
         self.left = x

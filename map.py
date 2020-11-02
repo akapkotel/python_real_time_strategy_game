@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 import heapq
-from math import inf as INFINITY, hypot
+from math import hypot, inf
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Optional, Tuple, List, Set, Dict, Generator, Any
 
-from scheduling import log
-from utils.classes import Singleton
 from data_types import Number, UnitId
+from utils.classes import Singleton
+from scheduling import log
+from functions import timer
 
 
 PATH = 'PATH'
@@ -77,14 +78,14 @@ class Map(GridHandler):
         self.rows = self.height // self.grid_height if height else 50
         self.columns = self.width // self.grid_width if width else 100
 
-        self.nodes: List[List[MapNode]] = []
-        self.units: List[List[UnitId]] = []
+        self.nodes: Dict[GridPosition, MapNode] = {}
+        self.units: Dict[GridPosition, UnitId] = {}
 
         self.generate_nodes()
         MapNode.map = Pathfinder.map = self
 
     def __len__(self) -> int:
-        return sum(len(row) for row in self.nodes)
+        return len(self.nodes)
 
     def in_bounds(self, grids) -> List[GridPosition]:
         return [
@@ -92,43 +93,37 @@ class Map(GridHandler):
         ]
 
     def adjacent_nodes(self, x: Number, y: Number) -> List[MapNode]:
-        adjacent_grids = self.in_bounds(self.adjacent_grids(x, y))
         return [
-            self.nodes[adj[0]][adj[1]] for adj in adjacent_grids
+            self.nodes[adj] for adj in self.in_bounds(self.adjacent_grids(x, y))
         ]
 
     def position_to_node(self, x: Number, y: Number) -> MapNode:
         return self.grid_to_node(self.position_to_grid(x, y))
 
     def grid_to_node(self, grid: GridPosition) -> MapNode:
-        return self.nodes[grid[0]][grid[1]]
+        return self.nodes[grid]
 
     def generate_nodes(self):
         for row in range(self.rows):
-            self.nodes.append([])
             for column in range(self.columns):
                 node = MapNode(row, column)
                 node.costs = {
                     grid: 1 for grid in self.in_bounds(self.adjacent_grids(*node.position))
                 }
-                self.nodes[row].append(node)
+                self.nodes[(row, column)] = node
         log(f'Generated {len(self)} map nodes.')
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
-        return self.nodes[row]
+        return [n for n in self.nodes.values() if n.grid[1] == row]
 
     def get_nodes_column(self, column: int) -> List[MapNode]:
-        return [row[column] for row in self.nodes]
+        return [n for n in self.nodes.values() if n.grid[0] == column]
 
     def get_all_nodes(self) -> List[MapNode]:
-        nodes = []
-        for row in self.nodes:
-            for node in row:
-                nodes.append(node)
-        return nodes
+        return list(self.nodes.values())
 
     def node(self, grid: GridPosition) -> MapNode:
-        return self.nodes[grid[0]][grid[1]]
+        return self.nodes[grid]
 
 
 class MapNode(GridHandler, ABC):
@@ -167,6 +162,9 @@ class PriorityQueue:
     def __bool__(self) -> bool:
         return len(self.elements) > 0
 
+    def __len__(self) -> int:
+        return len(self.elements)
+
     def __contains__(self, item) -> bool:
         return item in self._contains
 
@@ -181,7 +179,7 @@ class PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-class Pathfinder(Singleton):
+class Pathfinder:
     """
     A* algorithm implementation using PriorityQueue based on heapq.
     """
@@ -192,44 +190,45 @@ class Pathfinder(Singleton):
     def heuristic(start, end):
         return hypot(start[0] - end[0], start[1] - end[1])
 
+    @timer
     def find_path(self, start: GridPosition, end: GridPosition):
         log(f'Searching for path from {start} to {end}...')
         heuristic = self.heuristic
 
-        map_nodes = self.map.node
+        map_nodes = self.map.nodes
         adjacent_grids = self.map.adjacent_grids
         unexplored = PriorityQueue(start, heuristic(start, end))
-        explored: Set[GridPosition] = set()
         previous: Dict[GridPosition, GridPosition] = {}
 
         get_best_unexploed = unexplored.get
         put_to_unexplored = unexplored.put
 
-        cost_so_far = defaultdict(lambda: INFINITY)
+        cost_so_far = defaultdict(lambda: inf)
         cost_so_far[start] = 0
 
         while unexplored:
             current: GridPosition = get_best_unexploed()
-            explored.add(current)
             if current == end:
+                print(f'Path found! Unexplored: {len(unexplored)}')
                 return self.reconstruct_path(map_nodes, previous, current)
 
-            node = map_nodes(current)  # current[0]][current[1]
-            for adj in adjacent_grids(*node.position):
-                if not (adj_node := map_nodes(adj)).walkable and adj not in explored:
-                    continue
-                if (total := cost_so_far[current] + adj_node.costs[current]) < cost_so_far[adj]:
-                    previous[adj] = current
+            node = map_nodes[current]
+            for adj in (a for a in node.adjacent_nodes if a.grid not
+                        in unexplored and a.walkable):
+                total = cost_so_far[current] + adj.costs[current] < cost_so_far[adj.grid]
+                if total < cost_so_far[adj]:
+                    previous[adj.grid] = current
                     cost_so_far[adj] = total
-                    priority = total + heuristic(adj, end)
-                    put_to_unexplored(adj, priority)
+                    priority = total + heuristic(adj.grid, end)
+                    put_to_unexplored(adj.grid, priority)
+        print(f'Searching failed! Unexplored: {len(unexplored)}')
         return []
 
     def reconstruct_path(self, map_nodes, previous_nodes, current_node):
-        path = [map_nodes(current_node)]
+        path = [map_nodes[current_node]]
         while current_node in previous_nodes.keys():
             current_node = previous_nodes[current_node]
-            path.append(map_nodes(current_node))
+            path.append(map_nodes[current_node])
         return self.nodes_list_to_path(path[:-1])
 
     @staticmethod

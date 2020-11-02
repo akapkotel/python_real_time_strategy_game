@@ -21,7 +21,7 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self)
-        self.id = id or len(self.game.players)
+        self.id = id
         self.friendly_factions: Set[Faction] = set()
         self.players = set()
 
@@ -44,7 +44,7 @@ class Player(EventsCreator, ObjectsOwner, OwnedObject):
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self)
-        self.id = len(self.game.players)
+        self.id = id
         self.cpu = cpu
         self.color = color or self.game.next_free_player_color()
         self.faction: Faction = faction or Faction()

@@ -8,6 +8,7 @@ from statemachine import State, StateMachine
 from game import Game
 
 from functions import average_position_of_points_group
+from map import Pathfinder, GridPosition, PATH
 from player import PlayerEntity, Player
 from enums import UnitWeight
 from scheduling import log
@@ -34,9 +35,8 @@ class PermanentUnitsGroup:
         self.units.discard(unit)
 
 
-class Unit(PlayerEntity, StateMachine):
+class Unit(PlayerEntity, Pathfinder, StateMachine):
     """Unit is a PlayerEntity which can move on map."""
-    pathfinder: Optional[Pathfinder] = None
 
     # finite-state-machine states:
     idle = State('idle', 0, initial=True)
@@ -54,10 +54,8 @@ class Unit(PlayerEntity, StateMachine):
                  weight: UnitWeight,
                  position: Point):
         PlayerEntity.__init__(self, unit_name, player=player, position=position)
+        Pathfinder.__init__(self)
         StateMachine.__init__(self)
-
-        if Unit.pathfinder is None:
-            Unit.pathfinder = Pathfinder()
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
@@ -65,13 +63,16 @@ class Unit(PlayerEntity, StateMachine):
         self.position = self.game.map.normalize_position(*self.position)
         self.current_node = self.game.map.position_to_node(*self.position)
 
-    def find_path(self, destination: GridPosition):
-        start = self.current_node.grid
-        path = self.pathfinder.find_path(start, destination)
-        self.game.debugged.clear()
-        self.game.debugged.append([PATH, path])
-        log(f'Found path: {path}')
+    def move_to(self, destination: GridPosition):
+        log(f'move_to')
+        if (start := self.current_node.grid) == destination:
+            return
+        else:
+            path = self.find_path(start, destination)
+            self.game.debugged.clear()
+            self.game.debugged.append([PATH, path])
+            log(f'Found path: {path}')
 
 
 if __name__:
-    from map import Pathfinder, GridPosition, PATH
+    pass

@@ -36,10 +36,10 @@ logging.basicConfig(
 )
 
 
-def spawn_test_unit() -> Unit:
+def spawn_test_unit(player: Player) -> Unit:
     unit_name = get_path_to_file('medic_truck_red.png')
     position = 500, 500
-    return Unit(unit_name, Player((0, 0, 0), None, False), UnitWeight.LIGHT, position)
+    return Unit(unit_name, player, UnitWeight.LIGHT, position)
 
 
 def test_scheduling_with_function():
@@ -226,8 +226,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
-        self.players: Dict[int, Player] = {}
-        self.local_human_player: Optional[Player] = spawn_test_player()  # TODO
+        self.players: Dict[int, Player] = {2: Player(2)}
+        self.local_human_player: Optional[Player] = self.players[2]  # TODO
         self.factions: Dict[int, Faction] = {}
 
         self.missions: Dict[int, Mission] = {}
@@ -244,7 +244,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         name = self.__class__.__name__.lower()
         for _class in (c for c in globals().values() if hasattr(c, name)):
             setattr(_class, name, self)
-        Game.instance = self
+        Game.instance = self.window.cursor.game = self
 
     def on_show_view(self):
         super().on_show_view()
@@ -260,7 +260,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.schedule_event(event)
 
     def test_units_spawning(self):
-        unit = spawn_test_unit()
+        unit = spawn_test_unit(player=self.local_human_player)
         self.units.append(unit)
 
     def load_player_configs(self) -> Dict[str, Any]:
@@ -324,28 +324,34 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             self.debug_map_grid()
             self.debug_mouse_pointed_nodes()
             self.debug_debugged()
+        if (selection := self.window.cursor.mouse_drag_selection) is not None:
+            selection.draw()
 
     def debug_map_grid(self):
         self.map_grid.draw()
 
     def debug_mouse_pointed_nodes(self):
-        position = self.window.cursor.position
+        position = self.map.normalize_position(*self.window.cursor.position)
         node = self.map.position_to_node(*position)
 
-        normalised_pos = self.map.grid_to_position(node.grid)
-        arcade.draw_circle_outline(*normalised_pos, 10, WHITE, 2)
-
-        adjacent = 0
-        for adj in node.adjacent_nodes:
-            adjacent += 1
-            arcade.draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
-                                         TILE_HEIGHT, (255, 255, 255, 25))
-            arcade.draw_circle_outline(*adj.position, 5, WHITE, 1)
-
-        distance = self.heuristic((0, 0), node.grid)
-
-        text = f'{str(adjacent)},          Node: {node}, distance: {distance}'
-        arcade.draw_text(text, 10, 10, RED)
+        arcade.draw_circle_outline(node.x, node.y, 10, WHITE, 2)
+        # position = self.window.cursor.position
+        # node = self.map.position_to_node(*position)
+        #
+        # normalised_pos = self.map.grid_to_position(node.grid)
+        # arcade.draw_circle_outline(*normalised_pos, 10, WHITE, 2)
+        #
+        # adjacent = 0
+        # for adj in node.adjacent_nodes:
+        #     adjacent += 1
+        #     arcade.draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
+        #                                  TILE_HEIGHT, (255, 255, 255, 25))
+        #     arcade.draw_circle_outline(*adj.position, 5, WHITE, 1)
+        #
+        # distance = self.heuristic((0, 0), node.grid)
+        #
+        # text = f'{str(adjacent)},          Node: {node}, distance: {distance}'
+        # arcade.draw_text(text, 10, 10, RED)
 
     def debug_debugged(self):
         for element in self.debugged:
@@ -373,20 +379,25 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()
-        for i, row in enumerate(self.map.nodes):
-            y = i * TILE_HEIGHT
-            h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
-            grid.append(h_line)
-            y = i * TILE_HEIGHT + TILE_HEIGHT // 2
-            h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
-            grid.append(h2_line)
-            for j, column in enumerate(row):
-                x = j * TILE_WIDTH
-                v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
-                grid.append(v_line)
-                x = j * TILE_WIDTH + TILE_WIDTH // 2
-                v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
-                grid.append(v2_line)
+
+        # for i in range(self.map.rows):
+        #     for j in range(self.map.columns):
+        #         pass
+
+        # for i, row in enumerate(self.map.nodes):
+        #     y = i * TILE_HEIGHT
+        #     h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
+        #     grid.append(h_line)
+        #     y = i * TILE_HEIGHT + TILE_HEIGHT // 2
+        #     h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
+        #     grid.append(h2_line)
+        #     for j, column in enumerate(row):
+        #         x = j * TILE_WIDTH
+        #         v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
+        #         grid.append(v_line)
+        #         x = j * TILE_WIDTH + TILE_WIDTH // 2
+        #         v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
+        #         grid.append(v2_line)
         return grid
 
 

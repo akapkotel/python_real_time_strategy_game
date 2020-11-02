@@ -1,1 +1,379 @@
-INFO: 11/02/2020 08:17:21 PM Pressed key: 65307, all pressed keys: {65307}
+INFO: 11/03/2020 12:37:46 AM Pressed key: 32, all pressed keys: {32}
+INFO: 11/03/2020 12:37:46 AM FogOfWar created. Fog objects: 2
+INFO: 11/03/2020 12:37:47 AM Generated 5000 map nodes.
+INFO: 11/03/2020 12:37:49 AM Left-clicked at x:523, y: 514
+INFO: 11/03/2020 12:37:49 AM selected unit: set()
+INFO: 11/03/2020 12:37:49 AM on_left_button_release, (523, 514)
+INFO: 11/03/2020 12:37:49 AM Clicked at: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:37:49 AM PlayerEntity: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:37:49 AM Left-clicked at x:107, y: 282
+INFO: 11/03/2020 12:37:49 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:49 AM on_left_button_release, (107, 282)
+INFO: 11/03/2020 12:37:49 AM on_click_with_selected_units
+INFO: 11/03/2020 12:37:49 AM move_to
+INFO: 11/03/2020 12:37:49 AM Searching for path from (10, 10) to (2, 5)...
+INFO: 11/03/2020 12:37:49 AM Found path: [(125, 275), (175, 275), (225, 275), (275, 275), (325, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:37:50 AM Left-clicked at x:157, y: 645
+INFO: 11/03/2020 12:37:50 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:50 AM on_left_button_release, (157, 645)
+INFO: 11/03/2020 12:37:50 AM on_click_with_selected_units
+INFO: 11/03/2020 12:37:50 AM move_to
+INFO: 11/03/2020 12:37:50 AM Searching for path from (10, 10) to (3, 12)...
+INFO: 11/03/2020 12:37:50 AM Found path: [(175, 625), (225, 625), (275, 625), (325, 625), (375, 625), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:37:50 AM Left-clicked at x:918, y: 458
+INFO: 11/03/2020 12:37:50 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:51 AM on_left_button_release, (436, 149)
+INFO: 11/03/2020 12:37:51 AM Closing drag-selection...
+INFO: 11/03/2020 12:37:52 AM Left-clicked at x:988, y: 212
+INFO: 11/03/2020 12:37:52 AM selected unit: set()
+INFO: 11/03/2020 12:37:52 AM on_left_button_release, (988, 212)
+INFO: 11/03/2020 12:37:53 AM Left-clicked at x:947, y: 632
+INFO: 11/03/2020 12:37:53 AM selected unit: set()
+INFO: 11/03/2020 12:37:53 AM on_left_button_release, (947, 632)
+INFO: 11/03/2020 12:37:53 AM Left-clicked at x:411, y: 296
+INFO: 11/03/2020 12:37:53 AM selected unit: set()
+INFO: 11/03/2020 12:37:53 AM on_left_button_release, (411, 296)
+INFO: 11/03/2020 12:37:55 AM Left-clicked at x:445, y: 797
+INFO: 11/03/2020 12:37:55 AM selected unit: set()
+INFO: 11/03/2020 12:37:55 AM on_left_button_release, (685, 399)
+INFO: 11/03/2020 12:37:55 AM Closing drag-selection...
+INFO: 11/03/2020 12:37:55 AM Left-clicked at x:775, y: 165
+INFO: 11/03/2020 12:37:55 AM selected unit: set()
+INFO: 11/03/2020 12:37:55 AM on_left_button_release, (775, 165)
+INFO: 11/03/2020 12:37:58 AM Left-clicked at x:518, y: 518
+INFO: 11/03/2020 12:37:58 AM selected unit: set()
+INFO: 11/03/2020 12:37:58 AM on_left_button_release, (518, 518)
+INFO: 11/03/2020 12:37:58 AM Clicked at: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:37:58 AM PlayerEntity: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:37:58 AM Left-clicked at x:1056, y: 558
+INFO: 11/03/2020 12:37:58 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:58 AM on_left_button_release, (1056, 558)
+INFO: 11/03/2020 12:37:58 AM on_click_with_selected_units
+INFO: 11/03/2020 12:37:58 AM move_to
+INFO: 11/03/2020 12:37:58 AM Searching for path from (10, 10) to (21, 11)...
+INFO: 11/03/2020 12:37:58 AM Found path: [(1075, 575), (1025, 575), (975, 575), (925, 575), (875, 575), (825, 575), (775, 575), (725, 575), (675, 575), (625, 575), (575, 575)]
+INFO: 11/03/2020 12:37:59 AM Left-clicked at x:952, y: 291
+INFO: 11/03/2020 12:37:59 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:59 AM on_left_button_release, (952, 291)
+INFO: 11/03/2020 12:37:59 AM on_click_with_selected_units
+INFO: 11/03/2020 12:37:59 AM move_to
+INFO: 11/03/2020 12:37:59 AM Searching for path from (10, 10) to (19, 5)...
+INFO: 11/03/2020 12:37:59 AM Found path: [(975, 275), (925, 275), (875, 275), (825, 275), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:37:59 AM Left-clicked at x:733, y: 614
+INFO: 11/03/2020 12:37:59 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:37:59 AM on_left_button_release, (733, 614)
+INFO: 11/03/2020 12:37:59 AM on_click_with_selected_units
+INFO: 11/03/2020 12:37:59 AM move_to
+INFO: 11/03/2020 12:37:59 AM Searching for path from (10, 10) to (14, 12)...
+INFO: 11/03/2020 12:37:59 AM Found path: [(725, 625), (675, 625), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:00 AM Right-clicked at x:894, y: 390
+INFO: 11/03/2020 12:38:01 AM Left-clicked at x:359, y: 245
+INFO: 11/03/2020 12:38:01 AM selected unit: set()
+INFO: 11/03/2020 12:38:01 AM on_left_button_release, (359, 245)
+INFO: 11/03/2020 12:38:01 AM Left-clicked at x:124, y: 546
+INFO: 11/03/2020 12:38:01 AM selected unit: set()
+INFO: 11/03/2020 12:38:01 AM on_left_button_release, (124, 546)
+INFO: 11/03/2020 12:38:02 AM Left-clicked at x:520, y: 514
+INFO: 11/03/2020 12:38:02 AM selected unit: set()
+INFO: 11/03/2020 12:38:02 AM on_left_button_release, (520, 514)
+INFO: 11/03/2020 12:38:02 AM Clicked at: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:38:02 AM PlayerEntity: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:38:03 AM Left-clicked at x:211, y: 553
+INFO: 11/03/2020 12:38:03 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:03 AM on_left_button_release, (211, 553)
+INFO: 11/03/2020 12:38:03 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:03 AM move_to
+INFO: 11/03/2020 12:38:03 AM Searching for path from (10, 10) to (4, 11)...
+INFO: 11/03/2020 12:38:03 AM Found path: [(225, 575), (275, 575), (325, 575), (375, 575), (425, 575), (475, 575)]
+INFO: 11/03/2020 12:38:03 AM Left-clicked at x:313, y: 734
+INFO: 11/03/2020 12:38:03 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:03 AM on_left_button_release, (313, 734)
+INFO: 11/03/2020 12:38:03 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:03 AM move_to
+INFO: 11/03/2020 12:38:03 AM Searching for path from (10, 10) to (6, 14)...
+INFO: 11/03/2020 12:38:03 AM Found path: [(325, 725), (375, 675), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:03 AM Left-clicked at x:350, y: 292
+INFO: 11/03/2020 12:38:03 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:03 AM on_left_button_release, (350, 292)
+INFO: 11/03/2020 12:38:03 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:03 AM move_to
+INFO: 11/03/2020 12:38:03 AM Searching for path from (10, 10) to (7, 5)...
+INFO: 11/03/2020 12:38:03 AM Found path: [(375, 275), (375, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:04 AM Left-clicked at x:436, y: 80
+INFO: 11/03/2020 12:38:04 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:04 AM on_left_button_release, (436, 80)
+INFO: 11/03/2020 12:38:04 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:04 AM move_to
+INFO: 11/03/2020 12:38:04 AM Searching for path from (10, 10) to (8, 1)...
+INFO: 11/03/2020 12:38:04 AM Found path: [(425, 75), (425, 125), (425, 175), (425, 225), (425, 275), (425, 325), (425, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:04 AM Left-clicked at x:954, y: 103
+INFO: 11/03/2020 12:38:04 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:04 AM on_left_button_release, (954, 103)
+INFO: 11/03/2020 12:38:04 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:04 AM move_to
+INFO: 11/03/2020 12:38:04 AM Searching for path from (10, 10) to (19, 2)...
+INFO: 11/03/2020 12:38:04 AM Found path: [(975, 125), (925, 125), (875, 175), (825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:05 AM Left-clicked at x:915, y: 520
+INFO: 11/03/2020 12:38:05 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:05 AM on_left_button_release, (915, 520)
+INFO: 11/03/2020 12:38:05 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:05 AM move_to
+INFO: 11/03/2020 12:38:05 AM Searching for path from (10, 10) to (18, 10)...
+INFO: 11/03/2020 12:38:05 AM Found path: [(925, 525), (875, 525), (825, 525), (775, 525), (725, 525), (675, 525), (625, 525), (575, 525)]
+INFO: 11/03/2020 12:38:05 AM Left-clicked at x:992, y: 381
+INFO: 11/03/2020 12:38:05 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:05 AM on_left_button_release, (992, 381)
+INFO: 11/03/2020 12:38:05 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:05 AM move_to
+INFO: 11/03/2020 12:38:05 AM Searching for path from (10, 10) to (19, 7)...
+INFO: 11/03/2020 12:38:05 AM Found path: [(975, 375), (925, 375), (875, 375), (825, 375), (775, 375), (725, 375), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:06 AM Left-clicked at x:383, y: 187
+INFO: 11/03/2020 12:38:06 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:06 AM on_left_button_release, (383, 187)
+INFO: 11/03/2020 12:38:06 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:06 AM move_to
+INFO: 11/03/2020 12:38:06 AM Searching for path from (10, 10) to (7, 3)...
+INFO: 11/03/2020 12:38:06 AM Found path: [(375, 175), (375, 225), (375, 275), (375, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:06 AM Left-clicked at x:134, y: 492
+INFO: 11/03/2020 12:38:06 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:06 AM on_left_button_release, (134, 492)
+INFO: 11/03/2020 12:38:06 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:06 AM move_to
+INFO: 11/03/2020 12:38:06 AM Searching for path from (10, 10) to (2, 9)...
+INFO: 11/03/2020 12:38:06 AM Found path: [(125, 475), (175, 475), (225, 475), (275, 475), (325, 475), (375, 475), (425, 475), (475, 475)]
+INFO: 11/03/2020 12:38:06 AM Left-clicked at x:808, y: 245
+INFO: 11/03/2020 12:38:06 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:06 AM on_left_button_release, (808, 245)
+INFO: 11/03/2020 12:38:06 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:06 AM move_to
+INFO: 11/03/2020 12:38:06 AM Searching for path from (10, 10) to (16, 4)...
+INFO: 11/03/2020 12:38:06 AM Found path: [(825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:07 AM Left-clicked at x:893, y: 624
+INFO: 11/03/2020 12:38:07 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:07 AM on_left_button_release, (893, 624)
+INFO: 11/03/2020 12:38:07 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:07 AM move_to
+INFO: 11/03/2020 12:38:07 AM Searching for path from (10, 10) to (17, 12)...
+INFO: 11/03/2020 12:38:07 AM Found path: [(875, 625), (825, 625), (775, 625), (725, 625), (675, 625), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:07 AM Left-clicked at x:602, y: 757
+INFO: 11/03/2020 12:38:07 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:07 AM on_left_button_release, (602, 757)
+INFO: 11/03/2020 12:38:07 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:07 AM move_to
+INFO: 11/03/2020 12:38:07 AM Searching for path from (10, 10) to (12, 15)...
+INFO: 11/03/2020 12:38:07 AM Found path: [(625, 775), (625, 725), (625, 675), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:07 AM Left-clicked at x:592, y: 189
+INFO: 11/03/2020 12:38:07 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:07 AM on_left_button_release, (592, 189)
+INFO: 11/03/2020 12:38:07 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:07 AM move_to
+INFO: 11/03/2020 12:38:07 AM Searching for path from (10, 10) to (11, 3)...
+INFO: 11/03/2020 12:38:07 AM Found path: [(575, 175), (575, 225), (575, 275), (575, 325), (575, 375), (575, 425), (575, 475)]
+INFO: 11/03/2020 12:38:08 AM Left-clicked at x:1031, y: 33
+INFO: 11/03/2020 12:38:08 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:08 AM on_left_button_release, (1031, 33)
+INFO: 11/03/2020 12:38:08 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:08 AM move_to
+INFO: 11/03/2020 12:38:08 AM Searching for path from (10, 10) to (20, 0)...
+INFO: 11/03/2020 12:38:08 AM Found path: [(1025, 25), (975, 75), (925, 125), (875, 175), (825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:09 AM Left-clicked at x:736, y: 23
+INFO: 11/03/2020 12:38:09 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:09 AM on_left_button_release, (736, 23)
+INFO: 11/03/2020 12:38:09 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:09 AM move_to
+INFO: 11/03/2020 12:38:09 AM Searching for path from (10, 10) to (14, 0)...
+INFO: 11/03/2020 12:38:09 AM Found path: [(725, 25), (725, 75), (725, 125), (725, 175), (725, 225), (725, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:09 AM Left-clicked at x:881, y: 12
+INFO: 11/03/2020 12:38:09 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:09 AM on_left_button_release, (881, 12)
+INFO: 11/03/2020 12:38:09 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:09 AM move_to
+INFO: 11/03/2020 12:38:09 AM Searching for path from (10, 10) to (17, 0)...
+INFO: 11/03/2020 12:38:09 AM Found path: [(875, 25), (875, 75), (875, 125), (875, 175), (825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:10 AM Left-clicked at x:1135, y: 494
+INFO: 11/03/2020 12:38:10 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:10 AM on_left_button_release, (1135, 494)
+INFO: 11/03/2020 12:38:10 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:10 AM move_to
+INFO: 11/03/2020 12:38:10 AM Searching for path from (10, 10) to (22, 9)...
+INFO: 11/03/2020 12:38:10 AM Found path: [(1125, 475), (1075, 475), (1025, 475), (975, 475), (925, 475), (875, 475), (825, 475), (775, 475), (725, 475), (675, 475), (625, 475), (575, 475)]
+INFO: 11/03/2020 12:38:10 AM Left-clicked at x:1160, y: 272
+INFO: 11/03/2020 12:38:10 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:10 AM on_left_button_release, (1160, 272)
+INFO: 11/03/2020 12:38:10 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:10 AM move_to
+INFO: 11/03/2020 12:38:10 AM Searching for path from (10, 10) to (23, 5)...
+INFO: 11/03/2020 12:38:10 AM Found path: [(1175, 275), (1125, 275), (1075, 275), (1025, 275), (975, 275), (925, 275), (875, 275), (825, 275), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:11 AM Left-clicked at x:350, y: 182
+INFO: 11/03/2020 12:38:11 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:11 AM on_left_button_release, (350, 182)
+INFO: 11/03/2020 12:38:11 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:11 AM move_to
+INFO: 11/03/2020 12:38:11 AM Searching for path from (10, 10) to (7, 3)...
+INFO: 11/03/2020 12:38:11 AM Found path: [(375, 175), (375, 225), (375, 275), (375, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:11 AM Left-clicked at x:150, y: 615
+INFO: 11/03/2020 12:38:11 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:11 AM on_left_button_release, (150, 615)
+INFO: 11/03/2020 12:38:11 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:11 AM move_to
+INFO: 11/03/2020 12:38:11 AM Searching for path from (10, 10) to (3, 12)...
+INFO: 11/03/2020 12:38:11 AM Found path: [(175, 625), (225, 625), (275, 625), (325, 625), (375, 625), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:12 AM Left-clicked at x:767, y: 774
+INFO: 11/03/2020 12:38:12 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:12 AM on_left_button_release, (767, 774)
+INFO: 11/03/2020 12:38:12 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:12 AM move_to
+INFO: 11/03/2020 12:38:12 AM Searching for path from (10, 10) to (15, 15)...
+INFO: 11/03/2020 12:38:12 AM Found path: [(775, 775), (725, 725), (675, 675), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:14 AM Left-clicked at x:38, y: 213
+INFO: 11/03/2020 12:38:14 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:14 AM on_left_button_release, (38, 213)
+INFO: 11/03/2020 12:38:14 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:14 AM move_to
+INFO: 11/03/2020 12:38:14 AM Searching for path from (10, 10) to (0, 4)...
+INFO: 11/03/2020 12:38:14 AM Found path: [(25, 225), (75, 225), (125, 225), (175, 225), (225, 225), (275, 275), (325, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:14 AM Left-clicked at x:27, y: 694
+INFO: 11/03/2020 12:38:14 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:14 AM on_left_button_release, (27, 694)
+INFO: 11/03/2020 12:38:14 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:14 AM move_to
+INFO: 11/03/2020 12:38:14 AM Searching for path from (10, 10) to (0, 13)...
+INFO: 11/03/2020 12:38:14 AM Found path: [(25, 675), (75, 675), (125, 675), (175, 675), (225, 675), (275, 675), (325, 675), (375, 675), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:15 AM Left-clicked at x:27, y: 16
+INFO: 11/03/2020 12:38:15 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:15 AM on_left_button_release, (27, 16)
+INFO: 11/03/2020 12:38:15 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:15 AM move_to
+INFO: 11/03/2020 12:38:15 AM Searching for path from (10, 10) to (0, 0)...
+INFO: 11/03/2020 12:38:15 AM Found path: [(25, 25), (75, 75), (125, 125), (175, 175), (225, 225), (275, 275), (325, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:17 AM Left-clicked at x:1174, y: 13
+INFO: 11/03/2020 12:38:17 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:17 AM on_left_button_release, (1174, 13)
+INFO: 11/03/2020 12:38:17 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:17 AM move_to
+INFO: 11/03/2020 12:38:17 AM Searching for path from (10, 10) to (23, 0)...
+INFO: 11/03/2020 12:38:17 AM Found path: [(1175, 25), (1125, 25), (1075, 25), (1025, 25), (975, 75), (925, 125), (875, 175), (825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:17 AM Left-clicked at x:1160, y: 593
+INFO: 11/03/2020 12:38:17 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:17 AM on_left_button_release, (1160, 593)
+INFO: 11/03/2020 12:38:17 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:17 AM move_to
+INFO: 11/03/2020 12:38:17 AM Searching for path from (10, 10) to (23, 11)...
+INFO: 11/03/2020 12:38:17 AM Found path: [(1175, 575), (1125, 575), (1075, 575), (1025, 575), (975, 575), (925, 575), (875, 575), (825, 575), (775, 575), (725, 575), (675, 575), (625, 575), (575, 575)]
+INFO: 11/03/2020 12:38:18 AM Left-clicked at x:910, y: 787
+INFO: 11/03/2020 12:38:18 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:18 AM on_left_button_release, (910, 787)
+INFO: 11/03/2020 12:38:18 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:18 AM move_to
+INFO: 11/03/2020 12:38:18 AM Searching for path from (10, 10) to (18, 15)...
+INFO: 11/03/2020 12:38:18 AM Found path: [(925, 775), (875, 775), (825, 775), (775, 775), (725, 725), (675, 675), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:19 AM Left-clicked at x:124, y: 784
+INFO: 11/03/2020 12:38:19 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:19 AM on_left_button_release, (124, 784)
+INFO: 11/03/2020 12:38:19 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:19 AM move_to
+INFO: 11/03/2020 12:38:19 AM Searching for path from (10, 10) to (2, 15)...
+INFO: 11/03/2020 12:38:19 AM Found path: [(125, 775), (175, 775), (225, 775), (275, 775), (325, 725), (375, 675), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:20 AM Left-clicked at x:7, y: 551
+INFO: 11/03/2020 12:38:20 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:20 AM on_left_button_release, (7, 551)
+INFO: 11/03/2020 12:38:20 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:20 AM move_to
+INFO: 11/03/2020 12:38:20 AM Searching for path from (10, 10) to (0, 11)...
+INFO: 11/03/2020 12:38:20 AM Found path: [(25, 575), (75, 575), (125, 575), (175, 575), (225, 575), (275, 575), (325, 575), (375, 575), (425, 575), (475, 575)]
+INFO: 11/03/2020 12:38:21 AM Left-clicked at x:21, y: 209
+INFO: 11/03/2020 12:38:21 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:21 AM on_left_button_release, (21, 209)
+INFO: 11/03/2020 12:38:21 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:21 AM move_to
+INFO: 11/03/2020 12:38:21 AM Searching for path from (10, 10) to (0, 4)...
+INFO: 11/03/2020 12:38:21 AM Found path: [(25, 225), (75, 225), (125, 225), (175, 225), (225, 225), (275, 275), (325, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:23 AM Left-clicked at x:1187, y: 283
+INFO: 11/03/2020 12:38:23 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:23 AM on_left_button_release, (1187, 283)
+INFO: 11/03/2020 12:38:23 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:23 AM move_to
+INFO: 11/03/2020 12:38:23 AM Searching for path from (10, 10) to (23, 5)...
+INFO: 11/03/2020 12:38:23 AM Found path: [(1175, 275), (1125, 275), (1075, 275), (1025, 275), (975, 275), (925, 275), (875, 275), (825, 275), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:23 AM Left-clicked at x:1163, y: 634
+INFO: 11/03/2020 12:38:23 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:23 AM on_left_button_release, (1163, 634)
+INFO: 11/03/2020 12:38:23 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:23 AM move_to
+INFO: 11/03/2020 12:38:23 AM Searching for path from (10, 10) to (23, 12)...
+INFO: 11/03/2020 12:38:23 AM Found path: [(1175, 625), (1125, 625), (1075, 625), (1025, 625), (975, 625), (925, 625), (875, 625), (825, 625), (775, 625), (725, 625), (675, 625), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:25 AM Left-clicked at x:335, y: 784
+INFO: 11/03/2020 12:38:25 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:25 AM on_left_button_release, (335, 784)
+INFO: 11/03/2020 12:38:25 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:25 AM move_to
+INFO: 11/03/2020 12:38:25 AM Searching for path from (10, 10) to (6, 15)...
+INFO: 11/03/2020 12:38:25 AM Found path: [(325, 775), (325, 725), (375, 675), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:26 AM Left-clicked at x:21, y: 778
+INFO: 11/03/2020 12:38:26 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:26 AM on_left_button_release, (21, 778)
+INFO: 11/03/2020 12:38:26 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:26 AM move_to
+INFO: 11/03/2020 12:38:26 AM Searching for path from (10, 10) to (0, 15)...
+INFO: 11/03/2020 12:38:26 AM Found path: [(25, 775), (75, 775), (125, 775), (175, 775), (225, 775), (275, 775), (325, 725), (375, 675), (425, 625), (475, 575)]
+INFO: 11/03/2020 12:38:27 AM Left-clicked at x:22, y: 20
+INFO: 11/03/2020 12:38:27 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:27 AM on_left_button_release, (22, 20)
+INFO: 11/03/2020 12:38:27 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:27 AM move_to
+INFO: 11/03/2020 12:38:27 AM Searching for path from (10, 10) to (0, 0)...
+INFO: 11/03/2020 12:38:27 AM Found path: [(25, 25), (75, 75), (125, 125), (175, 175), (225, 225), (275, 275), (325, 325), (375, 375), (425, 425), (475, 475)]
+INFO: 11/03/2020 12:38:28 AM Left-clicked at x:1171, y: 11
+INFO: 11/03/2020 12:38:28 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:28 AM on_left_button_release, (1171, 11)
+INFO: 11/03/2020 12:38:28 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:28 AM move_to
+INFO: 11/03/2020 12:38:28 AM Searching for path from (10, 10) to (23, 0)...
+INFO: 11/03/2020 12:38:28 AM Found path: [(1175, 25), (1125, 25), (1075, 25), (1025, 25), (975, 75), (925, 125), (875, 175), (825, 225), (775, 275), (725, 325), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:32 AM Left-clicked at x:1052, y: 679
+INFO: 11/03/2020 12:38:32 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:32 AM on_left_button_release, (1052, 679)
+INFO: 11/03/2020 12:38:32 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:32 AM move_to
+INFO: 11/03/2020 12:38:32 AM Searching for path from (10, 10) to (21, 13)...
+INFO: 11/03/2020 12:38:32 AM Found path: [(1075, 675), (1025, 675), (975, 675), (925, 675), (875, 675), (825, 675), (775, 675), (725, 675), (675, 675), (625, 625), (575, 575)]
+INFO: 11/03/2020 12:38:32 AM Left-clicked at x:942, y: 361
+INFO: 11/03/2020 12:38:32 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:32 AM on_left_button_release, (940, 360)
+INFO: 11/03/2020 12:38:32 AM Closing drag-selection...
+INFO: 11/03/2020 12:38:33 AM Left-clicked at x:353, y: 269
+INFO: 11/03/2020 12:38:33 AM selected unit: set()
+INFO: 11/03/2020 12:38:33 AM on_left_button_release, (353, 269)
+INFO: 11/03/2020 12:38:34 AM Right-clicked at x:687, y: 377
+INFO: 11/03/2020 12:38:34 AM Left-clicked at x:502, y: 522
+INFO: 11/03/2020 12:38:34 AM selected unit: set()
+INFO: 11/03/2020 12:38:34 AM on_left_button_release, (502, 522)
+INFO: 11/03/2020 12:38:35 AM Left-clicked at x:200, y: 508
+INFO: 11/03/2020 12:38:35 AM selected unit: set()
+INFO: 11/03/2020 12:38:35 AM on_left_button_release, (200, 508)
+INFO: 11/03/2020 12:38:36 AM Left-clicked at x:525, y: 517
+INFO: 11/03/2020 12:38:36 AM selected unit: set()
+INFO: 11/03/2020 12:38:36 AM on_left_button_release, (525, 517)
+INFO: 11/03/2020 12:38:36 AM Clicked at: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:38:36 AM PlayerEntity: GameObject: medic_truck_red id: 1
+INFO: 11/03/2020 12:38:36 AM Left-clicked at x:515, y: 220
+INFO: 11/03/2020 12:38:36 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:36 AM on_left_button_release, (515, 220)
+INFO: 11/03/2020 12:38:36 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:36 AM move_to
+INFO: 11/03/2020 12:38:36 AM Searching for path from (10, 10) to (10, 4)...
+INFO: 11/03/2020 12:38:36 AM Found path: [(525, 225), (525, 275), (525, 325), (525, 375), (525, 425), (525, 475)]
+INFO: 11/03/2020 12:38:36 AM Left-clicked at x:992, y: 355
+INFO: 11/03/2020 12:38:36 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:36 AM on_left_button_release, (992, 355)
+INFO: 11/03/2020 12:38:36 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:36 AM move_to
+INFO: 11/03/2020 12:38:36 AM Searching for path from (10, 10) to (19, 7)...
+INFO: 11/03/2020 12:38:36 AM Found path: [(975, 375), (925, 375), (875, 375), (825, 375), (775, 375), (725, 375), (675, 375), (625, 425), (575, 475)]
+INFO: 11/03/2020 12:38:37 AM Left-clicked at x:661, y: 596
+INFO: 11/03/2020 12:38:37 AM selected unit: {GameObject: medic_truck_red id: 1}
+INFO: 11/03/2020 12:38:37 AM on_left_button_release, (661, 596)
+INFO: 11/03/2020 12:38:37 AM on_click_with_selected_units
+INFO: 11/03/2020 12:38:37 AM move_to
+INFO: 11/03/2020 12:38:37 AM Searching for path from (10, 10) to (13, 11)...
+INFO: 11/03/2020 12:38:37 AM Found path: [(675, 575), (625, 575), (575, 575)]
