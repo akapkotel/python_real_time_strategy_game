@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import heapq
-
 from typing import Iterable
 
 from arcade import SpriteList
@@ -141,23 +139,3 @@ class DividedSpriteList(SpriteList):
             return self.id_elements_dict[element_id]
         except KeyError:
             pass
-
-
-class PriorityQueue:
-    # much faster than sorting list each frame
-    def __init__(self):
-        self.elements = []
-        self._contains = set()  # my improvement, faster lookups
-
-    def __contains__(self, item) -> bool:
-        return item in self._contains
-
-    def not_empty(self) -> bool:
-        return len(self.elements) > 0
-
-    def put(self, item, priority):
-        self._contains.add(item)
-        heapq.heappush(self.elements, (priority, item))
-
-    def get(self):
-        return heapq.heappop(self.elements)[1]

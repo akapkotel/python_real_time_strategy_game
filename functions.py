@@ -1,9 +1,28 @@
 #!/usr/bin/env python
 
 from math import hypot
+from time import perf_counter
+from functools import wraps
 
 from data_types import Point, Number
 from typing import Sequence, Tuple, List, Iterable, Any
+
+
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = perf_counter()
+
+        result = func(*args, **kwargs)
+
+        end_time = perf_counter()
+        execution_time = end_time - start_time
+        fps = 1 / execution_time
+        fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
+        print(fr)
+        return result
+
+    return wrapper
 
 
 def filter_sequence(sequence: Sequence,

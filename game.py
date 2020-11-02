@@ -17,7 +17,7 @@ from functions import get_path_to_file
 from user_interface import (
     Frame, Button, CheckButton, ListBox, TextInputField
 )
-from colors import GRASS_GREEN, RED, BROWN, BLACK
+from colors import GRASS_GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
 SCREEN_WIDTH = 1200
@@ -74,7 +74,7 @@ class Window(arcade.Window, EventsCreator):
         self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
 
         # keyboard-related:
-        self.keyboard = KeyboardHandler()
+        self.keyboard = KeyboardHandler(window=self)
 
     @property
     def updated(self):
@@ -114,7 +114,7 @@ class Window(arcade.Window, EventsCreator):
         sound_submenu.set_updated_and_drawn_lists()
 
     def create_new_game(self):
-        self.game_view = Game()
+        self.game_view = Game(True)
 
     def start_new_game(self):
         if self.game_view is not None:
@@ -124,7 +124,6 @@ class Window(arcade.Window, EventsCreator):
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
-            print(f'Pointed unit: {self.cursor.pointed_unit}')
         self.events_scheduler.update()
 
     def on_draw(self):
@@ -144,7 +143,7 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.cursor.active:
             self.cursor.on_mouse_press(x, y, button, modifiers)
-            self.toggle_view()  # TODO: replace with interface interaction
+            # self.toggle_view()  # TODO: replace with interface interaction
 
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
@@ -207,10 +206,12 @@ def spawn_test_player() -> Player:
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
-    def __init__(self):
+    def __init__(self, debug=False):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         self.assign_reference_to_self_for_all_classes()
+
+        self.paused = False
 
         # SpriteLists:
         self.interface = arcade.SpriteList()
@@ -218,6 +219,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.buildings = DividedSpriteList()
 
         self.fog_of_war = FogOfWar()
+        self.map = Map()
 
         self.set_updated_and_drawn_lists()
 
@@ -230,6 +232,11 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
         self.missions: Dict[int, Mission] = {}
         self.curent_mission: Optional[Mission] = None
+
+        self.debug = debug
+        self.debugged = []
+        if debug:
+            self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
 
@@ -307,6 +314,81 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def get_notified(self, *args, **kwargs):
         pass
 
+    def on_update(self, delta_time: float):
+        if not self.paused:
+            super().on_update(delta_time)
+
+    def on_draw(self):
+        super().on_draw()
+        if self.debug:
+            self.debug_map_grid()
+            self.debug_mouse_pointed_nodes()
+            self.debug_debugged()
+
+    def debug_map_grid(self):
+        self.map_grid.draw()
+
+    def debug_mouse_pointed_nodes(self):
+        position = self.window.cursor.position
+        node = self.map.position_to_node(*position)
+
+        normalised_pos = self.map.grid_to_position(node.grid)
+        arcade.draw_circle_outline(*normalised_pos, 10, WHITE, 2)
+
+        adjacent = 0
+        for adj in node.adjacent_nodes:
+            adjacent += 1
+            arcade.draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
+                                         TILE_HEIGHT, (255, 255, 255, 25))
+            arcade.draw_circle_outline(*adj.position, 5, WHITE, 1)
+
+        distance = self.heuristic((0, 0), node.grid)
+
+        text = f'{str(adjacent)},          Node: {node}, distance: {distance}'
+        arcade.draw_text(text, 10, 10, RED)
+
+    def debug_debugged(self):
+        for element in self.debugged:
+            if element[0] == PATH:
+                self.debug_path(element[1])
+
+    def debug_path(self, path: List):
+        for i, point in enumerate(path):
+            try:
+                end = path[i + 1]
+                arcade.draw_line(*point, *end, RED, 2)
+            except IndexError:
+                pass
+
+    def toggle_pause(self):
+        self.paused = not self.paused
+
+
+    @staticmethod
+    def heuristic(point, destination):
+        from math import hypot
+        return hypot(destination[0] - point[0], destination[1] - point[1])
+
+    path = []
+
+    def create_map_debug_grid(self) -> arcade.ShapeElementList:
+        grid = arcade.ShapeElementList()
+        for i, row in enumerate(self.map.nodes):
+            y = i * TILE_HEIGHT
+            h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
+            grid.append(h_line)
+            y = i * TILE_HEIGHT + TILE_HEIGHT // 2
+            h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
+            grid.append(h2_line)
+            for j, column in enumerate(row):
+                x = j * TILE_WIDTH
+                v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
+                grid.append(v_line)
+                x = j * TILE_WIDTH + TILE_WIDTH // 2
+                v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
+                grid.append(v2_line)
+        return grid
+
 
 if __name__ == '__main__':
     from player import Faction, Player, PlayerEntity
@@ -316,6 +398,7 @@ if __name__ == '__main__':
     from fog_of_war import FogOfWar
     from buildings import Building
     from missions import Mission
+    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()

@@ -38,8 +38,12 @@ class Hierarchical:
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, *children: Hierarchical):
+        self._children.update(children)
+
     def add_child(self, child: Hierarchical):
-        print(child)
+        print(f'Added new child: {child}')
         if self._children is None:
             self._children = set()
         self._children.add(child)

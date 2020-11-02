@@ -7,12 +7,11 @@ from arcade import (
     get_sprites_at_point
 )
 
-from gameobject import GameObject, get_gameobjects_at_position
-from scheduling import EventsCreator, log
-from data_containers import DividedSpriteList
-from functions import first_object_of_type
-from colors import GREEN, CLEAR_GREEN
 from user_interface import ToggledElement, UiElement, CursorInteractive
+from data_containers import DividedSpriteList
+from scheduling import EventsCreator, log
+from colors import GREEN, CLEAR_GREEN
+from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
 from game import Game, Menu
@@ -55,6 +54,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
         self.selected_units: Set[Unit] = set()
+        self.selected_building: Optional[Building] = None
 
         self.menu = self.window.menu_view
 
@@ -76,23 +76,61 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
-            self.on_left_click(x, y, modifiers)
+            self.on_left_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
-            self.on_right_click(x, y, modifiers)
+            self.on_right_button_click(x, y, modifiers)
 
-    def on_left_click(self, x: float, y: float, modifiers: int):
-        if self.pointed_gameobject or self.pointed_ui_element:
-            log(f'Left-clicked at x:{x}, y: {y}')
-            log(f'Clicked at {self.pointed_gameobject, self.pointed_ui_element}')
+    def on_left_button_click(self, x: float, y: float, modifiers: int):
+        log(f'Left-clicked at x:{x}, y: {y}')
 
-    def on_right_click(self, x: float, y: float, modifiers: int):
+    def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
+        self.selected_units.clear()
         # TODO: clearing selections, context menu?
 
-    def on_mouse_release(self, x: float, y: float, button: int,
-                         modifiers: int):
-        # TODO: closing MouseSelection
+    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
+        if button is MOUSE_BUTTON_LEFT:
+            self.on_left_button_release(x, y, modifiers)
+        elif button is MOUSE_BUTTON_RIGHT:
+            self.on_right_button_release(x, y, modifiers)
+
+    def on_left_button_release(self, x: float, y: float, modifiers: int):
+        if self.mouse_drag_selection is not None:
+            # TODO: closing MouseSelection
+            pass
+        elif self.selected_units:
+            self.on_click_with_selected_units(x, y, modifiers)
+        elif (gameobject := self.pointed_gameobject) is not None:
+            self.on_gameobject_clicked(gameobject)
+
+    def on_right_button_release(self, x: float, y: float, modifiers: int):
         pass
+
+    def on_gameobject_clicked(self, clicked: GameObject):
+        log(f'Clicked at: {clicked}')
+        if isinstance(clicked, PlayerEntity):
+            self.on_player_entity_clicked(clicked)
+
+    def on_click_with_selected_units(self, x, y, modifiers):
+        for unit in self.selected_units:
+            destination = self.game.map.position_to_grid(x, y)
+            unit.find_path(destination)
+
+    def on_player_entity_clicked(self, clicked: PlayerEntity):
+        log(f'PlayerEntity: {clicked}')
+        clicked: Union[Unit, Building]
+        if self.pointed_unit is not None:
+            self.on_unit_clicked(clicked)
+        else:
+            self.on_building_clicked(clicked)
+
+    def on_unit_clicked(self, clicked_unit: Unit):
+        # if clicked_unit in self.game.local_human_player.units:
+        self.selected_units.add(clicked_unit)
+
+    def on_building_clicked(self, clicked_building: Building):
+        if clicked_building in self.game.local_human_player.buildings:
+            self.selected_building = clicked_building
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -121,6 +159,9 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
                 self.pointed_gameobject = pointed
         else:
             self.pointed_gameobject = self.pointed_ui_element = None
+        if self.game is not None and self.game.is_running:
+            print(f'Pointede: {self.pointed_gameobject}')
+            print(f'Selected: {self.selected_units}')
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[GameObject, UiElement]]:
         # Since we have many spritelists which are drawn in some
@@ -179,8 +220,6 @@ class MouseDragSelection:
 
         :param x: float -- x coordinate of selection starting corner
         :param y: float -- y coordinate of selection starting corner
-        :param game_instance: arcade.Window reference
-        :type game_instance: Game
         """
         self.start = (x, y)
         self.end = (x, y)

@@ -1,10 +1,1 @@
-INFO: 11/02/2020 12:01:16 AM FogOfWar created. Fog objects: 2
-INFO: 11/02/2020 12:01:37 AM Left-clicked at x:490, y: 508
-INFO: 11/02/2020 12:01:37 AM Clicked at (GameObject: medic_truck_red id: 1, None)
-INFO: 11/02/2020 12:01:39 AM FogOfWar created. Fog objects: 2
-INFO: 11/02/2020 12:01:41 AM Right-clicked at x:742, y: 320
-INFO: 11/02/2020 12:01:41 AM Right-clicked at x:745, y: 329
-INFO: 11/02/2020 12:01:41 AM FogOfWar created. Fog objects: 2
-INFO: 11/02/2020 12:01:43 AM Right-clicked at x:808, y: 328
-INFO: 11/02/2020 12:01:44 AM Right-clicked at x:940, y: 180
-INFO: 11/02/2020 12:01:44 AM FogOfWar created. Fog objects: 2
+INFO: 11/02/2020 08:17:21 PM Pressed key: 65307, all pressed keys: {65307}

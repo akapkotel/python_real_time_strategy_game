@@ -9,8 +9,8 @@ from game import Game
 
 from functions import average_position_of_points_group
 from player import PlayerEntity, Player
-
 from enums import UnitWeight
+from scheduling import log
 
 
 class PermanentUnitsGroup:
@@ -36,6 +36,8 @@ class PermanentUnitsGroup:
 
 class Unit(PlayerEntity, StateMachine):
     """Unit is a PlayerEntity which can move on map."""
+    pathfinder: Optional[Pathfinder] = None
+
     # finite-state-machine states:
     idle = State('idle', 0, initial=True)
     moving = State('move', 1)
@@ -54,5 +56,22 @@ class Unit(PlayerEntity, StateMachine):
         PlayerEntity.__init__(self, unit_name, player=player, position=position)
         StateMachine.__init__(self)
 
+        if Unit.pathfinder is None:
+            Unit.pathfinder = Pathfinder()
+
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
+
+        self.position = self.game.map.normalize_position(*self.position)
+        self.current_node = self.game.map.position_to_node(*self.position)
+
+    def find_path(self, destination: GridPosition):
+        start = self.current_node.grid
+        path = self.pathfinder.find_path(start, destination)
+        self.game.debugged.clear()
+        self.game.debugged.append([PATH, path])
+        log(f'Found path: {path}')
+
+
+if __name__:
+    from map import Pathfinder, GridPosition, PATH

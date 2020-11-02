@@ -15,7 +15,7 @@ class OwnedObject:
     """
 
     def __init__(self, owners=False):
-        """
+        """-
         :param owners: bool : default: False. Change it to True if you want
         this OwnedObjects to use default Set[ObjectsOwner] to keep track of
         the objects owning this instance. If implementing your own collection,
