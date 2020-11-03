@@ -5,7 +5,7 @@ from typing import Optional, List, Set, Tuple, Dict
 
 from arcade import load_texture
 
-from functions import get_path_to_file, get_enemies
+from utils.functions import get_path_to_file, get_enemies
 from scheduling import log
 from player import Player, CpuPlayer
 from map import Map

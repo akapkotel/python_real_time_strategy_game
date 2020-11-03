@@ -5,13 +5,11 @@ from typing import Set, Optional, Sequence
 from arcade.arcade_types import Point
 from statemachine import State, StateMachine
 
-from game import Game
-
-from functions import average_position_of_points_group
+from utils.functions import average_position_of_points_group, log
 from map import Pathfinder, GridPosition, PATH
 from player import PlayerEntity, Player
 from enums import UnitWeight
-from scheduling import log
+from game import Game
 
 
 class PermanentUnitsGroup:
@@ -63,6 +61,10 @@ class Unit(PlayerEntity, Pathfinder, StateMachine):
         self.position = self.game.map.normalize_position(*self.position)
         self.current_node = self.game.map.position_to_node(*self.position)
 
+    @property
+    def selectable(self) -> bool:
+        return self.player is self.game.local_human_player
+
     def move_to(self, destination: GridPosition):
         log(f'move_to')
         if (start := self.current_node.grid) == destination:
@@ -71,7 +73,7 @@ class Unit(PlayerEntity, Pathfinder, StateMachine):
             path = self.find_path(start, destination)
             self.game.debugged.clear()
             self.game.debugged.append([PATH, path])
-            log(f'Found path: {path}')
+            log(f'{self} found path to {destination}, path: {path}')
 
 
 if __name__:

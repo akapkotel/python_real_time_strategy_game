@@ -6,7 +6,7 @@ from arcade import Window
 from arcade.key import *
 
 from user_interface import ToggledElement
-from scheduling import log
+from utils.functions import log
 
 
 class KeyboardHandler(ToggledElement):

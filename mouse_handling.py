@@ -3,18 +3,19 @@
 from typing import Optional, Set, List, Union
 from arcade import (
     Window, Sprite, SpriteList, draw_lrtb_rectangle_filled,
-    draw_lrtb_rectangle_outline, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT,
-    get_sprites_at_point
+    draw_lrtb_rectangle_outline, get_sprites_at_point,
+    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE,
 )
 
 from user_interface import ToggledElement, UiElement, CursorInteractive
 from data_containers import DividedSpriteList
-from scheduling import EventsCreator, log
 from colors import GREEN, CLEAR_GREEN
-from gameobject import GameObject, get_gameobjects_at_position
+from scheduling import EventsCreator
+from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
 from game import Game, Menu
+from utils.functions import log
 from units import Unit
 
 
@@ -63,6 +64,9 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
 
         self.last_selected = False
 
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}'
+
     @property
     def updated_spritelists(self):
         return self._updated_spritelists
@@ -77,20 +81,25 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         self.position = x, y
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        # x, y = self.game.map.normalize_position(x, y)
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
             self.on_right_button_click(x, y, modifiers)
+        elif button is MOUSE_BUTTON_MIDDLE:
+            self.on_middle_button_click(x, y, modifiers)
+        else:
+            log(f'Unassigned mouse-button clicked: {button}')
 
     def on_left_button_click(self, x: float, y: float, modifiers: int):
         log(f'Left-clicked at x:{x}, y: {y}')
-        log(f'selected unit: {self.selected_units}')
 
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
         self.selected_units.clear()
         # TODO: clearing selections, context menu?
+
+    def on_middle_button_click(self, x: float, y: float, modifiers: int):
+        log(f'Middle-clicked at x:{x}, y: {y}')
 
     def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
@@ -99,7 +108,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
-        log(f'on_left_button_release, {x, y}')
+        log(f'MouseCursor.on_left_button_release, position: {x, y}')
         if self.mouse_drag_selection is None:
             if self.selected_units:
                 self.on_click_with_selected_units(x, y, modifiers)
@@ -109,7 +118,6 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.close_drag_selection()
 
     def close_drag_selection(self):
-        log(f'Closing drag-selection...')
         self.selected_units = self.mouse_drag_selection.units
         self.mouse_drag_selection = None
 
@@ -122,13 +130,13 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.on_player_entity_clicked(clicked)
 
     def on_click_with_selected_units(self, x, y, modifiers):
-        log(f'on_click_with_selected_units')
+        log(f'Called: on_click_with_selected_units')
         for unit in self.selected_units:
             destination = self.game.map.position_to_grid(x, y)
             unit.move_to(destination)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        log(f'PlayerEntity: {clicked}')
+        log(f'Clicked PlayerEntity: {clicked}')
         clicked: Union[Unit, Building]
         if self.pointed_unit is not None:
             self.on_unit_clicked(clicked)
@@ -136,21 +144,22 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.on_building_clicked(clicked)
 
     def on_unit_clicked(self, clicked_unit: Unit):
-        # if clicked_unit in self.game.local_human_player.units:
-        self.selected_units.add(clicked_unit)
+        if clicked_unit.selectable:
+            self.selected_units.clear()
+            self.selected_units.add(clicked_unit)
 
     def on_building_clicked(self, clicked_building: Building):
-        if clicked_building in self.game.local_human_player.buildings:
+        if clicked_building.selectable:
             self.selected_building = clicked_building
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
-        self.on_mouse_motion(x, y, dx, dy)
-        # TODO: dragging selections logic
-        if self.mouse_drag_selection is not None:
-            self.mouse_drag_selection.update(x, y)
-        else:
-            self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
+        if self.game.map.on_map_area(x, y):
+            self.on_mouse_motion(x, y, dx, dy)
+            if self.mouse_drag_selection is not None:
+                self.mouse_drag_selection.update(x, y)
+            else:
+                self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # TODO
@@ -176,9 +185,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         # be mouse-pointed (it lies on the top)
         if (pointed_sprite := self.dragged_ui_element) is None:
             for drawn in reversed(self._updated_spritelists):
-                if not (pointed_sprite := self.cursor_points(drawn, x, y)):
-                    continue
-                else:
+                if pointed_sprite := self.cursor_points(drawn, x, y):
                     break
             else:
                 return

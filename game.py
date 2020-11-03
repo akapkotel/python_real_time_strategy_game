@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import logging
 import arcade
 
 from typing import (
     List, Dict, Any, Optional, Union
 )
+from arcade import draw_line, draw_circle_outline, draw_rectangle_filled
 from arcade.arcade_types import Color
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
 from data_containers import DividedSpriteList
 from views import WindowView, LoadingScreen
-from functions import get_path_to_file
+from utils.functions import get_path_to_file, log
 from user_interface import (
-    Frame, Button, CheckButton, ListBox, TextInputField
+    Button, CheckButton, TextInputField
 )
 from colors import GRASS_GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
@@ -27,18 +27,8 @@ UPDATE_RATE = 1 / 30
 SpriteList = arcade.SpriteList
 
 
-logging.basicConfig(
-    filename='resources/logfile.txt',
-    filemode='w',
-    level=logging.INFO,
-    format='%(levelname)s: %(asctime)s %(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p'
-)
-
-
-def spawn_test_unit(player: Player) -> Unit:
+def spawn_test_unit(position, player: Player) -> Unit:
     unit_name = get_path_to_file('medic_truck_red.png')
-    position = 500, 500
     return Unit(unit_name, player, UnitWeight.LIGHT, position)
 
 
@@ -197,6 +187,10 @@ class Window(arcade.Window, EventsCreator):
     def load_game(self):
         raise NotImplementedError
 
+    def close(self):
+        log(f'Terminating application...', 1)
+        super().close()
+
 
 def spawn_test_player() -> Player:
     # TODO: remove it when spawning eal Player instances is done
@@ -226,16 +220,22 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
-        self.players: Dict[int, Player] = {2: Player(2)}
-        self.local_human_player: Optional[Player] = self.players[2]  # TODO
+        # Units belongs to the Players, Players belongs to the Factions, which
+        # are updated each frame to evaluate AI, enemies-visibility, etc.
         self.factions: Dict[int, Faction] = {}
+        self.players: Dict[int, Player] = {}
+        faction = Faction(name='Freemen')
+        player = Player(id=2, faction=faction, cpu=False)
+        cpu_player = CpuPlayer()
+        self.local_human_player: Optional[Player] = player
+        self.factions[2].start_war(self.factions[4])
 
         self.missions: Dict[int, Mission] = {}
         self.curent_mission: Optional[Mission] = None
 
-        self.debug = debug
-        self.debugged = []
         if debug:
+            self.debug = debug
+            self.debugged = []
             self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
@@ -254,14 +254,28 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def test_methods(self):
         # self.test_scheduling_events()
         self.test_units_spawning()
+        self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 1, self.scheduling_test, repeat=True)
         self.schedule_event(event)
 
     def test_units_spawning(self):
-        unit = spawn_test_unit(player=self.local_human_player)
-        self.units.append(unit)
+        position = 500, 500
+        player_unit = spawn_test_unit(position, player=self.players[2])
+        position = 600, 600
+        cpu_unit = spawn_test_unit(position, player=self.players[4])
+        self.units.extend({player_unit, cpu_unit})
+
+    def test_buildings_spawning(self):
+
+        building = Building(
+            get_path_to_file('medic_truck_red.png'),
+            self.players[2],
+            (400, 600),
+            produces=Unit
+        )
+        self.buildings.append(building)
 
     def load_player_configs(self) -> Dict[str, Any]:
         configs: Dict[str, Any] = {}
@@ -287,9 +301,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def register_player_or_faction(self, registered: Union[Player, Faction]):
         if isinstance(registered, Player):
-            self.players[len(self.players)] = registered
+            self.players[registered.id] = registered
         else:
-            self.factions[len(self.factions)] = registered
+            self.factions[registered.id] = registered
 
     def unregister(self, owned: OwnedObject):
         owned: Union[PlayerEntity, Player, Faction]
@@ -317,99 +331,87 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def on_update(self, delta_time: float):
         if not self.paused:
             super().on_update(delta_time)
+            self.update_factions_and_players()
+
+    def update_factions_and_players(self):
+        for faction in self.factions.values():
+            faction.update()
 
     def on_draw(self):
-        super().on_draw()
         if self.debug:
-            self.debug_map_grid()
-            self.debug_mouse_pointed_nodes()
-            self.debug_debugged()
+            self.draw_debugging()
+        super().on_draw()
         if (selection := self.window.cursor.mouse_drag_selection) is not None:
             selection.draw()
 
-    def debug_map_grid(self):
+    def draw_debugging(self):
+        if self.map_grid is None:
+            self.map_grid = self.create_map_debug_grid()
+        self.draw_debugged_map_grid()
+        self.draw_debugged_mouse_pointed_nodes()
+        self.draw_debugged()
+
+    def draw_debugged_map_grid(self):
         self.map_grid.draw()
 
-    def debug_mouse_pointed_nodes(self):
+    def draw_debugged_mouse_pointed_nodes(self):
         position = self.map.normalize_position(*self.window.cursor.position)
         node = self.map.position_to_node(*position)
 
-        arcade.draw_circle_outline(node.x, node.y, 10, WHITE, 2)
-        # position = self.window.cursor.position
-        # node = self.map.position_to_node(*position)
-        #
-        # normalised_pos = self.map.grid_to_position(node.grid)
-        # arcade.draw_circle_outline(*normalised_pos, 10, WHITE, 2)
-        #
-        # adjacent = 0
-        # for adj in node.adjacent_nodes:
-        #     adjacent += 1
-        #     arcade.draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
-        #                                  TILE_HEIGHT, (255, 255, 255, 25))
-        #     arcade.draw_circle_outline(*adj.position, 5, WHITE, 1)
-        #
-        # distance = self.heuristic((0, 0), node.grid)
-        #
-        # text = f'{str(adjacent)},          Node: {node}, distance: {distance}'
-        # arcade.draw_text(text, 10, 10, RED)
+        draw_circle_outline(node.x, node.y, 10, WHITE, 2)
 
-    def debug_debugged(self):
-        for element in self.debugged:
-            if element[0] == PATH:
-                self.debug_path(element[1])
+        for adj in node.adjacent_nodes:
+            draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
+                                         TILE_HEIGHT, (255, 255, 255, 25))
+            draw_circle_outline(*adj.position, 5, WHITE, 1)
 
-    def debug_path(self, path: List):
-        for i, point in enumerate(path):
-            try:
-                end = path[i + 1]
-                arcade.draw_line(*point, *end, RED, 2)
-            except IndexError:
-                pass
+    def draw_debugged(self):
+        paths = [element[1] for element in self.debugged if element[0] == PATH]
+        self.draw_debug_paths(paths)
+
+    @staticmethod
+    def draw_debug_paths(paths: List[List[GridPosition]]):
+        for path in paths:
+            for i, point in enumerate(path):
+                try:
+                    end = path[i + 1]
+                    draw_line(*point, *end, RED, 2)
+                except IndexError:
+                    pass
 
     def toggle_pause(self):
         self.paused = not self.paused
 
-
-    @staticmethod
-    def heuristic(point, destination):
-        from math import hypot
-        return hypot(destination[0] - point[0], destination[1] - point[1])
-
-    path = []
-
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()
 
-        # for i in range(self.map.rows):
-        #     for j in range(self.map.columns):
-        #         pass
-
-        # for i, row in enumerate(self.map.nodes):
-        #     y = i * TILE_HEIGHT
-        #     h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
-        #     grid.append(h_line)
-        #     y = i * TILE_HEIGHT + TILE_HEIGHT // 2
-        #     h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
-        #     grid.append(h2_line)
-        #     for j, column in enumerate(row):
-        #         x = j * TILE_WIDTH
-        #         v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
-        #         grid.append(v_line)
-        #         x = j * TILE_WIDTH + TILE_WIDTH // 2
-        #         v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
-        #         grid.append(v2_line)
+        for i in range(self.map.rows):
+            y = i * TILE_HEIGHT
+            h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
+            grid.append(h_line)
+            y = i * TILE_HEIGHT + TILE_HEIGHT // 2
+            h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
+            grid.append(h2_line)
+        for j in range(self.map.columns):
+            x = j * TILE_WIDTH
+            v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
+            grid.append(v_line)
+            x = j * TILE_WIDTH + TILE_WIDTH // 2
+            v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
+            grid.append(v2_line)
         return grid
 
 
 if __name__ == '__main__':
-    from player import Faction, Player, PlayerEntity
+    # these imports are placed here to avoid circular-imports issue:
+    from player import Faction, Player, CpuPlayer, PlayerEntity
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
     from buildings import Building
     from missions import Mission
-    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map
+    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map, GridPosition
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()

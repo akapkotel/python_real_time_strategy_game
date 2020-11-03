@@ -76,6 +76,9 @@ class DividedSpriteList(SpriteList):
         self.drawn = SpriteList(is_static)
         self.alive_ids = set()
 
+    def __repr__(self) -> str:
+        return f'DividedSpriteList, contains: {self.id_elements_dict}'
+
     def __getitem__(self, item):
         return self.updated[item]
 

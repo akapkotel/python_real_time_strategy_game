@@ -6,7 +6,7 @@ from arcade import (
 )
 
 
-from functions import get_attributes_with_attribute
+from utils.functions import get_attributes_with_attribute, log
 from data_containers import DividedSpriteList
 from colors import WHITE, GREEN
 
@@ -38,6 +38,7 @@ class WindowView(View):
         self.updated = get_attributes_with_attribute(self, 'update', ignored)
 
     def on_show_view(self):
+        log(f'Switched to WindowView: {self.__class__.__name__}')
         self.window.updated = self.updated
         self.window.drawn = self.drawn
 

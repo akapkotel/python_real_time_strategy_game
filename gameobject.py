@@ -10,7 +10,7 @@ from typing import Any, Optional, List, Set
 
 from data_containers import DividedSpriteList
 from enums import UnitWeight, Robustness
-from functions import get_object_name, filter_sequence
+from utils.functions import get_object_name, filter_sequence
 from observers import OwnedObject
 
 
@@ -27,8 +27,8 @@ def get_gameobjects_at_position(position: Point,
 
 class GameObject(AnimatedTimeBasedSprite, OwnedObject):
     """
-    Inherit from this class instead of arcade.Sprite to implement some useful
-    methods.
+    GameObject represents all in-game objects, like units, buildings,
+    terrain props, trees etc.
     """
     total_objects_count = 0
 

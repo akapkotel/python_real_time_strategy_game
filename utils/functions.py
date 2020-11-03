@@ -1,11 +1,30 @@
 #!/usr/bin/env python
 
+import logging
+
 from math import hypot
 from time import perf_counter
 from functools import wraps
 
 from data_types import Point, Number
 from typing import Sequence, Tuple, List, Iterable, Any
+
+
+logging.basicConfig(
+    filename='resources/logfile.txt',
+    filemode='w',
+    level=logging.INFO,
+    format='%(levelname)s: %(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p'
+)
+
+
+def log(logged_message: str, console=False):
+    if console:
+        print(logged_message)
+        logging.warning(logged_message)
+    else:
+        logging.info(logged_message)
 
 
 def timer(func):
@@ -19,7 +38,7 @@ def timer(func):
         execution_time = end_time - start_time
         fps = 1 / execution_time
         fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
-        print(fr)
+        log(fr, console=True)
         return result
 
     return wrapper
@@ -117,7 +136,7 @@ def get_enemies(war: int) -> Tuple[int, int]:
     index = 8589934592  # 2 to power of 32
     while index > 2:
         if war < index:
-            index = index // 2
+            index = index >> 1
         else:
             break
     return index, war - index

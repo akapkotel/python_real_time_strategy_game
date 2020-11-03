@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 from __future__ import annotations
-import logging
 import numpy as np
 from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
-
-def log(logged_message: str):
-    print(logged_message)
-    logging.info(logged_message)
+from utils.functions import log
 
 
 @dataclass
