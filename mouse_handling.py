@@ -3,7 +3,7 @@
 from typing import Optional, Set, List, Union
 from arcade import (
     Window, Sprite, SpriteList, draw_lrtb_rectangle_filled,
-    draw_lrtb_rectangle_outline, get_sprites_at_point,
+    draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture,
     MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE,
 )
 
@@ -15,7 +15,7 @@ from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
 from game import Game, Menu
-from utils.functions import log
+from utils.functions import log, get_path_to_file
 from units import Unit
 
 
@@ -38,6 +38,8 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         ToggledElement.__init__(self, active=False, visible=False)
         EventsCreator.__init__(self)
         self.window = window
+
+        self.load_textures()
 
         # cache currently updated and drawn spritelists of the active View:
         self._updated_spritelists: List[DrawnAndUpdated] = []
@@ -62,10 +64,13 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
 
-        self.last_selected = False
-
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}'
+
+    def load_textures(self):
+        self.textures.extend([
+            load_texture(get_path_to_file('forbidden.png'))
+        ])
 
     @property
     def updated_spritelists(self):
@@ -166,6 +171,11 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         raise NotImplementedError
 
     def update(self):
+        super().update()
+        self.update_cursor_pointed()
+        self.update_cursor_texture()
+
+    def update_cursor_pointed(self):
         """
         Search all Spritelists and DividedSpriteLists for any UiElements or
         GameObjects placed at the MouseCursor position.
@@ -209,6 +219,28 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         if pointed is not None:
             pointed.on_mouse_enter()
         self.pointed_ui_element = pointed
+
+    def update_cursor_texture(self):
+        if self.is_game_loaded_and_running:
+            if self.selected_units:
+                self.cursor_with_units_selected()
+            elif (gameobject := self.pointed_gameobject) is not None:
+                self.cursor_on_pointing_at_entity(gameobject)
+
+    def cursor_with_units_selected(self):
+        map = self.game.map
+        if not map.node(map.position_to_grid(*self.position)).walkable:
+            self.set_texture(1)
+        else:
+            self.set_texture(0)
+
+    def cursor_on_pointing_at_entity(self, pointed_gameobject: GameObject):
+        # TODO
+        pass
+
+    @property
+    def is_game_loaded_and_running(self) -> bool:
+        return self.game is not None and self.game.is_running
 
     @property
     def pointed_unit(self) -> Optional[Unit]:

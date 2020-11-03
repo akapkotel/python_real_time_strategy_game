@@ -6,14 +6,16 @@ import arcade
 from typing import (
     List, Dict, Any, Optional, Union
 )
-from arcade import draw_line, draw_circle_outline, draw_rectangle_filled
+from arcade import (
+    draw_line, draw_circle_outline, draw_rectangle_filled, create_line
+)
 from arcade.arcade_types import Color
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
 from data_containers import DividedSpriteList
 from views import WindowView, LoadingScreen
-from utils.functions import get_path_to_file, log
+from utils.functions import get_path_to_file, log, to_rgba
 from user_interface import (
     Button, CheckButton, TextInputField
 )
@@ -30,14 +32,6 @@ SpriteList = arcade.SpriteList
 def spawn_test_unit(position, player: Player) -> Unit:
     unit_name = get_path_to_file('medic_truck_red.png')
     return Unit(unit_name, player, UnitWeight.LIGHT, position)
-
-
-def test_scheduling_with_function():
-    print("Executed test unbound function")
-
-
-def test_scheduling_with_with_args(x):
-    print(f'Executed unbound function with argument: {x}')
 
 
 class Window(arcade.Window, EventsCreator):
@@ -252,12 +246,12 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.window.background_color = GRASS_GREEN
 
     def test_methods(self):
-        # self.test_scheduling_events()
+        self.test_scheduling_events()
         self.test_units_spawning()
         self.test_buildings_spawning()
 
     def test_scheduling_events(self):
-        event = ScheduledEvent(self, 1, self.scheduling_test, repeat=True)
+        event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
         self.schedule_event(event)
 
     def test_units_spawning(self):
@@ -358,11 +352,12 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         position = self.map.normalize_position(*self.window.cursor.position)
         node = self.map.position_to_node(*position)
 
-        draw_circle_outline(node.x, node.y, 10, WHITE, 2)
+        draw_circle_outline(node.x, node.y, 10, RED, 2)
 
-        for adj in node.adjacent_nodes:
+        for adj in node.adjacent_nodes + [node]:
+            color = to_rgba(WHITE, 25) if adj.walkable else to_rgba(RED, 25)
             draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
-                                         TILE_HEIGHT, (255, 255, 255, 25))
+                                         TILE_HEIGHT, color)
             draw_circle_outline(*adj.position, 5, WHITE, 1)
 
     def draw_debugged(self):
@@ -387,17 +382,17 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
         for i in range(self.map.rows):
             y = i * TILE_HEIGHT
-            h_line = arcade.create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
+            h_line = create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
             grid.append(h_line)
             y = i * TILE_HEIGHT + TILE_HEIGHT // 2
-            h2_line = arcade.create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
+            h2_line = create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
             grid.append(h2_line)
         for j in range(self.map.columns):
             x = j * TILE_WIDTH
-            v_line = arcade.create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
+            v_line = create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
             grid.append(v_line)
             x = j * TILE_WIDTH + TILE_WIDTH // 2
-            v2_line = arcade.create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
+            v2_line = create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
             grid.append(v2_line)
         return grid
 

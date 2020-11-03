@@ -43,7 +43,7 @@ class Unit(PlayerEntity, Pathfinder, StateMachine):
 
     # transitions:
     start_patrol = idle.to(patrolling) | moving.to(patrolling)
-    move = idle.to(moving) | patrolling.to(moving)
+    move = idle.to(moving) | patrolling.to(moving) | moving.to(moving)
     stop = patrolling.to(idle) | moving.to(idle)
 
     def __init__(self,
@@ -60,20 +60,24 @@ class Unit(PlayerEntity, Pathfinder, StateMachine):
 
         self.position = self.game.map.normalize_position(*self.position)
         self.current_node = self.game.map.position_to_node(*self.position)
+        self.current_node.walkable = False
 
     @property
     def selectable(self) -> bool:
         return self.player is self.game.local_human_player
 
     def move_to(self, destination: GridPosition):
-        log(f'move_to')
-        if (start := self.current_node.grid) == destination:
+        start = self.current_node.grid
+        if start == destination or not self.map.node(destination).walkable:
             return
-        else:
-            path = self.find_path(start, destination)
-            self.game.debugged.clear()
-            self.game.debugged.append([PATH, path])
-            log(f'{self} found path to {destination}, path: {path}')
+        self.move()
+        path = self.find_path(start, destination)
+        if self.game.debug: self.debug_found_path(path, destination)
+
+    def debug_found_path(self, path, destination):
+        self.game.debugged.clear()
+        self.game.debugged.append([PATH, path])
+        log(f'{self} found path to {destination}, path: {path}')
 
 
 if __name__:

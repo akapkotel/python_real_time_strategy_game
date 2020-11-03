@@ -6,6 +6,8 @@ from math import hypot
 from time import perf_counter
 from functools import wraps
 
+from arcade.arcade_types import RGB, RGBA
+
 from data_types import Point, Number
 from typing import Sequence, Tuple, List, Iterable, Any
 
@@ -140,3 +142,7 @@ def get_enemies(war: int) -> Tuple[int, int]:
         else:
             break
     return index, war - index
+
+
+def to_rgba(color: RGB, alpha: int) -> RGBA:
+    return color[0], color[1], color[2], alpha

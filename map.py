@@ -12,8 +12,8 @@ from utils.functions import timer, log
 
 
 PATH = 'PATH'
-TILE_WIDTH = 50
-TILE_HEIGHT = 50
+TILE_WIDTH = 60
+TILE_HEIGHT = 60
 
 # typing aliases:
 GridPosition = SectorId = NormalizedPoint = Tuple[int, int]
@@ -222,7 +222,6 @@ class Pathfinder:
             if current == end:
                 log(f'Path found! Unexplored: {len(unexplored)}')
                 return self.reconstruct_path(map_nodes, previous, current)
-
             node = map_nodes[current]
             for adj in (a for a in node.walkable_adjacent if a.grid not in unexplored):
                 total = cost_so_far[current] + adj.costs[current] < cost_so_far[adj.grid]
@@ -230,7 +229,6 @@ class Pathfinder:
                     previous[adj.grid] = current
                     cost_so_far[adj] = total
                     priority = total + heuristic(adj.grid, end)
-                    # explored.add(current)
                     put_to_unexplored(adj.grid, priority)
         log(f'Searching failed! Unexplored: {len(unexplored)}', console=True)
         return []
@@ -247,7 +245,7 @@ class Pathfinder:
         while current_node in previous_nodes.keys():
             current_node = previous_nodes[current_node]
             path.append(map_nodes[current_node])
-        return self.nodes_list_to_path(path[:-1])
+        return self.nodes_list_to_path(path[::-1])
 
     @staticmethod
     def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:

@@ -14,7 +14,8 @@ class ScheduledEvent:
     function: Callable
     args: Tuple[Any] = ()
     kwargs: Optional[Dict] = field(default_factory=dict)
-    repeat: bool = False
+    repeat: int = 0
+    infinite: bool = False
     frames_left: Optional[int] = None
 
     def __repr__(self):
@@ -68,6 +69,8 @@ class EventsScheduler:
                 log(f'Executed event: {event}')
                 if event.repeat:
                     self.schedule(event)
+                    if not event.infinite:
+                        event.repeat -= 1
 
     def frames_left_to_event_execution(self, event: ScheduledEvent) -> int:
         index = self.scheduled_events.index(event)
@@ -112,7 +115,8 @@ class EventsCreator:
              'self': 'self' if hasattr(event.function, '__self__') else None,
              'args': event.args,
              'kwargs': event.kwargs,
-             'repeat': event.repeat} for event in self.scheduled_events
+             'repeat': event.repeat,
+             'infinite': event.infinite} for event in self.scheduled_events
         ]
 
     def shelve_data_to_scheduled_events(self, shelve_data: List[Dict]) -> List[ScheduledEvent]:
@@ -121,10 +125,12 @@ class EventsCreator:
             ScheduledEvent(
                 creator=self,
                 delay=data['delay'],
-                function=eval(f"{data['self']}.{data['function_name']}" if data['self'] else data['function_name']),
+                function=eval(f"{data['self']}.{data['function_name']}" if
+                              data['self'] else data['function_name']),
                 args=data['args'],
                 kwargs=data['kwargs'],
                 repeat=data['repeat'],
+                infinite=data['infinite'],
                 frames_left=data['frames_left']
             )
             for data in shelve_data
@@ -136,4 +142,8 @@ class EventsCreator:
             return 'self'
 
     def scheduling_test(self):
-        print(f'Hi, this is an event created by {self}')
+        """
+        Function created for testing purposes only. You can shedule it
+        from any object inheriting the EventsCreator interface.
+        """
+        log(f'Hi, this is an event created by {self}', console=True)
