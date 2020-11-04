@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Optional, Tuple, List, Dict, Set
 
-from data_types import Number, UnitId, BuildingId
+from data_types import Number, UnitId, BuildingId, NodeId
 from utils.functions import timer, log
 from game import PROFILING_LEVEL
 
@@ -123,10 +123,8 @@ class Map(GridHandler):
 
     def calculate_distances_between_nodes(self):
         for node in self.nodes.values():
-            node.costs = {
-                grid: 1 for grid in
-                self.in_bounds(self.adjacent_grids(*node.position))
-            }
+            for grid in self.in_bounds(self.adjacent_grids(*node.position)):
+                node.costs[grid] = 1 if node.is_diagonal_to_other(grid) else 1.4
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -180,6 +178,9 @@ class MapNode(GridHandler, ABC):
 
     def in_bounds(self, *args, **kwargs):
         return self.map.in_bounds(*args, **kwargs)
+
+    def is_diagonal_to_other(self, other: GridPosition):
+        return self.grid[0] != other[0] and self.grid[1] != other[1]
 
     @property
     def unit_id(self) -> UnitId:

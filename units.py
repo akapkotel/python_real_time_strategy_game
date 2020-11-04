@@ -58,6 +58,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
 
         # pathfinding-related:
         self.position = self.map.normalize_position(*self.position)
+        self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)
         self.block_map_node(node)
 
@@ -88,13 +89,24 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
         """
+        self.scan_next_nodes_for_collisionss()
+        self.update_current_blocked_node()
+        if len(self.path) > 1:
+            self.update_reserved_node()
+
+    def update_current_blocked_node(self):
         new_current_node = self.map.position_to_node(*self.position)
         self.swap_blocked_nodes(self.current_node, new_current_node)
         self.current_node = new_current_node
-        self.scan_next_nodes_for_collisionss()
+
+    def update_reserved_node(self):
+        new_reserved_node = self.map.position_to_node(*self.path[1])
+        self.swap_blocked_nodes(self.reserved_node, new_reserved_node)
+        self.reserved_node = new_reserved_node
 
     def swap_blocked_nodes(self, unblocked: MapNode, blocked: MapNode):
-        self.unblock_map_node(unblocked)
+        if unblocked is not None:
+            self.unblock_map_node(unblocked)
         self.block_map_node(blocked)
 
     @staticmethod
@@ -158,10 +170,6 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         distance_left = distance_2d(self.position, destination)
         self.current_speed = speed = min(distance_left, self.speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
-
-    # @staticmethod
-    # def vector_2d(angle: float, speed: float) -> Vector2D:
-    #     return vector_2d(angle, speed)
 
     def move_to(self, destination: GridPosition):
         start = self.map.position_to_grid(*self.position)
