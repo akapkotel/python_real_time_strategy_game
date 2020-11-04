@@ -84,7 +84,6 @@ class FogOfWar(ObjectsOwner):
                 fog_rect for fog_rect in self.get_all_fog_rectangles() if
                 are_polygons_intersecting(rect, fog_rect.hit_box)
             ]
-            # print(f'Collliding: {colliding_fogs}')
             for fog in colliding_fogs:
                 try:
                     self.black_rectangles.remove(fog)

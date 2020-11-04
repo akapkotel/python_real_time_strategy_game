@@ -35,5 +35,3 @@ class KeyboardHandler(ToggledElement):
 
     def key_to_letter(self, symbol: int) -> str:
         return chr(symbol)
-
-

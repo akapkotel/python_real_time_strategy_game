@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Set, Deque, Optional, Sequence, List
 from collections import deque
+from abc import abstractmethod
+from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
 from utils.functions import (
@@ -68,15 +70,15 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.current_speed = 0
 
     @property
-    def selectable(self) -> bool:
-        return self.player is self.game.local_human_player
-
-    @property
     def current_task(self) -> Optional[UnitTask]:
         try:
             return self.tasks[0]
         except IndexError:
             return None
+
+    @abstractmethod
+    def needs_repair(self) -> bool:
+        raise NotImplementedError
 
     def update(self):
         self.evaluate_tasks()
@@ -204,3 +206,46 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.game.debugged.clear()
         self.game.debugged.append([PATH, path])
         log(f'{self} found path to {destination}, path: {path}')
+
+
+class Infantry(Unit):
+
+    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+                 position: Point):
+        super().__init__(unit_name, player, weight, position)
+
+        self.max_soldiers = 4
+        self.soldiers: List[Soldier] = []
+
+        self.health_restoration = 0.003
+
+    def __len__(self):
+        return len(self.soldiers)
+
+    @property
+    def needs_repair(self) -> bool:
+        return False
+
+    @property
+    def needs_medic(self) -> bool:
+        return int(self._health) < 25 * len(self.soldiers)
+
+    def update(self):
+        super().update()
+        self.restore_soldiers_health()
+
+    def restore_soldiers_health(self):
+        for soldier in self.soldiers:
+            self._health += soldier.restore_health()
+
+
+class Soldier(AnimatedTimeBasedSprite):
+    _max_health = 25
+    health = _max_health
+    health_restoration = 0.003
+
+    def restore_health(self) -> float:
+        wounds = round(self._max_health - self.health, 3)
+        health_gained = min(self.health_restoration, wounds)
+        self.health += health_gained
+        return health_gained

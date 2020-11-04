@@ -253,7 +253,7 @@ class Pathfinder:
         """
         Find shortest path from <start> to <end> position using A* algorithm.
         """
-        log(f'Searching for path from {start} to {end}...', 1)
+        log(f'Searching for path from {start} to {end}...')
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes

@@ -56,6 +56,7 @@ class IProducer:
 
 
 class Building(PlayerEntity, IProducer):
+
     game: Optional[Game] = None
 
     def __init__(self,
@@ -68,8 +69,9 @@ class Building(PlayerEntity, IProducer):
             IProducer.__init__(self)
             self.produced_objects.append(produces)
 
-    def selectable(self) -> bool:
-        return self.player is self.game.local_human_player
+    @property
+    def needs_repair(self) -> bool:
+        return self.health < self._max_health
 
     def update(self):
         super().update()

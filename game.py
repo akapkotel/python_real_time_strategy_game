@@ -91,7 +91,7 @@ class Window(arcade.Window, EventsCreator):
         graphics_submenu = SubMenu('Graphics', background_color=BROWN)
         game_setting = SubMenu('Game setting', background_color=BLACK)
 
-        ui_element_texture = get_path_to_file('medic_truck_red.png')
+        ui_element_texture = get_path_to_file('small_button_none.png')
         sound_ui_elements = [
             Button(ui_element_texture),
             CheckButton(ui_element_texture),
@@ -131,7 +131,6 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.cursor.active:
             self.cursor.on_mouse_press(x, y, button, modifiers)
-            # self.toggle_view()  # TODO: replace with interface interaction
 
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
@@ -190,11 +189,6 @@ class Window(arcade.Window, EventsCreator):
         super().close()
 
 
-def spawn_test_player() -> Player:
-    # TODO: remove it when spawning eal Player instances is done
-    return Player(BLACK, None, False)
-
-
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
@@ -229,7 +223,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.factions[2].start_war(self.factions[4])
 
         self.missions: Dict[int, Mission] = {}
-        self.curent_mission: Optional[Mission] = None
+        self.current_mission: Optional[Mission] = None
 
         self.debug = DEBUG
         if DEBUG:
@@ -252,7 +246,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def test_methods(self):
         self.test_scheduling_events()
         self.test_units_spawning()
-        print(len(self.units))
         # self.test_buildings_spawning()
 
     def test_scheduling_events(self):

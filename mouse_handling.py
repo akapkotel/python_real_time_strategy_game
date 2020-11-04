@@ -21,7 +21,12 @@ from units import Unit, UnitTask
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 
-UNIT_SELECTION = 'UNIT_SELECTION'
+
+CURSOR_NORMAL_TEXTURE = 0
+CURSOR_FORBIDDEN_TEXTURE = 1
+CURSOR_ATTACK_TEXTURE = 2
+CURSOR_SELECTION_TEXTURE = 3
+CURSOR_REPAIR_TEXTURE = 4
 
 
 class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
@@ -72,7 +77,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def load_textures(self):
         self.textures.extend([
-            load_texture(get_path_to_file('forbidden.png'))
+            load_texture(get_path_to_file('forbidden.png')),
+            load_texture(get_path_to_file('attack.png')),
+            load_texture(get_path_to_file('select.png')),
         ])
 
     @property
@@ -118,10 +125,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_left_button_release(self, x: float, y: float, modifiers: int):
         log(f'MouseCursor.on_left_button_release, position: {x, y}')
         if self.mouse_drag_selection is None:
-            if units := self.selected_units:
-                self.on_click_with_selected_units(x, y, modifiers, units)
-            elif (gameobject := self.pointed_gameobject) is not None:
-                self.on_gameobject_clicked(gameobject)
+            units = self.selected_units
+            pointed = self.pointed_unit or self.pointed_building
+            if units:
+                self.on_click_with_selected_units(x, y, modifiers, units, pointed)
+            elif pointed is not None:
+                self.on_player_entity_clicked(pointed)
         else:
             self.close_drag_selection()
 
@@ -131,26 +140,25 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
         if self.selected_units:
-            self.deselect_units()
-
-    def on_gameobject_clicked(self, clicked: GameObject):
-        log(f'Clicked at: {clicked}')
-        if isinstance(clicked, PlayerEntity):
-            self.on_player_entity_clicked(clicked)
-
-    def on_click_with_selected_units(self, x, y, modifiers, units):
-        log(f'Called: on_click_with_selected_units')
-        waypoints = self.game.map.group_of_waypoints(x, y, len(units))
-        for i, unit in enumerate(units):
-            unit.move_to(waypoints[i])
+            self.unselect_units()
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'Clicked PlayerEntity: {clicked}')
         clicked: Union[Unit, Building]
-        if self.pointed_unit is not None:
-            self.on_unit_clicked(clicked)
-        else:
-            self.on_building_clicked(clicked)
+        if clicked.selectable:
+            if self.pointed_unit is not None:
+                self.on_unit_clicked(clicked)
+            else:
+                self.on_building_clicked(clicked)
+
+    def on_click_with_selected_units(self, x, y, modifiers, units, pointed):
+        log(f'Called: on_click_with_selected_units')
+        pointed: Union[PlayerEntity, None]
+        if pointed is not None:
+            return self.on_player_entity_clicked(pointed)
+        waypoints = self.game.map.group_of_waypoints(x, y, len(units))
+        for i, unit in enumerate(units):
+            unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
         if clicked_unit.selectable:
@@ -235,18 +243,31 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.is_game_loaded_and_running:
             if self.selected_units:
                 self.cursor_with_units_selected()
-            elif (gameobject := self.pointed_gameobject) is not None:
-                self.cursor_on_pointing_at_entity(gameobject)
+            elif entity := (self.pointed_unit or self.pointed_building):
+                self.cursor_on_pointing_at_entity(entity)
 
     def cursor_with_units_selected(self):
-        if not self.game.map.position_to_node(*self.position).walkable:
-            self.set_texture(1)
+        if entity := (self.pointed_unit or self.pointed_building):
+            if entity.selectable:
+                self.show_selecting_texture()
+            else:
+                self.show_attack_texture()
+        elif not self.game.map.position_to_node(*self.position).walkable:
+            self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
         else:
-            self.set_texture(0)
+            self.set_texture(CURSOR_NORMAL_TEXTURE)
 
-    def cursor_on_pointing_at_entity(self, pointed_gameobject: GameObject):
-        # TODO
-        pass
+    def cursor_on_pointing_at_entity(self, entity: PlayerEntity):
+        if entity.selectable:
+            self.show_selecting_texture()
+        else:
+            self.set_texture(CURSOR_NORMAL_TEXTURE)
+
+    def show_attack_texture(self):
+        self.set_texture(CURSOR_ATTACK_TEXTURE)
+
+    def show_selecting_texture(self):
+        self.set_texture(CURSOR_SELECTION_TEXTURE)
 
     @property
     def is_game_loaded_and_running(self) -> bool:

@@ -171,11 +171,22 @@ class PlayerEntity(GameObject, EventsCreator):
         self.faction: Faction = self.player.faction
         self.known_enemies: Set[PlayerEntity] = set()
 
+        self._max_health = 100
+        self._health = self._max_health
+
         self.visibility_radius = 0
 
         self.production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
 
         self.register_to_objectsowners(self.game, self.player, self.game.fog_of_war)
+
+    @property
+    def health(self) -> float:
+        return self._health
+
+    @health.setter
+    def health(self, value: float):
+        self._health = value
 
     def update(self):
         super().update()
@@ -206,9 +217,13 @@ class PlayerEntity(GameObject, EventsCreator):
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)
 
-    @abstractmethod
     def selectable(self) -> bool:
+        return self.player is self.game.local_human_player
+
+    @abstractmethod
+    def needs_repair(self) -> bool:
         raise NotImplementedError
+
 
 
 if __name__:
