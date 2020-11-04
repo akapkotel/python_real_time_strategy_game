@@ -4,7 +4,7 @@ from typing import Optional, Set, List, Union
 from arcade import (
     Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
-    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE
+    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, draw_text
 )
 
 from user_interface import ToggledElement, UiElement, CursorInteractive
@@ -146,7 +146,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         log(f'Clicked PlayerEntity: {clicked}')
         clicked: Union[Unit, Building]
         if clicked.selectable:
-            if self.pointed_unit is not None:
+            if isinstance(clicked, Unit):
                 self.on_unit_clicked(clicked)
             else:
                 self.on_building_clicked(clicked)
@@ -161,8 +161,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
-        if clicked_unit.selectable:
-            self.select_units(clicked_unit)
+        self.select_units(clicked_unit)
 
     def select_units(self, *units: Unit):
         self.selected_units.clear()
@@ -359,3 +358,4 @@ class MouseDragSelection:
         left, right, top, bottom = self.left, self.right, self.top, self.bottom
         draw_lrtb_rectangle_filled(left, right, top, bottom, CLEAR_GREEN)
         draw_lrtb_rectangle_outline(left, right, top, bottom, GREEN)
+        draw_text(str(len(self.units)), left, bottom, GREEN)

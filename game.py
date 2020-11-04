@@ -33,8 +33,8 @@ DEBUG = True
 SpriteList = arcade.SpriteList
 
 
-def spawn_test_unit(position, player: Player) -> Unit:
-    unit_name = get_path_to_file('jeep_blue.png')
+def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
+    unit_name = get_path_to_file(unit_name)
     return Unit(unit_name, player, UnitWeight.LIGHT, position)
 
 
@@ -217,9 +217,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.factions: Dict[int, Faction] = {}
         self.players: Dict[int, Player] = {}
         faction = Faction(name='Freemen')
-        player = Player(id=2, faction=faction, cpu=False)
-        cpu_player = CpuPlayer()
-        self.local_human_player: Optional[Player] = player
+        Player(id=2, faction=faction, cpu=False)
+        CpuPlayer()
+        self.local_human_player: Optional[Player] = self.players[2]
         self.factions[2].start_war(self.factions[4])
 
         self.missions: Dict[int, Mission] = {}
@@ -260,16 +260,17 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
         player = self.players[2]
-
+        name = 'jeep_blue.png'
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                spawned_units.append(spawn_test_unit((x, y), player=player))
+                spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
         position = 600, 600
-        cpu_unit = spawn_test_unit(position, player=self.players[4])
+        name = "medic_truck_red.png"
+        cpu_unit = spawn_test_unit(position, name, player=self.players[4])
         spawned_units.append(cpu_unit)
         return spawned_units
 

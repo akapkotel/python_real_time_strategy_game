@@ -217,13 +217,13 @@ class PlayerEntity(GameObject, EventsCreator):
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)
 
+    @property
     def selectable(self) -> bool:
         return self.player is self.game.local_human_player
 
     @abstractmethod
     def needs_repair(self) -> bool:
         raise NotImplementedError
-
 
 
 if __name__:
