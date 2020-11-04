@@ -2,9 +2,9 @@
 
 from typing import Optional, Set, List, Union
 from arcade import (
-    Window, Sprite, SpriteList, draw_lrtb_rectangle_filled,
-    draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture,
-    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE,
+    Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
+    draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
+    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE
 )
 
 from user_interface import ToggledElement, UiElement, CursorInteractive
@@ -16,7 +16,7 @@ from player import PlayerEntity
 from buildings import Building
 from game import Game, Menu
 from utils.functions import log, get_path_to_file
-from units import Unit
+from units import Unit, UnitTask
 
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
@@ -24,7 +24,7 @@ DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 UNIT_SELECTION = 'UNIT_SELECTION'
 
 
-class MouseCursor(Sprite, ToggledElement, EventsCreator):
+class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     """
     MouseCursor replaces system-cursor with it's own Sprite and process all
     mouse-related calls from arcade.Window to call proper methods and functions
@@ -36,7 +36,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
     instance: Optional['MouseCursor'] = None
 
     def __init__(self, window: Window, texture_name: str):
-        Sprite.__init__(self, texture_name)
+        super().__init__(texture_name)
         ToggledElement.__init__(self, active=False, visible=False)
         EventsCreator.__init__(self)
         self.window = window
@@ -61,8 +61,9 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         self.selected_units: Set[Unit] = set()
         self.selected_building: Optional[Building] = None
 
-        self.menu = self.window.menu_view
+        self.attached_task: Optional[UnitTask] = None
 
+        self.menu = self.window.menu_view
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
 
@@ -117,8 +118,8 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
     def on_left_button_release(self, x: float, y: float, modifiers: int):
         log(f'MouseCursor.on_left_button_release, position: {x, y}')
         if self.mouse_drag_selection is None:
-            if self.selected_units:
-                self.on_click_with_selected_units(x, y, modifiers)
+            if units := self.selected_units:
+                self.on_click_with_selected_units(x, y, modifiers, units)
             elif (gameobject := self.pointed_gameobject) is not None:
                 self.on_gameobject_clicked(gameobject)
         else:
@@ -137,10 +138,11 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
         if isinstance(clicked, PlayerEntity):
             self.on_player_entity_clicked(clicked)
 
-    def on_click_with_selected_units(self, x, y, modifiers):
+    def on_click_with_selected_units(self, x, y, modifiers, units):
         log(f'Called: on_click_with_selected_units')
-        for unit in self.selected_units:
-            unit.move_to(x, y)
+        waypoints = self.game.map.group_of_waypoints(x, y, len(units))
+        for i, unit in enumerate(units):
+            unit.move_to(waypoints[i])
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'Clicked PlayerEntity: {clicked}')
@@ -237,8 +239,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
                 self.cursor_on_pointing_at_entity(gameobject)
 
     def cursor_with_units_selected(self):
-        map = self.game.map
-        if not map.node(map.position_to_grid(*self.position)).walkable:
+        if not self.game.map.position_to_node(*self.position).walkable:
             self.set_texture(1)
         else:
             self.set_texture(0)

@@ -5,10 +5,11 @@ import heapq
 from math import hypot, inf
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Set
 
-from data_types import Number, UnitId
+from data_types import Number, UnitId, BuildingId
 from utils.functions import timer, log
+from game import PROFILING_LEVEL
 
 
 PATH = 'PATH'
@@ -83,6 +84,7 @@ class Map(GridHandler):
 
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.units: Dict[GridPosition, UnitId] = {}
+        self.buildings: Dict[GridPosition, BuildingId] = {}
 
         self.generate_nodes()
         self.calculate_distances_between_nodes()
@@ -135,6 +137,24 @@ class Map(GridHandler):
     def get_all_nodes(self) -> List[MapNode]:
         return list(self.nodes.values())
 
+    def group_of_waypoints(self,
+                           x: Number,
+                           y: Number,
+                           required_waypoints: int) -> List[GridPosition]:
+        first_waypoint = self.position_to_grid(x, y)
+        waypoints: Set[GridPosition] = {first_waypoint}
+        all_adjacent = []
+        node = self.grid_to_node(first_waypoint)
+
+        iteration = 0
+        while len(waypoints) < required_waypoints:
+            adjacent = [n.grid for n in node.walkable_adjacent if n not in waypoints]
+            waypoints.update(adjacent)
+            all_adjacent.extend(a for a in adjacent if a not in all_adjacent)
+            node = self.grid_to_node(all_adjacent[-1])
+            iteration += 1
+        return list(waypoints)
+
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]
 
@@ -151,13 +171,37 @@ class MapNode(GridHandler, ABC):
         self.grid = x, y
         self.position = self.x, self.y = self.grid_to_position(self.grid)
         self.costs: Dict[GridPosition, float] = {}
-        self.walkable = True
+        self._unit_id: Optional[UnitId] = None
+        self._building_id: Optional[BuildingId] = None
+        self._walkable = True
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
 
     def in_bounds(self, *args, **kwargs):
         return self.map.in_bounds(*args, **kwargs)
+
+    @property
+    def unit_id(self) -> UnitId:
+        return self._unit_id
+
+    @unit_id.setter
+    def unit_id(self, value: Optional[UnitId]):
+        self.map.units[self.grid] = value
+        self._unit_id = value
+
+    @property
+    def building_id(self) -> UnitId:
+        return self._unit_id
+
+    @building_id.setter
+    def building_id(self, value: Optional[BuildingId]):
+        self.map.buildings[self.grid] = value
+        self._building_id = value
+
+    @property
+    def walkable(self):
+        return self._unit_id is None and self._building_id is None
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:
@@ -203,12 +247,12 @@ class Pathfinder:
     instance: Optional[Pathfinder] = None
     map: Optional[Map] = None
 
-    @timer
+    @timer(level=2, global_profiling_level=PROFILING_LEVEL)
     def find_path(self, start: GridPosition, end: GridPosition):
         """
         Find shortest path from <start> to <end> position using A* algorithm.
         """
-        log(f'Searching for path from {start} to {end}...')
+        log(f'Searching for path from {start} to {end}...', 1)
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes

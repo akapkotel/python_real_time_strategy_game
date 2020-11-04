@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Set, Deque, Optional, Sequence
+from typing import Set, Deque, Optional, Sequence, List
 from collections import deque
 from arcade.arcade_types import Point
-from statemachine import State, StateMachine
 
 from utils.functions import (
     average_position_of_points_group, log, calculate_angle, close_enough,
-    calculate_vector_2d
+    vector_2d, distance_2d
 )
-from map import Pathfinder, GridPosition, PATH, MapPath
+from map import Pathfinder, GridPosition, PATH, MapPath, MapNode
+from units_tasking import UnitTask, TasksExecutor
+from data_types import Number, Vector2D, UnitId
 from player import PlayerEntity, Player
+from scheduling import ScheduledEvent
+
 from enums import UnitWeight
-from data_types import Number, Vector2D
-from game import Game
+from game import Game, UPDATE_RATE
 
 
 class PermanentUnitsGroup:
@@ -38,41 +40,29 @@ class PermanentUnitsGroup:
         self.units.discard(unit)
 
 
-class Unit(PlayerEntity, Pathfinder):
+class Unit(PlayerEntity, TasksExecutor, Pathfinder):
     """Unit is a PlayerEntity which can move on map."""
-
-    # # finite-state-machine states:
-    # idle = State('idle', 0, initial=True)
-    # moving = State('move', 1)
-    # patrolling = State('patrolling', 2)
-    #
-    # # transitions:
-    # start_patrol = idle.to(patrolling) | moving.to(patrolling)
-    # move = idle.to(moving) | patrolling.to(moving) | moving.to(moving)
-    # stop = patrolling.to(idle) | moving.to(idle)
 
     def __init__(self,
                  unit_name: str,
                  player: Player,
                  weight: UnitWeight,
-                 position: Point):
+                 position: Point,
+                 tasks_on_start: Optional[List[UnitTask]] = None):
         PlayerEntity.__init__(self, unit_name, player=player, position=position)
+        TasksExecutor.__init__(self, tasks_on_start)
         Pathfinder.__init__(self)
-        # StateMachine.__init__(self)
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
 
-        # cache frequently called methods with many 'dots':
-        self.normalize_position = self.map.normalize_position
-        self.position_to_node = self.map.position_to_node
-        self.position_to_grid = self.map.position_to_grid
-
-        self.position = self.normalize_position(*self.position)
-        self.current_node = self.position_to_node(*self.position)
-        self.current_node.walkable = False
+        # pathfinding-related:
+        self.position = self.map.normalize_position(*self.position)
+        self.current_node = node = self.map.position_to_node(*self.position)
+        self.block_map_node(node)
 
         self.path: Deque[GridPosition] = deque()
+        self.waiting_for_path: List[int, Deque] = [0, None]
         self.speed = 4
         self.current_speed = 0
 
@@ -80,43 +70,127 @@ class Unit(PlayerEntity, Pathfinder):
     def selectable(self) -> bool:
         return self.player is self.game.local_human_player
 
+    @property
+    def current_task(self) -> Optional[UnitTask]:
+        try:
+            return self.tasks[0]
+        except IndexError:
+            return None
+
     def update(self):
+        self.evaluate_tasks()
+        self.update_blocked_map_nodes()
+        self.update_pathfinding()
+        super().update()
+
+    def update_blocked_map_nodes(self):
+        """
+        Units are blocking MapNodes they are occupying to enable other units
+        avoid collisions by navigating around blocked nodes.
+        """
+        new_current_node = self.map.position_to_node(*self.position)
+        self.swap_blocked_nodes(self.current_node, new_current_node)
+        self.current_node = new_current_node
+        self.scan_next_nodes_for_collisionss()
+
+    def swap_blocked_nodes(self, unblocked: MapNode, blocked: MapNode):
+        self.unblock_map_node(unblocked)
+        self.block_map_node(blocked)
+
+    @staticmethod
+    def unblock_map_node(node: MapNode):
+        node.unit_id = None
+
+    def block_map_node(self, node: MapNode):
+        node.unit_id = self.id
+
+    def scan_next_nodes_for_collisionss(self):
+        if not self.path:
+            return
+        if len(self.path) == 1:
+            self.scan_node_for_collisions(0)
+        else:
+            self.scan_node_for_collisions(1)
+
+    def scan_node_for_collisions(self, path_index: int):
+        next_node = self.map.position_to_node(*self.path[path_index])
+        if not next_node.walkable and next_node.unit_id != self.id:
+            if self.game.units.id_elements_dict[next_node.unit_id].path:
+                self.wait_for_free_path()
+            else:
+                self.schedule_pathfinding(self.map.position_to_grid(*self.path[-1]))
+
+    def wait_for_free_path(self):
+        """
+        Waiting for free path is useful when next node is only temporarily
+        blocked (blocking Unit is moving) and allows to avoid pathfinding
+        the path with A* algorthm. Instead, Unit 'shelves' currently found
+        path and after 1 second 'unshelves' it in countdown_waiting method.
+        """
+        self.waiting_for_path = [1 / UPDATE_RATE, self.path.copy()]
+        self.path.clear()
+
+    def update_pathfinding(self):
+        if self.waiting_for_path[0]:
+            self.countdown_waiting()
         if self.path:
             self.follow_path()
         else:
             self.stop()
-        super().update()
+
+    def countdown_waiting(self):
+        self.waiting_for_path[0] -= 1
+        if not self.waiting_for_path[0]:
+            self.path = self.waiting_for_path[1]
 
     def follow_path(self):
         destination = self.path[0]
-        if not close_enough(self.position, destination, self.speed):
+        if not close_enough(self.position, destination, self.current_speed):
             self.move_to_current_waypoint(destination)
         else:
-            self.get_next_waypoint(destination)
+            self.move_to_next_waypoint()
 
-    def get_next_waypoint(self, destination):
-        self.position = destination
+    def move_to_next_waypoint(self):
         self.path.popleft()
 
     def move_to_current_waypoint(self, destination):
-        desired_angle = calculate_angle(*self.position, *destination)
-        self.angle = desired_angle
-        self.change_x, self.change_y = self.vector_2d(desired_angle)
+        self.angle = angle = calculate_angle(*self.position, *destination)
+        distance_left = distance_2d(self.position, destination)
+        self.current_speed = speed = min(distance_left, self.speed)
+        self.change_x, self.change_y = vector_2d(angle, speed)
 
-    def vector_2d(self, angle: float, speed: Optional[float] = 0) -> Vector2D:
-        return calculate_vector_2d(angle, speed or self.speed)
+    # @staticmethod
+    # def vector_2d(angle: float, speed: float) -> Vector2D:
+    #     return vector_2d(angle, speed)
 
-    def move_to(self, x: Number, y: Number):
-        destination = self.position_to_grid(x, y)
-        start = self.position_to_grid(*self.position)
-        if self.map.node(destination).walkable:
+    def move_to(self, destination: GridPosition):
+        start = self.map.position_to_grid(*self.position)
+        if self.map.grid_to_node(destination).walkable:
             if path := self.find_path(start, destination):
                 self.create_new_path(destination, path)
+            else:
+                self.schedule_pathfinding(destination)
 
     def create_new_path(self, destination: GridPosition, path: MapPath):
         if self.game.debug:
             self.debug_found_path(path, destination)
-        self.path = deque(path)
+        self.path = deque(path[1:])
+
+    def schedule_pathfinding(self, destination: GridPosition):
+        """
+        Rather costly way to delay pathfinding execution. It is used only
+        when Unit already have not found correct path to the destination
+        because it is blocked for a longer while.
+        """
+        self.path.clear()
+        self.schedule_event(
+            ScheduledEvent(
+                creator=self,
+                delay=1,
+                function=self.move_to,
+                args=(destination,),
+            )
+        )
 
     def debug_found_path(self, path: MapPath, destination: GridPosition):
         self.game.debugged.clear()

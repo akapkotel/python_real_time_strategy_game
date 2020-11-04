@@ -79,6 +79,12 @@ class DividedSpriteList(SpriteList):
     def __repr__(self) -> str:
         return f'DividedSpriteList, contains: {self.id_elements_dict}'
 
+    def __len__(self) -> int:
+        return len(self.alive_ids)
+
+    def __bool__(self) -> bool:
+        return len(self.alive_ids) > 0
+
     def __getitem__(self, item):
         return self.updated[item]
 

@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Set, Dict, List, Union, Optional
+from arcade import has_line_of_sight
 from arcade.arcade_types import Color, Point
 
 from observers import ObjectsOwner, OwnedObject
 from gameobject import GameObject, Robustness
 from scheduling import EventsCreator
-from utils.functions import log
+from utils.functions import log, visible
 from data_types import FactionId, PlayerId
 from game import Game, UPDATE_RATE
 
@@ -197,7 +198,10 @@ class PlayerEntity(GameObject, EventsCreator):
         return visible_enemies
 
     def visible_for(self, other: PlayerEntity) -> bool:
-        return True
+        obstacles = self.game.buildings
+        return visible(self.position, other.position, obstacles)
+        # return has_line_of_sight(self.position, other.position, obstacles,
+        #                          100, 60)
 
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)

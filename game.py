@@ -16,16 +16,19 @@ from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
 from data_containers import DividedSpriteList
 from views import WindowView, LoadingScreen
-from utils.functions import get_path_to_file, log, to_rgba
+from utils.functions import (
+    timer, get_screen_size, get_path_to_file, log, to_rgba
+)
 from user_interface import (
     Button, CheckButton, TextInputField
 )
 from colors import GRASS_GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 UPDATE_RATE = 1 / 30
+PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
+DEBUG = True
 
 SpriteList = arcade.SpriteList
 
@@ -99,7 +102,7 @@ class Window(arcade.Window, EventsCreator):
         sound_submenu.set_updated_and_drawn_lists()
 
     def create_new_game(self):
-        self.game_view = Game(True)
+        self.game_view = Game(DEBUG)
 
     def start_new_game(self):
         if self.game_view is not None:
@@ -195,7 +198,7 @@ def spawn_test_player() -> Player:
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
-    def __init__(self, debug=False):
+    def __init__(self, debug: bool):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         self.assign_reference_to_self_for_all_classes()
@@ -228,8 +231,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.missions: Dict[int, Mission] = {}
         self.curent_mission: Optional[Mission] = None
 
-        if debug:
-            self.debug = debug
+        self.debug = DEBUG
+        if DEBUG:
             self.debugged = []
             self.map_grid = self.create_map_debug_grid()
 
@@ -249,18 +252,33 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def test_methods(self):
         self.test_scheduling_events()
         self.test_units_spawning()
-        self.test_buildings_spawning()
+        print(len(self.units))
+        # self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
         self.schedule_event(event)
 
     def test_units_spawning(self):
-        position = 500, 500
-        player_unit = spawn_test_unit(position, player=self.players[2])
+        player_units = self.spawn_local_human_player_units()
+        cpu_units = self.spawn_cpu_units()
+        self.units.extend(player_units + cpu_units)
+
+    def spawn_local_human_player_units(self) -> List[Unit]:
+        spawned_units = []
+        player = self.players[2]
+
+        for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
+            for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+                spawned_units.append(spawn_test_unit((x, y), player=player))
+        return spawned_units
+
+    def spawn_cpu_units(self) -> List[Unit]:
+        spawned_units = []
         position = 600, 600
         cpu_unit = spawn_test_unit(position, player=self.players[4])
-        self.units.extend({player_unit, cpu_unit})
+        spawned_units.append(cpu_unit)
+        return spawned_units
 
     def test_buildings_spawning(self):
 
@@ -323,6 +341,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def get_notified(self, *args, **kwargs):
         pass
 
+    @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
         if not self.paused:
             super().on_update(delta_time)
@@ -332,6 +351,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         for faction in self.factions.values():
             faction.update()
 
+    @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         if self.debug:
             self.draw_debugging()
@@ -339,6 +359,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         if (selection := self.window.cursor.mouse_drag_selection) is not None:
             selection.draw()
 
+    @timer(level=3, global_profiling_level=PROFILING_LEVEL)
     def draw_debugging(self):
         if self.map_grid is None:
             self.map_grid = self.create_map_debug_grid()
@@ -401,14 +422,14 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
+    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map, GridPosition
     from player import Faction, Player, CpuPlayer, PlayerEntity
     from keyboard_handling import KeyboardHandler
-    from mouse_handling import MouseCursor, UNIT_SELECTION
+    from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
     from buildings import Building
     from missions import Mission
-    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map, GridPosition
 
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()

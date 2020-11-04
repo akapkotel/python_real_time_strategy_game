@@ -4,14 +4,17 @@ import logging
 
 from math import hypot, atan2, degrees, sin, cos, radians
 from time import perf_counter
-from functools import wraps
 from numba import njit
+from shapely import speedups, affinity
+from shapely.geometry import LineString, Polygon
 
 from arcade.arcade_types import RGB, RGBA
 
-from data_types import Point, Number
 from typing import Sequence, Tuple, List, Iterable, Any
+from data_types import Point, Number, Union
 
+
+speedups.enable()
 
 logging.basicConfig(
     filename='resources/logfile.txt',
@@ -22,7 +25,7 @@ logging.basicConfig(
 )
 
 
-def log(logged_message: str, console=False):
+def log(logged_message: str, console: Union[int, bool] = False):
     if console:
         print(logged_message)
         logging.warning(logged_message)
@@ -30,21 +33,31 @@ def log(logged_message: str, console=False):
         logging.info(logged_message)
 
 
-def timer(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = perf_counter()
+def timer(level=0, global_profiling_level=0, forced=False):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if forced or level > global_profiling_level:
+                return func(*args, **kwargs)
 
-        result = func(*args, **kwargs)
+            start_time = perf_counter()
+            result = func(*args, **kwargs)
+            end_time = perf_counter()
 
-        end_time = perf_counter()
-        execution_time = end_time - start_time
-        fps = 1 / execution_time
-        fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
-        log(fr, console=True)
-        return result
+            execution_time = end_time - start_time
+            fps = 1 / execution_time
+            fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
+            log(fr, console=level)
+            return result
+        return wrapper
+    return decorator
 
-    return wrapper
+
+def get_screen_size() -> Tuple:
+    # import platform
+
+    from PIL import ImageGrab
+    screen = ImageGrab.grab()
+    return int(screen.width), int(screen.height)
 
 
 def filter_sequence(sequence: Sequence,
@@ -178,7 +191,7 @@ def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
 
 
 @njit
-def calculate_vector_2d(angle: float, scalar: float) -> Point:
+def vector_2d(angle: float, scalar: float) -> Point:
     """
     Calculate x and y parts of the current vector.
 
@@ -188,3 +201,19 @@ def calculate_vector_2d(angle: float, scalar: float) -> Point:
     """
     rad = -radians(angle)
     return sin(rad) * scalar, cos(rad) * scalar
+
+
+def visible(position_a: Point, position_b: Point, obstacles_: List) -> bool:
+    """
+    Check if position_a is 'visible' from position_b and vice-versa. 'Visible'
+    means, that you can connect both points with straight line without
+    intersecting any obstacle.
+
+    :param position_a: tuple -- coordinates of first position (x, y)
+    :param position_b: tuple -- coordinates of second position (x, y)
+    :param obstacles_: list -- Obstacle objects to check against
+    :return: tuple -- (bool, list)
+    """
+    if not obstacles_: return True
+    line = LineString([position_a, position_b])
+    return not any((Polygon(o.points).crosses(line) for o in obstacles_))

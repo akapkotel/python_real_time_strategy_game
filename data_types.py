@@ -5,5 +5,6 @@ from typing import Union, Tuple
 # typing aliases:
 Number = Union[int, float]
 Point = Tuple[Number, Number]
-FactionId = UnitId = PlayerId = int
+GridPosition = Tuple[int, int]
+FactionId = UnitId = BuildingId = PlayerId = int
 Vector2D = Tuple[float, float]

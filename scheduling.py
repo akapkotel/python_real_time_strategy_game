@@ -12,7 +12,7 @@ class ScheduledEvent:
     creator: Any
     delay: int
     function: Callable
-    args: Tuple[Any] = ()
+    args: Optional[Tuple] = field(default_factory=tuple)
     kwargs: Optional[Dict] = field(default_factory=dict)
     repeat: int = 0
     infinite: bool = False
@@ -143,7 +143,11 @@ class EventsCreator:
 
     def scheduling_test(self):
         """
-        Function created for testing purposes only. You can shedule it
-        from any object inheriting the EventsCreator interface.
+        Function created for testing purposes only. You can schedule it
+        from any object inheriting the EventsCreator interface to test if
+        scheduling works properly:
+
+        event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
+        self.schedule_event(event)
         """
-        log(f'Hi, this is an event created by {self}', console=True)
+        log(f'Hi, this is an event created by: {self}', console=True)
