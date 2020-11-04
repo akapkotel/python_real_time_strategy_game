@@ -74,17 +74,18 @@ class Map(GridHandler):
     """
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
-        self.grid_width = grid_width or 50
-        self.grid_height = grid_height or 40
-        self.width = width or self.grid_width * 100
-        self.height = height or self.grid_height * 50
-        self.rows = self.height // self.grid_height if height else 50
-        self.columns = self.width // self.grid_width if width else 100
+        self.grid_width = grid_width
+        self.grid_height = grid_height
+        self.width = width
+        self.height = height
+        self.rows = self.height // self.grid_height
+        self.columns = self.width // self.grid_width
 
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.units: Dict[GridPosition, UnitId] = {}
 
         self.generate_nodes()
+        self.calculate_distances_between_nodes()
         MapNode.map = Pathfinder.map = self
 
     def __len__(self) -> int:
@@ -115,12 +116,15 @@ class Map(GridHandler):
     def generate_nodes(self):
         for row in range(self.rows):
             for column in range(self.columns):
-                node = MapNode(row, column)
-                node.costs = {
-                    grid: 1 for grid in self.in_bounds(self.adjacent_grids(*node.position))
-                }
-                self.nodes[(row, column)] = node
-        log(f'Generated {len(self)} map nodes.')
+                self.nodes[(column, row)] = MapNode(column, row)
+        log(f'Generated {len(self)} map nodes.', True)
+
+    def calculate_distances_between_nodes(self):
+        for node in self.nodes.values():
+            node.costs = {
+                grid: 1 for grid in
+                self.in_bounds(self.adjacent_grids(*node.position))
+            }
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]

@@ -7,7 +7,8 @@ from typing import (
     List, Dict, Any, Optional, Union
 )
 from arcade import (
-    draw_line, draw_circle_outline, draw_rectangle_filled, create_line
+    draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
+    draw_rectangle_outline
 )
 from arcade.arcade_types import Color
 
@@ -30,7 +31,7 @@ SpriteList = arcade.SpriteList
 
 
 def spawn_test_unit(position, player: Player) -> Unit:
-    unit_name = get_path_to_file('medic_truck_red.png')
+    unit_name = get_path_to_file('jeep_blue.png')
     return Unit(unit_name, player, UnitWeight.LIGHT, position)
 
 
@@ -207,7 +208,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.buildings = DividedSpriteList()
 
         self.fog_of_war = FogOfWar()
-        self.map = Map()
+        self.map = Map(20 * 100, 20 * 100, 20, 20)
 
         self.set_updated_and_drawn_lists()
 
@@ -361,7 +362,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             draw_circle_outline(*adj.position, 5, WHITE, 1)
 
     def draw_debugged(self):
-        paths = [element[1] for element in self.debugged if element[0] == PATH]
+        debugged = self.debugged
+        paths = [element[1] for element in debugged if element[0] == PATH]
         self.draw_debug_paths(paths)
 
     @staticmethod
@@ -401,7 +403,7 @@ if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from player import Faction, Player, CpuPlayer, PlayerEntity
     from keyboard_handling import KeyboardHandler
-    from mouse_handling import MouseCursor
+    from mouse_handling import MouseCursor, UNIT_SELECTION
     from units import Unit, UnitWeight
     from fog_of_war import FogOfWar
     from buildings import Building

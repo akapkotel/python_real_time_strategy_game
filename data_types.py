@@ -6,3 +6,4 @@ from typing import Union, Tuple
 Number = Union[int, float]
 Point = Tuple[Number, Number]
 FactionId = UnitId = PlayerId = int
+Vector2D = Tuple[float, float]

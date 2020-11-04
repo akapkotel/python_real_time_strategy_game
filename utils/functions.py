@@ -2,9 +2,10 @@
 
 import logging
 
-from math import hypot
+from math import hypot, atan2, degrees, sin, cos, radians
 from time import perf_counter
 from functools import wraps
+from numba import njit
 
 from arcade.arcade_types import RGB, RGBA
 
@@ -120,11 +121,6 @@ def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     return max(minimum, min(value, maximum))
 
 
-def distance_2d(coord_a: Point, coord_b: Point) -> float:
-    """Calculate distance between two points in 2D space."""
-    return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
-
-
 def get_enemies(war: int) -> Tuple[int, int]:
     """
     Since each Player id attribute is a power of 2, id's can
@@ -146,3 +142,49 @@ def get_enemies(war: int) -> Tuple[int, int]:
 
 def to_rgba(color: RGB, alpha: int) -> RGBA:
     return color[0], color[1], color[2], alpha
+
+
+@njit
+def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
+    """
+    Calculate angle in direction from 'start' to the 'end' point in degrees.
+
+    :param:sx float -- x coordinate of start point
+    :param:sy float -- y coordinate of start point
+    :param:ex float -- x coordinate of end point
+    :param:ey float -- y coordinate of end point
+    :return: float -- degrees in range 0-360.
+    """
+    radians = atan2(ex - sx, ey - sy)
+    return -degrees(radians) % 360
+
+
+def distance_2d(coord_a: Point, coord_b: Point) -> float:
+    """Calculate distance between two points in 2D space."""
+    return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
+
+
+def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
+    """
+    Calculate distance between two points in 2D space and find if distance
+    is less than minimum distance.
+
+    :param coord_a: Point -- (x, y) coords of first point
+    :param coord_b: Point -- (x, y) coords of second point
+    :param distance: float -- minimal distance to check against
+    :return: bool -- if distance is less than
+    """
+    return distance_2d(coord_a, coord_b) <= distance
+
+
+@njit
+def calculate_vector_2d(angle: float, scalar: float) -> Point:
+    """
+    Calculate x and y parts of the current vector.
+
+    :param angle: float -- angle of the vector
+    :param scalar: float -- scalar difference of the vector (e.g. speed)
+    :return: Point -- x and y parts of the vector in format: (float, float)
+    """
+    rad = -radians(angle)
+    return sin(rad) * scalar, cos(rad) * scalar

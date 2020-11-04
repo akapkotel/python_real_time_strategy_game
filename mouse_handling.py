@@ -21,6 +21,8 @@ from units import Unit
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 
+UNIT_SELECTION = 'UNIT_SELECTION'
+
 
 class MouseCursor(Sprite, ToggledElement, EventsCreator):
     """
@@ -123,11 +125,12 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
             self.close_drag_selection()
 
     def close_drag_selection(self):
-        self.selected_units = self.mouse_drag_selection.units
+        self.select_units(*[u for u in self.mouse_drag_selection.units])
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
-        pass
+        if self.selected_units:
+            self.deselect_units()
 
     def on_gameobject_clicked(self, clicked: GameObject):
         log(f'Clicked at: {clicked}')
@@ -137,8 +140,7 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
     def on_click_with_selected_units(self, x, y, modifiers):
         log(f'Called: on_click_with_selected_units')
         for unit in self.selected_units:
-            destination = self.game.map.position_to_grid(x, y)
-            unit.move_to(destination)
+            unit.move_to(x, y)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'Clicked PlayerEntity: {clicked}')
@@ -150,8 +152,15 @@ class MouseCursor(Sprite, ToggledElement, EventsCreator):
 
     def on_unit_clicked(self, clicked_unit: Unit):
         if clicked_unit.selectable:
-            self.selected_units.clear()
-            self.selected_units.add(clicked_unit)
+            self.select_units(clicked_unit)
+
+    def select_units(self, *units: Unit):
+        self.selected_units.clear()
+        for unit in units:
+            self.selected_units.add(unit)
+
+    def unselect_units(self):
+        self.selected_units.clear()
 
     def on_building_clicked(self, clicked_building: Building):
         if clicked_building.selectable:
