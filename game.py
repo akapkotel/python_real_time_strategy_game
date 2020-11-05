@@ -31,8 +31,6 @@ PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 DEBUG = True
 
 
-
-
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
     unit_name = get_path_to_file(unit_name)
     return Unit(unit_name, player, UnitWeight.LIGHT, position)
@@ -46,7 +44,7 @@ class Window(arcade.Window, EventsCreator):
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
         self._updated: List = []
-        self._drawn: List = []
+        self.drawn: List = []
 
         self.menu_view = Menu()
         self.game_view: Optional[Game] = None
@@ -72,19 +70,9 @@ class Window(arcade.Window, EventsCreator):
     def updated(self, value: List[SpriteList]):
         self._updated = value
         try:
-            # update MouseCursor reference to updated spritelists only when
-            # they actually changes
             self.cursor.updated_spritelists = value
         except AttributeError:
-            pass
-
-    @property
-    def drawn(self):
-        return self._drawn
-
-    @drawn.setter
-    def drawn(self, value: List[SpriteList]):
-        self._drawn = value
+            pass  # MouseCursor is not initialised yet
 
     def create_submenus(self):
         sound_submenu = SubMenu('Sound', background_color=RED)

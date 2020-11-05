@@ -5,7 +5,7 @@ from arcade import (
     Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
     MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, draw_text,
-    Texture
+    Texture, AnimationKeyframe, load_textures
 )
 
 from user_interface import ToggledElement, UiElement, CursorInteractive
@@ -17,7 +17,7 @@ from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
 from data_types import Point
-from game import Game, Menu
+from game import Game, Menu, UPDATE_RATE
 from units import Unit, Vehicle, UnitTask
 
 
@@ -48,6 +48,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         EventsCreator.__init__(self)
         self.window = window
 
+        # textures-related:
+        self.all_frames_lists: List[List[AnimationKeyframe]] = []
         self.load_textures()
 
         # cache currently updated and drawn spritelists of the active View:
@@ -78,11 +80,33 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         return f'{self.__class__.__name__}'
 
     def load_textures(self):
-        self.textures.extend([
-            load_texture(get_path_to_file('forbidden.png')),
-            load_texture(get_path_to_file('attack.png')),
-            load_texture(get_path_to_file('select.png')),
-        ])
+        names = 'normal.png', 'forbidden.png', 'attack.png', 'select.png'
+        self.textures.extend(
+            [load_texture(get_path_to_file(name)) for name in names[1:]]
+        )
+
+        frames: List[Texture]
+        for i, texture in enumerate(self.textures):
+            frames_count = texture.width // 60
+            locations_list = [(60 * j, 0, 60, 60) for j in range(frames_count)]
+            frames = load_textures(get_path_to_file(names[i]), locations_list)
+            self.all_frames_lists.append(
+                self.new_frames_list(frames)
+            )
+
+        for frame_list in self.all_frames_lists:
+            print(frame_list)
+        self.set_texture(CURSOR_NORMAL_TEXTURE)
+
+    def new_frames_list(self, frames: List[Texture]) -> List[AnimationKeyframe]:
+        print(frames)
+        frames_count = len(frames)
+        duration = 1 // len(frames)
+        return [
+            AnimationKeyframe(
+                duration=duration, texture=frames[i], tile_id=i
+            ) for i in range(frames_count)
+        ]
 
     @property
     def updated_spritelists(self):
@@ -192,8 +216,20 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
+        self.update_animation()
         self.update_cursor_pointed()
         self.update_cursor_texture()
+
+    def update_animation(self, delta_time: float = UPDATE_RATE):
+        """
+        Logic for selecting the proper texture to use.
+        """
+        self.cur_frame_idx += 1
+        if self.cur_frame_idx >= len(self.frames):
+            self.cur_frame_idx = 0
+
+        cur_frame = self.frames[self.cur_frame_idx]
+        self.texture = cur_frame.texture
 
     def update_cursor_pointed(self):
         """
@@ -243,11 +279,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def update_cursor_texture(self):
         if self.is_game_loaded_and_running:
             if self.selected_units:
-                self.cursor_with_units_selected()
+                self.cursor_texture_with_units_selected()
             elif entity := (self.pointed_unit or self.pointed_building):
-                self.cursor_on_pointing_at_entity(entity)
+                self.cursor_texture_on_pointing_at_entity(entity)
+            else:
+                self.set_texture(CURSOR_NORMAL_TEXTURE)
 
-    def cursor_with_units_selected(self):
+    def cursor_texture_with_units_selected(self):
         if entity := (self.pointed_unit or self.pointed_building):
             if entity.selectable:
                 self.show_selecting_texture()
@@ -258,7 +296,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
 
-    def cursor_on_pointing_at_entity(self, entity: PlayerEntity):
+    def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
         if entity.selectable:
             self.show_selecting_texture()
         else:
@@ -269,6 +307,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def show_selecting_texture(self):
         self.set_texture(CURSOR_SELECTION_TEXTURE)
+
+    def set_texture(self, index: int):
+        # we override the original method to work with AnimationKeyframe
+        # lists which we set-up at cursor initialization. Instead of
+        # displaying static texture we switch updated cursor animation:
+        self.frames = self.all_frames_lists[index]
 
     @property
     def is_game_loaded_and_running(self) -> bool:

@@ -17,7 +17,7 @@ from data_types import Point, Number, Union
 speedups.enable()
 
 logging.basicConfig(
-    filename='resources/logfile.txt',
+    filename='resources/logging/logfile.txt',
     filemode='w',
     level=logging.INFO,
     format='%(levelname)s: %(asctime)s %(message)s',

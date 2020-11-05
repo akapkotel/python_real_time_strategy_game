@@ -102,7 +102,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.current_node = new_current_node
 
     def update_reserved_node(self):
-        new_reserved_node = self.map.position_to_node(*self.path[1])
+        new_reserved_node = self.map.position_to_node(*self.path[0])
         self.swap_blocked_nodes(self.reserved_node, new_reserved_node)
         self.reserved_node = new_reserved_node
 
