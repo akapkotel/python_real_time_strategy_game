@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Set, Deque, Optional, Sequence, List
 from collections import deque
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
@@ -208,7 +208,14 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         log(f'{self} found path to {destination}, path: {path}')
 
 
-class Infantry(Unit):
+class Vehicle(Unit):
+
+    @property
+    def needs_repair(self) -> bool:
+        return self._health < self._max_health
+
+
+class Infantry(Unit, ABC):
 
     def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
                  position: Point):
@@ -221,10 +228,6 @@ class Infantry(Unit):
 
     def __len__(self):
         return len(self.soldiers)
-
-    @property
-    def needs_repair(self) -> bool:
-        return False
 
     @property
     def needs_medic(self) -> bool:

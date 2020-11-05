@@ -8,7 +8,7 @@ from typing import (
 )
 from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
-    draw_rectangle_outline
+    draw_rectangle_outline, SpriteList
 )
 from arcade.arcade_types import Color
 
@@ -30,7 +30,7 @@ UPDATE_RATE = 1 / 30
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 DEBUG = True
 
-SpriteList = arcade.SpriteList
+
 
 
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
@@ -89,7 +89,7 @@ class Window(arcade.Window, EventsCreator):
     def create_submenus(self):
         sound_submenu = SubMenu('Sound', background_color=RED)
         graphics_submenu = SubMenu('Graphics', background_color=BROWN)
-        game_setting = SubMenu('Game setting', background_color=BLACK)
+        game_settings = SubMenu('Game settings', background_color=BLACK)
 
         ui_element_texture = get_path_to_file('small_button_none.png')
         sound_ui_elements = [
@@ -200,7 +200,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.paused = False
 
         # SpriteLists:
-        self.interface = arcade.SpriteList()
+        self.selection_markers_sprites = SpriteList()
+        self.interface = SpriteList()
         self.units = DividedSpriteList()
         self.buildings = DividedSpriteList()
 
@@ -350,8 +351,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         if self.debug:
             self.draw_debugging()
         super().on_draw()
-        if (selection := self.window.cursor.mouse_drag_selection) is not None:
-            selection.draw()
 
     @timer(level=3, global_profiling_level=PROFILING_LEVEL)
     def draw_debugging(self):
