@@ -81,7 +81,6 @@ class LoadingScreen(WindowView):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(False)
-        self.window.background_color = (0, 0, 0)
 
     def on_update(self, delta_time: float):
         super().on_update(delta_time)

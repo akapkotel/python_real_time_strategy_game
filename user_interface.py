@@ -3,9 +3,16 @@ from __future__ import annotations
 
 from typing import Optional, Callable, Set
 
-from arcade import Sprite
+from arcade import Sprite, SpriteList
 
 from observers import OwnedObject
+
+
+class UiSpriteList(SpriteList):
+    """
+    Wrapper for spritelists containing UiElements for quick identifying the
+    spritelists which should be colided with the MouseCursor.
+    """
 
 
 class Hierarchical:

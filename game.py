@@ -8,7 +8,7 @@ from typing import (
 )
 from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
-    draw_rectangle_outline, SpriteList
+    draw_rectangle_outline, draw_text, SpriteList, Sprite
 )
 from arcade.arcade_types import Color
 
@@ -16,6 +16,7 @@ from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
 from data_containers import DividedSpriteList
 from views import WindowView, LoadingScreen
+from user_interface import UiSpriteList
 from utils.functions import (
     timer, get_screen_size, get_path_to_file, log, to_rgba
 )
@@ -26,6 +27,8 @@ from colors import GRASS_GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
+SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+SCREEN_CENTER = SCREEN_X, SCREEN_Y
 UPDATE_RATE = 1 / 30
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 DEBUG = True
@@ -90,7 +93,7 @@ class Window(arcade.Window, EventsCreator):
         sound_submenu.set_updated_and_drawn_lists()
 
     def create_new_game(self):
-        self.game_view = Game(DEBUG)
+        self.game_view = Game()
 
     def start_new_game(self):
         if self.game_view is not None:
@@ -157,11 +160,12 @@ class Window(arcade.Window, EventsCreator):
         else:
             self.show_view(self.menu_view)
 
-    def toggle_mouse_and_keyboard(self, value: bool):
+    def toggle_mouse_and_keyboard(self, value: bool, only_mouse=False):
         try:
             self.cursor.active = value
             self.cursor.visible = value
-            self.keyboard.active = value
+            if not only_mouse:
+                self.keyboard.active = value
         except AttributeError:
             pass
 
@@ -180,7 +184,7 @@ class Window(arcade.Window, EventsCreator):
 class Game(WindowView, EventsCreator, ObjectsOwner):
     instance: Optional[Game] = None
 
-    def __init__(self, debug: bool):
+    def __init__(self, debug: bool = DEBUG):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         self.assign_reference_to_self_for_all_classes()
@@ -188,10 +192,12 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.paused = False
 
         # SpriteLists:
-        self.selection_markers_sprites = SpriteList()
-        self.interface = SpriteList()
+        self.terrain_objects = SpriteList(is_static=True)
+        self.vehicles_threads = SpriteList(is_static=True)
+        self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
-        self.buildings = DividedSpriteList()
+        self.selection_markers_sprites = UiSpriteList()
+        self.interface = UiSpriteList()
 
         self.fog_of_war = FogOfWar()
         self.map = Map(20 * 100, 20 * 100, 20, 20)
@@ -205,11 +211,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # are updated each frame to evaluate AI, enemies-visibility, etc.
         self.factions: Dict[int, Faction] = {}
         self.players: Dict[int, Player] = {}
-        faction = Faction(name='Freemen')
-        Player(id=2, faction=faction, cpu=False)
-        CpuPlayer()
-        self.local_human_player: Optional[Player] = self.players[2]
-        self.factions[2].start_war(self.factions[4])
+
+        self.local_human_player: Optional[Player] = None
 
         self.missions: Dict[int, Mission] = {}
         self.current_mission: Optional[Mission] = None
@@ -230,16 +233,23 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
-        self.window.background_color = GRASS_GREEN
 
     def test_methods(self):
         self.test_scheduling_events()
+        self.test_factions_and_players_creation()
         self.test_units_spawning()
         # self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
         self.schedule_event(event)
+
+    def test_factions_and_players_creation(self):
+        faction = Faction(name='Freemen')
+        Player(id=2, faction=faction, cpu=False)
+        CpuPlayer()
+        self.local_human_player: Optional[Player] = self.players[2]
+        self.factions[2].start_war_with(self.factions[4])
 
     def test_units_spawning(self):
         player_units = self.spawn_local_human_player_units()
@@ -264,7 +274,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         return spawned_units
 
     def test_buildings_spawning(self):
-
         building = Building(
             get_path_to_file('medic_truck_red.png'),
             self.players[2],
@@ -336,9 +345,11 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
+        super().on_draw()
         if self.debug:
             self.draw_debugging()
-        super().on_draw()
+        if self.paused:
+            self.draw_paused_dialog()
 
     @timer(level=3, global_profiling_level=PROFILING_LEVEL)
     def draw_debugging(self):
@@ -378,23 +389,32 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
                 except IndexError:
                     pass
 
+    def draw_paused_dialog(self):
+        draw_rectangle_filled(*SCREEN_CENTER, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))
+        draw_text('GAME PAUSED', SCREEN_X, SCREEN_Y, WHITE, 30,
+                  anchor_x='center', anchor_y='center')
+
     def toggle_pause(self):
-        self.paused = not self.paused
+        self.paused = paused = not self.paused
+        self.window.toggle_mouse_and_keyboard(not paused, only_mouse=True)
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()
-
+        # horizontal lines:
         for i in range(self.map.rows):
             y = i * TILE_HEIGHT
             h_line = create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
             grid.append(h_line)
+
             y = i * TILE_HEIGHT + TILE_HEIGHT // 2
             h2_line = create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
             grid.append(h2_line)
+        # vertical lines:
         for j in range(self.map.columns):
             x = j * TILE_WIDTH
             v_line = create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
             grid.append(v_line)
+
             x = j * TILE_WIDTH + TILE_WIDTH // 2
             v2_line = create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
             grid.append(v2_line)

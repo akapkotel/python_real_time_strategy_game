@@ -39,6 +39,7 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         self.friendly_factions: Set[FactionId] = set()
         self.enemy_factions: Set[FactionId] = set()
         self.players = set()
+        self.leader: Optional[Player] = None
         self.register_to_objectsowners(self.game)
 
     def __repr__(self) -> str:
@@ -47,10 +48,17 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
     def register(self, acquired: OwnedObject):
         acquired: Player
         self.players.add(acquired)
+        if self.leader is None:
+            self.new_leader(acquired)
 
     def unregister(self, owned: OwnedObject):
         owned: Player
         self.players.discard(owned)
+        if owned is self.leader:
+            self.new_leader()
+
+    def new_leader(self, leader: Optional[Player] = None):
+        self.leader = leader or sorted(self.players, key=lambda x: x.id)[-1]
 
     def get_notified(self, *args, **kwargs):
         pass
@@ -58,7 +66,7 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
     def is_enemy(self, other: Faction) -> bool:
         return other.id in self.enemy_factions
 
-    def start_war(self, other: Faction):
+    def start_war_with(self, other: Faction):
         self.friendly_factions.discard(other.id)
         self.enemy_factions.add(other.id)
         other.friendly_factions.discard(self.id)
@@ -134,6 +142,10 @@ class Player(EventsCreator, ObjectsOwner, OwnedObject):
 
     def is_enemy(self, other: Player) -> bool:
         return self.faction.is_enemy(other.faction)
+
+    def start_war_with(self, other: Player):
+        if self.faction.leader is self:
+            self.faction.start_war_with(other.faction)
 
     def update(self):
         log(f'Updating player: {self}')

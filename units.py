@@ -66,7 +66,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
 
         self.path: Deque[GridPosition] = deque()
         self.waiting_for_path: List[int, Deque] = [0, None]
-        self.speed = 4
+        self.speed = 3
         self.current_speed = 0
 
     @property

@@ -26,7 +26,6 @@ class Menu(WindowView, ObjectsOwner):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
-        self.window.background_color = (75, 0, 25)
 
     def on_update(self, delta_time: float):
         if self.current_submenu is None:

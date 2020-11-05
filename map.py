@@ -2,14 +2,18 @@
 from __future__ import annotations
 
 import heapq
-from math import hypot, inf
+import random
+import math
+from math import hypot
 from abc import ABC, abstractmethod
+
 from collections import defaultdict
 from typing import Optional, Tuple, List, Dict, Set
+from arcade import Sprite, Texture, load_texture, load_spritesheet
 
 from data_types import Number, UnitId, BuildingId, NodeId
-from utils.functions import timer, log
-from game import PROFILING_LEVEL
+from utils.functions import timer, log, get_path_to_file
+from game import Game, PROFILING_LEVEL
 
 
 PATH = 'PATH'
@@ -19,6 +23,12 @@ TILE_HEIGHT = 60
 # typing aliases:
 GridPosition = SectorId = NormalizedPoint = Tuple[int, int]
 MapPath = List[NormalizedPoint]
+
+
+MAP_TEXTURES = {
+    'mud': load_spritesheet(
+        get_path_to_file('mud_tileset_6x6.png'), 60, 60, 4, 16, 0)
+}
 
 
 class GridHandler:
@@ -68,13 +78,19 @@ class GridHandler:
         """Useful for pathfinding."""
         raise NotImplementedError
 
+    @classmethod
+    def diagonal(cls, first_id: GridPosition, second_id: GridPosition) -> bool:
+        return first_id[0] != second_id[0] and first_id[1] != second_id[1]
+
 
 class Map(GridHandler):
     """
 
     """
+    game: Optional[Game] = None
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
+        MapNode.map = Pathfinder.map = self
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.width = width
@@ -88,7 +104,6 @@ class Map(GridHandler):
 
         self.generate_nodes()
         self.calculate_distances_between_nodes()
-        MapNode.map = Pathfinder.map = self
 
     def __len__(self) -> int:
         return len(self.nodes)
@@ -115,16 +130,33 @@ class Map(GridHandler):
     def grid_to_node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]
 
+    @timer(1, global_profiling_level=PROFILING_LEVEL)
     def generate_nodes(self):
         for row in range(self.rows):
             for column in range(self.columns):
-                self.nodes[(column, row)] = MapNode(column, row)
+                self.nodes[(column, row)] = node = MapNode(column, row)
+                self.create_map_sprite(*node.position)
         log(f'Generated {len(self)} map nodes.', True)
+
+    def create_map_sprite(self, x, y):
+        sprite = Sprite(center_x=x, center_y=y)
+        sprite.texture = self.random_terrain_texture()
+        self.game.terrain_objects.append(
+            sprite
+        )
+
+    @staticmethod
+    def random_terrain_texture() -> Texture:
+        texture = random.choice(MAP_TEXTURES['mud'])
+        texture.image.transpose(random.randint(0, 5))
+        return texture
 
     def calculate_distances_between_nodes(self):
         for node in self.nodes.values():
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
-                node.costs[grid] = 1 if node.is_diagonal_to_other(grid) else 1.4
+                adjacent_node = self.nodes[grid]
+                distance = 1.4 if self.diagonal(node.grid, grid) else 1
+                node.costs[grid] = distance * (node.cost + adjacent_node.cost)
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -172,6 +204,7 @@ class MapNode(GridHandler, ABC):
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
         self._walkable = True
+        self.cost = 1
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
@@ -179,7 +212,7 @@ class MapNode(GridHandler, ABC):
     def in_bounds(self, *args, **kwargs):
         return self.map.in_bounds(*args, **kwargs)
 
-    def is_diagonal_to_other(self, other: GridPosition):
+    def diagonal_to_other(self, other: GridPosition):
         return self.grid[0] != other[0] and self.grid[1] != other[1]
 
     @property
@@ -257,27 +290,26 @@ class Pathfinder:
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes
-        unexplored = PriorityQueue(start, heuristic(start, end))
+        unexplored = PriorityQueue(start, heuristic(start, end) * 1.001)
         previous: Dict[GridPosition, GridPosition] = {}
 
         get_best_unexploed = unexplored.get
         put_to_unexplored = unexplored.put
 
-        cost_so_far = defaultdict(lambda: inf)
+        cost_so_far = defaultdict(lambda: math.inf)
         cost_so_far[start] = 0
 
         while unexplored:
-            current: GridPosition = get_best_unexploed()
-            if current == end:
-                log(f'Path found! Unexplored: {len(unexplored)}')
+            if (current := get_best_unexploed()) == end:
+                log(f'Path found! Unexplored: {len(unexplored)}', 1)
                 return self.reconstruct_path(map_nodes, previous, current)
             node = map_nodes[current]
             for adj in (a for a in node.walkable_adjacent if a.grid not in unexplored):
-                total = cost_so_far[current] + adj.costs[current] < cost_so_far[adj.grid]
-                if total < cost_so_far[adj]:
+                total = cost_so_far[current] + node.costs[adj.grid]
+                if total < cost_so_far[adj.grid]:
                     previous[adj.grid] = current
-                    cost_so_far[adj] = total
-                    priority = total + heuristic(adj.grid, end)
+                    cost_so_far[adj.grid] = total
+                    priority = total + heuristic(adj.grid, end) * 1.001
                     put_to_unexplored(adj.grid, priority)
         log(f'Searching failed! Unexplored: {len(unexplored)}', console=True)
         return []

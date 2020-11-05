@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Optional, Set, List, Union
+from typing import Optional, Set, List, Tuple, Union, Type
 from arcade import (
     Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
@@ -8,17 +8,19 @@ from arcade import (
     Texture, AnimationKeyframe, load_textures
 )
 
-from user_interface import ToggledElement, UiElement, CursorInteractive
+from user_interface import (
+    ToggledElement, UiSpriteList, UiElement, CursorInteractive
+)
 from utils.functions import log, get_path_to_file
 from data_containers import DividedSpriteList
+from units import Unit, Vehicle, UnitTask
+from game import Game, Menu, UPDATE_RATE
 from colors import GREEN, CLEAR_GREEN
 from scheduling import EventsCreator
 from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
 from data_types import Point
-from game import Game, Menu, UPDATE_RATE
-from units import Unit, Vehicle, UnitTask
 
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
@@ -83,9 +85,16 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         names = 'normal.png', 'forbidden.png', 'attack.png', 'select.png'
         self.textures.extend(
             [load_texture(get_path_to_file(name)) for name in names[1:]]
-        )
+        )  # without 'normal.png' since it is already loaded
+        self.create_cursor_animations_frames(names)
+        self.set_texture(CURSOR_NORMAL_TEXTURE)
 
-        frames: List[Texture]
+    def create_cursor_animations_frames(self, names: Tuple[str, ...]):
+        """
+        For each loaded Texture we create a list of sub-textures which will
+        be used to build lists of AnimationKeyframes utilised in
+        on_animation_update method.
+        """
         for i, texture in enumerate(self.textures):
             frames_count = texture.width // 60
             locations_list = [(60 * j, 0, 60, 60) for j in range(frames_count)]
@@ -94,14 +103,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 self.new_frames_list(frames)
             )
 
-        for frame_list in self.all_frames_lists:
-            print(frame_list)
-        self.set_texture(CURSOR_NORMAL_TEXTURE)
-
-    def new_frames_list(self, frames: List[Texture]) -> List[AnimationKeyframe]:
-        print(frames)
+    @staticmethod
+    def new_frames_list(frames: List[Texture]) -> List[AnimationKeyframe]:
         frames_count = len(frames)
-        duration = 1 // len(frames)
+        duration = (1 // frames_count)
         return [
             AnimationKeyframe(
                 duration=duration, texture=frames[i], tile_id=i
@@ -216,9 +221,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
-        self.update_animation()
         self.update_cursor_pointed()
         self.update_cursor_texture()
+        self.update_animation()
 
     def update_animation(self, delta_time: float = UPDATE_RATE):
         """
@@ -227,9 +232,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.cur_frame_idx += 1
         if self.cur_frame_idx >= len(self.frames):
             self.cur_frame_idx = 0
-
-        cur_frame = self.frames[self.cur_frame_idx]
-        self.texture = cur_frame.texture
+        self.texture = self.frames[self.cur_frame_idx].texture
 
     def update_cursor_pointed(self):
         """
@@ -251,6 +254,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # be mouse-pointed (it lies on the top)
         if (pointed_sprite := self.dragged_ui_element) is None:
             for drawn in reversed(self._updated_spritelists):
+                if not isinstance(drawn, (DividedSpriteList, UiSpriteList)):
+                    continue
                 if pointed_sprite := self.cursor_points(drawn, x, y):
                     break
             else:
@@ -264,7 +269,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # for first child, which is pointed instead:
         if pointed := get_sprites_at_point((x, y), spritelist):
             s: CursorInteractive
-            for sprite in (s for s in pointed if isinstance(s, GameObject) or not s.children):
+            for sprite in (s for s in pointed if isinstance(s, GameObject) or
+                                                 not getattr(s, 'children',
+                                                             False)):
                 return sprite  # first pointed children
             else:
                 return pointed[0]  # return pointed Sprite if no children found
@@ -320,18 +327,25 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @property
     def pointed_unit(self) -> Optional[Unit]:
-        if isinstance(pointed_gameobject := self.pointed_gameobject, Unit):
-            return pointed_gameobject
+        return o if isinstance(o := self.pointed_gameobject, Unit) else None
 
     @property
     def pointed_building(self) -> Optional[Building]:
-        if isinstance(pointed_gameobject := self.pointed_gameobject, Building):
-            return pointed_gameobject
+        return o if isinstance(o := self.pointed_gameobject, Building) else None
+
+    def get_pointed_of_type(self, type_: Type) -> Optional[Type]:
+        return o if isinstance(o := self.pointed_gameobject, type_) else None
 
     def draw(self):
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
         super().draw()
+        if self.is_game_loaded_and_running and self.game.debug:
+            self.draw_selected_units_counter()
+
+    def draw_selected_units_counter(self):
+        x, y = self.position
+        draw_text(str(len(self.selected_units)), x, y - 50, GREEN)
 
 
 class MouseDragSelection:

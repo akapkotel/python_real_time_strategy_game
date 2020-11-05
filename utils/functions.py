@@ -7,6 +7,7 @@ from time import perf_counter
 from numba import njit
 from shapely import speedups, affinity
 from shapely.geometry import LineString, Polygon
+from functools import lru_cache
 
 from arcade.arcade_types import RGB, RGBA
 
@@ -103,6 +104,7 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
     return sum_x / positions_count, sum_y / positions_count
 
 
+@lru_cache()
 def get_path_to_file(filename: str) -> str:
     """
     Build full absolute path to the filename and return it + /filename.

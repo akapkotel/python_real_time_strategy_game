@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, List, Deque
+from typing import Optional, List, Deque, Type
 from collections import deque
 
 from arcade.arcade_types import Point
@@ -13,7 +13,7 @@ class IProducer:
     """
     An interface for all Buildings which can produce Units in game.
     """
-    produced_objects: Optional[List[PlayerEntity]] = []
+    produced_objects: Optional[List[Type[PlayerEntity]]] = []
     production_queue: Optional[Deque[PlayerEntity]] = None
     production_progress: float = 0.0
     production_per_frame: float = 0.0
