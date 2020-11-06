@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Optional, Any
 
 from arcade import SpriteList
 
@@ -143,8 +143,8 @@ class DividedSpriteList(SpriteList):
         self.remove(poped_item)
         return poped_item
 
-    def select_by_id(self, element_id: int):
+    def select_by_id(self, element_id: int) -> Optional[Any]:
         try:
             return self.id_elements_dict[element_id]
         except KeyError:
-            pass
+            return None

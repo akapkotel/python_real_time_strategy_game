@@ -4,11 +4,11 @@ from __future__ import annotations
 import arcade
 
 from typing import (
-    List, Dict, Any, Optional, Union
+    List, Set, Dict, Any, Optional, Union
 )
 from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
-    draw_rectangle_outline, draw_text, SpriteList, ShapeElementList, Sprite
+    draw_text, SpriteList
 )
 from arcade.arcade_types import Color
 
@@ -23,7 +23,7 @@ from utils.functions import (
 from user_interface import (
     Button, CheckButton, TextInputField
 )
-from colors import MAP_GREEN, RED, BROWN, BLACK, WHITE
+from colors import GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -196,7 +196,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.vehicles_threads = SpriteList(is_static=True)
         self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
-        self.selection_markers_sprites = UiSpriteList()
+        self.selection_markers_sprites = SpriteList()
         self.interface = UiSpriteList()
 
         self.fog_of_war = FogOfWar()
@@ -213,6 +213,10 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.players: Dict[int, Player] = {}
 
         self.local_human_player: Optional[Player] = None
+        # we only draw those Units and Buildings, which are 'known" to the
+        # local human Player's Faction or belong to it, the rest of entities
+        # is hidden. This set is updated each frame:
+        self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
         self.missions: Dict[int, Mission] = {}
         self.current_mission: Optional[Mission] = None
@@ -250,7 +254,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         cpu_player = CpuPlayer()
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)
-        # self.factions[2].start_war_with(self.factions[4])
 
     def test_units_spawning(self):
         player_units = self.spawn_local_human_player_units()
@@ -338,8 +341,18 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
         if not self.paused:
+            self.update_local_drawn_units_and_buildings()
             super().on_update(delta_time)
             self.update_factions_and_players()
+
+    def update_local_drawn_units_and_buildings(self):
+        self.local_drawn_units_and_buildings.clear()
+        local_faction = self.local_human_player.faction
+        self.local_drawn_units_and_buildings.update(
+            local_faction.units,
+            local_faction.buildings,
+            local_faction.known_enemies
+        )
 
     def update_factions_and_players(self):
         for faction in self.factions.values():
@@ -385,7 +398,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             for i, point in enumerate(path):
                 try:
                     end = path[i + 1]
-                    draw_line(*point, *end, MAP_GREEN, 2)
+                    draw_line(*point, *end, GREEN, 1)
                 except IndexError:
                     pass
 

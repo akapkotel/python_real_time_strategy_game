@@ -8,6 +8,7 @@ from arcade.arcade_types import Point
 
 from player import PlayerEntity, Player
 from utils.functions import is_visible
+from map import MapNode
 
 
 class IProducer:
@@ -66,9 +67,24 @@ class Building(PlayerEntity, IProducer):
                  position: Point,
                  produces: Optional[PlayerEntity] = None):
         PlayerEntity.__init__(self, building_name, player, position, 4)
+
         if produces is not None:
             IProducer.__init__(self)
             self.produced_objects.append(produces)
+
+        self.position = self.game.map.normalize_position(*position)
+        self.occupied_nodes = [
+            self.game.map.position_to_node(*self.position)
+        ]
+        for node in self.occupied_nodes:
+            self.block_map_node(node)
+
+    @staticmethod
+    def unblock_map_node(node: MapNode):
+        node.building_id = None
+
+    def block_map_node(self, node: MapNode):
+        node.building_id = self.id
 
     @property
     def needs_repair(self) -> bool:

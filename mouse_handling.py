@@ -5,8 +5,9 @@ from arcade import (
     Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
     draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
     MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, draw_text,
-    Texture, AnimationKeyframe, load_textures
+    Texture, AnimationKeyframe, load_textures, SpriteSolidColor
 )
+from arcade.arcade_types import Color
 
 from user_interface import (
     ToggledElement, UiSpriteList, UiElement, CursorInteractive
@@ -15,7 +16,7 @@ from utils.functions import log, get_path_to_file
 from data_containers import DividedSpriteList
 from units import Unit, Vehicle, UnitTask
 from game import Game, Menu, UPDATE_RATE
-from colors import GREEN, CLEAR_GREEN
+from colors import GREEN, YELLOW, RED, CLEAR_GREEN
 from scheduling import EventsCreator
 from gameobject import GameObject
 from player import PlayerEntity
@@ -31,6 +32,54 @@ CURSOR_FORBIDDEN_TEXTURE = 1
 CURSOR_ATTACK_TEXTURE = 2
 CURSOR_SELECTION_TEXTURE = 3
 CURSOR_REPAIR_TEXTURE = 4
+
+
+selection_texture = load_texture(
+    get_path_to_file('unit_selection_marker.png'), 0, 0, 60, 60, hit_box_algorithm='None'
+)
+
+
+class SelectedEntityMarker:
+    """
+    This class produces rectangle-unit-selection markers showing that a
+    particular Unit or Building is selected by player and displaying some
+    info about selected, like health level or lack of fuel icon. Each marker
+    can contain many Sprites which are dynamically created, updated and
+    destroyed. You must cache SelectionMarker instances and their Sprites in
+    distinct data-structures. Markers are stored in ordinary list and
+    Sprites in SpriteLists.
+    """
+
+    def __init__(self, selected: PlayerEntity):
+        self.selected = selected
+        self.health = health = selected.health
+        self.position = selected.position
+        self.borders = borders = Sprite()
+        borders.texture = selection_texture
+        self.healthbar = healthbar = SpriteSolidColor(
+            *self.health_to_color_and_width(health))
+        self.sprites = [borders, healthbar]
+
+    @staticmethod
+    def health_to_color_and_width(health: float) -> Tuple[float, int, Color]:
+        width = int((60 / 100) * health)
+        if health > 66:
+            return width, 5, GREEN
+        return (width, 5, YELLOW) if health > 33 else width, 5, RED
+
+    def update(self):
+        self.position = x, y = self.selected.position
+        if self.selected.health != (health := self.health):
+            width, _, color = self.health_to_color_and_width(health)
+            self.healthbar.color = color
+            self.healthbar.width = width
+        self.healthbar.position = x, y + 30
+        for sprite in self.sprites[:-1]:
+            sprite.position = x, y
+
+    def kill(self):
+        for sprite in self.sprites:
+            sprite.kill()
 
 
 class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
@@ -71,6 +120,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # them with right-button click:
         self.selected_units: List[Unit] = []
         self.selected_building: Optional[Building] = None
+        # for each selected Unit create SelectedUnitMarker, a Sprite showing
+        # that this unit is currently selected and will react for players's
+        # actions. Sprites are actually drawn and updated in Game class,
+        # but here we keep them cashed to easily manipulate them:
+        self.selection_markers: Set[SelectedEntityMarker] = set()
 
         self.attached_task: Optional[UnitTask] = None
 
@@ -141,7 +195,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
-        self.selected_units.clear()
+        if self.selected_units:
+            self.unselect_units()
         # TODO: clearing selections, context menu?
 
     def on_middle_button_click(self, x: float, y: float, modifiers: int):
@@ -166,12 +221,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.close_drag_selection()
 
     def close_drag_selection(self):
+        self.unselect_units()
         self.select_units(*[u for u in self.mouse_drag_selection.units])
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
-        if self.selected_units:
-            self.unselect_units()
+        pass
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'Clicked PlayerEntity: {clicked}')
@@ -192,13 +247,27 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
+        self.unselect_units()
         self.select_units(clicked_unit)
 
     def select_units(self, *units: Unit):
         self.selected_units = list(units)
+        self.create_selection_markers(units)
+
+    def create_selection_markers(self, units):
+        for unit in units:
+            marker = SelectedEntityMarker(selected=unit)
+            self.selection_markers.add(marker)
+            self.game.selection_markers_sprites.extend(marker.sprites)
 
     def unselect_units(self):
         self.selected_units.clear()
+        self.clear_selection_markers()
+
+    def clear_selection_markers(self):
+        for marker in self.selection_markers:
+            marker.kill()
+        self.selection_markers.clear()
 
     def on_building_clicked(self, clicked_building: Building):
         if clicked_building.selectable:
@@ -219,9 +288,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
+        self.update_selection_markers()
         self.update_cursor_pointed()
         self.update_cursor_texture()
         self.update_animation()
+
+    def update_selection_markers(self):
+        for marker in self.selection_markers:
+            marker.update()
 
     def update_animation(self, delta_time: float = UPDATE_RATE):
         """
@@ -237,15 +311,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         Search all Spritelists and DividedSpriteLists for any UiElements or
         GameObjects placed at the MouseCursor position.
         """
+        self.pointed_gameobject = self.pointed_ui_element = None
         if pointed := self.get_pointed_sprite(*self.position):
             if isinstance(pointed, UiElement) and pointed.active:
                 self.update_mouse_pointed(pointed)
-            else:
+            elif getattr(pointed, 'rendered', False):
                 self.pointed_gameobject = pointed
-        else:
-            self.pointed_gameobject = self.pointed_ui_element = None
 
-    def get_pointed_sprite(self, x, y) -> Optional[Union[GameObject, UiElement]]:
+    def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn in some
         # hierarchical order, we must iterate over them catching
         # cursor-pointed elements in backward order: last draw, is first to
@@ -422,224 +495,3 @@ class MouseDragSelection:
         draw_lrtb_rectangle_filled(left, right, top, bottom, CLEAR_GREEN)
         draw_lrtb_rectangle_outline(left, right, top, bottom, GREEN)
         draw_text(str(len(self.units)), left, bottom, GREEN)
-
-
-class SelectionMarker:
-    """
-    This class produces rectangle-unit-selection markers showing that a
-    particular Unit or Building is selected by player and displaying some
-    info about selected, like health level or lack of fuel icon. Each marker
-    can contain many Sprites which are dynamically created, updated and
-    destroyed. You must cache SelectionMarker instances and their Sprites in
-    distinct data-structures. Markers are stored in ordinary list and
-    Sprites in SpriteLists.
-    """
-    rectangle_texture = "selection_rectangle.png"
-    health_green_texture = "health_bar_green.png"
-    health_yellow_texture = "health_bar_yellow.png"
-    health_red_texture = "health_bar_red.png"
-    commanding_star_texture = "commander_star.png"
-    numbers_texture = "group_numbers.png"
-    no_munitions_texture = "no_munitions.png"
-    no_fuel_texture = "no_fuel.png"
-
-    selection_markers_sprites = None  # for faster lookups, avoid .
-
-    def __init__(self, selected_object):
-        selected_object.selected = True
-        self.selected = selected_object
-        self.scale = max(selected_object.width, selected_object.height) / 25
-        self.rectangle = self.create_selection_rectangle(selected_object, self.scale)
-        self.health_bar_height = selected_object.height * 0.625
-        self.health_bar_width = (30 * self.scale)
-        self.health_bar_color = None
-        self.health_bar = self.create_health_bar(selected_object, self.scale)
-        self.index = 0
-        self.optionals: List = []
-        self.in_selection_markers_sprites = False
-
-    def __str__(self):
-        return f'SelectionMarker for {self.selected}'
-
-    def create_selection_rectangle(self,
-                                   selected: Union[Unit, Building],
-                                   scale: float) -> Sprite:
-        x, y = selected.position
-        return Sprite(self.rectangle_texture, scale, center_x=x, center_y=y)
-
-    def create_health_bar(self, selected, scale):
-        x, y = selected.center_x, selected.center_y + self.health_bar_height
-        # add textures in order: red, yellow, green to set their indexes to
-        # 0, 1, 2 what allows us to toggle them by dividing health_ratio by
-        # fixed number and cheaply decide which color of health bar to show
-        hb = Sprite(self.health_red_texture, scale, center_x=x, center_y=y)
-        hb.append_texture(load_texture(self.health_yellow_texture))
-        hb.append_texture(load_texture(self.health_green_texture))
-        return hb
-
-    def append_marker_to_selection_markers_sprites(self):
-        self.selection_markers_sprites.append(self.rectangle)
-        self.selection_markers_sprites.append(self.health_bar)
-        for optional in (o for o in self.optionals if o is not None):
-            self.selection_markers_sprites.append(optional)
-
-    def update(self) -> Union[Unit, Building]:
-        if not self.in_selection_markers_sprites:
-            self.append_marker_to_selection_markers_sprites()
-            self.in_selection_markers_sprites = True
-        selected = self.selected
-        self.rectangle.position = selected.position
-        self.update_health_bar(selected)
-        self.index = 0
-        return selected
-
-    def set_health_bar_color(self, health_ratio: float) -> Texture:
-        if health_ratio > 0.7:
-            return self.health_green_texture
-        return self.health_yellow_texture if health_ratio > 0.3 else self.health_red_texture
-
-    def update_health_bar(self, selected: Union[Unit, Building]):
-        health_ratio = selected.health / selected.max_health
-        width = self.health_bar_width * health_ratio
-        x = selected.center_x - (self.health_bar_width / 2) + width / 2
-        y = selected.center_y + self.health_bar_height
-        color = int(health_ratio // 0.4)
-        if color != self.health_bar_color:
-            self.change_health_bar_color(color)
-        self.health_bar.width = width
-        self.health_bar.set_position(x, y)
-
-    def change_health_bar_color(self, color: int):
-        # color is a index of Texture to be picked from self.textures
-        self.health_bar_color = color
-        self.health_bar.set_texture(color)
-
-    def get_marker_position(self, selected: Union[Unit, Building]) -> Point:
-        x = selected.center_x - selected.width + 14 * self.index
-        y = selected.center_y + self.health_bar_height * 0.6
-        self.index += 1
-        return x, y
-
-    def kill(self):
-        log(f'Killed {self}')
-        self.selected.selected = False
-        self.rectangle.kill()
-        self.health_bar.kill()
-        self.kill_optionals()
-
-    def kill_optionals(self):
-        for optional in self.optionals:
-            try:
-                optional.kill()
-            except AttributeError:
-                pass
-
-
-class UnitSelectionMarker(SelectionMarker):
-
-    def __init__(self, selected_unit: Unit):
-        super().__init__(selected_unit)
-        self.number = None
-        self.commander_star = None
-        self.no_munitions_icon = None
-        self.no_fuel_icon = None
-
-    def update(self):
-        selected = super().update()
-        self.update_commanding_star(selected)
-        self.update_group_number(selected)
-        self.update_munitions_icon(selected)
-        if isinstance(selected, Vehicle):
-            self.update_fuel_icon(selected)
-
-    def update_commanding_star(self, selected: Unit):
-        if selected.commander:
-            x, y = self.get_marker_position(selected)
-            if self.commander_star is None:
-                self.create_commander_star(x, y)
-            else:
-                self.commander_star.position = x, y
-        elif self.commander_star is not None:
-            self.commander_star.kill()
-            self.commander_star = None
-
-    def create_commander_star(self, x, y):
-        self.commander_star = Sprite(
-            self.commanding_star_texture, center_x=x, center_y=y)
-        self.selection_markers_sprites.append(self.commander_star)
-        self.optionals.append(self.commander_star)
-
-    def update_group_number(self, selected: Unit):
-        if selected.permanent_group_id is not None:
-            cx = selected.center_x + selected.width
-            cy = selected.center_y + self.health_bar_height * 0.6
-            if self.number is None:
-                self.create_group_number(selected, cx, cy)
-            else:
-                self.number.position = cx, cy
-        elif self.number is not None:
-            self.number.kill()
-            self.number = None
-
-    def create_group_number(self, selected: Unit, cx: float, cy: float):
-        number = chr(selected.permanent_group_id)
-        x, y, w, h = (int(number) - 1) * 14, 0, 14, 12
-        self.number = Sprite(self.numbers_texture, 1, x, y, w, h, cx, cy)
-        self.selection_markers_sprites.append(self.number)
-        self.optionals.append(self.number)
-
-    def update_munitions_icon(self, selected: Unit):
-        if not selected.munitions:
-            x, y = self.get_marker_position(selected)
-            if self.no_munitions_icon is None:
-                self.create_no_munitions_icon(x, y)
-            else:
-                self.no_munitions_icon.position = x, y
-        elif self.no_munitions_icon is not None:
-            self.no_munitions_icon.kill()
-            self.no_munitions_icon = None
-
-    def create_no_munitions_icon(self, x: float, y: float):
-        self.no_munitions_icon = Sprite(self.no_munitions_texture,
-                                              center_x=x, center_y=y)
-        self.selection_markers_sprites.append(self.no_munitions_icon)
-        self.optionals.append(self.no_munitions_icon)
-
-    def update_fuel_icon(self, selected: Vehicle):
-        if selected.fuel <= 0:
-            x, y = self.get_marker_position(selected)
-            if self.no_fuel_icon is None:
-                self.create_fuel_icon(x, y)
-            else:
-                self.no_fuel_icon.position = x, y
-        elif self.no_fuel_icon is not None:
-            self.no_fuel_icon.kill()
-            self.no_fuel_icon = None
-
-    def create_fuel_icon(self, x: float, y: float):
-        self.no_fuel_icon = Sprite(self.no_fuel_texture, center_x=x, center_y=y)
-        self.selection_markers_sprites.append(self.no_fuel_icon)
-        self.optionals.append(self.no_fuel_icon)
-
-
-class BuildingSelectionMarker(SelectionMarker):
-
-    def __init__(self, selected_building: Building):
-        super().__init__(selected_building)
-
-    def create_health_bar(self, selected, scale):
-        health_bar = super().create_health_bar(selected, scale)
-        health_bar.height *= 0.1
-        return health_bar
-
-    def update_health_bar(self, selected: Building):
-        health_ratio = selected.health / selected.max_health
-        width = self.health_bar_width * health_ratio
-        x = selected.center_x - (self.health_bar_width / 2) + width / 2
-        y = selected.center_y + self.health_bar_height
-        color = int(health_ratio // 0.4)
-        if color != self.health_bar_color:
-            self.change_health_bar_color(color)
-        self.health_bar.height = 10
-        self.health_bar.width = width
-        self.health_bar.set_position(x, y)

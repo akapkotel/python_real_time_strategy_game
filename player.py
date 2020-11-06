@@ -11,7 +11,7 @@ from scheduling import EventsCreator
 from utils.functions import log, is_visible
 from data_types import FactionId
 from game import Game, UPDATE_RATE
-from map import TILE_WIDTH
+from map import TILE_WIDTH, MapNode
 
 
 def new_id(objects: Dict) -> int:
@@ -36,10 +36,17 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         OwnedObject.__init__(self)
         self.id = id or new_id(self.game.factions)
         self.name: str = name or f'Faction {self.id}'
+
         self.friendly_factions: Set[FactionId] = set()
         self.enemy_factions: Set[FactionId] = set()
+
         self.players = set()
         self.leader: Optional[Player] = None
+
+        self.units: Set[Unit] = set()
+        self.buildings: Set[Building] = set()
+        self.known_enemies: Set[PlayerEntity] = set()
+
         self.register_to_objectsowners(self.game)
 
     def __repr__(self) -> str:
@@ -82,20 +89,9 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         other.cease_fire(self)
         other.friendly_factions.add(self.id)
 
-    def units(self) -> List[Unit]:
-        faction_units = []
-        for player in self.players:
-            faction_units.extend(player.units)
-        return faction_units
-
-    def buildings(self) -> List[Building]:
-        faction_buildings = []
-        for player in self.players:
-            faction_buildings.extend(player.buildings)
-        return faction_buildings
-
     def update(self):
         log(f'Updating faction: {self.name}')
+        self.known_enemies.clear()
         for player in self.players:
             player.update()
 
@@ -127,15 +123,19 @@ class Player(EventsCreator, ObjectsOwner, OwnedObject):
         acquired: Union[Unit, Building]
         if isinstance(acquired, Unit):
             self.units.add(acquired)
+            self.faction.units.add(acquired)
         else:
             self.buildings.add(acquired)
+            self.faction.buildings.add(acquired)
 
     def unregister(self, owned: OwnedObject):
         owned: Union[Unit, Building]
         try:
             self.units.remove(owned)
+            self.faction.units.remove(owned)
         except KeyError:
             self.buildings.discard(owned)
+            self.faction.buildings.discard(owned)
 
     def get_notified(self, *args, **kwargs):
         pass
@@ -155,6 +155,7 @@ class Player(EventsCreator, ObjectsOwner, OwnedObject):
         self.known_enemies.clear()
         for unit in self.units:
             self.known_enemies.update(unit.known_enemies)
+        self.faction.known_enemies.update(self.known_enemies)
 
 
 class CpuPlayer(Player):
@@ -182,6 +183,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self.player: Player = player
         self.faction: Faction = self.player.faction
         self.known_enemies: Set[PlayerEntity] = set()
+        self.was_notified_about_enemies = False
 
         self.is_building = isinstance(self, Building)
 
@@ -202,29 +204,59 @@ class PlayerEntity(GameObject, EventsCreator):
     def health(self, value: float):
         self._health = value
 
+    @staticmethod
+    @abstractmethod
+    def unblock_map_node(node: MapNode):
+        raise NotImplementedError
+
+    @abstractmethod
+    def block_map_node(self, node: MapNode):
+        raise NotImplementedError
+
     def update(self):
+        self.update_visibility()
         super().update()
-        self.update_known_enemies_set()
+        if not self.was_notified_about_enemies:
+            self.update_known_enemies_set()
+
+    def update_visibility(self):
+        if self in self.game.local_drawn_units_and_buildings:
+            if not self.rendered:
+                self.start_drawing()
+        elif self.rendered:
+            self.stop_drawing()
+
+    @property
+    def rendered(self) -> bool:
+        return self in self.divided_spritelist.drawn
+
+    def start_drawing(self):
+        self.divided_spritelist.start_drawing(self)
+
+    def stop_drawing(self):
+        self.divided_spritelist.stop_drawing(self)
 
     def update_known_enemies_set(self):
-        self.known_enemies = self.scan_for_visible_enemies()
+        self.known_enemies = enemies = self.scan_for_visible_enemies()
 
     def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
         potentially_visible = []
         for faction in self.game.factions.values():
             if faction.is_enemy(self.faction):
-                potentially_visible.extend(faction.units())
-                potentially_visible.extend(faction.buildings())
+                potentially_visible.extend(faction.units)
+                potentially_visible.extend(faction.buildings)
 
         visible_enemies: Set[Union[Unit, Building]] = {
-            enemy for enemy in potentially_visible if enemy.visible_for(self)
+            enemy for enemy in potentially_visible if
+            enemy.visible_for(self)
         }
         return visible_enemies
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
         distance = self.detection_radius
-        return is_visible(self.position, other.position, obstacles, distance)
+        return is_visible(self.position, other.position, obstacles,
+                          distance)
 
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)

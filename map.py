@@ -227,7 +227,7 @@ class MapNode(GridHandler, ABC):
         self._unit_id = value
 
     @property
-    def building_id(self) -> UnitId:
+    def building_id(self) -> Optional[BuildingId]:
         return self._unit_id
 
     @building_id.setter
