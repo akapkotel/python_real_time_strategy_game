@@ -24,3 +24,12 @@ class Robustness(IntEnum):
     MEDIUM = 2  # light, tracked vehicles
     HEAVY = 3  # only heavy, tracked vehicles
     INDESTRUCTIBLE = 4  # no Unit can ever destroy this object
+
+
+class TerrainCost(IntEnum):
+    ASPHALT = 1
+    GROUND = 1.25
+    GRASS = 1.5
+    SAND = 1.75
+    MUD = 2
+    SWAMP = 3

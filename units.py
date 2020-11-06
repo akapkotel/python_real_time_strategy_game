@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Set, Deque, Optional, Sequence, List
 from collections import deque
 from abc import ABC, abstractmethod
-from arcade import AnimatedTimeBasedSprite
+from arcade import AnimatedTimeBasedSprite, has_line_of_sight
 from arcade.arcade_types import Point
 
 from utils.functions import (
@@ -132,7 +132,8 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
             if self.game.units.id_elements_dict[next_node.unit_id].path:
                 self.wait_for_free_path()
             else:
-                self.schedule_pathfinding(self.map.position_to_grid(*self.path[-1]))
+                destination = self.map.position_to_grid(*self.path[-1])
+                self.schedule_pathfinding_for_later(destination)
 
     def wait_for_free_path(self):
         """
@@ -177,16 +178,14 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         start = self.map.position_to_grid(*self.position)
         if self.map.grid_to_node(destination).walkable:
             if path := self.find_path(start, destination):
-                self.create_new_path(destination, path)
+                self.create_new_path(path)
             else:
-                self.schedule_pathfinding(destination)
+                self.schedule_pathfinding_for_later(destination)
 
-    def create_new_path(self, destination: GridPosition, path: MapPath):
-        if self.game.debug:
-            self.debug_found_path(path, destination)
+    def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
 
-    def schedule_pathfinding(self, destination: GridPosition):
+    def schedule_pathfinding_for_later(self, destination: GridPosition):
         """
         Rather costly way to delay pathfinding execution. It is used only
         when Unit already have not found correct path to the destination

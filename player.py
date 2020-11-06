@@ -3,15 +3,15 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Set, Dict, List, Union, Optional
-from arcade import has_line_of_sight
 from arcade.arcade_types import Color, Point
 
 from observers import ObjectsOwner, OwnedObject
 from gameobject import GameObject, Robustness
 from scheduling import EventsCreator
-from utils.functions import log, visible
-from data_types import FactionId, PlayerId
+from utils.functions import log, is_visible
+from data_types import FactionId
 from game import Game, UPDATE_RATE
+from map import TILE_WIDTH
 
 
 def new_id(objects: Dict) -> int:
@@ -183,10 +183,12 @@ class PlayerEntity(GameObject, EventsCreator):
         self.faction: Faction = self.player.faction
         self.known_enemies: Set[PlayerEntity] = set()
 
+        self.is_building = isinstance(self, Building)
+
         self._max_health = 100
         self._health = self._max_health
 
-        self.visibility_radius = 0
+        self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
 
         self.production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
 
@@ -215,16 +217,14 @@ class PlayerEntity(GameObject, EventsCreator):
                 potentially_visible.extend(faction.buildings())
 
         visible_enemies: Set[Union[Unit, Building]] = {
-            unit for unit in potentially_visible if unit.visible_for(self)
+            enemy for enemy in potentially_visible if enemy.visible_for(self)
         }
-
         return visible_enemies
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
-        return visible(self.position, other.position, obstacles)
-        # return has_line_of_sight(self.position, other.position, obstacles,
-        #                          100, 60)
+        distance = self.detection_radius
+        return is_visible(self.position, other.position, obstacles, distance)
 
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)

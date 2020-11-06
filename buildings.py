@@ -7,6 +7,7 @@ from collections import deque
 from arcade.arcade_types import Point
 
 from player import PlayerEntity, Player
+from utils.functions import is_visible
 
 
 class IProducer:
@@ -77,6 +78,13 @@ class Building(PlayerEntity, IProducer):
         super().update()
         if hasattr(self, 'update_production'):
             self.update_production()
+
+    def visible_for(self, other: PlayerEntity) -> bool:
+        obstacles = self.game.buildings
+        if self.is_building:
+            obstacles = [b for b in obstacles if b.id is not self.id]
+        distance = self.detection_radius
+        return is_visible(self.position, other.position, obstacles, distance)
 
 
 if __name__:

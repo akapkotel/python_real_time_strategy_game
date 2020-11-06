@@ -2,10 +2,10 @@
 
 import logging
 
-from math import hypot, atan2, degrees, sin, cos, radians
+from math import hypot, atan2, degrees, sin, cos, radians, inf as INFINITY
 from time import perf_counter
 from numba import njit
-from shapely import speedups, affinity
+from shapely import speedups
 from shapely.geometry import LineString, Polygon
 from functools import lru_cache
 
@@ -205,7 +205,10 @@ def vector_2d(angle: float, scalar: float) -> Point:
     return sin(rad) * scalar, cos(rad) * scalar
 
 
-def visible(position_a: Point, position_b: Point, obstacles_: List) -> bool:
+def is_visible(position_a: Point,
+               position_b: Point,
+               obstacles: Sequence,
+               max_distance: float = INFINITY) -> bool:
     """
     Check if position_a is 'visible' from position_b and vice-versa. 'Visible'
     means, that you can connect both points with straight line without
@@ -213,9 +216,13 @@ def visible(position_a: Point, position_b: Point, obstacles_: List) -> bool:
 
     :param position_a: tuple -- coordinates of first position (x, y)
     :param position_b: tuple -- coordinates of second position (x, y)
-    :param obstacles_: list -- Obstacle objects to check against
+    :param obstacles: list -- Obstacle objects to check against
+    :param max_distance: float -- maximum visibility fistance
     :return: tuple -- (bool, list)
     """
-    if not obstacles_: return True
-    line = LineString([position_a, position_b])
-    return not any((Polygon(o.points).crosses(line) for o in obstacles_))
+    line_of_sight = LineString([position_a, position_b])
+    if line_of_sight.length > max_distance:
+        return False
+    elif not obstacles:
+        return True
+    return not any((Polygon(o.get_adjusted_hit_box()).crosses(line_of_sight) for o in obstacles))

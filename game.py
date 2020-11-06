@@ -8,7 +8,7 @@ from typing import (
 )
 from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
-    draw_rectangle_outline, draw_text, SpriteList, Sprite
+    draw_rectangle_outline, draw_text, SpriteList, ShapeElementList, Sprite
 )
 from arcade.arcade_types import Color
 
@@ -23,7 +23,7 @@ from utils.functions import (
 from user_interface import (
     Button, CheckButton, TextInputField
 )
-from colors import GRASS_GREEN, RED, BROWN, BLACK, WHITE
+from colors import MAP_GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -238,7 +238,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
         self.test_units_spawning()
-        # self.test_buildings_spawning()
+        self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
@@ -246,10 +246,11 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
-        Player(id=2, faction=faction, cpu=False)
-        CpuPlayer()
+        player = Player(id=2, faction=faction, cpu=False)
+        cpu_player = CpuPlayer()
         self.local_human_player: Optional[Player] = self.players[2]
-        self.factions[2].start_war_with(self.factions[4])
+        player.start_war_with(cpu_player)
+        # self.factions[2].start_war_with(self.factions[4])
 
     def test_units_spawning(self):
         player_units = self.spawn_local_human_player_units()
@@ -260,6 +261,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         spawned_units = []
         player = self.players[2]
         name = 'jeep_blue.png'
+        # spawned_units.append(spawn_test_unit((100, 100), name, player=player))
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
                 spawned_units.append(spawn_test_unit((x, y), name, player=player))
@@ -275,8 +277,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def test_buildings_spawning(self):
         building = Building(
-            get_path_to_file('medic_truck_red.png'),
-            self.players[2],
+            get_path_to_file('small_button_none.png'),
+            self.players[4],
             (400, 600),
             produces=Unit
         )
@@ -292,14 +294,14 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         return 0, 0, 0
 
     def register(self, acquired: OwnedObject):
-        acquired: Union[Unit, Building, Player, Faction]
+        acquired: Union[Player, Faction, PlayerEntity]
         if isinstance(acquired, (Unit, Building)):
             self.register_player_entity(acquired)
         else:
             self.register_player_or_faction(acquired)
 
     def register_player_entity(self, registered: Union[Unit, Building]):
-        if isinstance(registered, Unit):
+        if not registered.is_building:
             self.units.append(registered)
         else:
             self.buildings.append(registered)
@@ -319,7 +321,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def unregister_player_entity(self, owned: Union[PlayerEntity]):
         owned: Union[Unit, Building]
-        if isinstance(owned, Unit):
+        if not owned.is_building:
             self.units.remove(owned)
         else:
             self.buildings.remove(owned)
@@ -375,19 +377,22 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             draw_circle_outline(*adj.position, 5, WHITE, 1)
 
     def draw_debugged(self):
-        debugged = self.debugged
-        paths = [element[1] for element in debugged if element[0] == PATH]
-        self.draw_debug_paths(paths)
+        self.draw_debug_paths()
+        self.draw_debug_lines_of_sight()
 
-    @staticmethod
-    def draw_debug_paths(paths: List[List[GridPosition]]):
-        for path in paths:
+    def draw_debug_paths(self):
+        for path in (u.path for u in self.local_human_player.units if u.path):
             for i, point in enumerate(path):
                 try:
                     end = path[i + 1]
-                    draw_line(*point, *end, RED, 2)
+                    draw_line(*point, *end, MAP_GREEN, 2)
                 except IndexError:
                     pass
+
+    def draw_debug_lines_of_sight(self):
+        for unit in (u for u in self.local_human_player.units if u.known_enemies):
+            for enemy in unit.known_enemies:
+                draw_line(*unit.position, *enemy.position, RED)
 
     def draw_paused_dialog(self):
         draw_rectangle_filled(*SCREEN_CENTER, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))

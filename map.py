@@ -14,6 +14,7 @@ from arcade import Sprite, Texture, load_texture, load_spritesheet
 from data_types import Number, UnitId, BuildingId, NodeId
 from utils.functions import timer, log, get_path_to_file
 from game import Game, PROFILING_LEVEL
+from enums import TerrainCost
 
 
 PATH = 'PATH'
@@ -156,7 +157,8 @@ class Map(GridHandler):
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = 1.4 if self.diagonal(node.grid, grid) else 1
-                node.costs[grid] = distance * (node.cost + adjacent_node.cost)
+                distance *= (node.terrain_cost + adjacent_node.terrain_cost)
+                node.costs[grid] = distance
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -204,7 +206,7 @@ class MapNode(GridHandler, ABC):
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
         self._walkable = True
-        self.cost = 1
+        self.terrain_cost = 1
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
@@ -301,7 +303,6 @@ class Pathfinder:
 
         while unexplored:
             if (current := get_best_unexploed()) == end:
-                log(f'Path found! Unexplored: {len(unexplored)}', 1)
                 return self.reconstruct_path(map_nodes, previous, current)
             node = map_nodes[current]
             for adj in (a for a in node.walkable_adjacent if a.grid not in unexplored):
@@ -311,7 +312,6 @@ class Pathfinder:
                     cost_so_far[adj.grid] = total
                     priority = total + heuristic(adj.grid, end) * 1.001
                     put_to_unexplored(adj.grid, priority)
-        log(f'Searching failed! Unexplored: {len(unexplored)}', console=True)
         return []
 
     @staticmethod

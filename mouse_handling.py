@@ -69,7 +69,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
-        self.selected_units: Set[Unit] = set()
+        self.selected_units: List[Unit] = []
         self.selected_building: Optional[Building] = None
 
         self.attached_task: Optional[UnitTask] = None
@@ -177,7 +177,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         log(f'Clicked PlayerEntity: {clicked}')
         clicked: Union[Unit, Building]
         if clicked.selectable:
-            if isinstance(clicked, Unit):
+            if not clicked.is_building:
                 self.on_unit_clicked(clicked)
             else:
                 self.on_building_clicked(clicked)
@@ -195,9 +195,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.select_units(clicked_unit)
 
     def select_units(self, *units: Unit):
-        self.selected_units.clear()
-        for unit in units:
-            self.selected_units.add(unit)
+        self.selected_units = list(units)
 
     def unselect_units(self):
         self.selected_units.clear()
@@ -296,7 +294,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if entity := (self.pointed_unit or self.pointed_building):
             if entity.selectable:
                 self.show_selecting_texture()
-            else:
+            elif entity.is_enemy(self.selected_units[0]):
                 self.show_attack_texture()
         elif not self.game.map.position_to_node(*self.position).walkable:
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
