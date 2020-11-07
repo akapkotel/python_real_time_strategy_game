@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
-from typing import Tuple, Set, Sequence, Optional
+from typing import Tuple, Set, Dict, Sequence, Optional
 
 from arcade import load_texture, Sprite, SpriteSolidColor
 from arcade.arcade_types import Color, Point
@@ -70,10 +71,12 @@ class PermanentUnitsGroup:
     their numbers.
     """
     game: Optional[Game] = None
+    groups: Dict[int, PermanentUnitsGroup] = {}
 
     def __init__(self, group_id: int, units: Sequence[Unit]):
         self.group_id = group_id
         self.units: Set[Unit] = set(units)
+        self.game.permanent_units_groups[group_id] = self
 
     @property
     def position(self) -> Point:

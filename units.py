@@ -44,7 +44,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
 
         self.path: Deque[GridPosition] = deque()
         self.waiting_for_path: List[int, Deque] = [0, None]
-        self.speed = 10
+        self.speed = 4
         self.current_speed = 0
 
     @property
@@ -163,6 +163,8 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
 
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
+        if self.waiting_for_path[0]:
+            self.waiting_for_path = [0, None]
 
     def schedule_pathfinding_for_later(self, destination: GridPosition):
         """

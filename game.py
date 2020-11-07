@@ -10,7 +10,7 @@ from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
     draw_text, SpriteList
 )
-from arcade.arcade_types import Color
+from arcade.arcade_types import Color, Point
 
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
@@ -28,6 +28,7 @@ from colors import GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
 
+FULL_SCREEN = True
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
@@ -48,6 +49,7 @@ class Window(arcade.Window, EventsCreator):
 
     def __init__(self, width: int, height: int, update_rate: float):
         arcade.Window.__init__(self, width, height, update_rate=update_rate)
+        self.set_fullscreen(FULL_SCREEN)
         self.center_window()
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
@@ -69,6 +71,11 @@ class Window(arcade.Window, EventsCreator):
 
         # keyboard-related:
         self.keyboard = KeyboardHandler(window=self)
+
+    @property
+    def screen_center(self) -> Point:
+        left, _, bottom, _ = self.current_viewport
+        return left + SCREEN_X, bottom + SCREEN_Y
 
     @property
     def updated(self):
@@ -105,7 +112,6 @@ class Window(arcade.Window, EventsCreator):
             self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
-        self.current_viewport = self.get_viewport()
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
@@ -133,7 +139,7 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
         if self.cursor.active:
-            left, _, bottom, _ = self.get_viewport()
+            left, _, bottom, _ = self.current_viewport
             self.cursor.on_mouse_release(x + left, y + bottom, button, modifiers)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
@@ -192,6 +198,7 @@ class Window(arcade.Window, EventsCreator):
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
         new_right = new_left + SCREEN_WIDTH
         new_top = new_bottom + SCREEN_HEIGHT
+        self.current_viewport = new_left, new_right, new_bottom, new_top
         self.set_viewport(new_left, new_right, new_bottom, new_top)
 
     def get_viewport(self) -> Viewport:
@@ -247,6 +254,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # local human Player's Faction or belong to it, the rest of entities
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
+
+        self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
         self.missions: Dict[int, Mission] = {}
         self.current_mission: Optional[Mission] = None
@@ -437,9 +446,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
                 draw_line(*unit.position, *enemy.position, RED)
 
     def draw_paused_dialog(self):
-        draw_rectangle_filled(*SCREEN_CENTER, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))
-        draw_text('GAME PAUSED', SCREEN_X, SCREEN_Y, WHITE, 30,
-                  anchor_x='center', anchor_y='center')
+        x, y = self.window.screen_center
+        draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))
+        draw_text('GAME PAUSED', x, y, WHITE, 30, anchor_x='center', anchor_y='center')
 
     def toggle_pause(self):
         self.paused = paused = not self.paused
@@ -472,6 +481,7 @@ if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map, GridPosition
     from player import Faction, Player, CpuPlayer, PlayerEntity
+    from unit_management import PermanentUnitsGroup
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor
     from units import Unit, UnitWeight

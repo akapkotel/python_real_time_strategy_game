@@ -231,10 +231,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.selected_units.clear()
         self.clear_selection_markers()
 
-    def clear_selection_markers(self):
-        for marker in self.selection_markers:
+    def clear_selection_markers(self,
+                                killed: Set[SelectedEntityMarker] = None):
+        killed = killed if killed is not None else self.selection_markers
+        for marker in killed:
             marker.kill()
-        self.selection_markers.clear()
+        self.selection_markers.difference_update(killed)
 
     def on_building_clicked(self, clicked_building: Building):
         if clicked_building.selectable:
@@ -253,9 +255,15 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.game.map.on_map_area(x, y):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:
-                self.mouse_drag_selection.update(x, y)
+                new, lost = self.mouse_drag_selection.update(x, y)
+                self.actualize_selection_markers_set(new, lost)
             else:
                 self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
+
+    def actualize_selection_markers_set(self, new, lost):
+        discarded = {m for m in self.selection_markers if m.selected in lost}
+        self.clear_selection_markers(discarded)
+        self.create_selection_markers(new)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # TODO
@@ -418,7 +426,7 @@ class MouseDragSelection:
     def __contains__(self, item: PlayerEntity) -> bool:
         return item in self.units
 
-    def update(self, x: float, y: float):
+    def update(self, x: float, y: float) -> Tuple[Set[Unit], Set[Unit]]:
         """
         Update current Selection setting new shape of a rectangle-marker.
 
@@ -427,38 +435,39 @@ class MouseDragSelection:
         """
         self.end = (x, y)  # actual mouse-cursor position
         self.calculate_selection_rectangle_bounds()
-        self.update_units()  # some units could get outside and some inside
+        return self.update_units()  # to update visible selection markers
 
     def calculate_selection_rectangle_bounds(self):
         corners = self.start, self.end
         self.left, self.right = sorted([x[0] for x in corners])
         self.bottom, self.top = sorted([x[1] for x in corners])
 
-    def update_units(self):
+    def update_units(self) -> Tuple[Set[Unit], Set[Unit]]:
         """
         Update list of currently selected_units accordingly to the shape of
         the selection rectangle: units inside the shape are considered as
         'selected' and units outside the shape are not selected.
         """
-        selection_units = self.units
-        player_units = self.game.local_human_player.units
-        inside_selection = self.inside_selection_rect
+        all_player_units = self.game.local_human_player.units
         units_to_add = set()
         units_to_discard = set()
         # check units if they should be selected or not:
-        for unit in (u for u in player_units if u.selectable):
-            inside = inside_selection(*unit.position)
-            if inside:
-                if unit not in selection_units:
+        for unit in (u for u in all_player_units if u.selectable):
+            if self.inside_selection_rect(*unit.position):
+                if unit not in self.units:
                     units_to_add.add(unit)
-            elif unit in selection_units:
+            elif unit in self.units:
                 units_to_discard.add(unit)
         # update selection units set:
-        selection_units.difference_update(units_to_discard)
+        self.remove_units_from_selection(units_to_discard)
         self.add_units_to_selection(units_to_add)
+        return units_to_add, units_to_discard
 
     def inside_selection_rect(self, x: float, y: float) -> bool:
         return self.left < x < self.right and self.bottom < y < self.top
+
+    def remove_units_from_selection(self, units: Set[Unit]):
+        self.units.difference_update(units)
 
     def add_units_to_selection(self, units: Set[Unit]):
         self.units.update(units)
