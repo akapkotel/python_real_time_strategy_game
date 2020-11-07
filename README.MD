@@ -38,6 +38,12 @@ To be done.
     each other.
 11. Alternative scheduling calls system to work with the (to be done)
     saving and loading game.
+12. Simple permanent group of units are now 'saved' and player can
+    activate them with 0-9 keys press.
+13. Mouse-drag scrolling the map.
+14. Small improvement to efficiency by spreading of many pathfinding
+    calls for several update-frames, so no big lag when sending units to
+    the opposite corner of the map.
 
 #### TO BE DONE:
 #### Minor:
@@ -45,13 +51,17 @@ To be done.
    friendly Units which are very close to each other.
 2. Improve collisions-avoidance to get rid off the
    diagonal-movements-collisions.
+3. Display currently selected permanent units group number above each
+   unit belonging to this group.
 
 #### Major:
-1. Installer/executable for Windows and Linux.
-2. AI (with finite-state=-machine?)
-3. Saving and loading game (with shelve?)
-4. Sounds and music
-5. Multiplayer.
-6. "Playing" section above.
+1. User-interface.
+2. Menu!
+3. AI (with finite-state=-machine?)
+4. Saving and loading game (with shelve?)
+5. Sounds and music (reimplement system from Pytanks for now?)
+6. Multiplayer.
+7. "Playing" section above.
+8. Installer/executable for Windows and Linux.
 
 Rafał "Akapkotel" Trąbski
