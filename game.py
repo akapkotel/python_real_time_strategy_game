@@ -4,7 +4,7 @@ from __future__ import annotations
 import arcade
 
 from typing import (
-    List, Set, Dict, Any, Optional, Union
+    List, Set, Tuple, Dict, Any, Optional, Union
 )
 from arcade import (
     draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
@@ -15,10 +15,11 @@ from arcade.arcade_types import Color
 from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
 from observers import ObjectsOwner, OwnedObject
 from data_containers import DividedSpriteList
+from data_types import Viewport
 from views import WindowView, LoadingScreen
 from user_interface import UiSpriteList
 from utils.functions import (
-    timer, get_screen_size, get_path_to_file, log, to_rgba
+    timer, get_screen_size, get_path_to_file, log, to_rgba, clamp
 )
 from user_interface import (
     Button, CheckButton, TextInputField
@@ -26,12 +27,16 @@ from user_interface import (
 from colors import GREEN, RED, BROWN, BLACK, WHITE
 from menu import Menu, SubMenu
 
+
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
 UPDATE_RATE = 1 / 30
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 DEBUG = True
+
+#viewport-related:
+SCROLLING_DISTANCE = 60
 
 
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
@@ -44,10 +49,10 @@ class Window(arcade.Window, EventsCreator):
     def __init__(self, width: int, height: int, update_rate: float):
         arcade.Window.__init__(self, width, height, update_rate=update_rate)
         self.center_window()
+
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
         self._updated: List = []
-        self.drawn: List = []
 
         self.menu_view = Menu()
         self.game_view: Optional[Game] = None
@@ -57,10 +62,10 @@ class Window(arcade.Window, EventsCreator):
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
         # cursor-related:
+        self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
         # store viewport data to avoid redundant get_viewport() calls and call
         # get_viewport only when viewport is actually changed:
         self.current_viewport = self.get_viewport()
-        self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
 
         # keyboard-related:
         self.keyboard = KeyboardHandler(window=self)
@@ -100,13 +105,15 @@ class Window(arcade.Window, EventsCreator):
             self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
+        self.current_viewport = self.get_viewport()
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
         self.events_scheduler.update()
+        super().on_update(delta_time)
 
     def on_draw(self):
-        self.clear()
+        arcade.start_render()
         self.current_view.on_draw()
         if (cursor := self.cursor).visible:
             cursor.draw()
@@ -126,7 +133,8 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
         if self.cursor.active:
-            self.cursor.on_mouse_release(x, y, button, modifiers)
+            left, _, bottom, _ = self.get_viewport()
+            self.cursor.on_mouse_release(x + left, y + bottom, button, modifiers)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -141,6 +149,10 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
+            if self.game_view is not None and self.game_view.is_running:
+                if symbol == arcade.key.ENTER:
+                    spawn_test_unit(self.cursor.position, 'jeep_blue.png',
+                                    self.game_view.players[2])
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -168,6 +180,24 @@ class Window(arcade.Window, EventsCreator):
                 self.keyboard.active = value
         except AttributeError:
             pass
+
+    def change_viewport(self, dx: float, dy: float):
+        """
+        Change displayed area accordingly to the current position of player
+        in the game world. If not in game, return static menu viewport.
+        """
+        game_map = self.game_view.map
+        left, right, bottom, top = self.get_viewport()
+        new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
+        new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
+        new_right = new_left + SCREEN_WIDTH
+        new_top = new_bottom + SCREEN_HEIGHT
+        self.set_viewport(new_left, new_right, new_bottom, new_top)
+
+    def get_viewport(self) -> Viewport:
+        if self.current_view is not self.game_view:
+            return 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
+        return super().get_viewport()
 
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
@@ -200,7 +230,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.interface = UiSpriteList()
 
         self.fog_of_war = FogOfWar()
-        self.map = Map(20 * 100, 20 * 100, 20, 20)
+        self.map = Map(100 * TILE_WIDTH, 100 * TILE_HEIGHT, TILE_WIDTH, TILE_WIDTH)
 
         self.set_updated_and_drawn_lists()
 
@@ -221,9 +251,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.missions: Dict[int, Mission] = {}
         self.current_mission: Optional[Mission] = None
 
-        self.debug = DEBUG
-        if DEBUG:
-            self.debugged = []
+        self.debug = debug
+        self.debugged = []
+        if debug:
             self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
@@ -264,7 +294,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         spawned_units = []
         player = self.players[2]
         name = 'jeep_blue.png'
-        # spawned_units.append(spawn_test_unit((100, 100), name, player=player))
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
                 spawned_units.append(spawn_test_unit((x, y), name, player=player))
@@ -421,20 +450,20 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # horizontal lines:
         for i in range(self.map.rows):
             y = i * TILE_HEIGHT
-            h_line = create_line(0, y, SCREEN_WIDTH, y, BLACK, 1)
+            h_line = create_line(0, y, self.map.width, y, BLACK)
             grid.append(h_line)
 
             y = i * TILE_HEIGHT + TILE_HEIGHT // 2
-            h2_line = create_line(TILE_WIDTH // 2, y, SCREEN_WIDTH, y, WHITE, 1)
+            h2_line = create_line(TILE_WIDTH // 2, y, self.map.width, y, WHITE)
             grid.append(h2_line)
         # vertical lines:
-        for j in range(self.map.columns):
+        for j in range(self.map.columns * 2):
             x = j * TILE_WIDTH
-            v_line = create_line(x, 0, x, SCREEN_HEIGHT, BLACK, 1)
+            v_line = create_line(x, 0, x, self.map.height, BLACK)
             grid.append(v_line)
 
             x = j * TILE_WIDTH + TILE_WIDTH // 2
-            v2_line = create_line(x, TILE_HEIGHT // 2, x, SCREEN_HEIGHT, WHITE, 1)
+            v2_line = create_line(x, TILE_HEIGHT // 2, x, self.map.height, WHITE)
             grid.append(v2_line)
         return grid
 
@@ -450,5 +479,18 @@ if __name__ == '__main__':
     from buildings import Building
     from missions import Mission
 
+    if PROFILING_LEVEL:
+        try:
+            from pyprofiler import start_profile, end_profile
+            profiler = start_profile()
+        except Exception as e:
+            log(str(e), console=True)
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()
+
+    if PROFILING_LEVEL:
+        try:
+        # noinspection PyUnboundLocalVariable
+            end_profile(profiler, 30, True)
+        except NameError:
+            pass

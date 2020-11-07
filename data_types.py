@@ -8,3 +8,4 @@ Point = Tuple[Number, Number]
 GridPosition = Tuple[int, int]
 FactionId = UnitId = BuildingId = PlayerId = NodeId = int
 Vector2D = Tuple[float, float]
+Viewport = Tuple[float, float, float, float]

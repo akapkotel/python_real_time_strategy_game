@@ -7,21 +7,20 @@ from arcade import (
     MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, draw_text,
     Texture, AnimationKeyframe, load_textures, SpriteSolidColor
 )
-from arcade.arcade_types import Color
 
 from user_interface import (
     ToggledElement, UiSpriteList, UiElement, CursorInteractive
 )
 from utils.functions import log, get_path_to_file
+from unit_management import SelectedEntityMarker
 from data_containers import DividedSpriteList
-from units import Unit, Vehicle, UnitTask
+from units import Unit, UnitTask
 from game import Game, Menu, UPDATE_RATE
-from colors import GREEN, YELLOW, RED, CLEAR_GREEN
-from scheduling import EventsCreator
+from colors import GREEN, CLEAR_GREEN
+from scheduling import EventsCreator, ScheduledEvent
 from gameobject import GameObject
 from player import PlayerEntity
 from buildings import Building
-from data_types import Point
 
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
@@ -32,54 +31,6 @@ CURSOR_FORBIDDEN_TEXTURE = 1
 CURSOR_ATTACK_TEXTURE = 2
 CURSOR_SELECTION_TEXTURE = 3
 CURSOR_REPAIR_TEXTURE = 4
-
-
-selection_texture = load_texture(
-    get_path_to_file('unit_selection_marker.png'), 0, 0, 60, 60, hit_box_algorithm='None'
-)
-
-
-class SelectedEntityMarker:
-    """
-    This class produces rectangle-unit-selection markers showing that a
-    particular Unit or Building is selected by player and displaying some
-    info about selected, like health level or lack of fuel icon. Each marker
-    can contain many Sprites which are dynamically created, updated and
-    destroyed. You must cache SelectionMarker instances and their Sprites in
-    distinct data-structures. Markers are stored in ordinary list and
-    Sprites in SpriteLists.
-    """
-
-    def __init__(self, selected: PlayerEntity):
-        self.selected = selected
-        self.health = health = selected.health
-        self.position = selected.position
-        self.borders = borders = Sprite()
-        borders.texture = selection_texture
-        self.healthbar = healthbar = SpriteSolidColor(
-            *self.health_to_color_and_width(health))
-        self.sprites = [borders, healthbar]
-
-    @staticmethod
-    def health_to_color_and_width(health: float) -> Tuple[float, int, Color]:
-        width = int((60 / 100) * health)
-        if health > 66:
-            return width, 5, GREEN
-        return (width, 5, YELLOW) if health > 33 else width, 5, RED
-
-    def update(self):
-        self.position = x, y = self.selected.position
-        if self.selected.health != (health := self.health):
-            width, _, color = self.health_to_color_and_width(health)
-            self.healthbar.color = color
-            self.healthbar.width = width
-        self.healthbar.position = x, y + 30
-        for sprite in self.sprites[:-1]:
-            sprite.position = x, y
-
-    def kill(self):
-        for sprite in self.sprites:
-            sprite.kill()
 
 
 class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
@@ -105,6 +56,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         # cache currently updated and drawn spritelists of the active View:
         self._updated_spritelists: List[DrawnAndUpdated] = []
+
+        self.mouse_dragging = False
 
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
@@ -181,6 +134,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.position = x, y
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        self.clicked_position = int(x), int(y)
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
@@ -195,8 +149,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
-        if self.selected_units:
-            self.unselect_units()
         # TODO: clearing selections, context menu?
 
     def on_middle_button_click(self, x: float, y: float, modifiers: int):
@@ -226,7 +178,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
-        pass
+        if self.mouse_dragging:
+            self.mouse_dragging = False
+        elif self.selected_units:
+            self.unselect_units()
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         log(f'Clicked PlayerEntity: {clicked}')
@@ -241,10 +196,17 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         log(f'Called: on_click_with_selected_units')
         pointed: Union[PlayerEntity, None]
         if pointed is not None:
-            return self.on_player_entity_clicked(pointed)
+            self.on_player_entity_clicked(pointed)
+        else:
+            self.send_units_to_pointed_location(units, x, y)
+
+    def send_units_to_pointed_location(self, units, x, y):
         waypoints = self.game.map.group_of_waypoints(x, y, len(units))
         for i, unit in enumerate(units):
-            unit.move_to(waypoints[i])
+            e = ScheduledEvent(
+                self, 0, unit.move_to, args=(waypoints[i],), frames_left=1 + i
+            )
+            self.schedule_event(e)
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_units()
@@ -259,6 +221,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             marker = SelectedEntityMarker(selected=unit)
             self.selection_markers.add(marker)
             self.game.selection_markers_sprites.extend(marker.sprites)
+
+    def remove_from_selection_markers(self, entity: PlayerEntity):
+        for marker in self.selection_markers:
+            if marker.selected is entity:
+                marker.kill()
 
     def unselect_units(self):
         self.selected_units.clear()
@@ -275,6 +242,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
+        if self.is_game_loaded_and_running:
+            if buttons == MOUSE_BUTTON_LEFT:
+                self.on_left_button_drag(dx, dy, x, y)
+            elif buttons == MOUSE_BUTTON_RIGHT:
+                self.mouse_dragging = True
+                self.game.window.change_viewport(dx, dy)
+
+    def on_left_button_drag(self, dx, dy, x, y):
         if self.game.map.on_map_area(x, y):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:

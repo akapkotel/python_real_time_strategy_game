@@ -50,8 +50,10 @@ class OwnedObject:
 
     def unregister_from_all_owners(self):
         """Remember to call this method in objects __kill__."""
-        for owner in self._owners:
-            self.unregister_from_objectsowner(owner)
+        if self._owners is not None:
+            for owner in self._owners.copy():
+                owner.unregister(self)
+            self._owners.clear()
 
 
 class ObjectsOwner:

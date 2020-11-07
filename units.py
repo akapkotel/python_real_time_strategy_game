@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Set, Deque, Optional, Sequence, List
 from collections import deque
 from abc import ABC, abstractmethod
-from arcade import AnimatedTimeBasedSprite, has_line_of_sight
+from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
 from utils.functions import (
@@ -13,33 +13,11 @@ from utils.functions import (
 )
 from map import Pathfinder, GridPosition, PATH, MapPath, MapNode
 from units_tasking import UnitTask, TasksExecutor
-from data_types import Number, Vector2D, UnitId
 from player import PlayerEntity, Player
 from scheduling import ScheduledEvent
 
 from enums import UnitWeight
 from game import Game, UPDATE_RATE
-
-
-class PermanentUnitsGroup:
-    """
-    Player can group units by selecting them with mouse and pressing CTRL +
-    numeric keys (1-9). Such groups could be then quickly selected by pressing
-    their numbers.
-    """
-    game: Optional[Game] = None
-
-    def __init__(self, group_id: int, units: Sequence[Unit]):
-        self.group_id = group_id
-        self.units: Set[Unit] = set(units)
-
-    @property
-    def position(self) -> Point:
-        positions = [(u.center_x, u.center_y) for u in self.units]
-        return average_position_of_points_group(positions)
-
-    def discard(self, unit: Unit):
-        self.units.discard(unit)
 
 
 class Unit(PlayerEntity, TasksExecutor, Pathfinder):
@@ -51,7 +29,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
                  weight: UnitWeight,
                  position: Point,
                  tasks_on_start: Optional[List[UnitTask]] = None):
-        PlayerEntity.__init__(self, unit_name, player=player, position=position)
+        PlayerEntity.__init__(self, unit_name, player, position)
         TasksExecutor.__init__(self, tasks_on_start)
         Pathfinder.__init__(self)
 
@@ -66,7 +44,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
 
         self.path: Deque[GridPosition] = deque()
         self.waiting_for_path: List[int, Deque] = [0, None]
-        self.speed = 3
+        self.speed = 10
         self.current_speed = 0
 
     @property
@@ -81,10 +59,11 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         raise NotImplementedError
 
     def update(self):
-        self.evaluate_tasks()
-        self.update_blocked_map_nodes()
-        self.update_pathfinding()
-        super().update()
+        if self.alive:
+            super().update()
+            self.evaluate_tasks()
+            self.update_blocked_map_nodes()
+            self.update_pathfinding()
 
     def update_blocked_map_nodes(self):
         """
@@ -142,7 +121,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         the path with A* algorthm. Instead, Unit 'shelves' currently found
         path and after 1 second 'unshelves' it in countdown_waiting method.
         """
-        self.waiting_for_path = [1 / UPDATE_RATE, self.path.copy()]
+        self.waiting_for_path = [1 // UPDATE_RATE, self.path.copy()]
         self.path.clear()
 
     def update_pathfinding(self):
@@ -198,6 +177,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
                 delay=1,
                 function=self.move_to,
                 args=(destination,),
+                frames_left=5,
             )
         )
 
@@ -205,6 +185,12 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.game.debugged.clear()
         self.game.debugged.append([PATH, path])
         log(f'{self} found path to {destination}, path: {path}')
+
+    def kill(self):
+        for node in (self.current_node, self.reserved_node):
+            if node is not None:
+                self.unblock_map_node(node)
+        super().kill()
 
 
 class Vehicle(Unit):

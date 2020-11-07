@@ -178,12 +178,13 @@ class PlayerEntity(GameObject, EventsCreator):
                  robustness: Robustness = 0):
         GameObject.__init__(self, entity_name, robustness, position)
         EventsCreator.__init__(self)
-        OwnedObject.__init__(self)
+        OwnedObject.__init__(self, owners=True)
 
         self.player: Player = player
         self.faction: Faction = self.player.faction
         self.known_enemies: Set[PlayerEntity] = set()
-        self.was_notified_about_enemies = False
+
+        self.selection_marker: Optional[SelectedEntityMarker] = None
 
         self.is_building = isinstance(self, Building)
 
@@ -214,10 +215,16 @@ class PlayerEntity(GameObject, EventsCreator):
         raise NotImplementedError
 
     def update(self):
-        self.update_visibility()
         super().update()
-        if not self.was_notified_about_enemies:
+        if self.alive:
+            self.update_visibility()
             self.update_known_enemies_set()
+        else:
+            self.kill()
+
+    @property
+    def alive(self) -> bool:
+        return self._health > 0
 
     def update_visibility(self):
         if self in self.game.local_drawn_units_and_buildings:
@@ -230,14 +237,8 @@ class PlayerEntity(GameObject, EventsCreator):
     def rendered(self) -> bool:
         return self in self.divided_spritelist.drawn
 
-    def start_drawing(self):
-        self.divided_spritelist.start_drawing(self)
-
-    def stop_drawing(self):
-        self.divided_spritelist.stop_drawing(self)
-
     def update_known_enemies_set(self):
-        self.known_enemies = enemies = self.scan_for_visible_enemies()
+        self.known_enemies = self.scan_for_visible_enemies()
 
     def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
         potentially_visible = []
@@ -269,7 +270,13 @@ class PlayerEntity(GameObject, EventsCreator):
     def needs_repair(self) -> bool:
         raise NotImplementedError
 
+    def kill(self):
+        if self.selection_marker is not None:
+            self.selection_marker.kill()
+        super().kill()
+
 
 if __name__:
     from units import Unit
     from buildings import Building
+    from mouse_handling import SelectedEntityMarker

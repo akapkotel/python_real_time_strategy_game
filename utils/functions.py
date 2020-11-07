@@ -54,8 +54,6 @@ def timer(level=0, global_profiling_level=0, forced=False):
 
 
 def get_screen_size() -> Tuple:
-    # import platform
-
     from PIL import ImageGrab
     screen = ImageGrab.grab()
     return int(screen.width), int(screen.height)

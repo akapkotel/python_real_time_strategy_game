@@ -8,11 +8,11 @@ from math import hypot
 from abc import ABC, abstractmethod
 
 from collections import defaultdict
-from typing import Optional, Tuple, List, Dict, Set
+from typing import Optional, Tuple, Sequence, List, Dict, Set
 from arcade import Sprite, Texture, load_texture, load_spritesheet
 
 from data_types import Number, UnitId, BuildingId, NodeId
-from utils.functions import timer, log, get_path_to_file
+from utils.functions import timer, log, get_path_to_file, distance_2d
 from game import Game, PROFILING_LEVEL
 from enums import TerrainCost
 
@@ -92,10 +92,10 @@ class Map(GridHandler):
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
         MapNode.map = Pathfinder.map = self
-        self.grid_width = grid_width
-        self.grid_height = grid_height
         self.width = width
         self.height = height
+        self.grid_width = grid_width
+        self.grid_height = grid_height
         self.rows = self.height // self.grid_height
         self.columns = self.width // self.grid_width
 
@@ -133,9 +133,10 @@ class Map(GridHandler):
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     def generate_nodes(self):
-        for row in range(self.rows):
-            for column in range(self.columns):
-                self.nodes[(column, row)] = node = MapNode(column, row)
+        print(f'map rows: {self.rows}, columns: {self.columns}')
+        for x in range(self.columns):
+            for y in range(self.rows):
+                self.nodes[(x, y)] = node = MapNode(x, y)
                 self.create_map_sprite(*node.position)
         log(f'Generated {len(self)} map nodes.', True)
 
@@ -175,17 +176,15 @@ class Map(GridHandler):
                            required_waypoints: int) -> List[GridPosition]:
         first_waypoint = self.position_to_grid(x, y)
         waypoints: Set[GridPosition] = {first_waypoint}
-        all_adjacent = []
+        # all_adjacent = []
         node = self.grid_to_node(first_waypoint)
 
-        iteration = 0
         while len(waypoints) < required_waypoints:
             adjacent = [n.grid for n in node.walkable_adjacent if n not in waypoints]
             waypoints.update(adjacent)
-            all_adjacent.extend(a for a in adjacent if a not in all_adjacent)
-            node = self.grid_to_node(all_adjacent[-1])
-            iteration += 1
-        return list(waypoints)
+            # all_adjacent.extend(a for a in adjacent if a not in all_adjacent)
+            node = self.grid_to_node(adjacent[-1])
+        return [w for w in waypoints]
 
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]

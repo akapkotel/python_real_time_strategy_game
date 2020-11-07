@@ -37,7 +37,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
                  robustness: Robustness = 0,
                  position: Point = (0, 0)):
         x, y = position
-        Sprite.__init__(self, filename, center_x=x, center_y=y)
+        super().__init__(filename, center_x=x, center_y=y)
         self.object_name = get_object_name(filename)
 
         GameObject.total_objects_count += 1
@@ -63,6 +63,20 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
     def update_animation(self, delta_time: float = 1 / 60):
         super().update_animation(delta_time)
 
+    def start_drawing(self):
+        self.divided_spritelist.start_drawing(self)
+
+    def stop_drawing(self):
+        self.divided_spritelist.stop_drawing(self)
+
+    def start_updating(self):
+        self.divided_spritelist.start_updating(self)
+
+    def stop_updating(self):
+        self.divided_spritelist.stop_updating(self)
+
     def kill(self):
+        self.sprite_lists.clear()
+        self.unregister_from_all_owners()
         self.divided_spritelist.remove(self)
         super().kill()

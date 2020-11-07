@@ -21,7 +21,6 @@ class WindowView(View):
         self.loaded = False
         self._requires_loading = requires_loading
         self.updated: List[Updateable] = []
-        self.drawn: List[Drawable] = []
 
     @property
     def requires_loading(self):
@@ -34,20 +33,19 @@ class WindowView(View):
     def set_updated_and_drawn_lists(self, ignored=(Window, Set, Dict)):
         # to draw and update everything with one instruction in on_draw()
         # and on_update() methods:
-        self.drawn = get_attributes_with_attribute(self, 'draw', ignored)
-        self.updated = get_attributes_with_attribute(self, 'update', ignored)
+        self.updated = get_attributes_with_attribute(self, 'on_update',
+                                                     ignored)
 
     def on_show_view(self):
         log(f'Switched to WindowView: {self.__class__.__name__}')
         self.window.updated = self.updated
-        self.window.drawn = self.drawn
 
     def on_update(self, delta_time: float):
         for obj in self.updated:
             obj.update()
 
     def on_draw(self):
-        for obj in self.drawn:
+        for obj in self.updated:
             obj.draw()
 
 
