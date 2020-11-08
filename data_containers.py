@@ -68,12 +68,12 @@ class DividedSpriteList(SpriteList):
     Not-drawing all Sprites each frame, but only visible saves CPU-time.
     """
 
-    def __init__(self, is_static=False):
+    def __init__(self, use_spatial_hash=False, is_static=False):
         super().__init__(is_static)  # to comply with SpriteList interface
         self.id_elements_dict = {}
         del self.sprite_list  # we replace it with two SpriteLists below:
-        self.updated = SpriteList(is_static)
-        self.drawn = SpriteList(is_static)
+        self.updated = SpriteList(use_spatial_hash, is_static)
+        self.drawn = SpriteList(use_spatial_hash, is_static)
         self.alive_ids = set()
 
     def __repr__(self) -> str:

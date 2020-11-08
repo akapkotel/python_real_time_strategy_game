@@ -1,43 +1,38 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import arcade
+from typing import (Any, Dict, List, Optional, Set, Union)
 
-from typing import (
-    List, Set, Tuple, Dict, Any, Optional, Union
-)
+import arcade
 from arcade import (
-    draw_line, draw_circle_outline, draw_rectangle_filled, create_line,
-    draw_text, SpriteList
+    SpriteList, create_line, draw_circle_outline, draw_line,
+    draw_rectangle_filled, draw_text
 )
 from arcade.arcade_types import Color, Point
 
-from scheduling import EventsCreator, ScheduledEvent, EventsScheduler
-from observers import ObjectsOwner, OwnedObject
+from colors import BLACK, BROWN, GREEN, RED, WHITE
 from data_containers import DividedSpriteList
 from data_types import Viewport
-from views import WindowView, LoadingScreen
-from user_interface import UiSpriteList
-from utils.functions import (
-    timer, get_screen_size, get_path_to_file, log, to_rgba, clamp
-)
+
+from observers import ObjectsOwner, OwnedObject
+from scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from user_interface import (
     Button, CheckButton, TextInputField
 )
-from colors import GREEN, RED, BROWN, BLACK, WHITE
+from user_interface import UiSpriteList
+from utils.functions import (
+    clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
+)
+from views import LoadingScreen, WindowView
 from menu import Menu, SubMenu
-
 
 FULL_SCREEN = True
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
 UPDATE_RATE = 1 / 30
-PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
+PROFILING_LEVEL = 1  # higher the level, more functions will be time-profiled
 DEBUG = True
-
-#viewport-related:
-SCROLLING_DISTANCE = 60
 
 
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
@@ -201,6 +196,15 @@ class Window(arcade.Window, EventsCreator):
         self.current_viewport = new_left, new_right, new_bottom, new_top
         self.set_viewport(new_left, new_right, new_bottom, new_top)
 
+    def move_viewport_to_the_position(self, x: int, y: int):
+        game_map = self.game_view.map
+        new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
+        new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
+        new_right = new_left + SCREEN_WIDTH
+        new_top = new_bottom + SCREEN_HEIGHT
+        self.current_viewport = new_left, new_right, new_bottom, new_top
+        self.set_viewport(new_left, new_right, new_bottom, new_top)
+
     def get_viewport(self) -> Viewport:
         if self.current_view is not self.game_view:
             return 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
@@ -214,8 +218,11 @@ class Window(arcade.Window, EventsCreator):
         raise NotImplementedError
 
     def close(self):
-        log(f'Terminating application...', 1)
-        super().close()
+        if self.is_game_loaded_and_running:
+            self.show_view(self.menu_view)
+        else:
+            log(f'Terminating application...')
+            super().close()
 
 
 class Game(WindowView, EventsCreator, ObjectsOwner):
@@ -233,14 +240,12 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.vehicles_threads = SpriteList(is_static=True)
         self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
-        self.selection_markers_sprites = SpriteList()
+        self.selection_markers_sprites: SpriteList[SelectedEntityMarker] = SpriteList()
         self.interface = UiSpriteList()
 
-        self.fog_of_war = FogOfWar()
+        self.set_updated_and_drawn_lists(self.terrain_objects)
+
         self.map = Map(100 * TILE_WIDTH, 100 * TILE_HEIGHT, TILE_WIDTH, TILE_WIDTH)
-
-        self.set_updated_and_drawn_lists()
-
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
@@ -255,6 +260,10 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
+        # player can create group of Units by CTRL + 0-9 keys, and then
+        # select those groups quickly with 0-9 keys, or even move screen tp
+        # the position of the group by pressing numeric key twice. See the
+        # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
         self.missions: Dict[int, Mission] = {}
@@ -360,7 +369,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         else:
             self.unregister_player_or_faction(owned)
 
-    def unregister_player_entity(self, owned: Union[PlayerEntity]):
+    def unregister_player_entity(self, owned: PlayerEntity):
         owned: Union[Unit, Building]
         if not owned.is_building:
             self.units.remove(owned)
@@ -479,8 +488,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from map import TILE_WIDTH, TILE_HEIGHT, PATH, Map, GridPosition
+    from map import TILE_WIDTH, TILE_HEIGHT, Map
     from player import Faction, Player, CpuPlayer, PlayerEntity
+    from unit_management import SelectedEntityMarker
     from unit_management import PermanentUnitsGroup
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor

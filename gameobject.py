@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from typing import Any, List, Optional, Set
+
 from arcade import (
-    Sprite, AnimatedTimeBasedSprite, SpriteList, get_sprites_at_point
+    AnimatedTimeBasedSprite, SpriteList, get_sprites_at_point
 )
 from arcade.arcade_types import Point
 
-from typing import Any, Optional, List, Set
-
 from data_containers import DividedSpriteList
-from enums import UnitWeight, Robustness
-from utils.functions import get_object_name, filter_sequence
+from enums import Robustness, UnitWeight
 from observers import OwnedObject
+from utils.functions import filter_sequence, get_object_name
 
 
 def get_gameobjects_at_position(position: Point,
@@ -38,6 +38,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
                  position: Point = (0, 0)):
         x, y = position
         super().__init__(filename, center_x=x, center_y=y)
+        OwnedObject.__init__(self, owners=True)
         self.object_name = get_object_name(filename)
 
         GameObject.total_objects_count += 1

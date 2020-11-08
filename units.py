@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Set, Deque, Optional, Sequence, List
-from collections import deque
 from abc import ABC, abstractmethod
+from collections import deque
+from typing import Deque, List, Tuple, Optional
+
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
-from utils.functions import (
-    average_position_of_points_group, log, calculate_angle, close_enough,
-    vector_2d, distance_2d
-)
-from map import Pathfinder, GridPosition, PATH, MapPath, MapNode
-from units_tasking import UnitTask, TasksExecutor
-from player import PlayerEntity, Player
-from scheduling import ScheduledEvent
-
 from enums import UnitWeight
-from game import Game, UPDATE_RATE
+from game import UPDATE_RATE
+from map import GridPosition, MapNode, MapPath, PATH, Pathfinder
+from player import Player, PlayerEntity
+from scheduling import ScheduledEvent
+from units_tasking import TasksExecutor, UnitTask
+from utils.functions import (
+    calculate_angle, close_enough, distance_2d, log, vector_2d
+)
 
 
 class Unit(PlayerEntity, TasksExecutor, Pathfinder):
@@ -43,7 +42,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.block_map_node(node)
 
         self.path: Deque[GridPosition] = deque()
-        self.waiting_for_path: List[int, Deque] = [0, None]
+        self.waiting_for_path: List[int, MapPath] = [0, []]
         self.speed = 4
         self.current_speed = 0
 
@@ -59,11 +58,10 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         raise NotImplementedError
 
     def update(self):
-        if self.alive:
-            super().update()
-            self.evaluate_tasks()
-            self.update_blocked_map_nodes()
-            self.update_pathfinding()
+        super().update()
+        self.evaluate_tasks()
+        self.update_blocked_map_nodes()
+        self.update_pathfinding()
 
     def update_blocked_map_nodes(self):
         """
@@ -133,8 +131,12 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
             self.stop()
 
     def countdown_waiting(self):
-        self.waiting_for_path[0] -= 1
-        if not self.waiting_for_path[0]:
+        path = self.waiting_for_path[1]
+        if self.map.position_to_node(*path[0]).walkable:
+            self.waiting_for_path[0] = 0
+        else:
+            self.waiting_for_path[0] -= 1
+        if self.waiting_for_path[0] == 0:
             self.path = self.waiting_for_path[1]
 
     def follow_path(self):
@@ -157,14 +159,12 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         start = self.map.position_to_grid(*self.position)
         if self.map.grid_to_node(destination).walkable:
             if path := self.find_path(start, destination):
-                self.create_new_path(path)
-            else:
-                self.schedule_pathfinding_for_later(destination)
+                return self.create_new_path(path)
+        self.schedule_pathfinding_for_later(destination)
 
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
-        if self.waiting_for_path[0]:
-            self.waiting_for_path = [0, None]
+        self.waiting_for_path[0] = 0
 
     def schedule_pathfinding_for_later(self, destination: GridPosition):
         """

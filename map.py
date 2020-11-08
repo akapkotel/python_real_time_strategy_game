@@ -2,20 +2,18 @@
 from __future__ import annotations
 
 import heapq
-import random
 import math
-from math import hypot
+import random
 from abc import ABC, abstractmethod
-
 from collections import defaultdict
-from typing import Optional, Tuple, Sequence, List, Dict, Set
-from arcade import Sprite, Texture, load_texture, load_spritesheet
+from math import hypot
+from typing import Dict, List, Optional, Set, Tuple
 
-from data_types import Number, UnitId, BuildingId, NodeId
-from utils.functions import timer, log, get_path_to_file, distance_2d
+from arcade import Sprite, Texture, load_spritesheet
+
+from data_types import BuildingId, Number, UnitId
 from game import Game, PROFILING_LEVEL
-from enums import TerrainCost
-
+from utils.functions import get_path_to_file, log, timer
 
 PATH = 'PATH'
 TILE_WIDTH = 60
@@ -99,6 +97,11 @@ class Map(GridHandler):
         self.rows = self.height // self.grid_height
         self.columns = self.width // self.grid_width
 
+        # map is divided for sectors containing 10x10 Nodes each to split
+        # space for smaller chunks in order to make enemies-detection
+        # faster: since each Unit could only scan it's current Sector and
+        # adjacent ones instead of whole map for enemies:
+        self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.units: Dict[GridPosition, UnitId] = {}
         self.buildings: Dict[GridPosition, BuildingId] = {}
@@ -188,6 +191,19 @@ class Map(GridHandler):
 
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]
+
+
+class Sector:
+    """
+    Map is divided for sectors containing 10x10 Nodes each to split space for
+    smaller chunks in order to make enemies-detection faster: since each Unit
+    could only scan it's current Sector and adjacent ones instead of whole
+    map for enemies.
+    """
+
+    def __init__(self, id: SectorId):
+        self.id = id
+        self.units_and_buildings: Set[PlayerEntity] = set()
 
 
 class MapNode(GridHandler, ABC):
@@ -330,3 +346,7 @@ class Pathfinder:
     @staticmethod
     def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:
         return [node.position for node in nodes_list]
+
+
+if __name__:
+    from player import PlayerEntity

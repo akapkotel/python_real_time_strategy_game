@@ -2,16 +2,17 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Set, Dict, List, Union, Optional
-from arcade.arcade_types import Color, Point
+from typing import Dict, Optional, Set, Union
 
-from observers import ObjectsOwner, OwnedObject
-from gameobject import GameObject, Robustness
-from scheduling import EventsCreator
-from utils.functions import log, is_visible
+from arcade.arcade_types import Point
+
 from data_types import FactionId
 from game import Game, UPDATE_RATE
-from map import TILE_WIDTH, MapNode
+from gameobject import GameObject, Robustness
+from map import MapNode, TILE_WIDTH
+from observers import ObjectsOwner, OwnedObject
+from scheduling import EventsCreator
+from utils.functions import is_visible, log
 
 
 def new_id(objects: Dict) -> int:
@@ -96,10 +97,22 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
             player.update()
 
 
-class Player(EventsCreator, ObjectsOwner, OwnedObject):
+class ResourcesManager:
+    oil: float = 0
+    fuel: float = 0
+    food: float = 0
+    energy: float = 0
+    iron: float = 0
+    steel: float = 0
+    conscripts: int = 0
+
+
+class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     game: Optional[Game] = None
 
-    def __init__(self, id=None, name=None, color=None, faction=None, cpu=True):
+    def __init__(self, id=None, name=None, color=None, faction=None,
+                 cpu=True):
+        ResourcesManager.__init__(self)
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self)
@@ -178,7 +191,6 @@ class PlayerEntity(GameObject, EventsCreator):
                  robustness: Robustness = 0):
         GameObject.__init__(self, entity_name, robustness, position)
         EventsCreator.__init__(self)
-        OwnedObject.__init__(self, owners=True)
 
         self.player: Player = player
         self.faction: Faction = self.player.faction
@@ -195,7 +207,7 @@ class PlayerEntity(GameObject, EventsCreator):
 
         self.production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
 
-        self.register_to_objectsowners(self.game, self.player, self.game.fog_of_war)
+        self.register_to_objectsowners(self.game, self.player)
 
     @property
     def health(self) -> float:

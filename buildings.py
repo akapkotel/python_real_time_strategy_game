@@ -96,11 +96,14 @@ class Building(PlayerEntity, IProducer):
             self.update_production()
 
     def visible_for(self, other: PlayerEntity) -> bool:
-        obstacles = self.game.buildings
-        if self.is_building:
-            obstacles = [b for b in obstacles if b.id is not self.id]
+        obstacles = [b for b in self.game.buildings if b.id is not self.id]
         distance = self.detection_radius
         return is_visible(self.position, other.position, obstacles, distance)
+
+    def kill(self):
+        for node in self.occupied_nodes:
+            self.unblock_map_node(node)
+        super().kill()
 
 
 if __name__:

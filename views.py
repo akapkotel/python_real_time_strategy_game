@@ -21,6 +21,7 @@ class WindowView(View):
         self.loaded = False
         self._requires_loading = requires_loading
         self.updated: List[Updateable] = []
+        self.drawn: List[Drawable] = []
 
     @property
     def requires_loading(self):
@@ -30,11 +31,31 @@ class WindowView(View):
     def is_running(self):
         return self.window.current_view is self
 
-    def set_updated_and_drawn_lists(self, ignored=(Window, Set, Dict)):
-        # to draw and update everything with one instruction in on_draw()
-        # and on_update() methods:
-        self.updated = get_attributes_with_attribute(self, 'on_update',
-                                                     ignored)
+    def set_updated_and_drawn_lists(self,
+                                    *ignore_update,
+                                    ignored=(Window, Set, Dict)):
+        """
+        Call this method after you initialised all 'updateable' and 'drawable'
+        attributes of application eg.: SpriteLists. They are identified by
+        having 'on_update' and 'draw' methods. Collected all these objects
+        you can later update and draw them at once with:
+
+        for obj in self.updated:
+            obj.update()
+
+        or:
+
+        for obj in self.drawn:
+            obj.draw()
+
+        :param ignore_update: put here all SpriteLists and other objects
+        which have on_update method but you want them to be NOT updated
+        :param ignored: instead you can declare types of objects, you do not
+        want to be updated, nor drawn
+        """
+        updated = get_attributes_with_attribute(self, 'on_update', ignored)
+        self.drawn = get_attributes_with_attribute(self, 'draw', ignored)
+        self.updated = [u for u in updated if u not in ignore_update]
 
     def on_show_view(self):
         log(f'Switched to WindowView: {self.__class__.__name__}')
@@ -45,7 +66,7 @@ class WindowView(View):
             obj.update()
 
     def on_draw(self):
-        for obj in self.updated:
+        for obj in self.drawn:
             obj.draw()
 
 

@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 
-from typing import Optional, Set, List, Tuple, Union, Type
+from typing import List, Optional, Set, Tuple, Type, Union
+
 from arcade import (
-    Window, AnimatedTimeBasedSprite, SpriteList, draw_lrtb_rectangle_filled,
-    draw_lrtb_rectangle_outline, get_sprites_at_point, load_texture, Sprite,
-    MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, draw_text,
-    Texture, AnimationKeyframe, load_textures, SpriteSolidColor
+    AnimatedTimeBasedSprite, AnimationKeyframe, MOUSE_BUTTON_LEFT,
+    MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT, Sprite,
+    SpriteList, Texture, Window, draw_lrtb_rectangle_filled,
+    draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
+    load_textures
 )
 
-from user_interface import (
-    ToggledElement, UiSpriteList, UiElement, CursorInteractive
-)
-from utils.functions import log, get_path_to_file
-from unit_management import SelectedEntityMarker
+from buildings import Building
+from colors import CLEAR_GREEN, GREEN
 from data_containers import DividedSpriteList
-from units import Unit, UnitTask
 from game import Game, Menu, UPDATE_RATE
-from colors import GREEN, CLEAR_GREEN
-from scheduling import EventsCreator, ScheduledEvent
 from gameobject import GameObject
 from player import PlayerEntity
-from buildings import Building
-
+from scheduling import EventsCreator, ScheduledEvent
+from unit_management import SelectedEntityMarker
+from units import Unit, UnitTask
+from user_interface import (
+    CursorInteractive, ToggledElement, UiElement, UiSpriteList
+)
+from utils.functions import get_path_to_file, log
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 
@@ -220,7 +221,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         for unit in units:
             marker = SelectedEntityMarker(selected=unit)
             self.selection_markers.add(marker)
-            self.game.selection_markers_sprites.extend(marker.sprites)
 
     def remove_from_selection_markers(self, entity: PlayerEntity):
         for marker in self.selection_markers:

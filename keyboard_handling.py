@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Set, Optional
+from typing import Optional, Set
 
 from arcade import Window
 from arcade.key import *
@@ -37,20 +37,10 @@ class KeyboardHandler(ToggledElement):
             self.on_numeric_key_press(int(digit))
 
     def on_numeric_key_press(self, digit: int):
-        if LCTRL in self.keys_pressed and self.window.cursor.selected_units:
-            self.create_new_permanent_units_group(digit)
-        elif digit in self.window.game_view.permanent_units_groups:
-            self.select_permanent_units_group(digit)
-
-    def create_new_permanent_units_group(self, digit: int):
-        units = self.window.cursor.selected_units
-        new_group = PermanentUnitsGroup(group_id=digit, units=units)
-        self.window.game_view.permanent_units_groups[digit] = new_group
-
-    def select_permanent_units_group(self, group_id: int):
-        group = self.window.game_view.permanent_units_groups[group_id]
-        self.window.cursor.unselect_units()
-        self.window.cursor.select_units(*group.units)
+        if LCTRL in self.keys_pressed:
+            PermanentUnitsGroup.create_new_permanent_units_group(digit)
+        else:
+            PermanentUnitsGroup.select_permanent_units_group(digit)
 
     def key_to_letter(self, symbol: int) -> str:
         return chr(symbol)

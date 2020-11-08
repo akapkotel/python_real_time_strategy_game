@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Set
 from abc import abstractmethod
+from typing import Set
 
 
 class OwnedObject:
