@@ -202,7 +202,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         waypoints = self.game.map.group_of_waypoints(x, y, len(units))
         for i, unit in enumerate(units):
             e = ScheduledEvent(
-                self, 0, unit.move_to, args=(waypoints[i],), frames_left=1 + i
+                self, 0, unit.move_to, (waypoints[i],), frames_left=1 + 2 * i
             )
             self.schedule_event(e)
 

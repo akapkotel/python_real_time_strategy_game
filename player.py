@@ -2,17 +2,17 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict, Optional, Set, Union
+from typing import Dict, Optional, Set, Union, List
 
 from arcade.arcade_types import Point
 
-from data_types import FactionId
+from data_types import FactionId, GridPosition
 from game import Game, UPDATE_RATE
 from gameobject import GameObject, Robustness
 from map import MapNode, TILE_WIDTH
 from observers import ObjectsOwner, OwnedObject
 from scheduling import EventsCreator
-from utils.functions import is_visible, log
+from utils.functions import is_visible, log, calculate_observable_area, timer
 
 
 def new_id(objects: Dict) -> int:
@@ -204,6 +204,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self._health = self._max_health
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
+        self.observed_nodes: Set[MapNode] = set()
 
         self.production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
 
@@ -224,6 +225,10 @@ class PlayerEntity(GameObject, EventsCreator):
 
     @abstractmethod
     def block_map_node(self, node: MapNode):
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_sector(self):
         raise NotImplementedError
 
     def update(self):
@@ -249,21 +254,33 @@ class PlayerEntity(GameObject, EventsCreator):
     def rendered(self) -> bool:
         return self in self.divided_spritelist.drawn
 
+    @abstractmethod
+    def update_observed_area(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def calculate_observed_area(self) -> Set[GridPosition]:
+        position = self.game.map.position_to_grid(*self.position)
+        observed_area = calculate_observable_area(*position, 8)
+        observed_area = self.game.map.in_bounds(observed_area)
+        return set(observed_area)
+
     def update_known_enemies_set(self):
         self.known_enemies = self.scan_for_visible_enemies()
 
     def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
-        potentially_visible = []
-        for faction in self.game.factions.values():
-            if faction.is_enemy(self.faction):
-                potentially_visible.extend(faction.units)
-                potentially_visible.extend(faction.buildings)
+        potentially_visible = self.get_potentially_visible_enemies()
 
         visible_enemies: Set[Union[Unit, Building]] = {
-            enemy for enemy in potentially_visible if
-            enemy.visible_for(self)
+            enemy for enemy in potentially_visible if enemy.visible_for(self)
         }
         return visible_enemies
+
+    def get_potentially_visible_enemies(self) -> List[PlayerEntity]:
+        enemies = []
+        for faction in (f for f in self.game.factions.values() if
+                        f.is_enemy(self.faction)):
+            enemies.extend(faction.units.union(faction.buildings))
+        return enemies
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings

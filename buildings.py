@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, List, Deque, Type
+from typing import Optional, List, Set, Deque, Type
 from collections import deque
 
 from arcade.arcade_types import Point
 
 from player import PlayerEntity, Player
+from data_types import SectorId
 from utils.functions import is_visible
-from map import MapNode
+from map import MapNode, TILE_WIDTH, TILE_HEIGHT
 
 
 class IProducer:
@@ -72,12 +73,34 @@ class Building(PlayerEntity, IProducer):
             IProducer.__init__(self)
             self.produced_objects.append(produces)
 
-        self.position = self.game.map.normalize_position(*position)
-        self.occupied_nodes = [
-            self.game.map.position_to_node(*self.position)
-        ]
+        self.position = self.place_building_properly_on_the_grid()
+        self.occupied_nodes: List[MapNode] = self.block_map_nodes()
         for node in self.occupied_nodes:
             self.block_map_node(node)
+        self.occupied_sectors: Set[SectorId] = self.update_sector()
+
+    def place_building_properly_on_the_grid(self) -> Point:
+        """
+        Buildings positions must be adjusted accordingly to their texture
+        width and height so they occupy minimum MapNodes.
+        """
+        self.position = self.game.map.normalize_position(*self.position)
+        offset_x = 0 if (self.width // TILE_WIDTH) % 3 == 0 else TILE_WIDTH // 2
+        offset_y = 0 if (self.height // TILE_WIDTH) % 3 == 0 else TILE_HEIGHT // 2
+        return self.center_x + offset_x, self.center_y + offset_y
+
+    def block_map_nodes(self) -> List[MapNode]:
+        occupied_nodes = set()
+        min_x_grid = int(self.left // TILE_WIDTH)
+        min_y_grid = int(self.bottom // TILE_HEIGHT)
+        max_x_grid = int(self.right // TILE_WIDTH)
+        max_y_grid = int(self.top // TILE_HEIGHT)
+        for x in range(min_x_grid, max_x_grid):
+            for y in range(min_y_grid, max_y_grid):
+                node = self.game.map.grid_to_node((x, y))
+                occupied_nodes.add(node)
+                self.block_map_node(node)
+        return list(occupied_nodes)
 
     @staticmethod
     def unblock_map_node(node: MapNode):
@@ -85,6 +108,17 @@ class Building(PlayerEntity, IProducer):
 
     def block_map_node(self, node: MapNode):
         node.building_id = self.id
+
+    def update_sector(self):
+        distinct_sectors = set()
+        for node in self.occupied_nodes:
+            distinct_sectors.add(node.sector_id)
+        for sector in (self.game.map.sectors[id] for id in distinct_sectors):
+            sector.units_and_buildings.add(self)
+        return distinct_sectors
+
+    def update_observed_area(self, *args, **kwargs):
+        self.observable_nodes = self.calculate_observed_area()
 
     @property
     def needs_repair(self) -> bool:
@@ -95,6 +129,9 @@ class Building(PlayerEntity, IProducer):
         if hasattr(self, 'update_production'):
             self.update_production()
 
+    def draw(self):
+        super().draw()
+
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
         distance = self.detection_radius
@@ -103,6 +140,8 @@ class Building(PlayerEntity, IProducer):
     def kill(self):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
+        for sector in (self.game.map.sectors[id] for id in self.occupied_sectors):
+            sector.units_and_buildings.discard(self)
         super().kill()
 
 

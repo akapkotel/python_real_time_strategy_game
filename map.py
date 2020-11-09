@@ -89,7 +89,7 @@ class Map(GridHandler):
     game: Optional[Game] = None
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
-        MapNode.map = Pathfinder.map = self
+        MapNode.map = Pathfinder.map = Sector.map = self
         self.width = width
         self.height = height
         self.grid_width = grid_width
@@ -141,14 +141,13 @@ class Map(GridHandler):
             for y in range(self.rows):
                 self.nodes[(x, y)] = node = MapNode(x, y)
                 self.create_map_sprite(*node.position)
+                sector = self.sectors.get((x, y), Sector((x, y)))
         log(f'Generated {len(self)} map nodes.', True)
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
         sprite.texture = self.random_terrain_texture()
-        self.game.terrain_objects.append(
-            sprite
-        )
+        self.game.terrain_objects.append(sprite)
 
     @staticmethod
     def random_terrain_texture() -> Texture:
@@ -200,10 +199,18 @@ class Sector:
     could only scan it's current Sector and adjacent ones instead of whole
     map for enemies.
     """
+    map: Optional[Map] = None
 
     def __init__(self, id: SectorId):
+        """
+        Each MapSector is a 10x10 square containing 100 MapNodes.
+
+        :param id: SectorId is a Tuple[int, int] which are boundaries of
+        this Sector: first column and first row of MapNodes, this Sector owns
+        """
         self.id = id
         self.units_and_buildings: Set[PlayerEntity] = set()
+        self.map.sectors[id] = self
 
 
 class MapNode(GridHandler, ABC):
@@ -217,6 +224,7 @@ class MapNode(GridHandler, ABC):
     def __init__(self, x, y):
         self.grid = x, y
         self.position = self.x, self.y = self.grid_to_position(self.grid)
+        self.sector_id: SectorId = x // 10, y // 10
         self.costs: Dict[GridPosition, float] = {}
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None

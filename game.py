@@ -26,13 +26,13 @@ from utils.functions import (
 from views import LoadingScreen, WindowView
 from menu import Menu, SubMenu
 
-FULL_SCREEN = True
+FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
 UPDATE_RATE = 1 / 30
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = False
+PYPROFILER = True
 DEBUG = False
 
 
@@ -108,7 +108,7 @@ class Window(arcade.Window, EventsCreator):
             self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
-        self.current_view.update(delta_time)
+        self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
         self.events_scheduler.update()
@@ -246,7 +246,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
         self.set_updated_and_drawn_lists()
 
-        self.map = Map(100 * TILE_WIDTH, 100 * TILE_HEIGHT, TILE_WIDTH, TILE_WIDTH)
+        self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
+                       TILE_WIDTH)
+        self.fog_of_war = FogOfWar()
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
@@ -328,7 +330,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def test_buildings_spawning(self):
         building = Building(
-            get_path_to_file('small_button_none.png'),
+            get_path_to_file('building_dummy.png'),
             self.players[4],
             (400, 600),
             produces=Unit
@@ -391,6 +393,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         if not self.paused:
             self.update_local_drawn_units_and_buildings()
             super().on_update(delta_time)
+            self.fog_of_war.update()
             self.update_factions_and_players()
 
     def update_local_drawn_units_and_buildings(self):
@@ -409,6 +412,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
+        self.fog_of_war.draw()
         if self.debug:
             self.draw_debugging()
         if self.paused:
@@ -496,7 +500,7 @@ if __name__ == '__main__':
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
-    # from fog_of_war import FogOfWar
+    from fog_of_war import FogOfWar
     from buildings import Building
     from missions import Mission
 

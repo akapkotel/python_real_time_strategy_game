@@ -61,7 +61,7 @@ class WindowView(View):
         log(f'Switched to WindowView: {self.__class__.__name__}')
         self.window.updated = self.updated
 
-    def update(self, delta_time: float):
+    def on_update(self, delta_time: float):
         for obj in self.updated:
             obj.update()
 

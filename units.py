@@ -60,21 +60,30 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
     def update(self):
         super().update()
         self.evaluate_tasks()
-        self.update_blocked_map_nodes()
+        new_current_node = self.map.position_to_node(*self.position)
+        if self in self.game.local_human_player.faction.units:
+            self.update_observed_area(new_current_node)
+        self.update_blocked_map_nodes(new_current_node)
         self.update_pathfinding()
 
-    def update_blocked_map_nodes(self):
+    def update_observed_area(self, new_current_node: MapNode):
+        if self.observed_nodes and new_current_node == self.current_node:
+            self.game.fog_of_war.explore_map(self.observed_nodes)
+        else:
+            self.observed_nodes.update(self.calculate_observed_area())
+            self.game.fog_of_war.explore_map(self.observed_nodes)
+
+    def update_blocked_map_nodes(self, new_current_node):
         """
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
         """
         self.scan_next_nodes_for_collisionss()
-        self.update_current_blocked_node()
+        self.update_current_blocked_node(new_current_node)
         if len(self.path) > 1:
             self.update_reserved_node()
 
-    def update_current_blocked_node(self):
-        new_current_node = self.map.position_to_node(*self.position)
+    def update_current_blocked_node(self, new_current_node: MapNode):
         self.swap_blocked_nodes(self.current_node, new_current_node)
         self.current_node = new_current_node
 
@@ -98,7 +107,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
     def scan_next_nodes_for_collisionss(self):
         if not self.path:
             return
-        if len(self.path) == 1:
+        elif len(self.path) == 1:
             self.scan_node_for_collisions(0)
         else:
             self.scan_node_for_collisions(1)
@@ -131,11 +140,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
             self.stop()
 
     def countdown_waiting(self):
-        path = self.waiting_for_path[1]
-        if self.map.position_to_node(*path[0]).walkable:
-            self.waiting_for_path[0] = 0
-        else:
-            self.waiting_for_path[0] -= 1
+        self.waiting_for_path[0] -= 1
         if self.waiting_for_path[0] == 0:
             self.path = self.waiting_for_path[1]
 
@@ -165,8 +170,15 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
         self.waiting_for_path[0] = 0
+        self.unschedule_earlier_move_orders()
 
-    def schedule_pathfinding_for_later(self, destination: GridPosition):
+    def unschedule_earlier_move_orders(self):
+        for event in (e for e in self.scheduled_events if e.function == self.move_to):
+            self.unschedule_event(event)
+
+    def schedule_pathfinding_for_later(self,
+                                       destination: GridPosition,
+                                       delay: int = 30):
         """
         Rather costly way to delay pathfinding execution. It is used only
         when Unit already have not found correct path to the destination
@@ -179,7 +191,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
                 delay=1,
                 function=self.move_to,
                 args=(destination,),
-                frames_left=5,
+                frames_left=delay,
             )
         )
 

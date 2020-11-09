@@ -4,6 +4,7 @@ import logging
 
 from math import hypot, atan2, degrees, sin, cos, radians, inf as INFINITY
 from time import perf_counter
+from functools import lru_cache
 from numba import njit
 from shapely import speedups
 from shapely.geometry import LineString, Polygon
@@ -224,3 +225,17 @@ def is_visible(position_a: Point,
     elif not obstacles:
         return True
     return not any((Polygon(o.get_adjusted_hit_box()).crosses(line_of_sight) for o in obstacles))
+
+
+@lru_cache
+@njit(['int64, int64, int64'], nogil=True, fastmath=True)
+def calculate_observable_area(grid_x, grid_y, max_distance):
+    radius = int(max_distance * 1.6)
+    observable_area = []
+    for x in range(-max_distance, max_distance + 1):
+        dist_x = abs(x)
+        for y in range(-max_distance, max_distance + 1):
+            dist_y = abs(y)
+            if dist_x + dist_y < radius:
+                observable_area.append((grid_x + x, grid_y + y))
+    return observable_area

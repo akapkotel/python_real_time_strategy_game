@@ -50,9 +50,12 @@ class EventsScheduler:
 
     def unschedule(self, event: ScheduledEvent):
         log(f'Unscheduled event: {event}')
-        index = self.scheduled_events.index(event)
-        self.scheduled_events.pop(index)
-        self.frames_left.pop(index)
+        try:
+            index = self.scheduled_events.index(event)
+            self.scheduled_events.pop(index)
+            self.frames_left.pop(index)
+        except ValueError:
+            pass
 
     def update(self):
         self.decrease_frames_left()
