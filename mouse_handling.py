@@ -12,8 +12,9 @@ from arcade import (
 
 from buildings import Building
 from colors import CLEAR_GREEN, GREEN
-from data_containers import DividedSpriteList
+from improved_spritelists import DividedSpriteList
 from game import Game, Menu, UPDATE_RATE
+from utils.classes import HashedList
 from gameobject import GameObject
 from player import PlayerEntity
 from scheduling import EventsCreator, ScheduledEvent
@@ -72,7 +73,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
-        self.selected_units: List[Unit] = []
+        self.selected_units: HashedList[Unit] = HashedList()
         self.selected_building: Optional[Building] = None
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
         # that this unit is currently selected and will react for players's
@@ -135,7 +136,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.position = x, y
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        self.clicked_position = int(x), int(y)
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
@@ -162,7 +162,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
-        log(f'MouseCursor.on_left_button_release, position: {x, y}')
         if self.mouse_drag_selection is None:
             units = self.selected_units
             pointed = self.pointed_unit or self.pointed_building
@@ -185,7 +184,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.unselect_units()
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        log(f'Clicked PlayerEntity: {clicked}')
         clicked: Union[Unit, Building]
         if clicked.selectable:
             if not clicked.is_building:
@@ -194,11 +192,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 self.on_building_clicked(clicked)
 
     def on_click_with_selected_units(self, x, y, modifiers, units, pointed):
-        log(f'Called: on_click_with_selected_units')
         pointed: Union[PlayerEntity, None]
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
-        else:
+        elif self.game.map.position_to_node(x, y).walkable:
             self.send_units_to_pointed_location(units, x, y)
 
     def send_units_to_pointed_location(self, units, x, y):

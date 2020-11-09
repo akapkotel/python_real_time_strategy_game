@@ -7,7 +7,7 @@ from arcade import (
 
 
 from utils.functions import get_attributes_with_attribute, log
-from data_containers import DividedSpriteList
+from improved_spritelists import DividedSpriteList
 from colors import WHITE, GREEN
 
 
@@ -61,7 +61,7 @@ class WindowView(View):
         log(f'Switched to WindowView: {self.__class__.__name__}')
         self.window.updated = self.updated
 
-    def on_update(self, delta_time: float):
+    def update(self, delta_time: float):
         for obj in self.updated:
             obj.update()
 

@@ -11,7 +11,7 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from colors import BLACK, BROWN, GREEN, RED, WHITE
-from data_containers import DividedSpriteList
+from improved_spritelists import DividedSpriteList, SpriteListWithSwitch
 from data_types import Viewport
 
 from observers import ObjectsOwner, OwnedObject
@@ -31,8 +31,9 @@ SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
 UPDATE_RATE = 1 / 30
-PROFILING_LEVEL = 1  # higher the level, more functions will be time-profiled
-DEBUG = True
+PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
+PYPROFILER = False
+DEBUG = False
 
 
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
@@ -107,7 +108,7 @@ class Window(arcade.Window, EventsCreator):
             self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
-        self.current_view.on_update(delta_time)
+        self.current_view.update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
         self.events_scheduler.update()
@@ -218,7 +219,7 @@ class Window(arcade.Window, EventsCreator):
         raise NotImplementedError
 
     def close(self):
-        if self.is_game_loaded_and_running:
+        if self.current_view is self.game_view:
             self.show_view(self.menu_view)
         else:
             log(f'Terminating application...')
@@ -236,14 +237,14 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.paused = False
 
         # SpriteLists:
-        self.terrain_objects = SpriteList(is_static=True)
+        self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
         self.selection_markers_sprites: SpriteList[SelectedEntityMarker] = SpriteList()
         self.interface = UiSpriteList()
 
-        self.set_updated_and_drawn_lists(self.terrain_objects)
+        self.set_updated_and_drawn_lists()
 
         self.map = Map(100 * TILE_WIDTH, 100 * TILE_HEIGHT, TILE_WIDTH, TILE_WIDTH)
         # Settings, game-progress data, etc.
@@ -255,12 +256,12 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.players: Dict[int, Player] = {}
 
         self.local_human_player: Optional[Player] = None
-        # we only draw those Units and Buildings, which are 'known" to the
+        # We only draw those Units and Buildings, which are 'known" to the
         # local human Player's Faction or belong to it, the rest of entities
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
-        # player can create group of Units by CTRL + 0-9 keys, and then
+        # Player can create group of Units by CTRL + 0-9 keys, and then
         # select those groups quickly with 0-9 keys, or even move screen tp
         # the position of the group by pressing numeric key twice. See the
         # PermanentUnitsGroup class in units_management.py
@@ -495,11 +496,11 @@ if __name__ == '__main__':
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
-    from fog_of_war import FogOfWar
+    # from fog_of_war import FogOfWar
     from buildings import Building
     from missions import Mission
 
-    if PROFILING_LEVEL:
+    if PYPROFILER:
         try:
             from pyprofiler import start_profile, end_profile
             profiler = start_profile()
@@ -508,7 +509,7 @@ if __name__ == '__main__':
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()
 
-    if PROFILING_LEVEL:
+    if PYPROFILER:
         try:
         # noinspection PyUnboundLocalVariable
             end_profile(profiler, 30, True)

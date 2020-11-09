@@ -8,7 +8,7 @@ from arcade import (
 )
 from arcade.arcade_types import Point
 
-from data_containers import DividedSpriteList
+from improved_spritelists import DividedSpriteList
 from enums import Robustness, UnitWeight
 from observers import OwnedObject
 from utils.functions import filter_sequence, get_object_name

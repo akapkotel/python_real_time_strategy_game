@@ -31,7 +31,7 @@ class Menu(WindowView, ObjectsOwner):
         if self.current_submenu is None:
             super().on_update(delta_time)
         else:
-            self.current_submenu.on_update(delta_time)
+            self.current_submenu.on_update()
 
     def on_draw(self):
         if self.current_submenu is None:
