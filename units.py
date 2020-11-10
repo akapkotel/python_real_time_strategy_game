@@ -70,7 +70,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         if self.observed_nodes and new_current_node == self.current_node:
             self.game.fog_of_war.explore_map(self.observed_nodes)
         else:
-            self.observed_nodes.update(self.calculate_observed_area())
+            self.observed_nodes = self.calculate_observed_area()
             self.game.fog_of_war.explore_map(self.observed_nodes)
 
     def update_blocked_map_nodes(self, new_current_node):
