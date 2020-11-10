@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import random
+
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Deque, List, Tuple, Optional
@@ -36,6 +38,7 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         self.visibility_radius = 100
 
         # pathfinding-related:
+        self.angle = random.random() * 360
         self.position = self.map.normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)

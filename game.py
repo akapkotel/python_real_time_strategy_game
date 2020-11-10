@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+__title__ = 'RaTS: Real (almost) Time Strategy'
+__author__ = 'Rafał "Akapkotel" Trąbski'
+__license__ = "Share Alike Attribution-NonCommercial-ShareAlike 4.0"
+__version__ = "0.0.3"
+__maintainer__ = "Rafał Trąbski"
+__email__ = "rafal.trabski@mises.pl"
+__status__ = "development"
+__credits__ = []
+
 from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
@@ -46,6 +55,7 @@ class Window(arcade.Window, EventsCreator):
     def __init__(self, width: int, height: int, update_rate: float):
         arcade.Window.__init__(self, width, height, update_rate=update_rate)
         self.set_fullscreen(FULL_SCREEN)
+        self.set_caption(__title__)
         self.center_window()
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
