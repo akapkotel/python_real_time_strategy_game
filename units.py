@@ -5,7 +5,7 @@ import random
 
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Deque, List, Tuple, Optional
+from typing import Deque, List, Tuple, Optional, cast
 
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
@@ -21,7 +21,7 @@ from utils.functions import (
 )
 
 
-class Unit(PlayerEntity, TasksExecutor, Pathfinder):
+class Unit(PlayerEntity, TasksExecutor):
     """Unit is a PlayerEntity which can move on map."""
 
     def __init__(self,
@@ -32,7 +32,6 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
                  tasks_on_start: Optional[List[UnitTask]] = None):
         PlayerEntity.__init__(self, unit_name, player, position)
         TasksExecutor.__init__(self, tasks_on_start)
-        Pathfinder.__init__(self)
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
@@ -166,9 +165,16 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
     def move_to(self, destination: GridPosition):
         start = self.map.position_to_grid(*self.position)
         if self.map.grid_to_node(destination).walkable:
-            if path := self.find_path(start, destination):
-                return self.create_new_path(path)
+            self.cancel_path_requests()
+            self.game.pathfinder.request_path(self, start, destination)
         self.schedule_pathfinding_for_later(destination)
+
+    # def move_to(self, destination: GridPosition):
+    #     start = self.map.position_to_grid(*self.position)
+    #     if self.map.grid_to_node(destination).walkable:
+    #         if path := self.game.pathfinder.request_path(start, destination):
+    #             return self.create_new_path(path)
+    #     self.schedule_pathfinding_for_later(destination)
 
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
@@ -204,10 +210,14 @@ class Unit(PlayerEntity, TasksExecutor, Pathfinder):
         log(f'{self} found path to {destination}, path: {path}')
 
     def kill(self):
+        self.cancel_path_requests()
         for node in (self.current_node, self.reserved_node):
             if node is not None:
                 self.unblock_map_node(node)
         super().kill()
+
+    def cancel_path_requests(self):
+        self.game.pathfinder.cancel_path_requests(self)
 
 
 class Vehicle(Unit):
@@ -233,7 +243,7 @@ class Infantry(Unit, ABC):
 
     @property
     def needs_medic(self) -> bool:
-        return int(self._health) < 25 * len(self.soldiers)
+        return cast(int, self._health) < 25 * len(self.soldiers)
 
     def update(self):
         super().update()

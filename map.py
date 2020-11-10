@@ -5,24 +5,25 @@ import heapq
 import math
 import random
 from abc import ABC, abstractmethod
-from collections import defaultdict
+from collections import defaultdict, deque
 from math import hypot
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Deque
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from data_types import BuildingId, Number, UnitId
+from data_types import BuildingId, GridPosition, SectorId, Number, UnitId
+from scheduling import ScheduledEvent, EventsCreator
 from game import Game, PROFILING_LEVEL
 from utils.functions import get_path_to_file, log, timer
+from utils.classes import Singleton
 
 PATH = 'PATH'
 TILE_WIDTH = 60
 TILE_HEIGHT = 60
 
 # typing aliases:
-GridPosition = SectorId = NormalizedPoint = Tuple[int, int]
+NormalizedPoint = Tuple[int, int]
 MapPath = List[NormalizedPoint]
-
 
 MAP_TEXTURES = {
     'mud': load_spritesheet(
@@ -47,7 +48,7 @@ class GridHandler:
 
     @classmethod
     def normalize_position(cls, x: Number, y: Number) -> NormalizedPoint:
-        grid = cls.position_to_grid(int(x), int(y))
+        grid = cls.position_to_grid(x, y)
         return cls.grid_to_position(grid)
 
     @classmethod
@@ -139,9 +140,9 @@ class Map(GridHandler):
         print(f'map rows: {self.rows}, columns: {self.columns}')
         for x in range(self.columns):
             for y in range(self.rows):
-                self.nodes[(x, y)] = node = MapNode(x, y)
-                self.create_map_sprite(*node.position)
                 sector = self.sectors.get((x, y), Sector((x, y)))
+                self.nodes[(x, y)] = node = MapNode(x, y, sector)
+                self.create_map_sprite(*node.position)
         log(f'Generated {len(self)} map nodes.', True)
 
     def create_map_sprite(self, x, y):
@@ -221,8 +222,9 @@ class MapNode(GridHandler, ABC):
     """
     map: Optional[Map] = None
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, sector):
         self.grid = x, y
+        self.sector = sector
         self.position = self.x, self.y = self.grid_to_position(self.grid)
         self.sector_id: SectorId = x // 10, y // 10
         self.costs: Dict[GridPosition, float] = {}
@@ -299,12 +301,32 @@ class PriorityQueue:
         return heapq.heappop(self.elements)[1]  # (priority, item)
 
 
-class Pathfinder:
+PathRequest = Tuple['Unit', GridPosition, GridPosition]
+
+
+class Pathfinder(Singleton, EventsCreator):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
     """
     instance: Optional[Pathfinder] = None
     map: Optional[Map] = None
+
+    def __init__(self, map: Map):
+        EventsCreator.__init__(self)
+        self.map = map
+        self.requests_for_paths: Deque[PathRequest] = deque()
+        Pathfinder.instance = self
+
+    def request_path(self,
+                     unit: Unit,
+                     start: GridPosition,
+                     destination: GridPosition):
+        self.requests_for_paths.appendleft((unit, start, destination))
+
+    def cancel_path_requests(self, unit: Unit):
+        for request in self.requests_for_paths:
+            if request[0] == unit:
+                self.requests_for_paths.remove(request)
 
     @timer(level=2, global_profiling_level=PROFILING_LEVEL)
     def find_path(self, start: GridPosition, end: GridPosition):
@@ -355,6 +377,37 @@ class Pathfinder:
     def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:
         return [node.position for node in nodes_list]
 
+    def update(self):
+        if self.requests_for_paths:
+            unit, start, destination = self.requests_for_paths.pop()
+            if path := self.find_path(start, destination):
+                unit.create_new_path(path)
+            else:
+                self.schedule_pathfinding_for_later(
+                    unit, start, destination, 1 + len(self.requests_for_paths)
+                )
+
+    def schedule_pathfinding_for_later(self,
+                                       unit: Unit,
+                                       start: GridPosition,
+                                       destination: GridPosition,
+                                       delay: int = 30):
+        """
+        Rather costly way to delay pathfinding execution. It is used only
+        when Unit already have not found correct path to the destination
+        because it is blocked for a longer while.
+        """
+        self.schedule_event(
+            ScheduledEvent(
+                creator=self,
+                delay=1,
+                function=self.request_path,
+                args=(unit, start, destination),
+                frames_left=delay,
+            )
+        )
+
 
 if __name__:
     from player import PlayerEntity
+    from units import Unit

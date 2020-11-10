@@ -191,6 +191,7 @@ class PlayerEntity(GameObject, EventsCreator):
                  robustness: Robustness = 0):
         GameObject.__init__(self, entity_name, robustness, position)
         EventsCreator.__init__(self)
+        self.map = self.game.map
 
         self.player: Player = player
         self.faction: Faction = self.player.faction
@@ -259,9 +260,9 @@ class PlayerEntity(GameObject, EventsCreator):
         raise NotImplementedError
 
     def calculate_observed_area(self) -> Set[GridPosition]:
-        position = self.game.map.position_to_grid(*self.position)
+        position = self.map.position_to_grid(*self.position)
         observed_area = calculate_observable_area(*position, 8)
-        observed_area = self.game.map.in_bounds(observed_area)
+        observed_area = self.map.in_bounds(observed_area)
         return set(observed_area)
 
     def update_known_enemies_set(self):
@@ -285,8 +286,7 @@ class PlayerEntity(GameObject, EventsCreator):
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
         distance = self.detection_radius
-        return is_visible(self.position, other.position, obstacles,
-                          distance)
+        return is_visible(self.position, other.position, obstacles, distance)
 
     def is_enemy(self, other: Unit) -> bool:
         return self.faction.is_enemy(other.faction)

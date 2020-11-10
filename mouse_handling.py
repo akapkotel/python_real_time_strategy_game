@@ -32,7 +32,8 @@ CURSOR_NORMAL_TEXTURE = 0
 CURSOR_FORBIDDEN_TEXTURE = 1
 CURSOR_ATTACK_TEXTURE = 2
 CURSOR_SELECTION_TEXTURE = 3
-CURSOR_REPAIR_TEXTURE = 4
+CURSOR_MOVE_TEXTURE = 4
+CURSOR_REPAIR_TEXTURE = 5
 
 
 class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
@@ -91,7 +92,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         return f'{self.__class__.__name__}'
 
     def load_textures(self):
-        names = 'normal.png', 'forbidden.png', 'attack.png', 'select.png'
+        names = ('normal.png', 'forbidden.png', 'attack.png', 'select.png',
+                 'move.png')
         self.textures.extend(
             [load_texture(get_path_to_file(name)) for name in names[1:]]
         )  # without 'normal.png' since it is already loaded
@@ -201,10 +203,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def send_units_to_pointed_location(self, units, x, y):
         waypoints = self.game.map.group_of_waypoints(x, y, len(units))
         for i, unit in enumerate(units):
-            e = ScheduledEvent(
-                self, 0, unit.move_to, (waypoints[i],), frames_left=1 + 2 * i
-            )
-            self.schedule_event(e)
+            unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_units()
@@ -352,7 +351,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         elif not self.game.map.position_to_node(*self.position).walkable:
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
         else:
-            self.set_texture(CURSOR_NORMAL_TEXTURE)
+            self.set_texture(CURSOR_MOVE_TEXTURE)
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
         if entity.selectable:

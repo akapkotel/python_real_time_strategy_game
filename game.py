@@ -125,7 +125,7 @@ class Window(arcade.Window, EventsCreator):
         super().on_update(delta_time)
 
     def on_draw(self):
-        arcade.start_render()
+        self.clear()
         self.current_view.on_draw()
         if (cursor := self.cursor).visible:
             cursor.draw()
@@ -258,6 +258,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
         self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
                        TILE_WIDTH)
+        self.pathfinder = Pathfinder(map=self.map)
         self.fog_of_war = FogOfWar()
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
@@ -403,6 +404,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         if not self.paused:
             self.update_local_drawn_units_and_buildings()
             super().on_update(delta_time)
+            self.pathfinder.update()
             self.fog_of_war.update()
             self.update_factions_and_players()
 
@@ -503,7 +505,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from map import TILE_WIDTH, TILE_HEIGHT, Map
+    from map import TILE_WIDTH, TILE_HEIGHT, Map, Pathfinder
     from player import Faction, Player, CpuPlayer, PlayerEntity
     from unit_management import SelectedEntityMarker
     from unit_management import PermanentUnitsGroup
