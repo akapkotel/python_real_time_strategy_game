@@ -2,19 +2,18 @@
 from __future__ import annotations
 
 import random
-
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Deque, List, Tuple, Optional, cast
+from typing import Deque, List, Optional, Union, cast
 
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
+from buildings import Building
 from enums import UnitWeight
 from game import UPDATE_RATE
-from map import GridPosition, MapNode, MapPath, PATH, Pathfinder
+from map import GridPosition, MapNode, MapPath, PATH, Sector
 from player import Player, PlayerEntity
-from scheduling import ScheduledEvent
 from units_tasking import TasksExecutor, UnitTask
 from utils.functions import (
     calculate_angle, close_enough, distance_2d, log, vector_2d
@@ -41,6 +40,9 @@ class Unit(PlayerEntity, TasksExecutor):
         self.position = self.map.normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)
+        self.current_sector: Optional[Sector] = None
+        self.update_current_sector()
+
         self.block_map_node(node)
 
         self.path: Deque[GridPosition] = deque()
@@ -62,10 +64,13 @@ class Unit(PlayerEntity, TasksExecutor):
     def update(self):
         super().update()
         self.evaluate_tasks()
+
         new_current_node = self.map.position_to_node(*self.position)
         if self in self.game.local_human_player.faction.units:
             self.update_observed_area(new_current_node)
+
         self.update_blocked_map_nodes(new_current_node)
+        self.update_current_sector()
         self.update_pathfinding()
 
     def update_observed_area(self, new_current_node: MapNode):
@@ -80,7 +85,7 @@ class Unit(PlayerEntity, TasksExecutor):
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
         """
-        self.scan_next_nodes_for_collisionss()
+        self.scan_next_nodes_for_collisions()
         self.update_current_blocked_node(new_current_node)
         if len(self.path) > 1:
             self.update_reserved_node()
@@ -106,7 +111,7 @@ class Unit(PlayerEntity, TasksExecutor):
     def block_map_node(self, node: MapNode):
         node.unit_id = self.id
 
-    def scan_next_nodes_for_collisionss(self):
+    def scan_next_nodes_for_collisions(self):
         if not self.path:
             return
         elif len(self.path) == 1:
@@ -121,7 +126,7 @@ class Unit(PlayerEntity, TasksExecutor):
                 self.wait_for_free_path()
             else:
                 destination = self.map.position_to_grid(*self.path[-1])
-                self.schedule_pathfinding_for_later(destination)
+                self.move_to(destination)
 
     def wait_for_free_path(self):
         """
@@ -132,6 +137,14 @@ class Unit(PlayerEntity, TasksExecutor):
         """
         self.waiting_for_path = [1 // UPDATE_RATE, self.path.copy()]
         self.path.clear()
+        self.stop()
+
+    def update_current_sector(self):
+        if (sector := self.current_node.sector) != self.current_sector:
+            if self.current_sector is not None:
+                self.current_sector.units_and_buildings.discard(self)
+            self.current_sector = sector
+            sector.units_and_buildings.add(self)
 
     def update_pathfinding(self):
         if self.waiting_for_path[0]:
@@ -144,7 +157,8 @@ class Unit(PlayerEntity, TasksExecutor):
     def countdown_waiting(self):
         self.waiting_for_path[0] -= 1
         if self.waiting_for_path[0] == 0:
-            self.path = self.waiting_for_path[1]
+            destination_position = self.waiting_for_path[1][-1]
+            self.move_to(self.map.position_to_grid(*destination_position))
 
     def follow_path(self):
         destination = self.path[0]
@@ -164,17 +178,8 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def move_to(self, destination: GridPosition):
         start = self.map.position_to_grid(*self.position)
-        if self.map.grid_to_node(destination).walkable:
-            self.cancel_path_requests()
-            self.game.pathfinder.request_path(self, start, destination)
-        self.schedule_pathfinding_for_later(destination)
-
-    # def move_to(self, destination: GridPosition):
-    #     start = self.map.position_to_grid(*self.position)
-    #     if self.map.grid_to_node(destination).walkable:
-    #         if path := self.game.pathfinder.request_path(start, destination):
-    #             return self.create_new_path(path)
-    #     self.schedule_pathfinding_for_later(destination)
+        self.cancel_path_requests()
+        self.game.pathfinder.request_path(self, start, destination)
 
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])
@@ -185,39 +190,34 @@ class Unit(PlayerEntity, TasksExecutor):
         for event in (e for e in self.scheduled_events if e.function == self.move_to):
             self.unschedule_event(event)
 
-    def schedule_pathfinding_for_later(self,
-                                       destination: GridPosition,
-                                       delay: int = 30):
-        """
-        Rather costly way to delay pathfinding execution. It is used only
-        when Unit already have not found correct path to the destination
-        because it is blocked for a longer while.
-        """
-        self.path.clear()
-        self.schedule_event(
-            ScheduledEvent(
-                creator=self,
-                delay=1,
-                function=self.move_to,
-                args=(destination,),
-                frames_left=delay,
-            )
-        )
-
     def debug_found_path(self, path: MapPath, destination: GridPosition):
         self.game.debugged.clear()
         self.game.debugged.append([PATH, path])
         log(f'{self} found path to {destination}, path: {path}')
 
     def kill(self):
+        self.current_sector.units_and_buildings.discard(self)
+
         self.cancel_path_requests()
+
         for node in (self.current_node, self.reserved_node):
             if node is not None:
                 self.unblock_map_node(node)
+
         super().kill()
 
     def cancel_path_requests(self):
         self.game.pathfinder.cancel_path_requests(self)
+
+    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
+        return [self.current_sector] + self.current_sector.adjacent_sectors()
+
+    def visible_for(self, other: PlayerEntity) -> bool:
+        other: Union[Unit, Building]
+        if self.player is self.game.local_human_player and not other.is_building:
+            if other.current_node not in self.observed_nodes:
+                return False
+        return super().visible_for(other)
 
 
 class Vehicle(Unit):

@@ -289,6 +289,8 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
+        close = ScheduledEvent(self, 20, self.window.close)
+        self.schedule_event(close)
 
     def assign_reference_to_self_for_all_classes(self):
         name = self.__class__.__name__.lower()
@@ -333,10 +335,11 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        position = 600, 600
         name = "medic_truck_red.png"
-        cpu_unit = spawn_test_unit(position, name, player=self.players[4])
-        spawned_units.append(cpu_unit)
+        player = self.players[4]
+        for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
+            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+                spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def test_buildings_spawning(self):

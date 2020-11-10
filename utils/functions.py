@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
 import logging
-
-from math import hypot, atan2, degrees, sin, cos, radians, inf as INFINITY
+from functools import lru_cache
+from math import atan2, cos, degrees, hypot, inf as INFINITY, radians, sin
 from time import perf_counter
+from typing import Any, Iterable, List, Sequence, Tuple
+
+from arcade.arcade_types import RGB, RGBA
 from numba import njit
 from shapely import speedups
 from shapely.geometry import LineString, Polygon
-from functools import lru_cache
 
-from arcade.arcade_types import RGB, RGBA
-
-from typing import Sequence, Tuple, List, Iterable, Any, cast
-from data_types import Point, Number, Union
-
+from data_types import Number, Point, Union
 
 speedups.enable()
 

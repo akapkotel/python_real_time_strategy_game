@@ -4,22 +4,24 @@ from __future__ import annotations
 import heapq
 import math
 import random
+
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 from math import hypot
-from typing import Dict, List, Optional, Set, Tuple, Deque
+from typing import Deque, Dict, List, Optional, Set, Tuple
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from data_types import BuildingId, GridPosition, SectorId, Number, UnitId
-from scheduling import ScheduledEvent, EventsCreator
+from data_types import BuildingId, GridPosition, Number, SectorId, UnitId
 from game import Game, PROFILING_LEVEL
-from utils.functions import get_path_to_file, log, timer
+from scheduling import EventsCreator, ScheduledEvent
 from utils.classes import Singleton
+from utils.functions import get_path_to_file, log, timer
 
 PATH = 'PATH'
 TILE_WIDTH = 60
 TILE_HEIGHT = 60
+SECTOR_SIZE = 8
 
 # typing aliases:
 NormalizedPoint = Tuple[int, int]
@@ -90,7 +92,7 @@ class Map(GridHandler):
     game: Optional[Game] = None
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
-        MapNode.map = Pathfinder.map = Sector.map = self
+        MapNode.map = Sector.map = self
         self.width = width
         self.height = height
         self.grid_width = grid_width
@@ -107,6 +109,7 @@ class Map(GridHandler):
         self.units: Dict[GridPosition, UnitId] = {}
         self.buildings: Dict[GridPosition, BuildingId] = {}
 
+        self.generate_sectors()
         self.generate_nodes()
         self.calculate_distances_between_nodes()
 
@@ -135,15 +138,23 @@ class Map(GridHandler):
     def grid_to_node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]
 
+    def generate_sectors(self):
+        for x in range(self.columns // SECTOR_SIZE + 1):
+            for y in range(self.rows // SECTOR_SIZE + 1):
+                self.sectors[(x, y)] = Sector((x, y))
+        log(f'Created {len(self.sectors)} sectors.', 1)
+
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     def generate_nodes(self):
         print(f'map rows: {self.rows}, columns: {self.columns}')
         for x in range(self.columns):
+            sector_x = x // SECTOR_SIZE
             for y in range(self.rows):
-                sector = self.sectors.get((x, y), Sector((x, y)))
+                sector_y = y // SECTOR_SIZE
+                sector = self.sectors[sector_x, sector_y]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
                 self.create_map_sprite(*node.position)
-        log(f'Generated {len(self)} map nodes.', True)
+        log(f'Generated {len(self.nodes)} map nodes', 1)
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
@@ -193,7 +204,7 @@ class Map(GridHandler):
         return self.nodes[grid]
 
 
-class Sector:
+class Sector(GridHandler, ABC):
     """
     Map is divided for sectors containing 10x10 Nodes each to split space for
     smaller chunks in order to make enemies-detection faster: since each Unit
@@ -202,16 +213,27 @@ class Sector:
     """
     map: Optional[Map] = None
 
-    def __init__(self, id: SectorId):
+    def __init__(self, grid: SectorId):
         """
         Each MapSector is a 10x10 square containing 100 MapNodes.
 
         :param id: SectorId is a Tuple[int, int] which are boundaries of
         this Sector: first column and first row of MapNodes, this Sector owns
         """
-        self.id = id
+        self.grid = grid
         self.units_and_buildings: Set[PlayerEntity] = set()
-        self.map.sectors[id] = self
+        self.map.sectors[grid] = self
+
+    def adjacent_sectors(self) -> List[Sector]:
+        raw_grids = self.adjacent_grids(*self.grid)
+        return [self.map.sectors[g] for g in self.in_bounds(raw_grids)]
+
+    def in_bounds(self, grids: List[GridPosition]):
+        # TODO: fix setting correct bounds for sectors
+        return [p for p in grids if 0 <= p[0] < 13 and 0 <= p[1] < 7]
+
+    def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
+        return [(x + p[0], y + p[1]) for p in cls.adjacent_offsets]
 
 
 class MapNode(GridHandler, ABC):
@@ -226,7 +248,6 @@ class MapNode(GridHandler, ABC):
         self.grid = x, y
         self.sector = sector
         self.position = self.x, self.y = self.grid_to_position(self.grid)
-        self.sector_id: SectorId = x // 10, y // 10
         self.costs: Dict[GridPosition, float] = {}
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
@@ -309,9 +330,15 @@ class Pathfinder(Singleton, EventsCreator):
     A* algorithm implementation using PriorityQueue based on improved heapq.
     """
     instance: Optional[Pathfinder] = None
-    map: Optional[Map] = None
 
     def __init__(self, map: Map):
+        """
+        This class is a Singleton, so there is only one instance of
+        Pathfinder in the game, and it will be returned each time the
+        Pathfinder() is instantiated.
+
+        :param map: Map -- actual instance of game Map loaded.
+        """
         EventsCreator.__init__(self)
         self.map = map
         self.requests_for_paths: Deque[PathRequest] = deque()
@@ -324,7 +351,7 @@ class Pathfinder(Singleton, EventsCreator):
         self.requests_for_paths.appendleft((unit, start, destination))
 
     def cancel_path_requests(self, unit: Unit):
-        for request in self.requests_for_paths:
+        for request in self.requests_for_paths.copy():
             if request[0] == unit:
                 self.requests_for_paths.remove(request)
 
@@ -380,12 +407,10 @@ class Pathfinder(Singleton, EventsCreator):
     def update(self):
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
-            if path := self.find_path(start, destination):
-                unit.create_new_path(path)
-            else:
-                self.schedule_pathfinding_for_later(
-                    unit, start, destination, 1 + len(self.requests_for_paths)
-                )
+            if self.map.grid_to_node(destination).walkable:
+                if path := self.find_path(start, destination):
+                    return unit.create_new_path(path)
+            self.request_path(unit, start, destination)
 
     def schedule_pathfinding_for_later(self,
                                        unit: Unit,

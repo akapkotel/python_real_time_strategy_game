@@ -62,3 +62,7 @@ class HashedList(list):
 
     def where(self, condition):
         return HashedList([e for e in self if condition(e)])
+
+
+class QuadTree:
+    ...

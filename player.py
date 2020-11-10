@@ -2,17 +2,20 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict, Optional, Set, Union, List
+from typing import Dict, List, Optional, Set, Union
 
 from arcade.arcade_types import Point
 
 from data_types import FactionId, GridPosition
 from game import Game, UPDATE_RATE
 from gameobject import GameObject, Robustness
-from map import MapNode, TILE_WIDTH
+from map import MapNode, Sector, TILE_WIDTH
 from observers import ObjectsOwner, OwnedObject
 from scheduling import EventsCreator
-from utils.functions import is_visible, log, calculate_observable_area, timer
+from utils.functions import (
+    calculate_observable_area, close_enough,
+    is_visible, log
+)
 
 
 def new_id(objects: Dict) -> int:
@@ -195,7 +198,14 @@ class PlayerEntity(GameObject, EventsCreator):
 
         self.player: Player = player
         self.faction: Faction = self.player.faction
+
+        # Each Unit or Building keeps a set containing enemies it actually
+        # sees and updates this set each frame:
         self.known_enemies: Set[PlayerEntity] = set()
+
+        # when an Unit or Building detect enemy, enemy detects it too
+        # automatically, to decrease number of is_visible function calls:
+        self.mutually_detected_enemies: Set[PlayerEntity] = set()
 
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
@@ -266,29 +276,36 @@ class PlayerEntity(GameObject, EventsCreator):
         return set(observed_area)
 
     def update_known_enemies_set(self):
-        self.known_enemies = self.scan_for_visible_enemies()
+        if enemies := self.scan_for_visible_enemies():
+            for enemy in enemies:
+                enemy.mutually_detected_enemies.add(self)
+        self.known_enemies = enemies
+        self.mutually_detected_enemies.clear()
 
     def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
         potentially_visible = self.get_potentially_visible_enemies()
-
-        visible_enemies: Set[Union[Unit, Building]] = {
-            enemy for enemy in potentially_visible if enemy.visible_for(self)
-        }
-        return visible_enemies
+        return {e for e in potentially_visible if e.visible_for(self)}
 
     def get_potentially_visible_enemies(self) -> List[PlayerEntity]:
         enemies = []
-        for faction in (f for f in self.game.factions.values() if
-                        f.is_enemy(self.faction)):
-            enemies.extend(faction.units.union(faction.buildings))
-        return enemies
+        sectors = self.get_sectors_to_scan_for_enemies()
+        for sector in sectors:
+            enemies.extend(
+                e for e in sector.units_and_buildings if e.is_enemy(self)
+            )
+        return [e for e in enemies if e not in self.mutually_detected_enemies]
+
+    @abstractmethod
+    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
+        raise NotImplementedError
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
-        distance = self.detection_radius
-        return is_visible(self.position, other.position, obstacles, distance)
+        if close_enough(self.position, other.position, self.detection_radius):
+            return is_visible(self.position, other.position, obstacles)
+        return False
 
-    def is_enemy(self, other: Unit) -> bool:
+    def is_enemy(self, other: PlayerEntity) -> bool:
         return self.faction.is_enemy(other.faction)
 
     @property

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Iterable, Optional, Any
+from typing import Any, Iterable, Optional
 
 from arcade import SpriteList
 

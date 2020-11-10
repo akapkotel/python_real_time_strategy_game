@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, List, Set, Deque, Type
 from collections import deque
+from typing import Deque, List, Optional, Set, Type
 
 from arcade.arcade_types import Point
 
-from player import PlayerEntity, Player
 from data_types import SectorId
+from map import MapNode, Sector, TILE_HEIGHT, TILE_WIDTH
+from player import Player, PlayerEntity
 from utils.functions import is_visible
-from map import MapNode, TILE_WIDTH, TILE_HEIGHT
 
 
 class IProducer:
@@ -59,6 +59,10 @@ class IProducer:
 
 
 class Building(PlayerEntity, IProducer):
+
+    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
+        sectors = []
+        return sectors
 
     game: Optional[Game] = None
 
@@ -112,8 +116,8 @@ class Building(PlayerEntity, IProducer):
     def update_sector(self):
         distinct_sectors = set()
         for node in self.occupied_nodes:
-            distinct_sectors.add(node.sector_id)
-        for sector in (self.game.map.sectors[id] for id in distinct_sectors):
+            distinct_sectors.add(node.sector)
+        for sector in distinct_sectors:
             sector.units_and_buildings.add(self)
         return distinct_sectors
 

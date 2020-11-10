@@ -12,17 +12,17 @@ from arcade import (
 
 from buildings import Building
 from colors import CLEAR_GREEN, GREEN
-from improved_spritelists import DividedSpriteList
 from game import Game, Menu, UPDATE_RATE
-from utils.classes import HashedList
 from gameobject import GameObject
+from improved_spritelists import DividedSpriteList
 from player import PlayerEntity
-from scheduling import EventsCreator, ScheduledEvent
+from scheduling import EventsCreator
 from unit_management import SelectedEntityMarker
 from units import Unit, UnitTask
 from user_interface import (
     CursorInteractive, ToggledElement, UiElement, UiSpriteList
 )
+from utils.classes import HashedList
 from utils.functions import get_path_to_file, log
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']

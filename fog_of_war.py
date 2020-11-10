@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-from typing import Set, Optional, Dict, KeysView
 from functools import lru_cache
-from numba import njit
+from typing import Dict, KeysView, Optional, Set
 
 from arcade import Sprite, SpriteList, make_circle_texture
+from numba import njit
 
-from data_types import GridPosition
 from colors import BLACK, FOG
-from map import TILE_WIDTH, TILE_HEIGHT, MapNode
+from data_types import GridPosition
 from game import Game
-
+from map import TILE_HEIGHT, TILE_WIDTH
 
 OFFSET_X = TILE_WIDTH // 2
 OFFSET_Y = TILE_HEIGHT // 2
