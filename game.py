@@ -39,6 +39,11 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
+
+TILE_WIDTH = 60
+TILE_HEIGHT = 60
+SECTOR_SIZE = 8
+
 UPDATE_RATE = 1 / 30
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = True
@@ -80,7 +85,7 @@ class Window(arcade.Window, EventsCreator):
 
     @property
     def screen_center(self) -> Point:
-        left, _, bottom, _ = self.current_viewport
+        left, _, bottom, _ = self.current_view.viewport
         return left + SCREEN_X, bottom + SCREEN_Y
 
     @property
@@ -133,7 +138,7 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         if self.cursor.active:
             if self.current_view is self.game_view:
-                left, _, bottom, _ = self.current_viewport
+                left, _, bottom, _ = self.current_view.viewport
                 self.cursor.on_mouse_motion(x + left, y + bottom, dx, dy)
             else:
                 self.cursor.on_mouse_motion(x, y, dx, dy)
@@ -145,13 +150,13 @@ class Window(arcade.Window, EventsCreator):
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
         if self.cursor.active:
-            left, _, bottom, _ = self.current_viewport
+            left, _, bottom, _ = self.current_view.viewport
             self.cursor.on_mouse_release(x + left, y + bottom, button, modifiers)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
         if self.cursor.active:
-            left, _, bottom, _ = self.current_viewport
+            left, _, bottom, _ = self.current_view.viewport
             self.cursor.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
@@ -202,24 +207,28 @@ class Window(arcade.Window, EventsCreator):
         left, right, bottom, top = self.get_viewport()
         new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
+        self.update_viewport_coordinates(new_bottom, new_left)
+
+    def update_viewport_coordinates(self, new_bottom, new_left):
         new_right = new_left + SCREEN_WIDTH
         new_top = new_bottom + SCREEN_HEIGHT
-        self.current_viewport = new_left, new_right, new_bottom, new_top
+        self.current_view.viewport = new_left, new_right, new_bottom, new_top
         self.set_viewport(new_left, new_right, new_bottom, new_top)
 
     def move_viewport_to_the_position(self, x: int, y: int):
+        """
+        Call it when Player clicked on the minimap or teleported to the
+        position of selected permanent group of Units with numeric keys.
+        """
         game_map = self.game_view.map
         new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
-        new_right = new_left + SCREEN_WIDTH
-        new_top = new_bottom + SCREEN_HEIGHT
-        self.current_viewport = new_left, new_right, new_bottom, new_top
-        self.set_viewport(new_left, new_right, new_bottom, new_top)
+        self.update_viewport_coordinates(new_bottom, new_left)
 
     def get_viewport(self) -> Viewport:
-        if self.current_view is not self.game_view:
-            return 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
-        return super().get_viewport()
+        # We cache viewport coordinates each time they are changed,
+        # so no need for redundant call to the Window method
+        return self.current_view.viewport
 
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
@@ -251,13 +260,13 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.vehicles_threads = SpriteList(is_static=True)
         self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
-        self.selection_markers_sprites: SpriteList[SelectedEntityMarker] = SpriteList()
+        self.selection_markers_sprites = SpriteList()
         self.interface = UiSpriteList()
 
         self.set_updated_and_drawn_lists()
 
         self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
-                       TILE_WIDTH)
+                       TILE_HEIGHT)
         self.pathfinder = Pathfinder(map=self.map)
         self.fog_of_war = FogOfWar()
         # Settings, game-progress data, etc.
@@ -289,8 +298,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
-        close = ScheduledEvent(self, 20, self.window.close)
-        self.schedule_event(close)
 
     def assign_reference_to_self_for_all_classes(self):
         name = self.__class__.__name__.lower()
@@ -335,11 +342,11 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        name = "medic_truck_red.png"
-        player = self.players[4]
-        for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
-            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        # name = "medic_truck_red.png"
+        # player = self.players[4]
+        # for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
+        #     for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def test_buildings_spawning(self):
@@ -406,6 +413,7 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     def on_update(self, delta_time: float):
         if not self.paused:
             self.update_local_drawn_units_and_buildings()
+            # GameObject.move_all_instances()
             super().on_update(delta_time)
             self.pathfinder.update()
             self.fog_of_war.update()
@@ -508,9 +516,9 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from map import TILE_WIDTH, TILE_HEIGHT, Map, Pathfinder
+    from map import Map, Pathfinder
     from player import Faction, Player, CpuPlayer, PlayerEntity
-    from unit_management import SelectedEntityMarker
+    from unit_management import SelectedEntityMarker  # only to bind game ref
     from unit_management import PermanentUnitsGroup
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor

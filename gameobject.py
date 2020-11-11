@@ -42,7 +42,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.object_name = get_object_name(filename)
 
         GameObject.total_objects_count += 1
-        self.id = GameObject.total_objects_count
+        self.id = index = GameObject.total_objects_count
 
         self._robustness = robustness  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile
@@ -60,6 +60,12 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness
+
+    def on_update(self, delta_time: float = 1/60):
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+        if self.frames:
+            self.update_animation(delta_time)
 
     def update_animation(self, delta_time: float = 1 / 60):
         super().update_animation(delta_time)

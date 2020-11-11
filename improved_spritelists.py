@@ -60,7 +60,8 @@ class DividedSpriteList(SpriteList):
     """
 
     def __init__(self, use_spatial_hash=False, is_static=False):
-        super().__init__(is_static)  # to comply with SpriteList interface
+        super().__init__(use_spatial_hash, is_static)  # to comply with
+        # SpriteList interface
         self.id_elements_dict = {}
         del self.sprite_list  # we replace it with two SpriteLists below:
         self.updated = SpriteList(use_spatial_hash, is_static)

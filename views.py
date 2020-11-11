@@ -9,6 +9,7 @@ from arcade import (
 from utils.functions import get_attributes_with_attribute, log
 from improved_spritelists import DividedSpriteList
 from colors import WHITE, GREEN
+from data_types import Viewport
 
 
 Updateable = Drawable = Union[SpriteList, DividedSpriteList, Sprite]
@@ -22,6 +23,12 @@ class WindowView(View):
         self._requires_loading = requires_loading
         self.updated: List[Updateable] = []
         self.drawn: List[Drawable] = []
+
+        # Since we can toggle views and some views has dynamic viewports and
+        # other do not, we keep track of each View viewport to retrieve it
+        # when we go back to the View from another, and each time we update
+        # the viewport of the Window, we use current View viewport coordinates:
+        self.viewport: Viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
 
     @property
     def requires_loading(self):
@@ -60,10 +67,12 @@ class WindowView(View):
     def on_show_view(self):
         log(f'Switched to WindowView: {self.__class__.__name__}')
         self.window.updated = self.updated
+        self.window.set_viewport(*self.viewport)
 
     def on_update(self, delta_time: float):
+        log(f'Time since last update call: {delta_time}')
         for obj in self.updated:
-            obj.update()
+            obj.on_update(delta_time)
 
     def on_draw(self):
         for obj in self.drawn:

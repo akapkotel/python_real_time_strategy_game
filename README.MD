@@ -29,7 +29,8 @@ To be done.
 4. Simple debugging logic.
 5. Pausing game logic.
 6. Finding files by their names without any paths-constants etc.
-7. Basic mouse-handling.
+7. Basic mouse-handling: selecting, unselecting, giving move-orders to
+   Units.
 8. Scratch of the keyboard-handling.
 9. Efficient replacements for the arcade.Spritelists allowing me to
    arbitrary 'activate', 'deactivate' updating and drawing some Sprites
@@ -44,6 +45,10 @@ To be done.
 14. Small improvement to efficiency by spreading of many pathfinding
     calls for several update-frames, so no big lag when sending units to
     the opposite corner of the map.
+15. Added queueing the pathfinding-requests and a Pathfinder changed to
+    the Singleton.
+16. Divided map to the Sectors to avoid visibility-tests between all
+    Units and Buildings in game.
 
 #### TO BE DONE:
 #### Minor:
@@ -53,6 +58,9 @@ To be done.
    diagonal-movements-collisions.
 3. Display currently selected permanent units group number above each
    unit belonging to this group.
+4. More efficient visibility-tests to avoid as many tests as possible.
+5. Better collision-avoidance to replace tiles-reserving system -
+   flocking maybe? How to make it working with pathfinding?
 
 #### Major:
 1. User-interface.

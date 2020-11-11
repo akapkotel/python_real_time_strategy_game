@@ -13,15 +13,12 @@ from typing import Deque, Dict, List, Optional, Set, Tuple
 from arcade import Sprite, Texture, load_spritesheet
 
 from data_types import BuildingId, GridPosition, Number, SectorId, UnitId
-from game import Game, PROFILING_LEVEL
+from game import Game, PROFILING_LEVEL, TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from scheduling import EventsCreator, ScheduledEvent
 from utils.classes import Singleton
 from utils.functions import get_path_to_file, log, timer
 
 PATH = 'PATH'
-TILE_WIDTH = 60
-TILE_HEIGHT = 60
-SECTOR_SIZE = 8
 
 # typing aliases:
 NormalizedPoint = Tuple[int, int]

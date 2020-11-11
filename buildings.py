@@ -81,7 +81,7 @@ class Building(PlayerEntity, IProducer):
         self.occupied_nodes: List[MapNode] = self.block_map_nodes()
         for node in self.occupied_nodes:
             self.block_map_node(node)
-        self.occupied_sectors: Set[SectorId] = self.update_sector()
+        self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
     def place_building_properly_on_the_grid(self) -> Point:
         """
@@ -113,7 +113,7 @@ class Building(PlayerEntity, IProducer):
     def block_map_node(self, node: MapNode):
         node.building_id = self.id
 
-    def update_sector(self):
+    def update_current_sector(self):
         distinct_sectors = set()
         for node in self.occupied_nodes:
             distinct_sectors.add(node.sector)
@@ -122,14 +122,14 @@ class Building(PlayerEntity, IProducer):
         return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
-        self.observable_nodes = self.calculate_observed_area()
+        self.observed_nodes = self.calculate_observed_area()
 
     @property
     def needs_repair(self) -> bool:
         return self.health < self._max_health
 
-    def update(self):
-        super().update()
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
         if hasattr(self, 'update_production'):
             self.update_production()
 
@@ -140,6 +140,15 @@ class Building(PlayerEntity, IProducer):
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
         distance = self.detection_radius
         return is_visible(self.position, other.position, obstacles, distance)
+
+    def get_nearby_friends(self) -> Set[PlayerEntity]:
+        friends: Set[PlayerEntity] = set()
+        for sector in self.occupied_sectors:
+            friends.update(
+                u for u in sector.units_and_buildings if not
+                u.is_enemy(self)
+            )
+        return friends
 
     def kill(self):
         for node in self.occupied_nodes:

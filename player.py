@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Tuple, Optional, Set, Union
 
 from arcade.arcade_types import Point
 
@@ -166,12 +166,17 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     def update(self):
         log(f'Updating player: {self}')
         self.update_known_enemies()
+        self.clear_mutually_detected_enemies()
 
     def update_known_enemies(self):
         self.known_enemies.clear()
         for unit in self.units:
             self.known_enemies.update(unit.known_enemies)
         self.faction.known_enemies.update(self.known_enemies)
+
+    def clear_mutually_detected_enemies(self):
+        for entity in self.units.union(self.buildings):
+            entity.mutually_detected_enemies.clear()
 
 
 class CpuPlayer(Player):
@@ -207,6 +212,8 @@ class PlayerEntity(GameObject, EventsCreator):
         # automatically, to decrease number of is_visible function calls:
         self.mutually_detected_enemies: Set[PlayerEntity] = set()
 
+        self.nearby_friends: Set[PlayerEntity] = set()
+
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
         self.is_building = isinstance(self, Building)
@@ -239,13 +246,14 @@ class PlayerEntity(GameObject, EventsCreator):
         raise NotImplementedError
 
     @abstractmethod
-    def update_sector(self):
+    def update_current_sector(self):
         raise NotImplementedError
 
-    def update(self):
-        super().update()
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
         if self.alive:
             self.update_visibility()
+            self.update_nearby_friends()
             self.update_known_enemies_set()
         else:
             self.kill()
@@ -275,12 +283,31 @@ class PlayerEntity(GameObject, EventsCreator):
         observed_area = self.map.in_bounds(observed_area)
         return set(observed_area)
 
+    def update_nearby_friends(self):
+        self.nearby_friends = self.get_nearby_friends()
+
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
-            for enemy in enemies:
-                enemy.mutually_detected_enemies.add(self)
-        self.known_enemies = enemies
-        self.mutually_detected_enemies.clear()
+            self.notify_detected_enemies_about_self(enemies)
+            self.notify_all_nearby_friends_about_enemies(enemies)
+        self.known_enemies = enemies.union(self.mutually_detected_enemies)
+
+    def notify_all_nearby_friends_about_enemies(self, enemies):
+        """
+        By informing other, friendly Units and Buildings about detected
+        enemies, we can cut down the number of detection-tests, and more
+        congested the area is, the more processing time we save.
+        """
+        for friend in self.nearby_friends:
+            friend.mutually_detected_enemies.update(enemies)
+
+    def notify_detected_enemies_about_self(self, enemies):
+        """
+        Informing visible enemy that we are visible for him is an obvious way
+        to cut detection-tests by half.
+        """
+        for enemy in enemies:
+            enemy.mutually_detected_enemies.add(self)
 
     def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
         potentially_visible = self.get_potentially_visible_enemies()
@@ -320,6 +347,10 @@ class PlayerEntity(GameObject, EventsCreator):
         if self.selection_marker is not None:
             self.selection_marker.kill()
         super().kill()
+
+    @abstractmethod
+    def get_nearby_friends(self) -> Set[PlayerEntity]:
+        raise NotImplementedError
 
 
 if __name__:

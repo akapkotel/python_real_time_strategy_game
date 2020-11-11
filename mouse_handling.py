@@ -27,7 +27,6 @@ from utils.functions import get_path_to_file, log
 
 DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
 
-
 CURSOR_NORMAL_TEXTURE = 0
 CURSOR_FORBIDDEN_TEXTURE = 1
 CURSOR_ATTACK_TEXTURE = 2
@@ -157,7 +156,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_middle_button_click(self, x: float, y: float, modifiers: int):
         log(f'Middle-clicked at x:{x}, y: {y}')
 
-    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
+    def on_mouse_release(self, x: float, y: float, button: int,
+                         modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_release(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
@@ -168,7 +168,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             units = self.selected_units
             pointed = self.pointed_unit or self.pointed_building
             if units:
-                self.on_click_with_selected_units(x, y, modifiers, units, pointed)
+                self.on_click_with_selected_units(x, y, modifiers, units,
+                                                  pointed)
             elif pointed is not None:
                 self.on_player_entity_clicked(pointed)
         else:
@@ -235,8 +236,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.selection_markers.difference_update(killed)
 
     def on_building_clicked(self, clicked_building: Building):
-        if clicked_building.selectable:
-            self.selected_building = clicked_building
+        # TODO: resolving possible building-related tasks for units first
+        self.selected_building = clicked_building
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -294,10 +295,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if pointed := self.get_pointed_sprite(*self.position):
             if isinstance(pointed, UiElement) and pointed.active:
                 self.update_mouse_pointed(pointed)
-            elif getattr(pointed, 'rendered', False):
+            elif isinstance(pointed, PlayerEntity):
                 self.pointed_gameobject = pointed
 
-    def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
+    def get_pointed_sprite(self, x, y) -> Optional[
+        Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn in some
         # hierarchical order, we must iterate over them catching
         # cursor-pointed elements in backward order: last draw, is first to
@@ -318,10 +320,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # be first to interact with cursor, we discard all parents and seek
         # for first child, which is pointed instead:
         if pointed := get_sprites_at_point((x, y), spritelist):
-            s: CursorInteractive
-            for sprite in (s for s in pointed if isinstance(s, GameObject) or
-                                                 not getattr(s, 'children',
-                                                             False)):
+            s: Union[CursorInteractive, PlayerEntity]
+            for sprite in (
+                    s for s in pointed if not getattr(s, 'children', False)):
                 return sprite  # first pointed children
             else:
                 return pointed[0]  # return pointed Sprite if no children found
@@ -381,7 +382,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @property
     def pointed_building(self) -> Optional[Building]:
-        return o if isinstance(o := self.pointed_gameobject, Building) else None
+        return o if isinstance(o := self.pointed_gameobject,
+                               Building) else None
 
     def get_pointed_of_type(self, type_: Type) -> Optional[Type]:
         return o if isinstance(o := self.pointed_gameobject, type_) else None
@@ -401,7 +403,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 class MouseDragSelection:
     """Class for mouse-selected_units rectangle-areas."""
 
-    __slots__ = ["game", "start", "end", "left", "right", "top", "bottom", "units"]
+    __slots__ = ["game", "start", "end", "left", "right", "top", "bottom",
+                 "units"]
 
     def __init__(self, game: Game, x: float, y: float):
         """

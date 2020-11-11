@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Deque, List, Optional, Union, cast
+from typing import Deque, List, Set, Optional, Union, cast
 
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
@@ -61,8 +61,8 @@ class Unit(PlayerEntity, TasksExecutor):
     def needs_repair(self) -> bool:
         raise NotImplementedError
 
-    def update(self):
-        super().update()
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
         self.evaluate_tasks()
 
         new_current_node = self.map.position_to_node(*self.position)
@@ -162,17 +162,17 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def follow_path(self):
         destination = self.path[0]
-        if not close_enough(self.position, destination, self.current_speed):
-            self.move_to_current_waypoint(destination)
-        else:
+        speed = self.current_speed
+        if (distance_left := distance_2d(self.position, destination)) <= speed:
             self.move_to_next_waypoint()
+        else:
+            self.move_to_current_waypoint(destination, distance_left)
 
     def move_to_next_waypoint(self):
         self.path.popleft()
 
-    def move_to_current_waypoint(self, destination):
+    def move_to_current_waypoint(self, destination, distance_left):
         self.angle = angle = calculate_angle(*self.position, *destination)
-        distance_left = distance_2d(self.position, destination)
         self.current_speed = speed = min(distance_left, self.speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
 
@@ -218,6 +218,12 @@ class Unit(PlayerEntity, TasksExecutor):
             if other.current_node not in self.observed_nodes:
                 return False
         return super().visible_for(other)
+
+    def get_nearby_friends(self) -> Set[PlayerEntity]:
+        return {
+            u for u in self.current_sector.units_and_buildings if not
+            u.is_enemy(self)
+        }
 
 
 class Vehicle(Unit):
