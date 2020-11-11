@@ -7,12 +7,18 @@ from arcade import Sprite, SpriteList
 
 from observers import OwnedObject
 
+from utils.functions import log
+
 
 class UiSpriteList(SpriteList):
     """
     Wrapper for spritelists containing UiElements for quick identifying the
     spritelists which should be colided with the MouseCursor.
     """
+
+    def clear(self):
+        for i in range(len(self)):
+            self.pop()
 
 
 class Hierarchical:
@@ -64,8 +70,6 @@ class CursorInteractive(Hierarchical):
     pass
 
     def __init__(self,
-                 visible: bool = True,
-                 active: bool = True,
                  can_be_dragged: bool = False,
                  function_on_left_click: Optional[Callable] = None,
                  function_on_right_click: Optional[Callable] = None,
@@ -129,7 +133,7 @@ class ToggledElement:
     @active.setter
     def active(self, value: bool):
         self._active = value
-        print(f'{self.__class__.__name__} state = {value}')
+        log(f'{self.__class__.__name__} state = {value}')
 
     @property
     def visible(self):
@@ -155,15 +159,24 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
 
     def __init__(self,
                  texture_name: str,
+                 x: int,
+                 y: int,
                  active: bool = True,
-                 visible: bool = True):
-        super().__init__(texture_name)
+                 visible: bool = True,
+                 parent: Optional[Hierarchical] = None):
+        super().__init__(texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
+        CursorInteractive.__init__(self, parent=parent)
         OwnedObject.__init__(self, owners=True)
 
 
 class Frame(UiElement):
-    ...
+
+    def __init__(self,
+                 texture_name: str,
+                 active: bool = True,
+                 visible: bool = True):
+        super().__init__(texture_name, active, visible)
 
 
 class TabsGroup(UiElement):
@@ -175,7 +188,15 @@ class Tab(UiElement):
 
 
 class Button(UiElement):
-    ...
+
+    def __init__(self, texture_name: str,
+                 x: int,
+                 y: int,
+                 active: bool = True,
+                 visible: bool = True,
+                 parent: Optional[Hierarchical] = None
+                 ):
+        super().__init__(texture_name, x, y, active, visible, parent)
 
 
 class CheckButton(UiElement):

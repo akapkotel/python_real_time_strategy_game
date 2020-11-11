@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, List, Optional, Callable
 
-from arcade import SpriteList
+from arcade import SpriteList, Sprite
 
 
 class SpriteListWithSwitch(SpriteList):
@@ -141,3 +141,6 @@ class DividedSpriteList(SpriteList):
             return self.id_elements_dict[sprite_id]
         except KeyError:
             return None
+
+    def where(self, condition: Callable) -> List[Sprite]:
+        return [item for item in self.updated if condition(item)]

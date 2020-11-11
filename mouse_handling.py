@@ -148,6 +148,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_left_button_click(self, x: float, y: float, modifiers: int):
         log(f'Left-clicked at x:{x}, y: {y}')
+        if (ui_elem := self.pointed_ui_element) is not None and ui_elem.active:
+            ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
 
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
@@ -293,6 +295,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         """
         self.pointed_gameobject = self.pointed_ui_element = None
         if pointed := self.get_pointed_sprite(*self.position):
+            print(pointed)
             if isinstance(pointed, UiElement) and pointed.active:
                 self.update_mouse_pointed(pointed)
             elif isinstance(pointed, PlayerEntity):

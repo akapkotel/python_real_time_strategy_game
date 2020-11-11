@@ -32,8 +32,8 @@ from user_interface import UiSpriteList
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
-from views import LoadingScreen, WindowView
-from menu import Menu, SubMenu
+from views import LoadingScreen, WindowView, Updateable
+from menu import Menu, UiElementsBundle
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -44,7 +44,9 @@ TILE_WIDTH = 60
 TILE_HEIGHT = 60
 SECTOR_SIZE = 8
 
-UPDATE_RATE = 1 / 30
+GAME_SPEED = 1.0
+
+UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = True
 DEBUG = False
@@ -65,11 +67,11 @@ class Window(arcade.Window, EventsCreator):
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
-        self._updated: List = []
+        self._updated: List[Updateable] = []
 
+        # views:
         self.menu_view = Menu()
         self.game_view: Optional[Game] = None
-
         self.create_submenus()
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
@@ -89,11 +91,12 @@ class Window(arcade.Window, EventsCreator):
         return left + SCREEN_X, bottom + SCREEN_Y
 
     @property
-    def updated(self):
+    def updated(self) -> List[Updateable]:
         return self._updated
 
     @updated.setter
-    def updated(self, value: List[SpriteList]):
+    def updated(self, value: List[Updateable]):
+        print(f'New updated objects:', value)
         self._updated = value
         try:
             self.cursor.updated_spritelists = value
@@ -101,19 +104,26 @@ class Window(arcade.Window, EventsCreator):
             pass  # MouseCursor is not initialised yet
 
     def create_submenus(self):
-        sound_submenu = SubMenu('Sound', background_color=RED)
-        graphics_submenu = SubMenu('Graphics', background_color=BROWN)
-        game_settings = SubMenu('Game settings', background_color=BLACK)
-
         ui_element_texture = get_path_to_file('small_button_none.png')
-        sound_ui_elements = [
-            Button(ui_element_texture),
-            CheckButton(ui_element_texture),
-            TextInputField(ui_element_texture)
-        ]
-        for element in sound_ui_elements:
-            element.register_to_objectsowners()
-        sound_submenu.set_updated_and_drawn_lists()
+
+        main_menu = UiElementsBundle(
+            index=1,
+            name='Main menu',
+            elements=[
+                Button(ui_element_texture, 200, 200),
+                CheckButton(ui_element_texture, 400, 400),
+            ]
+        )
+
+        second_menu = UiElementsBundle(
+            index=2,
+            name='Second menu',
+            elements=[
+                TextInputField(ui_element_texture, 600, 600)
+            ]
+        )
+        self.menu_view.register(main_menu)
+        self.menu_view.register(second_menu)
 
     def create_new_game(self):
         self.game_view = Game()
@@ -166,10 +176,13 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
-            if self.game_view is not None and self.game_view.is_running:
-                if symbol == arcade.key.ENTER:
+            if symbol == arcade.key.ENTER:
+                if self.game_view is not None and self.game_view.is_running:
                     spawn_test_unit(self.cursor.position, 'jeep_blue.png',
                                     self.game_view.players[2])
+                else:
+                    index = 1 if self.menu_view.submenu_index == 2 else 2
+                    self.menu_view.switch_submenu_of_index(index)
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)

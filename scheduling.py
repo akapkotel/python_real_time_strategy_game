@@ -19,9 +19,9 @@ class ScheduledEvent:
     frames_left: Optional[int] = None
 
     def __repr__(self):
-        return (f'ScheduledEvent: scheduled by {self.creator}, '
+        return (f'Event scheduled by: {self.creator.__class__.__name__}, '
                 f'function: {self.function.__name__}, args: {self.args}, '
-                f'kwargs: {self.kwargs}')
+                f'kwargs: {self.kwargs}, frames left: {self.frames_left}')
 
     def execute(self):
         self.function(*self.args, **self.kwargs)

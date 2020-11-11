@@ -177,8 +177,9 @@ class Unit(PlayerEntity, TasksExecutor):
         self.change_x, self.change_y = vector_2d(angle, speed)
 
     def move_to(self, destination: GridPosition):
-        start = self.map.position_to_grid(*self.position)
+        self.path.clear()
         self.cancel_path_requests()
+        start = self.map.position_to_grid(*self.position)
         self.game.pathfinder.request_path(self, start, destination)
 
     def create_new_path(self, path: MapPath):

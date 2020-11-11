@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from typing import Callable
+
 
 class Singleton:
     instances = {}
@@ -60,9 +62,19 @@ class HashedList(list):
         self.elements_ids.clear()
         super().clear()
 
-    def where(self, condition):
+    def where(self, condition: Callable):
         return HashedList([e for e in self if condition(e)])
 
 
 class QuadTree:
-    ...
+
+    def __init__(self, min_x, min_y, max_x, max_y):
+        self.min_x = min_x
+        self.min_y = min_y
+        self.max_x = max_x
+        self.max_y = max_y
+
+
+
+
+
