@@ -20,21 +20,21 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from colors import BLACK, BROWN, GREEN, RED, WHITE
+from colors import BLACK, GREEN, RED, WHITE
 from improved_spritelists import DividedSpriteList, SpriteListWithSwitch
 from data_types import Viewport
 
 from observers import ObjectsOwner, OwnedObject
 from scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from user_interface import (
-    Button, CheckButton, TextInputField
+    Button, Checkbox, TextInputField, Frame
 )
 from user_interface import UiSpriteList
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
 from views import LoadingScreen, WindowView, Updateable
-from menu import Menu, UiElementsBundle
+from menu import Menu, UiElementsBundle, UiBundlesHandler
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -69,6 +69,8 @@ class Window(arcade.Window, EventsCreator):
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
         self._updated: List[Updateable] = []
+
+        self.test_variable = False
 
         # views:
         self.menu_view = Menu()
@@ -106,32 +108,44 @@ class Window(arcade.Window, EventsCreator):
     def create_submenus(self):
         back_to_menu_button = Button(
             get_path_to_file('menu_button_back.png'), SCREEN_X, 400,
-            function_on_left_click=partial(self.menu_view.switch_submenu_of_index, 1)
+            function_on_left_click=partial(self.menu_view.switch_submenu_of_index, 0)
         )
 
         main_menu = UiElementsBundle(
-            index=1,
+            index=0,
             name='Main menu',
             elements=[
                 Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 200,
                        function_on_left_click=self.close),
                 Button(get_path_to_file('menu_button_options.png'), SCREEN_X, 400,
                        function_on_left_click=partial(
-                           self.menu_view.switch_submenu_of_index, 2)),
-                Button(get_path_to_file('menu_button_new_game.png'), SCREEN_X, 600,
+                           self.menu_view.switch_submenu_of_index, 1)),
+                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 600,
                        function_on_left_click=self.start_new_game),
             ]
         )
 
+        frame = Frame('', 500, 500, 500, 500, RED)
         options_menu = UiElementsBundle(
-            index=2,
+            index=1,
             name='Second menu',
             elements=[
-                back_to_menu_button
+                frame,
+                back_to_menu_button,
+                Checkbox(
+                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 600,
+                    parent=frame,
+                    ticked=self.test_variable,
+                    variable=(self, 'test_variable')
+                )
             ]
         )
         self.menu_view.register(main_menu)
         self.menu_view.register(options_menu)
+
+    @property
+    def is_game_running(self) -> bool:
+        return self.game_view is not None and self.current_view == self.game_view
 
     def start_new_game(self):
         self.game_view = Game()
@@ -185,9 +199,6 @@ class Window(arcade.Window, EventsCreator):
                 if self.game_view is not None and self.game_view.is_running:
                     spawn_test_unit(self.cursor.position, 'jeep_blue.png',
                                     self.game_view.players[2])
-                else:
-                    index = 1 if self.menu_view.submenu_index == 2 else 2
-                    self.menu_view.switch_submenu_of_index(index)
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -216,6 +227,8 @@ class Window(arcade.Window, EventsCreator):
         left, right, bottom, top = self.get_viewport()
         new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
+        if self.is_game_running:
+            self.game_view.update_interface_position(dx, dy)
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def update_viewport_coordinates(self, new_bottom, new_left):
@@ -251,12 +264,13 @@ class Window(arcade.Window, EventsCreator):
         super().close()
 
 
-class Game(WindowView, EventsCreator, ObjectsOwner):
+class Game(WindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
     def __init__(self, debug: bool = DEBUG):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
+        UiBundlesHandler.__init__(self)
         self.assign_reference_to_self_for_all_classes()
 
         self.paused = False
@@ -267,14 +281,18 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         self.buildings = DividedSpriteList(is_static=True)
         self.units = DividedSpriteList()
         self.selection_markers_sprites = SpriteList()
-        self.interface = UiSpriteList()
-
+        self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()
 
         self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
                        TILE_HEIGHT)
         self.pathfinder = Pathfinder(map=self.map)
+
         self.fog_of_war = FogOfWar()
+        # we put FoW before the interface to list of rendered layers to
+        # assure that FoW will not cover player interface:
+        self.drawn.insert(-2, self.fog_of_war)
+
         # Settings, game-progress data, etc.
         self.player_configs: Dict[str, Any] = self.load_player_configs()
 
@@ -310,6 +328,30 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         for _class in (c for c in globals().values() if hasattr(c, name)):
             setattr(_class, name, self)
         Game.instance = self.window.cursor.game = self
+
+    def create_interface(self) -> UiSpriteList:
+        interface = UiSpriteList()
+        self.ui_elements_spritelist = interface
+        right_panel_frame = Frame('', SCREEN_WIDTH * 0.9, SCREEN_Y,
+                                  SCREEN_WIDTH // 5, SCREEN_HEIGHT, BLACK)
+        right_panel = UiElementsBundle(
+            name='right_panel',
+            index=0,
+            elements=[
+                right_panel_frame,
+            ]
+        )
+        right_panel.register_to_objectsowners(self)
+        return interface
+
+    def update_interface_position(self, dx, dy):
+        print(dx)
+        right, top = self.interface[0].right, self.interface[0].top
+        if right - dx < SCREEN_WIDTH or right - dx > self.map.width:
+            dx = 0
+        if top - dy < SCREEN_HEIGHT or top - dy > self.map.height:
+            dy = 0
+        self.interface.move(-dx, -dy)
 
     def on_show_view(self):
         super().on_show_view()
@@ -374,11 +416,13 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         return 0, 0, 0
 
     def register(self, acquired: OwnedObject):
-        acquired: Union[Player, Faction, PlayerEntity]
+        acquired: Union[Player, Faction, PlayerEntity, UiElementsBundle]
         if isinstance(acquired, (Unit, Building)):
             self.register_player_entity(acquired)
-        else:
+        elif isinstance(acquired, (Player, Faction)):
             self.register_player_or_faction(acquired)
+        else:
+            super().register(acquired)
 
     def register_player_entity(self, registered: Union[Unit, Building]):
         if not registered.is_building:
@@ -393,11 +437,13 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
             self.factions[registered.id] = registered
 
     def unregister(self, owned: OwnedObject):
-        owned: Union[PlayerEntity, Player, Faction]
+        owned: Union[PlayerEntity, Player, Faction, UiElementsBundle]
         if isinstance(owned, PlayerEntity):
             self.unregister_player_entity(owned)
-        else:
+        elif isinstance(owned, (Player, Faction)):
             self.unregister_player_or_faction(owned)
+        else:
+            super().unregister(owned)
 
     def unregister_player_entity(self, owned: PlayerEntity):
         owned: Union[Unit, Building]
@@ -441,7 +487,6 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
-        self.fog_of_war.draw()
         if self.debug:
             self.draw_debugging()
         if self.paused:
@@ -520,12 +565,28 @@ class Game(WindowView, EventsCreator, ObjectsOwner):
         return grid
 
 
+def start_profilling_code_execution():
+    try:
+        from pyprofiler import start_profile, end_profile
+        profiler = start_profile()
+        return end_profile, profiler
+    except Exception as e:
+        log(str(e), console=True)
+        return None, None
+
+def end_profilling_code_execution(profiler):
+    try:
+        # noinspection PyUnboundLocalVariable
+        end_profile(profiler, 30, True)
+    except NameError:
+        pass
+
+
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map import Map, Pathfinder
+    from unit_management import PermanentUnitsGroup, SelectedEntityMarker
     from player import Faction, Player, CpuPlayer, PlayerEntity
-    from unit_management import SelectedEntityMarker  # only to bind game ref
-    from unit_management import PermanentUnitsGroup
     from keyboard_handling import KeyboardHandler
     from mouse_handling import MouseCursor
     from units import Unit, UnitWeight
@@ -534,17 +595,9 @@ if __name__ == '__main__':
     from missions import Mission
 
     if PYPROFILER:
-        try:
-            from pyprofiler import start_profile, end_profile
-            profiler = start_profile()
-        except Exception as e:
-            log(str(e), console=True)
+        end_profile, profiler = start_profilling_code_execution()
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()
 
-    if PYPROFILER:
-        try:
-        # noinspection PyUnboundLocalVariable
-            end_profile(profiler, 30, True)
-        except NameError:
-            pass
+    if PYPROFILER and profiler is not None:
+        end_profilling_code_execution(profiler)

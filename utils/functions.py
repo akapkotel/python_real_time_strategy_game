@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
 import logging
+import PIL
 from functools import lru_cache
 from math import atan2, cos, degrees, hypot, inf as INFINITY, radians, sin
 from time import perf_counter
 from typing import Any, Iterable, List, Sequence, Tuple
 
-from arcade.arcade_types import RGB, RGBA
+from arcade import Texture
+from arcade.utils import lerp
+from arcade.arcade_types import RGB, RGBA, Color
 from numba import njit
 from shapely import speedups
 from shapely.geometry import LineString, Polygon
@@ -236,3 +239,23 @@ def calculate_observable_area(grid_x, grid_y, max_distance):
             if dist_x + dist_y < radius:
                 observable_area.append((grid_x + x, grid_y + y))
     return observable_area
+
+
+def make_texture(width: int,
+                             height: int,
+                             color: Color) -> Texture:
+    """
+    Return a :class:`Texture` of a square with the given diameter and color,
+    fading out at its edges.
+
+    :param int size: Diameter of the square and dimensions of the square Texture returned.
+    :param Color color: Color of the square.
+    :param int center_alpha: Alpha value of the square at its center.
+    :param int outer_alpha: Alpha value of the square at its edges.
+
+    :returns: New :class:`Texture` object.
+    """
+    bg_color = color # fully transparent
+    img = PIL.Image.new("RGBA", (width, height), bg_color)
+    name = "{}:{}:{}:{}".format("rect", width, height, color)  # name must be unique for caching
+    return Texture(name, img)

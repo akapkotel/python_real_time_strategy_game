@@ -3,11 +3,17 @@ from __future__ import annotations
 
 from typing import Optional, Callable, Set
 
-from arcade import Sprite, SpriteList, load_texture
+from arcade import (
+    Sprite, SpriteList, load_texture, draw_rectangle_outline,
+    make_soft_square_texture
+)
+from arcade.arcade_types import Color
 
 from observers import OwnedObject
 
-from utils.functions import log, get_path_to_file
+from utils.functions import log, make_texture
+
+from colors import GREEN, RED, WHITE
 
 
 class UiSpriteList(SpriteList):
@@ -16,9 +22,17 @@ class UiSpriteList(SpriteList):
     spritelists which should be collided with the MouseCursor.
     """
 
+    def __init__(self, use_spatial_hash=False, spatial_hash_cell_size=128,
+                 is_static=False):
+        super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
+
     def clear(self):
         for i in range(len(self)):
             self.pop()
+
+    def draw(self, **kwargs):
+        for ui_element in self:
+            ui_element.draw()
 
 
 class Hierarchical:
@@ -63,6 +77,10 @@ class Hierarchical:
 
     def discard_child(self, child: Hierarchical):
         self._children.discard(child)
+
+    @property
+    def level(self):
+        return 0 if not self._parent else self._parent.level + 1
 
 
 class CursorInteractive(Hierarchical):
@@ -157,17 +175,12 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     parent property.
     """
 
-    def __init__(self,
-                 texture_name: str,
-                 x: int,
-                 y: int,
-                 active: bool = True,
-                 visible: bool = True,
-                 parent: Optional[Hierarchical] = None,
+    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
+                 visible: bool = True, parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
                  can_be_dragged: bool = False):
-        Sprite.__init__(self, texture_name, center_x=x, center_y=y)
+        super().__init__(texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self,
                                    can_be_dragged,
@@ -175,15 +188,36 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                                    function_on_left_click,
                                    parent=parent)
         OwnedObject.__init__(self, owners=True)
+        self.ui_spritelist = None
+
+    def draw(self):
+        super().draw()
+        if self.pointed:
+            self.draw_highlight_around_element()
+
+    def draw_highlight_around_element(self):
+        color = RED if 'quit' in self.textures[1].name else GREEN
+        draw_rectangle_outline(*self.position, self.width + 4, self.height + 4, color, 2)
 
 
 class Frame(UiElement):
 
     def __init__(self,
                  texture_name: str,
-                 active: bool = True,
-                 visible: bool = True):
-        super().__init__(texture_name, active, visible)
+                 x: int,
+                 y: int,
+                 width: int,
+                 height: int,
+                 color: Optional[Color] = None,
+                 active: bool = False,
+                 visible: bool = True,
+                 ):
+        super().__init__(texture_name, x, y, active, visible)
+        if not texture_name:
+            self.texture = make_texture(width, height, color or WHITE)
+
+    def draw_highlight_around_element(self):
+        pass
 
 
 class TabsGroup(UiElement):
@@ -207,29 +241,46 @@ class Button(UiElement):
                  ):
         super().__init__(texture_name, x, y, active, visible, parent,
                          function_on_left_click, function_on_right_click)
-        self.highlight = None
-        self.ui_spritelist = None
         self.textures = [
             load_texture(texture_name, 0, 0, 300, 60),
             load_texture(texture_name, 300, 0, 300, 60)
         ]
         self.set_texture(0)
 
-    def _func_on_mouse_enter(self, cursor):
-        x, y = self.position
-        self.highlight = sprite = Sprite(
-            get_path_to_file('button_highlight_green.png'), center_x=x, center_y=y
-        )
-        self.ui_spritelist.append(sprite)
-        self.set_texture(1)
-
-    def _func_on_mouse_exit(self):
-        self.highlight.kill()
-        self.set_texture(0)
+    def draw(self):
+        super().draw()
 
 
-class CheckButton(UiElement):
-    ...
+class Checkbox(UiElement):
+    """
+    Checkbox is a UiElement which function is to allow user toggling the
+    boolean value of some variable - if Checkbox is 'ticked' the value is
+    set to True, else it is considered False.
+    """
+
+    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
+                 visible: bool = True, parent: Optional[Hierarchical] = None,
+                 function_on_right_click: Optional[Callable] = None,
+                 function_on_left_click: Optional[Callable] = None,
+                 ticked: bool = False, variable: (object, str) = None):
+        super().__init__(texture_name, x, y, active, visible, parent,
+                         function_on_left_click, function_on_right_click)
+        self.ticked = ticked
+        self.variable = variable
+        self.textures = [
+            load_texture(texture_name, 0, 0, 40, 40),
+            load_texture(texture_name, 40, 0, 40, 40)
+        ]
+        self.set_texture(int(self.ticked))
+
+    def on_mouse_press(self, button: int):
+        super().on_mouse_press(button)
+        self.toggle_variable()
+
+    def toggle_variable(self):
+        self.ticked = not self.ticked
+        setattr(self.variable[0], self.variable[1], self.ticked)
+        self.set_texture(int(self.ticked))
 
 
 class ListBox(UiElement):

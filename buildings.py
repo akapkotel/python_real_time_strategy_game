@@ -6,8 +6,7 @@ from typing import Deque, List, Optional, Set, Type
 
 from arcade.arcade_types import Point
 
-from data_types import SectorId
-from map import MapNode, Sector, TILE_HEIGHT, TILE_WIDTH
+from map import MapNode, Sector
 from player import Player, PlayerEntity
 from utils.functions import is_visible
 
@@ -159,4 +158,4 @@ class Building(PlayerEntity, IProducer):
 
 
 if __name__:
-    from game import Game
+    from game import Game, TILE_HEIGHT, TILE_WIDTH

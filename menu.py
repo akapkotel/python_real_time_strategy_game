@@ -24,25 +24,21 @@ class UiElementsBundle(OwnedObject):
     index: int
     name: str
     elements: List[UiElement]
+    _owners = None
 
 
-class Menu(WindowView, ObjectsOwner):
+class UiBundlesHandler(ObjectsOwner):
 
     def __init__(self):
-        super().__init__()
         ObjectsOwner.__init__(self)
         self.submenus: Dict[str, UiElementsBundle] = {}
-        self.submenu_index = 1
+        self.submenu_index = 0
         self.ui_elements_spritelist = UiSpriteList()
-        self.set_updated_and_drawn_lists()
-
-    def on_show_view(self):
-        super().on_show_view()
-        self.window.toggle_mouse_and_keyboard(True)
 
     def register(self, acquired: OwnedObject):
         acquired: UiElementsBundle
         self.submenus[acquired.name] = acquired
+        self.ui_elements_spritelist.extend(acquired.elements)
         self.bind_ui_elements_with_ui_spritelist(acquired.elements)
 
     def unregister(self, owned: OwnedObject):
@@ -51,9 +47,6 @@ class Menu(WindowView, ObjectsOwner):
 
     def get_notified(self, *args, **kwargs):
         pass
-
-    def on_update(self, delta_time: float):
-        super().on_update(delta_time)
 
     def switch_submenu_of_index(self, index: int = 0):
         for submenu in self.submenus.values():
@@ -73,3 +66,16 @@ class Menu(WindowView, ObjectsOwner):
     def bind_ui_elements_with_ui_spritelist(self, elements):
         for ui_element in elements:
             ui_element.ui_spritelist = self.ui_elements_spritelist
+
+
+class Menu(WindowView, UiBundlesHandler):
+
+    def __init__(self):
+        super().__init__()
+        UiBundlesHandler.__init__(self)
+        self.set_updated_and_drawn_lists()
+
+    def on_show_view(self):
+        super().on_show_view()
+        self.window.toggle_mouse_and_keyboard(True)
+        self.switch_submenu_of_index(0)
