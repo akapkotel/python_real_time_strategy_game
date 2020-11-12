@@ -15,6 +15,11 @@ class UiElementsBundle(OwnedObject):
     """
     A bundle of UiElement objects kept together to easy swithc between Menu
     submenus.
+
+    Initialize with params:\n
+    index: int \n
+    name: str \n
+    elements: List[UiElement]
     """
     index: int
     name: str
@@ -28,7 +33,7 @@ class Menu(WindowView, ObjectsOwner):
         ObjectsOwner.__init__(self)
         self.submenus: Dict[str, UiElementsBundle] = {}
         self.submenu_index = 1
-        self.ui_elements: UiSpriteList[UiElement] = UiSpriteList()
+        self.ui_elements_spritelist = UiSpriteList()
         self.set_updated_and_drawn_lists()
 
     def on_show_view(self):
@@ -36,18 +41,13 @@ class Menu(WindowView, ObjectsOwner):
         self.window.toggle_mouse_and_keyboard(True)
 
     def register(self, acquired: OwnedObject):
-        acquired: Union[WindowView, UiElement]
-        if isinstance(acquired, UiElementsBundle):
-            self.submenus[acquired.name] = acquired
-        else:
-            self.ui_elements.append(acquired)
+        acquired: UiElementsBundle
+        self.submenus[acquired.name] = acquired
+        self.bind_ui_elements_with_ui_spritelist(acquired.elements)
 
     def unregister(self, owned: OwnedObject):
-        owned: Union[WindowView, UiElement]
-        if isinstance(owned, UiElementsBundle):
-            del self.submenus[owned.name]
-        else:
-            self.ui_elements.remove(owned)
+        owned: UiElementsBundle
+        del self.submenus[owned.name]
 
     def get_notified(self, *args, **kwargs):
         pass
@@ -65,6 +65,11 @@ class Menu(WindowView, ObjectsOwner):
 
     def _switch_to_submenu(self, submenu: UiElementsBundle):
         log(f'Switched to submenu {submenu.name} of index: {submenu.index}')
-        self.ui_elements.clear()
-        self.ui_elements.extend(submenu.elements)
+        self.ui_elements_spritelist.clear()
+        self.ui_elements_spritelist.extend(submenu.elements)
+        self.bind_ui_elements_with_ui_spritelist(submenu.elements)
         self.submenu_index = submenu.index
+
+    def bind_ui_elements_with_ui_spritelist(self, elements):
+        for ui_element in elements:
+            ui_element.ui_spritelist = self.ui_elements_spritelist

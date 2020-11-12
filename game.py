@@ -10,6 +10,7 @@ __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
 __credits__ = []
 
+from functools import partial
 from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
@@ -96,7 +97,6 @@ class Window(arcade.Window, EventsCreator):
 
     @updated.setter
     def updated(self, value: List[Updateable]):
-        print(f'New updated objects:', value)
         self._updated = value
         try:
             self.cursor.updated_spritelists = value
@@ -104,33 +104,38 @@ class Window(arcade.Window, EventsCreator):
             pass  # MouseCursor is not initialised yet
 
     def create_submenus(self):
-        ui_element_texture = get_path_to_file('small_button_none.png')
+        back_to_menu_button = Button(
+            get_path_to_file('menu_button_back.png'), SCREEN_X, 400,
+            function_on_left_click=partial(self.menu_view.switch_submenu_of_index, 1)
+        )
 
         main_menu = UiElementsBundle(
             index=1,
             name='Main menu',
             elements=[
-                Button(ui_element_texture, 200, 200),
-                CheckButton(ui_element_texture, 400, 400),
+                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 200,
+                       function_on_left_click=self.close),
+                Button(get_path_to_file('menu_button_options.png'), SCREEN_X, 400,
+                       function_on_left_click=partial(
+                           self.menu_view.switch_submenu_of_index, 2)),
+                Button(get_path_to_file('menu_button_new_game.png'), SCREEN_X, 600,
+                       function_on_left_click=self.start_new_game),
             ]
         )
 
-        second_menu = UiElementsBundle(
+        options_menu = UiElementsBundle(
             index=2,
             name='Second menu',
             elements=[
-                TextInputField(ui_element_texture, 600, 600)
+                back_to_menu_button
             ]
         )
         self.menu_view.register(main_menu)
-        self.menu_view.register(second_menu)
-
-    def create_new_game(self):
-        self.game_view = Game()
+        self.menu_view.register(options_menu)
 
     def start_new_game(self):
-        if self.game_view is not None:
-            self.show_view(self.game_view)
+        self.game_view = Game()
+        self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
         self.current_view.on_update(delta_time)
@@ -193,15 +198,6 @@ class Window(arcade.Window, EventsCreator):
         else:
             super().show_view(new_view)
 
-    def toggle_view(self):
-        # debug method to be replaced with callbacks of UiElements
-        if self.current_view is self.menu_view:
-            self.create_new_game()
-            self.start_new_game()
-            # self.menu_view.toggle_submenu(self.sound_submenu)
-        else:
-            self.show_view(self.menu_view)
-
     def toggle_mouse_and_keyboard(self, value: bool, only_mouse=False):
         try:
             self.cursor.active = value
@@ -251,11 +247,8 @@ class Window(arcade.Window, EventsCreator):
         raise NotImplementedError
 
     def close(self):
-        if self.current_view is self.game_view:
-            self.show_view(self.menu_view)
-        else:
-            log(f'Terminating application...')
-            super().close()
+        log(f'Terminating application...')
+        super().close()
 
 
 class Game(WindowView, EventsCreator, ObjectsOwner):

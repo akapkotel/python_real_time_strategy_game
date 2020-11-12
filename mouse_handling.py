@@ -293,16 +293,15 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         Search all Spritelists and DividedSpriteLists for any UiElements or
         GameObjects placed at the MouseCursor position.
         """
-        self.pointed_gameobject = self.pointed_ui_element = None
-        if pointed := self.get_pointed_sprite(*self.position):
-            print(pointed)
-            if isinstance(pointed, UiElement) and pointed.active:
-                self.update_mouse_pointed(pointed)
-            elif isinstance(pointed, PlayerEntity):
-                self.pointed_gameobject = pointed
+        pointed = self.get_pointed_sprite(*self.position)
+        if isinstance(pointed, PlayerEntity):
+            self.pointed_gameobject = pointed
+            self.update_mouse_pointed_ui_element(None)
+        else:
+            self.pointed_gameobject = None
+            self.update_mouse_pointed_ui_element(pointed)
 
-    def get_pointed_sprite(self, x, y) -> Optional[
-        Union[PlayerEntity, UiElement]]:
+    def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn in some
         # hierarchical order, we must iterate over them catching
         # cursor-pointed elements in backward order: last draw, is first to
@@ -330,11 +329,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             else:
                 return pointed[0]  # return pointed Sprite if no children found
 
-    def update_mouse_pointed(self, pointed: Optional[CursorInteractive]):
-        if self.pointed_ui_element not in (None, pointed):
-            self.pointed_ui_element.on_mouse_exit()
-        if pointed is not None:
-            pointed.on_mouse_enter()
+    def update_mouse_pointed_ui_element(self,
+                                        pointed: Optional[CursorInteractive]):
+        if pointed != self.pointed_ui_element:
+            if hasattr(self.pointed_ui_element, 'on_mouse_exit'):
+                self.pointed_ui_element.on_mouse_exit()
+            if hasattr(pointed, 'on_mouse_enter'):
+                pointed.on_mouse_enter(cursor=self)
         self.pointed_ui_element = pointed
 
     def update_cursor_texture(self):

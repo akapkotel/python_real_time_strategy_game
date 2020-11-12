@@ -29,10 +29,8 @@ class KeyboardHandler(ToggledElement):
     def evaluate_pressed_key(self, symbol: int, modifiers: int):
         if symbol == P and self.window.game_view is not None:
             self.window.game_view.toggle_pause()
-        elif symbol == SPACE:
-            self.window.toggle_view()
         elif symbol == ESCAPE:
-            self.window.close()
+            self.window.show_view(self.window.menu_view)
         elif (digit := chr(symbol)).isdigit():
             self.on_numeric_key_press(int(digit))
 

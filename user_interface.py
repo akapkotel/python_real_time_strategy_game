@@ -3,17 +3,17 @@ from __future__ import annotations
 
 from typing import Optional, Callable, Set
 
-from arcade import Sprite, SpriteList
+from arcade import Sprite, SpriteList, load_texture
 
 from observers import OwnedObject
 
-from utils.functions import log
+from utils.functions import log, get_path_to_file
 
 
 class UiSpriteList(SpriteList):
     """
     Wrapper for spritelists containing UiElements for quick identifying the
-    spritelists which should be colided with the MouseCursor.
+    spritelists which should be collided with the MouseCursor.
     """
 
     def clear(self):
@@ -67,7 +67,6 @@ class Hierarchical:
 
 class CursorInteractive(Hierarchical):
     """Interface for all objects which are clickable etc."""
-    pass
 
     def __init__(self,
                  can_be_dragged: bool = False,
@@ -80,22 +79,23 @@ class CursorInteractive(Hierarchical):
         self.can_be_dragged = can_be_dragged
         self.function_on_left_click = function_on_left_click
         self.function_on_right_click = function_on_right_click
+        self.cursor = None
 
     def __repr__(self):
         return f'{self.__class__.__name__} id: {id(self)}'
 
-    def on_mouse_enter(self):
+    def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
         if not self.pointed:
-            print(f'Mouse over {self}')
+            log(f'Mouse over {self}')
             self.pointed = True
-            self._func_on_mouse_enter()
+            self._func_on_mouse_enter(cursor)
 
-    def _func_on_mouse_enter(self):
+    def _func_on_mouse_enter(self, cursor):
         pass
 
     def on_mouse_exit(self):
         if self.pointed:
-            print(f'Mouse left {self}')
+            log(f'Mouse left {self}')
             self.pointed = False
             self._func_on_mouse_exit()
 
@@ -103,13 +103,13 @@ class CursorInteractive(Hierarchical):
         pass
 
     def on_mouse_press(self, button: int):
-        print(f'Mouse button {button} clicked on {self}')
+        log(f'Mouse button {button} clicked on {self}')
         if self.function_on_left_click is not None:
             self.function_on_left_click()
         self.dragged = self.can_be_dragged
 
     def on_mouse_release(self, button: int):
-        print(f'Released button {button} on {self}')
+        log(f'Released button {button} on {self}')
         self.dragged = False
 
     def on_mouse_drag(self, x: float = None, y: float = None):
@@ -163,10 +163,17 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                  y: int,
                  active: bool = True,
                  visible: bool = True,
-                 parent: Optional[Hierarchical] = None):
-        super().__init__(texture_name, center_x=x, center_y=y)
+                 parent: Optional[Hierarchical] = None,
+                 function_on_right_click: Optional[Callable] = None,
+                 function_on_left_click: Optional[Callable] = None,
+                 can_be_dragged: bool = False):
+        Sprite.__init__(self, texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
-        CursorInteractive.__init__(self, parent=parent)
+        CursorInteractive.__init__(self,
+                                   can_be_dragged,
+                                   function_on_right_click,
+                                   function_on_left_click,
+                                   parent=parent)
         OwnedObject.__init__(self, owners=True)
 
 
@@ -194,9 +201,31 @@ class Button(UiElement):
                  y: int,
                  active: bool = True,
                  visible: bool = True,
-                 parent: Optional[Hierarchical] = None
+                 parent: Optional[Hierarchical] = None,
+                 function_on_right_click: Optional[Callable] = None,
+                 function_on_left_click: Optional[Callable] = None,
                  ):
-        super().__init__(texture_name, x, y, active, visible, parent)
+        super().__init__(texture_name, x, y, active, visible, parent,
+                         function_on_left_click, function_on_right_click)
+        self.highlight = None
+        self.ui_spritelist = None
+        self.textures = [
+            load_texture(texture_name, 0, 0, 300, 60),
+            load_texture(texture_name, 300, 0, 300, 60)
+        ]
+        self.set_texture(0)
+
+    def _func_on_mouse_enter(self, cursor):
+        x, y = self.position
+        self.highlight = sprite = Sprite(
+            get_path_to_file('button_highlight_green.png'), center_x=x, center_y=y
+        )
+        self.ui_spritelist.append(sprite)
+        self.set_texture(1)
+
+    def _func_on_mouse_exit(self):
+        self.highlight.kill()
+        self.set_texture(0)
 
 
 class CheckButton(UiElement):
