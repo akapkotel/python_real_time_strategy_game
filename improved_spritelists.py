@@ -136,7 +136,7 @@ class DividedSpriteList(SpriteList):
         self.remove(poped_item)
         return poped_item
 
-    def select_by_id(self, sprite_id: int) -> Optional[Any]:
+    def get_id(self, sprite_id: int) -> Optional[Any]:
         try:
             return self.id_elements_dict[sprite_id]
         except KeyError:

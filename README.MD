@@ -49,6 +49,9 @@ To be done.
     the Singleton.
 16. Divided map to the Sectors to avoid visibility-tests between all
     Units and Buildings in game.
+17. Scratch of Menu and user interface systems.
+18. Units are now asking other units for pass if they are blocking their
+    way.
 
 #### TO BE DONE:
 #### Minor:
@@ -61,10 +64,15 @@ To be done.
 4. More efficient visibility-tests to avoid as many tests as possible.
 5. Better collision-avoidance to replace tiles-reserving system -
    flocking maybe? How to make it working with pathfinding?
+6. Find way to avoid constant pathfinding calls when unit is given
+   move-order to the position which is impossible to reach (for. eg. it
+   is encircled by other units completely).
+7. Minimap and teleporting to the map-locations by clickling on the
+   minimap.
 
 #### Major:
-1. User-interface.
-2. Menu!
+1. User-interface. (currently being developed)
+2. Menu! (currently being developed)
 3. AI (with finite-state=-machine?)
 4. Saving and loading game (with shelve?)
 5. Sounds and music (reimplement system from Pytanks for now?)

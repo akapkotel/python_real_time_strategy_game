@@ -20,7 +20,7 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from colors import BLACK, GREEN, RED, WHITE
+from colors import BLACK, GREEN, RED, WHITE, DARK
 from improved_spritelists import DividedSpriteList, SpriteListWithSwitch
 from data_types import Viewport
 
@@ -333,7 +333,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         interface = UiSpriteList()
         self.ui_elements_spritelist = interface
         right_panel_frame = Frame('', SCREEN_WIDTH * 0.9, SCREEN_Y,
-                                  SCREEN_WIDTH // 5, SCREEN_HEIGHT, BLACK)
+                                  SCREEN_WIDTH // 5, SCREEN_HEIGHT, DARK)
         right_panel = UiElementsBundle(
             name='right_panel',
             index=0,

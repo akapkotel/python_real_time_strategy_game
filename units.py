@@ -122,11 +122,11 @@ class Unit(PlayerEntity, TasksExecutor):
     def scan_node_for_collisions(self, path_index: int):
         next_node = self.map.position_to_node(*self.path[path_index])
         if not next_node.walkable and next_node.unit_id != self.id:
-            if self.game.units.id_elements_dict[next_node.unit_id].path:
+            blocker = self.game.units.get_id(next_node.unit_id)
+            if blocker.path or blocker.waiting_for_path[0]:
                 self.wait_for_free_path()
             else:
-                destination = self.map.position_to_grid(*self.path[-1])
-                self.move_to(destination)
+                self.ask_for_pass(blocker)
 
     def wait_for_free_path(self):
         """
@@ -138,6 +138,23 @@ class Unit(PlayerEntity, TasksExecutor):
         self.waiting_for_path = [1 // UPDATE_RATE, self.path.copy()]
         self.path.clear()
         self.stop()
+
+    def ask_for_pass(self, blocker: Unit):
+        if blocker.find_free_tile_to_unblock_way(self.path):
+            self.wait_for_free_path()
+        else:
+            destination = self.map.position_to_grid(*self.path[-1])
+            self.move_to(destination)
+
+    def find_free_tile_to_unblock_way(self, path) -> bool:
+        adjacent = self.current_node.walkable_adjacent
+        possible = [n for n in adjacent if n.position not in path]
+        try:
+            free_tile = random.choice(possible)
+            self.move_to(self.map.position_to_grid(*free_tile.position))
+            return True
+        except IndexError:
+            return False
 
     def update_current_sector(self):
         if (sector := self.current_node.sector) != self.current_sector:
