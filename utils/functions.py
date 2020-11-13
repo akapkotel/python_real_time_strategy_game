@@ -109,6 +109,7 @@ def get_path_to_file(filename: str) -> str:
     Build full absolute path to the filename and return it + /filename.
     """
     import os
+    print(filename)
     for directory in os.walk(os.getcwd() + '/resources'):
         if filename in directory[2]:
             return f'{directory[0]}/{filename}'

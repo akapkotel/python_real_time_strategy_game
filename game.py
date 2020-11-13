@@ -50,7 +50,7 @@ GAME_SPEED = 1.0
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = True
-DEBUG = False
+DEBUG = True
 
 
 def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
@@ -70,7 +70,7 @@ class Window(arcade.Window, EventsCreator):
 
         self._updated: List[Updateable] = []
 
-        self.test_variable = False
+        self.debug = DEBUG
 
         # views:
         self.menu_view = Menu()
@@ -126,31 +126,27 @@ class Window(arcade.Window, EventsCreator):
             register_to=self.menu_view
         )
 
-        frame = Frame('', 500, 500, 500, 500, RED)
         options_menu = UiElementsBundle(
             index=1,
             name='Second menu',
             elements=[
-                frame,
                 back_to_menu_button,
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), SCREEN_X, 600,
-                    parent=frame,
-                    ticked=self.test_variable,
-                    variable=(self, 'test_variable')
+                    ticked=self.debug,
+                    variable=(self, 'debug')
                 )
             ],
             register_to=self.menu_view
         )
-        # self.menu_view.register(main_menu)
-        # self.menu_view.register(options_menu)
 
     @property
     def is_game_running(self) -> bool:
         return self.game_view is not None and self.current_view == self.game_view
 
     def start_new_game(self):
-        self.game_view = Game()
+        print(self.debug)
+        self.game_view = Game(self.debug)
         self.show_view(self.game_view)
 
     def on_update(self, delta_time: float):
@@ -271,7 +267,7 @@ class Window(arcade.Window, EventsCreator):
 class Game(WindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
-    def __init__(self, debug: bool = DEBUG):
+    def __init__(self, debug: bool):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)

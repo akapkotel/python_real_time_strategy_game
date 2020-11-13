@@ -8,7 +8,7 @@ import random
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 from math import hypot
-from typing import Deque, Dict, List, Optional, Set, Tuple
+from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
@@ -374,7 +374,10 @@ class Pathfinder(Singleton, EventsCreator):
                 self.requests_for_paths.remove(request)
 
     @timer(level=2, global_profiling_level=PROFILING_LEVEL)
-    def find_path(self, start: GridPosition, end: GridPosition):
+    def find_path(self,
+                  start: GridPosition,
+                  end: GridPosition,
+                  pathable: bool = False) -> Union[MapPath, bool]:
         """
         Find shortest path from <start> to <end> position using A* algorithm.
         """
@@ -395,14 +398,19 @@ class Pathfinder(Singleton, EventsCreator):
             if (current := get_best_unexploed()) == end:
                 return self.reconstruct_path(map_nodes, previous, current)
             node = map_nodes[current]
-            for adj in (a for a in node.pathable_adjacent if a.grid not in unexplored):
-                total = cost_so_far[current] + node.costs[adj.grid]
-                if total < cost_so_far[adj.grid]:
-                    previous[adj.grid] = current
-                    cost_so_far[adj.grid] = total
-                    priority = total + heuristic(adj.grid, end) * 1.001
-                    put_to_unexplored(adj.grid, priority)
-        return []
+            walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
+            for adjacent in (a for a in walkable if a.grid not in unexplored):
+                total = cost_so_far[current] + node.costs[adjacent.grid]
+                if total < cost_so_far[adjacent.grid]:
+                    previous[adjacent.grid] = current
+                    cost_so_far[adjacent.grid] = total
+                    priority = total + heuristic(adjacent.grid, end) * 1.001
+                    put_to_unexplored(adjacent.grid, priority)
+        # if path was not found searching by walkable tiles, we call second
+        # pass and search for pathable nodes this time
+        if not pathable:
+            return self.find_path(start, end, pathable=True)
+        return False  # no third pass, if there is no possible path!
 
     @staticmethod
     def heuristic(start, end):
