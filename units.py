@@ -12,7 +12,7 @@ from arcade.arcade_types import Point
 from buildings import Building
 from enums import UnitWeight
 from game import UPDATE_RATE
-from map import GridPosition, MapNode, MapPath, PATH, Sector
+from map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
 from player import Player, PlayerEntity
 from units_tasking import TasksExecutor, UnitTask
 from utils.functions import (
@@ -112,21 +112,20 @@ class Unit(PlayerEntity, TasksExecutor):
         node.unit_id = self.id
 
     def scan_next_nodes_for_collisions(self):
-        if not self.path:
-            return
-        elif len(self.path) == 1:
-            self.scan_node_for_collisions(0)
-        else:
-            self.scan_node_for_collisions(1)
+        if self.path:
+            next_node = self.map.position_to_node(*self.path[0])
+            if not next_node.walkable and next_node.unit_id != self.id:
+                blocker = self.game.units.get_id(next_node.unit_id)
+                self.find_best_way_to_avoid_collision(blocker)
 
-    def scan_node_for_collisions(self, path_index: int):
-        next_node = self.map.position_to_node(*self.path[path_index])
-        if not next_node.walkable and next_node.unit_id != self.id:
-            blocker = self.game.units.get_id(next_node.unit_id)
-            if blocker.path or blocker.waiting_for_path[0]:
-                self.wait_for_free_path()
-            else:
-                self.ask_for_pass(blocker)
+    def find_best_way_to_avoid_collision(self, blocker):
+        if (blocker.path or blocker.waiting_for_path[0] or
+                self.is_enemy(blocker) or blocker in Pathfinder.instance):
+            self.wait_for_free_path()
+        elif self.find_alternative_path() is not None:
+            pass
+        else:
+            self.ask_for_pass(blocker)
 
     def wait_for_free_path(self):
         """
@@ -138,6 +137,14 @@ class Unit(PlayerEntity, TasksExecutor):
         self.waiting_for_path = [1 // UPDATE_RATE, self.path.copy()]
         self.path.clear()
         self.stop()
+
+    def find_alternative_path(self) -> Optional[Deque]:
+        if len(path := self.path) > 1:
+            destination = self.map.position_to_node(*path[1])
+            adjacent = self.current_node.walkable_adjacent
+            for node in (n for n in adjacent if n in destination.walkable_adjacent):
+                self.path[0] = node.position
+                return self.path
 
     def ask_for_pass(self, blocker: Unit):
         if blocker.find_free_tile_to_unblock_way(self.path):
@@ -197,7 +204,7 @@ class Unit(PlayerEntity, TasksExecutor):
         self.path.clear()
         self.cancel_path_requests()
         start = self.map.position_to_grid(*self.position)
-        self.game.pathfinder.request_path(self, start, destination)
+        Pathfinder.instance.request_path(self, start, destination)
 
     def create_new_path(self, path: MapPath):
         self.path = deque(path[1:])

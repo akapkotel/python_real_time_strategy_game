@@ -189,6 +189,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                                    parent=parent)
         OwnedObject.__init__(self, owners=True)
         self.ui_spritelist = None
+        self.bundle = None
 
     def draw(self):
         super().draw()
@@ -211,8 +212,9 @@ class Frame(UiElement):
                  color: Optional[Color] = None,
                  active: bool = False,
                  visible: bool = True,
+                 parent: Optional[Hierarchical] = None
                  ):
-        super().__init__(texture_name, x, y, active, visible)
+        super().__init__(texture_name, x, y, active, visible, parent)
         if not texture_name:
             self.texture = make_texture(width, height, color or WHITE)
 

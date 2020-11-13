@@ -124,6 +124,9 @@ class Map(GridHandler):
     def walkable_adjacent(self, x, y) -> List[MapNode]:
         return [n for n in self.adjacent_nodes(x, y) if n.walkable]
 
+    def pathable_adjacent(self, x, y) -> List[MapNode]:
+        return [n for n in self.adjacent_nodes(x, y) if n.pathable]
+
     def adjacent_nodes(self, x: Number, y: Number) -> List[MapNode]:
         return [
             self.nodes[adj] for adj in self.in_bounds(self.adjacent_grids(x, y))
@@ -249,6 +252,7 @@ class MapNode(GridHandler, ABC):
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
         self._walkable = True
+        self._allowed_for_pathfinding = True
         self.terrain_cost = 1
 
     def __repr__(self) -> str:
@@ -279,12 +283,20 @@ class MapNode(GridHandler, ABC):
         self._building_id = value
 
     @property
-    def walkable(self):
-        return self._unit_id is None and self._building_id is None
+    def walkable(self) -> bool:
+        return all((self._walkable, self._unit_id is None, self._building_id is None))
+
+    @property
+    def pathable(self) -> bool:
+        return self._allowed_for_pathfinding and self._building_id is None
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:
         return self.map.walkable_adjacent(*self.position)
+
+    @property
+    def pathable_adjacent(self) -> List[MapNode]:
+        return self.map.pathable_adjacent(*self.position)
 
     @property
     def adjacent_nodes(self) -> List[MapNode]:
@@ -341,6 +353,15 @@ class Pathfinder(Singleton, EventsCreator):
         self.requests_for_paths: Deque[PathRequest] = deque()
         Pathfinder.instance = self
 
+    def __bool__(self) -> bool:
+        return len(self.requests_for_paths) > 0
+
+    def __len__(self) -> int:
+        return len(self.requests_for_paths)
+
+    def __contains__(self, unit: Unit) -> bool:
+        return any(request[0] == unit for request in self.requests_for_paths)
+
     def request_path(self,
                      unit: Unit,
                      start: GridPosition,
@@ -374,7 +395,7 @@ class Pathfinder(Singleton, EventsCreator):
             if (current := get_best_unexploed()) == end:
                 return self.reconstruct_path(map_nodes, previous, current)
             node = map_nodes[current]
-            for adj in (a for a in node.walkable_adjacent if a.grid not in unexplored):
+            for adj in (a for a in node.pathable_adjacent if a.grid not in unexplored):
                 total = cost_so_far[current] + node.costs[adj.grid]
                 if total < cost_so_far[adj.grid]:
                     previous[adj.grid] = current

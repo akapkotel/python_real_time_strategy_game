@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict, List, Tuple, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Union
 
-from arcade.arcade_types import Point
+from arcade.arcade_types import Point, Color
 
 from data_types import FactionId, GridPosition
 from game import Game, UPDATE_RATE
@@ -13,8 +13,7 @@ from map import MapNode, Sector, TILE_WIDTH
 from observers import ObjectsOwner, OwnedObject
 from scheduling import EventsCreator
 from utils.functions import (
-    calculate_observable_area, close_enough,
-    is_visible, log
+    calculate_observable_area, close_enough, is_visible, log
 )
 
 
@@ -112,9 +111,13 @@ class ResourcesManager:
 
 class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     game: Optional[Game] = None
+    cpu = False
 
-    def __init__(self, id=None, name=None, color=None, faction=None,
-                 cpu=True):
+    def __init__(self,
+                 id: Optional[int] = None,
+                 name: Optional[str] = None,
+                 color: Optional[Color] = None,
+                 faction: Optional[Faction] = None):
         ResourcesManager.__init__(self)
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
@@ -122,7 +125,6 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.id = id or new_id(self.game.players)
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
-        self.cpu = cpu
         self.color = color or self.game.next_free_player_color()
 
         self.units: Set[Unit] = set()
@@ -178,10 +180,23 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         for entity in self.units.union(self.buildings):
             entity.mutually_detected_enemies.clear()
 
+    @property
+    def defeated(self) -> bool:
+        return not self.units and not self.buildings
+
 
 class CpuPlayer(Player):
-    # TODO: all Cpu-controlled Player logic!
-    pass
+    cpu = True
+
+    def __init__(self,
+                 id: Optional[int] = None,
+                 name: Optional[str] = None,
+                 color: Optional[Color] = None,
+                 faction: Optional[Faction] = None):
+        super().__init__(id, name, color, faction)
+
+    def update(self):
+        super().update()
 
 
 class PlayerEntity(GameObject, EventsCreator):

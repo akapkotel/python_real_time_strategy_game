@@ -122,7 +122,8 @@ class Window(arcade.Window, EventsCreator):
                            self.menu_view.switch_submenu_of_index, 1)),
                 Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 600,
                        function_on_left_click=self.start_new_game),
-            ]
+            ],
+            register_to=self.menu_view
         )
 
         frame = Frame('', 500, 500, 500, 500, RED)
@@ -138,10 +139,11 @@ class Window(arcade.Window, EventsCreator):
                     ticked=self.test_variable,
                     variable=(self, 'test_variable')
                 )
-            ]
+            ],
+            register_to=self.menu_view
         )
-        self.menu_view.register(main_menu)
-        self.menu_view.register(options_menu)
+        # self.menu_view.register(main_menu)
+        # self.menu_view.register(options_menu)
 
     @property
     def is_game_running(self) -> bool:
@@ -245,6 +247,8 @@ class Window(arcade.Window, EventsCreator):
         game_map = self.game_view.map
         new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
+        left, _, bottom, _ = self.current_view.viewport
+        self.game_view.update_interface_position(left - new_left, bottom - new_bottom)
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def get_viewport(self) -> Viewport:
@@ -330,22 +334,22 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         Game.instance = self.window.cursor.game = self
 
     def create_interface(self) -> UiSpriteList:
-        interface = UiSpriteList()
-        self.ui_elements_spritelist = interface
-        right_panel_frame = Frame('', SCREEN_WIDTH * 0.9, SCREEN_Y,
-                                  SCREEN_WIDTH // 5, SCREEN_HEIGHT, DARK)
+        ui_center = SCREEN_WIDTH * 0.9, SCREEN_Y
+        ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
+        right_ui_panel = Frame('', *ui_center, *ui_size, DARK)
         right_panel = UiElementsBundle(
             name='right_panel',
             index=0,
             elements=[
-                right_panel_frame,
-            ]
+                right_ui_panel,
+                Frame('', ui_center[0], SCREEN_HEIGHT - 125, ui_size[0], 200,
+                      BLACK, parent=right_ui_panel)
+            ],
+            register_to=self
         )
-        right_panel.register_to_objectsowners(self)
-        return interface
+        return self.ui_elements_spritelist
 
     def update_interface_position(self, dx, dy):
-        print(dx)
         right, top = self.interface[0].right, self.interface[0].top
         if right - dx < SCREEN_WIDTH or right - dx > self.map.width:
             dx = 0
@@ -369,7 +373,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
-        player = Player(id=2, faction=faction, cpu=False)
+        player = Player(id=2, faction=faction)
         cpu_player = CpuPlayer()
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)

@@ -52,6 +52,8 @@ To be done.
 17. Scratch of Menu and user interface systems.
 18. Units are now asking other units for pass if they are blocking their
     way.
+19. Pathfinder can now find paths leading to the encircled areas or with
+    entrances blocked by units.
 
 #### TO BE DONE:
 #### Minor:
@@ -69,6 +71,11 @@ To be done.
    is encircled by other units completely).
 7. Minimap and teleporting to the map-locations by clickling on the
    minimap.
+8. Pathfinder switching to paths searching with 'walkable' instead of
+   'pathable' property in case where path would go through large group
+   of units inside which it is impossible to make way for unit.
+   Alternatively unit could go-around large groups without asking
+   Pathfinder?
 
 #### Major:
 1. User-interface. (currently being developed)

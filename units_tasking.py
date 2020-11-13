@@ -13,7 +13,7 @@ from data_types import GridPosition
 class UnitTask:
     name: str = ''
     priority: int = 0
-    mouse_cursor_id: int = 0
+    id: int = 0
     target: Any = None
     evaluation_args: Optional[Tuple[str]] = field(default_factory=tuple)
 
