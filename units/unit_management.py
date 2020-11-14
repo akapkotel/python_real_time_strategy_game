@@ -88,6 +88,13 @@ class SelectionUnitMarket(SelectedEntityMarker):
         self.game.selection_markers_sprites.append(bar)
 
 
+class SelectedBuildingMarker(SelectedEntityMarker):
+
+    def __init__(self, building: PlayerEntity):
+        super().__init__(building)
+        self.borders.texture = selection_textures[0]
+
+
 class PermanentUnitsGroup:
     """
     Player can group units by selecting them with mouse and pressing CTRL +
@@ -139,14 +146,3 @@ class PermanentUnitsGroup:
                 game.window.cursor.select_units(*group.units)
         except KeyError:
             pass
-
-    @classmethod
-    def dissolve_permanent_units_group(cls, group_index: int):
-        del PermanentUnitsGroup.game.permanent_units_groups[group_index]
-
-
-class SelectedBuildingMarker(SelectedEntityMarker):
-
-    def __init__(self, building: PlayerEntity):
-        super().__init__(building)
-        self.borders.texture = selection_textures[0]

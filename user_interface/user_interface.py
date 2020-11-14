@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import PIL
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable, Set, Tuple
 
@@ -34,6 +36,166 @@ class UiSpriteList(SpriteList):
     def draw(self, **kwargs):
         for ui_element in (u for u in self if u.visible):
             ui_element.draw()
+
+
+@dataclass
+class UiElementsBundle(OwnedObject):
+    """
+    A bundle of UiElement objects kept together to easy swithc between Menu
+    submenus.
+
+    Initialize with params:\n
+    index: int \n
+    name: str \n
+    elements: List[UiElement]
+    """
+    index: int
+    name: str
+    elements: List[UiElement]
+    register_to: ObjectsOwner
+    _owners = None
+
+    def __post_init__(self):
+        self.register_to_objectsowners(self.register_to)
+        for element in self.elements:
+            element.bundle = self
+
+    def add(self, element: UiElement):
+        self.elements.append(element)
+        element.bundle = self
+
+    def remove(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            self._remove(element)
+            element.bundle = None
+
+    def __getitem__(self, name: str):
+        return self._find_by_name(name)
+
+    def show_element(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.show()
+
+    def hide_element(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.hide()
+
+    def activate_element(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.activate()
+
+    def deactivate_element(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.deactivate()
+
+    def _find_by_name(self, name: str) -> Optional[UiElement]:
+        try:
+            return next(e for e in self.elements if e.name == name)
+        except StopIteration:
+            return
+
+    def _remove(self, element: UiElement):
+        self.elements.remove(element)
+        element.bundle = None
+
+
+class UiBundlesHandler(ObjectsOwner):
+    """
+    This class keeps track of currently loaded and displayed UiElements,
+    allowing switching between different groups of buttons, checkboxes etc.
+    and dynamically compose content of the screen eg. in game menu or player
+    interface.
+    """
+
+    def __init__(self, use_spatial_hash=False):
+        """
+        To add UiElementsBundle to this handler you need only to initialize
+        this bundle inside of the class inheriting from the handler and it
+        will automatically add itself to the list of bundles and it's all
+        elements will .
+        """
+        ObjectsOwner.__init__(self)
+        # all bundles available to load and display:
+        self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
+        # currently displayed UiElements of the chosen bundle/s:
+        self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
+
+    def register(self, acquired: OwnedObject):
+        acquired: UiElementsBundle
+        self.ui_elements_bundles[acquired.name] = acquired
+        self.ui_elements_spritelist.extend(acquired.elements)
+        self.bind_ui_elements_with_ui_spritelist(acquired.elements)
+
+    def unregister(self, owned: OwnedObject):
+        owned: UiElementsBundle
+        del self.ui_elements_bundles[owned.name]
+
+    def get_notified(self, *args, **kwargs):
+        pass
+
+    def switch_submenu_of_index(self, index: int = 0):
+        for submenu in self.ui_elements_bundles.values():
+            if submenu.index == index:
+                return self._switch_to_submenu(submenu)
+
+    def switch_to_submenu_of_name(self, name: str):
+        if name in self.ui_elements_bundles:
+            self._switch_to_submenu(self.ui_elements_bundles[name])
+
+    def _switch_to_submenu(self, submenu: UiElementsBundle):
+        log(f'Switched to submenu {submenu.name} of index: {submenu.index}')
+        self._unload_all()
+        self._load_bundle(submenu)
+
+    def bind_ui_elements_with_ui_spritelist(self, elements):
+        for ui_element in elements:
+            ui_element.ui_spritelist = self.ui_elements_spritelist
+
+    def load_bundle(self,
+                    name: Optional[str] = None,
+                    index: Optional[int] = None):
+        """
+        Only add UiElementsBundle elements to the current list, without
+        removing anything from it.
+        """
+        if name is not None:
+            bundle = self.ui_elements_bundles.get(name, None)
+        elif index is not None:
+            bundle = self.get_bundle_of_index(index)
+        else:
+            return
+        if bundle is not None:
+            self._load_bundle(bundle)
+
+    def unload_bundle(self,
+                      name: Optional[str] = None,
+                      index: Optional[int] = None):
+        if name is not None:
+            bundle = self.ui_elements_bundles.get(name, None)
+        elif index is not None:
+            bundle = self.get_bundle_of_index(index)
+        else:
+            return
+        if bundle is not None:
+            self._unload_bundle(bundle)
+
+    def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
+        try:
+            return next(b for b in self.ui_elements_bundles.values() if b.index == index)
+        except StopIteration:
+            return
+
+    def _load_bundle(self, bundle: UiElementsBundle):
+        self.ui_elements_spritelist.extend(bundle.elements)
+        self.bind_ui_elements_with_ui_spritelist(bundle.elements)
+
+    def _unload_bundle(self, bundle: UiElementsBundle):
+        for element in self.ui_elements_spritelist[::-1]:
+            if element.bundle == bundle:
+                self.ui_elements_spritelist.remove(element)
+
+    def _unload_all(self):
+        self.ui_elements_spritelist.clear()
 
 
 class Hierarchical:
@@ -265,9 +427,11 @@ class Button(UiElement):
         super().__init__('', x, y, name, active, visible, parent,
                          function_on_left_click, function_on_right_click)
         # we load 2 textures for button: normal and for 'highlighted' button:
+        image = PIL.Image.open(texture_name)
+        width, height = image.size[0] // 2, image.size[1]
         self.textures = [
-            load_texture(texture_name, 0, 0, 300, 60),
-            load_texture(texture_name, 300, 0, 300, 60)
+            load_texture(texture_name, 0, 0, width, height),
+            load_texture(texture_name, width, 0, width, height)
         ]
         self.set_texture(0)
 
@@ -379,155 +543,3 @@ class TextInputField(UiElement):
 
 class ScrollBar(UiElement):
     ...
-
-
-@dataclass
-class UiElementsBundle(OwnedObject):
-    """
-    A bundle of UiElement objects kept together to easy swithc between Menu
-    submenus.
-
-    Initialize with params:\n
-    index: int \n
-    name: str \n
-    elements: List[UiElement]
-    """
-    index: int
-    name: str
-    elements: List[UiElement]
-    register_to: ObjectsOwner
-    _owners = None
-
-    def __post_init__(self):
-        self.register_to_objectsowners(self.register_to)
-        for element in self.elements:
-            element.bundle = self
-
-    def add(self, element: UiElement):
-        self.elements.append(element)
-        element.bundle = self
-
-    def remove(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
-            self._remove(element)
-            element.bundle = None
-
-    def __getitem__(self, name: str):
-        return self._find_by_name(name)
-
-    def show(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
-            element.visible = element.active = True
-
-    def hide(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
-            element.visible = element.active = False
-
-    def _find_by_name(self, name: str) -> Optional[UiElement]:
-        try:
-            return next(e for e in self.elements if e.name == name)
-        except StopIteration:
-            return
-
-    def _remove(self, element: UiElement):
-        self.elements.remove(element)
-        element.bundle = None
-
-
-class UiBundlesHandler(ObjectsOwner):
-    """
-    This class keeps track of currently loaded and displayed UiElements,
-    allowing switching between different groups of buttons, checkboxes etc.
-    and dynamically compose content of the screen eg. in game menu or player
-    interface.
-    """
-
-    def __init__(self, use_spatial_hash=False):
-        """
-        To add UiElementsBundle to this handler you need only to initialize
-        this bundle inside of the class inheriting from the handler and it
-        will automatically add itself to the list of bundles and it's all
-        elements will .
-        """
-        ObjectsOwner.__init__(self)
-        # all bundles available to load and display:
-        self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
-        # currently displayed UiElements of the chosen bundle/s:
-        self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
-
-    def register(self, acquired: OwnedObject):
-        acquired: UiElementsBundle
-        self.ui_elements_bundles[acquired.name] = acquired
-        self.ui_elements_spritelist.extend(acquired.elements)
-        self.bind_ui_elements_with_ui_spritelist(acquired.elements)
-
-    def unregister(self, owned: OwnedObject):
-        owned: UiElementsBundle
-        del self.ui_elements_bundles[owned.name]
-
-    def get_notified(self, *args, **kwargs):
-        pass
-
-    def switch_submenu_of_index(self, index: int = 0):
-        for submenu in self.ui_elements_bundles.values():
-            if submenu.index == index:
-                return self._switch_to_submenu(submenu)
-
-    def switch_to_submenu_of_name(self, name: str):
-        if name in self.ui_elements_bundles:
-            self._switch_to_submenu(self.ui_elements_bundles[name])
-
-    def _switch_to_submenu(self, submenu: UiElementsBundle):
-        log(f'Switched to submenu {submenu.name} of index: {submenu.index}')
-        self._unload_all()
-        self._load_bundle(submenu)
-
-    def bind_ui_elements_with_ui_spritelist(self, elements):
-        for ui_element in elements:
-            ui_element.ui_spritelist = self.ui_elements_spritelist
-
-    def load_bundle(self,
-                    name: Optional[str] = None,
-                    index: Optional[int] = None):
-        """
-        Only add UiElementsBundle elements to the current list, without
-        removing anything from it.
-        """
-        if name is not None:
-            bundle = self.ui_elements_bundles.get(name, None)
-        elif index is not None:
-            bundle = self.get_bundle_of_index(index)
-        else:
-            return
-        if bundle is not None:
-            self._load_bundle(bundle)
-
-    def unload_bundle(self,
-                      name: Optional[str] = None,
-                      index: Optional[int] = None):
-        if name is not None:
-            bundle = self.ui_elements_bundles.get(name, None)
-        elif index is not None:
-            bundle = self.get_bundle_of_index(index)
-        else:
-            return
-        if bundle is not None:
-            self._unload_bundle(bundle)
-
-    def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
-        try:
-            return next(b for b in self.ui_elements_bundles.values() if b.index == index)
-        except StopIteration:
-            return
-
-    def _load_bundle(self, bundle: UiElementsBundle):
-        self.ui_elements_spritelist.extend(bundle.elements)
-        self.bind_ui_elements_with_ui_spritelist(bundle.elements)
-
-    def _unload_bundle(self, bundle: UiElementsBundle):
-        for element in self.ui_elements_spritelist[::-1]:
-            if element.bundle == bundle:
-                self.ui_elements_spritelist.remove(element)
-
-    def _unload_all(self):
-        self.ui_elements_spritelist.clear()

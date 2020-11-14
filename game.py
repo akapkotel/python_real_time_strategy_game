@@ -163,7 +163,7 @@ class Window(arcade.Window, EventsCreator):
             register_to=self.menu_view
         )
 
-        x, y = SCREEN_WIDTH // 6, SCREEN_Y
+        x, y = SCREEN_WIDTH // 4, SCREEN_Y
         new_game_menu = UiElementsBundle(
             index=3,
             name='new game menu',
@@ -174,7 +174,7 @@ class Window(arcade.Window, EventsCreator):
                 Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
                        function_on_left_click=partial(switch_menu, 'campaign menu')),
                 Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x, y,
-                       function_on_left_click=partial(switch_menu, 'multiplayer')),
+                       function_on_left_click=partial(switch_menu, 'multiplayer menu')),
             ],
             register_to=self.menu_view
         )
