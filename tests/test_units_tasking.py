@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from units_tasking import TaskIdle, MoveTask, TasksExecutor
+from units.units_tasking import TaskIdle, MoveTask, TasksExecutor
 
 
 class TestTasksExecutor(TestCase):

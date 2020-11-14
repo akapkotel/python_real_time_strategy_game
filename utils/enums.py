@@ -16,7 +16,7 @@ class UnitWeight(IntEnum):
 
 class Robustness(IntEnum):
     """
-    When GameObject occupies a MapTile, it can block it (mak it not-walkable).
+    When GameObject occupies a MapTile, it can block it (make it not-walkable).
     But if heavy-enough Unit try to enter the tile, it can destroy an object if
     only its UnitWeight is equal or larger than object's robustness.
     """

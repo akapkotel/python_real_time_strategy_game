@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Callable, Set
+from typing import Optional, Callable, Set, Tuple
 
 from arcade import (
-    Sprite, SpriteList, load_texture, draw_rectangle_outline,
-    make_soft_square_texture
+    Sprite, SpriteList, load_texture, draw_rectangle_outline, draw_text
 )
 from arcade.arcade_types import Color
 
-from observers import OwnedObject
+from utils.observers import OwnedObject
 
 from utils.functions import log, make_texture
 
-from colors import GREEN, RED, WHITE
+from utils.colors import GREEN, RED, WHITE, BLACK
 
 
 class UiSpriteList(SpriteList):
@@ -31,7 +30,7 @@ class UiSpriteList(SpriteList):
             self.pop()
 
     def draw(self, **kwargs):
-        for ui_element in self:
+        for ui_element in (u for u in self if u.visible):
             ui_element.draw()
 
 
@@ -64,10 +63,6 @@ class Hierarchical:
     @property
     def children(self):
         return self._children
-
-    @children.setter
-    def children(self, *children: Hierarchical):
-        self._children.update(children)
 
     def add_child(self, child: Hierarchical):
         print(f'Added new child: {child}')
@@ -175,7 +170,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     parent property.
     """
 
-    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
+    def __init__(self, texture_name: str, x: int, y: int,
+                 name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
@@ -188,8 +184,9 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                                    function_on_left_click,
                                    parent=parent)
         OwnedObject.__init__(self, owners=True)
-        self.ui_spritelist = None
+        self.name = name
         self.bundle = None
+        self.ui_spritelist = None
 
     def draw(self):
         super().draw()
@@ -197,7 +194,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
             self.draw_highlight_around_element()
 
     def draw_highlight_around_element(self):
-        color = RED if 'quit' in self.textures[1].name else GREEN
+        color = RED if 'quit' in self.textures[-1].name else GREEN
         draw_rectangle_outline(*self.position, self.width + 4, self.height + 4, color, 2)
 
 
@@ -209,12 +206,13 @@ class Frame(UiElement):
                  y: int,
                  width: int,
                  height: int,
+                 name: Optional[str] = None,
                  color: Optional[Color] = None,
                  active: bool = False,
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None
                  ):
-        super().__init__(texture_name, x, y, active, visible, parent)
+        super().__init__(texture_name, x, y, name, active, visible, parent)
         if not texture_name:
             self.texture = make_texture(width, height, color or WHITE)
 
@@ -235,13 +233,14 @@ class Button(UiElement):
     def __init__(self, texture_name: str,
                  x: int,
                  y: int,
+                 name: Optional[str] = None,
                  active: bool = True,
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
                  ):
-        super().__init__(texture_name, x, y, active, visible, parent,
+        super().__init__(texture_name, x, y, name, active, visible, parent,
                          function_on_left_click, function_on_right_click)
         self.textures = [
             load_texture(texture_name, 0, 0, 300, 60),
@@ -260,12 +259,32 @@ class Checkbox(UiElement):
     set to True, else it is considered False.
     """
 
-    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
+    def __init__(self, texture_name: str, x: int, y: int, text: str,
+                 font_size: int = 10, text_color: Color = WHITE,
+                 name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
-                 ticked: bool = False, variable: (object, str) = None):
-        super().__init__(texture_name, x, y, active, visible, parent,
+                 ticked: bool = False, variable: Tuple[object, str] = None):
+        """
+
+        :param texture_name:
+        :param x:
+        :param y:
+        :param name:
+        :param active:
+        :param visible:
+        :param parent:
+        :param function_on_right_click:
+        :param function_on_left_click:
+        :param ticked:
+        :param variable: Tuple[object, str] -- to bind a variable to this
+        Checkbox you must pass a tuple which first element is an reference
+        to the python object and second is a string name of this object
+        attribute, e.g. (self, 'name_of_my_attribute').
+        """
+        super().__init__(texture_name, x, y, name, active, visible,
+                         parent,
                          function_on_left_click, function_on_right_click)
         self.ticked = ticked
         self.variable = variable
@@ -274,6 +293,11 @@ class Checkbox(UiElement):
             load_texture(texture_name, 40, 0, 40, 40)
         ]
         self.set_texture(int(self.ticked))
+        self.text_label = UiTextLabel(
+            x - int(len(text) * font_size * 0.45), y, text, font_size,
+            text_color
+        )
+        self.add_child(self.text_label)
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
@@ -283,6 +307,35 @@ class Checkbox(UiElement):
         self.ticked = not self.ticked
         setattr(self.variable[0], self.variable[1], self.ticked)
         self.set_texture(int(self.ticked))
+
+    def draw(self):
+        self.text_label.draw()
+        super().draw()
+
+
+class UiTextLabel(UiElement):
+
+    def __init__(self, x: int, y: int, text: str,
+                 font_size: int = 10, text_color: Color = WHITE,
+                 name: Optional[str] = None, active: bool = False,
+                 visible: bool = True, parent: Optional[Hierarchical] = None):
+        super().__init__('', x, y, name, active, visible, parent)
+        self.text = text
+        self.size = font_size
+        self.text_color = text_color
+        self.textures = [
+            make_texture(int(len(text) * font_size * 0.725), font_size * 2, BLACK)
+        ]
+        self.set_texture(0)
+
+    def draw(self):
+        super().draw()
+        draw_text(
+            self.text, self.left, self.bottom + self.size // 2,
+            self.text_color, self.size)
+
+    def draw_highlight_around_element(self):
+        pass
 
 
 class ListBox(UiElement):

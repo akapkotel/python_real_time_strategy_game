@@ -7,9 +7,9 @@ from arcade import (
 
 
 from utils.functions import get_attributes_with_attribute, log
-from improved_spritelists import DividedSpriteList
-from colors import WHITE, GREEN
-from data_types import Viewport
+from utils.improved_spritelists import DividedSpriteList
+from utils.colors import WHITE, GREEN
+from utils.data_types import Viewport
 
 
 Updateable = Drawable = Union[SpriteList, DividedSpriteList, Sprite]

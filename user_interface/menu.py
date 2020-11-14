@@ -4,9 +4,9 @@ from __future__ import annotations
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 
-from observers import ObjectsOwner, OwnedObject
-from user_interface import UiElement, UiSpriteList
-from views import WindowView
+from utils.observers import ObjectsOwner, OwnedObject
+from user_interface.user_interface import UiElement, UiSpriteList
+from utils.views import WindowView
 from utils.functions import log
 
 
@@ -36,7 +36,26 @@ class UiElementsBundle(OwnedObject):
         self.elements.append(element)
         element.bundle = self
 
-    def remove(self, element: UiElement):
+    def remove(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            self._remove(element)
+            element.bundle = None
+
+    def show(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.visible = element.active = True
+
+    def hide(self, name: str):
+        if (element := self._find_by_name(name)) is not None:
+            element.visible = element.active = False
+
+    def _find_by_name(self, name: str) -> Optional[UiElement]:
+        try:
+            return next(e for e in self.elements if e.name == name)
+        except StopIteration:
+            return
+
+    def _remove(self, element: UiElement):
         self.elements.remove(element)
         element.bundle = None
 
@@ -57,8 +76,9 @@ class UiBundlesHandler(ObjectsOwner):
         elements will .
         """
         ObjectsOwner.__init__(self)
+        # all bundles available to load and display:
         self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
-        self.submenu_index = 0
+        # currently displayed UiElements of the chosen bundle/s:
         self.ui_elements_spritelist = UiSpriteList()
 
     def register(self, acquired: OwnedObject):
@@ -86,7 +106,6 @@ class UiBundlesHandler(ObjectsOwner):
         log(f'Switched to submenu {submenu.name} of index: {submenu.index}')
         self._unload_all()
         self._load_bundle(submenu)
-        self.submenu_index = submenu.index
 
     def bind_ui_elements_with_ui_spritelist(self, elements):
         for ui_element in elements:
@@ -122,8 +141,7 @@ class UiBundlesHandler(ObjectsOwner):
 
     def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
         try:
-            return next(filter(lambda b: b.index == index,
-                               self.ui_elements_bundles.values()))
+            return next(b for b in self.ui_elements_bundles.values() if b.index == index)
         except StopIteration:
             return
 

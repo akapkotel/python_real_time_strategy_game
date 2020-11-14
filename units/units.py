@@ -9,14 +9,14 @@ from typing import Deque, List, Set, Optional, Union, cast
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
-from buildings import Building
-from enums import UnitWeight
+from buildings.buildings import Building
+from utils.enums import UnitWeight
 from game import UPDATE_RATE
-from map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
-from player import Player, PlayerEntity
-from units_tasking import TasksExecutor, UnitTask
+from scenarios.map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
+from players_and_factions.player import Player, PlayerEntity
+from units.units_tasking import TasksExecutor, UnitTask
 from utils.functions import (
-    calculate_angle, close_enough, distance_2d, log, vector_2d
+    calculate_angle, distance_2d, log, vector_2d
 )
 
 

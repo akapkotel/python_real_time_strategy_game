@@ -6,9 +6,9 @@ from typing import Optional, List, Set, Tuple, Dict
 from arcade import load_texture
 
 from utils.functions import get_path_to_file, get_enemies
-from scheduling import log
-from player import Player, CpuPlayer
-from map import Map
+from utils.scheduling import log
+from players_and_factions.player import Player, CpuPlayer
+from scenarios.map import Map
 
 
 class Event:

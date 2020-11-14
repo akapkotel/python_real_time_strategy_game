@@ -6,10 +6,10 @@ from typing import Dict, KeysView, Optional, Set
 from arcade import Sprite, SpriteList, make_circle_texture
 from numba import njit
 
-from colors import BLACK, FOG
-from data_types import GridPosition
+from utils.colors import BLACK, FOG
+from utils.data_types import GridPosition
 from game import Game
-from map import TILE_HEIGHT, TILE_WIDTH
+from scenarios.map import TILE_HEIGHT, TILE_WIDTH
 
 OFFSET_X = TILE_WIDTH // 2
 OFFSET_Y = TILE_HEIGHT // 2

@@ -8,9 +8,9 @@ from arcade import (
 )
 from arcade.arcade_types import Point
 
-from improved_spritelists import DividedSpriteList
-from enums import Robustness, UnitWeight
-from observers import OwnedObject
+from utils.improved_spritelists import DividedSpriteList
+from utils.enums import Robustness, UnitWeight
+from utils.observers import OwnedObject
 from utils.functions import filter_sequence, get_object_name
 
 
@@ -42,7 +42,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.object_name = get_object_name(filename)
 
         GameObject.total_objects_count += 1
-        self.id = index = GameObject.total_objects_count
+        self.id = GameObject.total_objects_count
 
         self._robustness = robustness  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile

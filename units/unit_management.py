@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Dict, Optional, Sequence, Set, Tuple
+from typing import Optional, Sequence, Set, Tuple, Iterator
 
 from arcade import Sprite, SpriteSolidColor, load_texture
 from arcade.arcade_types import Color, Point
 
-from colors import GREEN, RED, YELLOW
+from utils.colors import GREEN, RED, YELLOW
 from game import Game
-from player import PlayerEntity
-from units import Unit
+from players_and_factions.player import PlayerEntity
+from units.units import Unit
 from utils.functions import average_position_of_points_group, get_path_to_file
 
 selection_texture = load_texture(
@@ -84,13 +84,17 @@ class PermanentUnitsGroup:
     their numbers.
     """
     game: Optional[Game] = None
-    groups: Dict[int, PermanentUnitsGroup] = {}
 
     def __init__(self, group_id: int, units: Sequence[Unit]):
         self.group_id = group_id
         self.units: Set[Unit] = set(units)
-        # PermanentUnitsGroup.groups[group_id] = self
         self.game.permanent_units_groups[group_id] = self
+
+    def __contains__(self, unit: Unit) -> bool:
+        return unit in self.units
+
+    def __iter__(self) -> Iterator:
+        return iter(self.units)
 
     @property
     def position(self) -> Point:
@@ -112,7 +116,7 @@ class PermanentUnitsGroup:
             game = PermanentUnitsGroup.game
             group = game.permanent_units_groups[group_id]
             selected = game.window.cursor.selected_units
-            if all(u in selected for u in group.units):
+            if selected and all(u in group for u in selected):
                 game.window.move_viewport_to_the_position(*group.position)
             else:
                 game.window.cursor.unselect_units()

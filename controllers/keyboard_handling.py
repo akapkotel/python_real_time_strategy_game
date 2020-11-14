@@ -5,8 +5,8 @@ from typing import Optional, Set
 from arcade import Window
 from arcade.key import *
 
-from unit_management import PermanentUnitsGroup
-from user_interface import ToggledElement
+from units.unit_management import PermanentUnitsGroup
+from user_interface.user_interface import ToggledElement
 from utils.functions import log
 
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from abc import abstractmethod
 from collections import deque
 
-from data_types import GridPosition
+from utils.data_types import GridPosition
 
 
 @dataclass

@@ -10,16 +10,16 @@ from arcade import (
     load_textures
 )
 
-from buildings import Building
-from colors import CLEAR_GREEN, GREEN
+from buildings.buildings import Building
+from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, Menu, UPDATE_RATE
-from gameobject import GameObject
-from improved_spritelists import DividedSpriteList
-from player import PlayerEntity
-from scheduling import EventsCreator
-from unit_management import SelectedEntityMarker
-from units import Unit, UnitTask
-from user_interface import (
+from gameobjects.gameobject import GameObject
+from utils.improved_spritelists import DividedSpriteList
+from players_and_factions.player import PlayerEntity
+from utils.scheduling import EventsCreator
+from units.unit_management import SelectedEntityMarker
+from units.units import Unit, UnitTask
+from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, UiSpriteList
 )
 from utils.classes import HashedList
@@ -200,7 +200,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         pointed: Union[PlayerEntity, None]
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
-        elif self.game.map.position_to_node(x, y).walkable:
+        elif self.game.map.position_to_node(x, y).pathable:
             self.send_units_to_pointed_location(units, x, y)
 
     def send_units_to_pointed_location(self, units, x, y):
@@ -474,7 +474,6 @@ class MouseDragSelection:
 
     def add_units_to_selection(self, units: Set[Unit]):
         self.units.update(units)
-        # self.game.create_selection_markers(*units)  # TODO: selection markers
 
     def draw(self):
         """Draw rectangle showing borders of current selection."""

@@ -20,21 +20,23 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from colors import BLACK, GREEN, RED, WHITE, DARK
-from improved_spritelists import DividedSpriteList, SpriteListWithSwitch
-from data_types import Viewport
+from utils.colors import BLACK, GREEN, RED, WHITE, DARK
+from utils.improved_spritelists import DividedSpriteList, SpriteListWithSwitch
+from utils.data_types import Viewport
 
-from observers import ObjectsOwner, OwnedObject
-from scheduling import EventsCreator, EventsScheduler, ScheduledEvent
-from user_interface import (
-    Button, Checkbox, TextInputField, Frame
+from utils.observers import OwnedObject
+from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
+from user_interface.user_interface import (
+    UiSpriteList, Button, Checkbox, Frame
 )
-from user_interface import UiSpriteList
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
-from views import LoadingScreen, WindowView, Updateable
-from menu import Menu, UiElementsBundle, UiBundlesHandler
+from utils.views import LoadingScreen, WindowView, Updateable
+from user_interface.menu import Menu, UiElementsBundle, UiBundlesHandler
+
+# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -49,7 +51,7 @@ GAME_SPEED = 1.0
 
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = True
+PYPROFILER = False
 DEBUG = True
 
 
@@ -122,6 +124,9 @@ class Window(arcade.Window, EventsCreator):
                            self.menu_view.switch_submenu_of_index, 1)),
                 Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 600,
                        function_on_left_click=self.start_new_game),
+                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 800,
+                       name='resume button', active=False, visible=False,
+                       function_on_left_click=partial(self.show_view, self.game_view)),
             ],
             register_to=self.menu_view
         )
@@ -131,10 +136,10 @@ class Window(arcade.Window, EventsCreator):
             name='Second menu',
             elements=[
                 back_to_menu_button,
+                # UiTextLabel(SCREEN_X - 100, 600, 'Draw debug:', 20),
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), SCREEN_X, 600,
-                    ticked=self.debug,
-                    variable=(self, 'debug')
+                    'Draw debug:', 20, ticked=self.debug, variable=(self, 'debug')
                 )
             ],
             register_to=self.menu_view
@@ -332,14 +337,14 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def create_interface(self) -> UiSpriteList:
         ui_center = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_ui_panel = Frame('', *ui_center, *ui_size, DARK)
+        right_ui_panel = Frame('', *ui_center, *ui_size, None, DARK)
         right_panel = UiElementsBundle(
             name='right_panel',
             index=0,
             elements=[
                 right_ui_panel,
                 Frame('', ui_center[0], SCREEN_HEIGHT - 125, ui_size[0], 200,
-                      BLACK, parent=right_ui_panel)
+                      None, BLACK, parent=right_ui_panel)
             ],
             register_to=self
         )
@@ -381,20 +386,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
-        player = self.players[2]
-        name = 'jeep_blue.png'
-        for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
-            for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        # player = self.players[2]
+        # name = 'jeep_blue.png'
+        # for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
+        #     for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        # name = "medic_truck_red.png"
-        # player = self.players[4]
-        # for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
-        #     for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        name = "medic_truck_red.png"
+        player = self.players[4]
+        for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
+            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+                spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def test_buildings_spawning(self):
@@ -402,7 +407,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             get_path_to_file('building_dummy.png'),
             self.players[4],
             (400, 600),
-            produces=Unit
+            produces=(Unit, )
         )
         self.buildings.append(building)
 
@@ -464,14 +469,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
         if not self.paused:
-            self.update_local_drawn_units_and_buildings()
-            # GameObject.move_all_instances()
             super().on_update(delta_time)
+            self.update_local_drawn_units_and_buildings()
             self.pathfinder.update()
             self.fog_of_war.update()
             self.update_factions_and_players()
 
     def update_local_drawn_units_and_buildings(self):
+        """
+        We draw on the screen only these PlayerEntities, which belongs to
+        the local Player's Faction, or are detected by his Faction.
+        """
         self.local_drawn_units_and_buildings.clear()
         local_faction = self.local_human_player.faction
         self.local_drawn_units_and_buildings.update(
@@ -565,7 +573,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         return grid
 
 
-def start_profilling_code_execution():
+def start_profiling_code_execution():
     try:
         from pyprofiler import start_profile, end_profile
         profiler = start_profile()
@@ -574,7 +582,8 @@ def start_profilling_code_execution():
         log(str(e), console=True)
         return None, None
 
-def end_profilling_code_execution(profiler):
+
+def end_profiling_code_execution(profiler):
     try:
         # noinspection PyUnboundLocalVariable
         end_profile(profiler, 30, True)
@@ -584,20 +593,22 @@ def end_profilling_code_execution(profiler):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from map import Map, Pathfinder
-    from unit_management import PermanentUnitsGroup, SelectedEntityMarker
-    from player import Faction, Player, CpuPlayer, PlayerEntity
-    from keyboard_handling import KeyboardHandler
-    from mouse_handling import MouseCursor
-    from units import Unit, UnitWeight
-    from fog_of_war import FogOfWar
-    from buildings import Building
-    from missions import Mission
+    from scenarios.map import Map, Pathfinder
+    from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
+    from players_and_factions.player import (
+        Faction, Player, CpuPlayer, PlayerEntity
+    )
+    from controllers.keyboard_handling import KeyboardHandler
+    from controllers.mouse_handling import MouseCursor
+    from units.units import Unit, UnitWeight
+    from scenarios.fog_of_war import FogOfWar
+    from buildings.buildings import Building
+    from scenarios.missions import Mission
 
     if PYPROFILER:
-        end_profile, profiler = start_profilling_code_execution()
+        end_profile, profiler = start_profiling_code_execution()
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
     arcade.run()
 
     if PYPROFILER and profiler is not None:
-        end_profilling_code_execution(profiler)
+        end_profiling_code_execution(profiler)

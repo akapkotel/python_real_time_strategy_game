@@ -6,15 +6,17 @@ from typing import Dict, List, Optional, Set, Union
 
 from arcade.arcade_types import Point, Color
 
-from data_types import FactionId, GridPosition
+from utils.data_types import FactionId, GridPosition
 from game import Game, UPDATE_RATE
-from gameobject import GameObject, Robustness
-from map import MapNode, Sector, TILE_WIDTH
-from observers import ObjectsOwner, OwnedObject
-from scheduling import EventsCreator
+from gameobjects.gameobject import GameObject, Robustness
+from scenarios.map import MapNode, Sector, TILE_WIDTH
+from utils.observers import ObjectsOwner, OwnedObject
+from utils.scheduling import EventsCreator
 from utils.functions import (
-    calculate_observable_area, close_enough, is_visible, log
+    calculate_observable_area, is_visible, log
 )
+
+# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 
 def new_id(objects: Dict) -> int:
@@ -167,14 +169,17 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
 
     def update(self):
         log(f'Updating player: {self}')
-        self.update_known_enemies()
+        # self.update_known_enemies()
+        self.known_enemies.clear()
         self.clear_mutually_detected_enemies()
 
-    def update_known_enemies(self):
-        self.known_enemies.clear()
-        for unit in self.units:
-            self.known_enemies.update(unit.known_enemies)
-        self.faction.known_enemies.update(self.known_enemies)
+    def update_known_enemies(self, enemies: Set[PlayerEntity]):
+        self.known_enemies.update(enemies)
+        self.faction.known_enemies.update(enemies)
+        # self.known_enemies.clear()
+        # for unit in self.units:
+        #     self.known_enemies.update(unit.known_enemies)
+        # self.faction.known_enemies.update(self.known_enemies)
 
     def clear_mutually_detected_enemies(self):
         for entity in self.units.union(self.buildings):
@@ -207,6 +212,9 @@ class PlayerEntity(GameObject, EventsCreator):
     """
     game: Optional[Game] = None
 
+    production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
+    production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
+
     def __init__(self,
                  entity_name: str,
                  player: Player,
@@ -231,15 +239,14 @@ class PlayerEntity(GameObject, EventsCreator):
 
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
+        # this is checked so frequent that it is worth caching it:
         self.is_building = isinstance(self, Building)
 
         self._max_health = 100
         self._health = self._max_health
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
-        self.observed_nodes: Set[MapNode] = set()
-
-        self.production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
+        self.observed_nodes: Set[GridPosition] = set()
 
         self.register_to_objectsowners(self.game, self.player)
 
@@ -303,9 +310,10 @@ class PlayerEntity(GameObject, EventsCreator):
 
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
+            self.player.update_known_enemies(enemies)
             self.notify_detected_enemies_about_self(enemies)
             self.notify_all_nearby_friends_about_enemies(enemies)
-        self.known_enemies = enemies.union(self.mutually_detected_enemies)
+        self.known_enemies = enemies
 
     def notify_all_nearby_friends_about_enemies(self, enemies):
         """
@@ -314,7 +322,7 @@ class PlayerEntity(GameObject, EventsCreator):
         congested the area is, the more processing time we save.
         """
         for friend in self.nearby_friends:
-            friend.mutually_detected_enemies.update(enemies)
+            friend.known_enemies.update(enemies)
 
     def notify_detected_enemies_about_self(self, enemies):
         """
@@ -324,13 +332,22 @@ class PlayerEntity(GameObject, EventsCreator):
         for enemy in enemies:
             enemy.mutually_detected_enemies.add(self)
 
-    def scan_for_visible_enemies(self) -> Set[Union[Unit, Building]]:
+    def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
+        known_enemies = set()
         potentially_visible = self.get_potentially_visible_enemies()
-        return {e for e in potentially_visible if e.visible_for(self)}
+        observed_nodes = self.observed_nodes
+        entity: Union[Unit, Building]
+        for entity in potentially_visible:
+            if entity.is_building:
+                if any(n.grid in observed_nodes for n in entity.occupied_nodes):
+                    known_enemies.add(entity)
+            elif entity.current_node.grid in observed_nodes:
+                known_enemies.add(entity)
+        return {e for e in known_enemies if e.visible_for(self)}
 
     def get_potentially_visible_enemies(self) -> List[PlayerEntity]:
-        enemies = []
         sectors = self.get_sectors_to_scan_for_enemies()
+        enemies = []
         for sector in sectors:
             enemies.extend(
                 e for e in sector.units_and_buildings if e.is_enemy(self)
@@ -343,9 +360,7 @@ class PlayerEntity(GameObject, EventsCreator):
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
-        if close_enough(self.position, other.position, self.detection_radius):
-            return is_visible(self.position, other.position, obstacles)
-        return False
+        return is_visible(self.position, other.position, obstacles)
 
     def is_enemy(self, other: PlayerEntity) -> bool:
         return self.faction.is_enemy(other.faction)
@@ -369,6 +384,7 @@ class PlayerEntity(GameObject, EventsCreator):
 
 
 if __name__:
-    from units import Unit
-    from buildings import Building
-    from mouse_handling import SelectedEntityMarker
+    # these imports are placed here to avoid circular-imports issue:
+    from units.units import Unit
+    from buildings.buildings import Building
+    from controllers.mouse_handling import SelectedEntityMarker

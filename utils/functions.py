@@ -8,13 +8,12 @@ from time import perf_counter
 from typing import Any, Iterable, List, Sequence, Tuple
 
 from arcade import Texture
-from arcade.utils import lerp
 from arcade.arcade_types import RGB, RGBA, Color
 from numba import njit
 from shapely import speedups
 from shapely.geometry import LineString, Polygon
 
-from data_types import Number, Point, Union
+from utils.data_types import Number, Point, Union
 
 speedups.enable()
 
@@ -109,7 +108,6 @@ def get_path_to_file(filename: str) -> str:
     Build full absolute path to the filename and return it + /filename.
     """
     import os
-    print(filename)
     for directory in os.walk(os.getcwd() + '/resources'):
         if filename in directory[2]:
             return f'{directory[0]}/{filename}'
@@ -156,7 +154,7 @@ def get_enemies(war: int) -> Tuple[int, int]:
 
 
 def to_rgba(color: RGB, alpha: int) -> RGBA:
-    return color[0], color[1], color[2], alpha
+    return color[0], color[1], color[2], clamp(alpha, 255, 0)
 
 
 @njit
@@ -242,14 +240,13 @@ def calculate_observable_area(grid_x, grid_y, max_distance):
     return observable_area
 
 
-def make_texture(width: int,
-                             height: int,
-                             color: Color) -> Texture:
+def make_texture(width: int, height: int, color: Color) -> Texture:
     """
     Return a :class:`Texture` of a square with the given diameter and color,
     fading out at its edges.
 
-    :param int size: Diameter of the square and dimensions of the square Texture returned.
+    :param int size: Diameter of the square and dimensions of the square
+    Texture returned.
     :param Color color: Color of the square.
     :param int center_alpha: Alpha value of the square at its center.
     :param int outer_alpha: Alpha value of the square at its edges.
@@ -258,5 +255,5 @@ def make_texture(width: int,
     """
     bg_color = color # fully transparent
     img = PIL.Image.new("RGBA", (width, height), bg_color)
-    name = "{}:{}:{}:{}".format("rect", width, height, color)  # name must be unique for caching
+    name = "{}:{}:{}:{}".format("rect", width, height, color)
     return Texture(name, img)

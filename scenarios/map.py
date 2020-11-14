@@ -12,11 +12,15 @@ from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from data_types import BuildingId, GridPosition, Number, SectorId, UnitId
+from utils.data_types import BuildingId, GridPosition, Number, SectorId, UnitId
 from game import Game, PROFILING_LEVEL, TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
-from scheduling import EventsCreator, ScheduledEvent
+from utils.scheduling import EventsCreator, ScheduledEvent
 from utils.classes import Singleton
 from utils.functions import get_path_to_file, log, timer
+from utils.enums import TerrainCost
+
+# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
 
 PATH = 'PATH'
 
@@ -172,7 +176,7 @@ class Map(GridHandler):
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = 1.4 if self.diagonal(node.grid, grid) else 1
-                distance *= (node.terrain_cost + adjacent_node.terrain_cost)
+                distance *= (node.terrain + adjacent_node.terrain)
                 node.costs[grid] = distance
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
@@ -249,11 +253,14 @@ class MapNode(GridHandler, ABC):
         self.sector = sector
         self.position = self.x, self.y = self.grid_to_position(self.grid)
         self.costs: Dict[GridPosition, float] = {}
+
+        self._allowed_for_pathfinding = True
+        self._walkable = True
+
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
-        self._walkable = True
-        self._allowed_for_pathfinding = True
-        self.terrain_cost = 1
+
+        self.terrain: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
@@ -284,10 +291,15 @@ class MapNode(GridHandler, ABC):
 
     @property
     def walkable(self) -> bool:
+        """
+        Use it to find if node is not blocked at the moment by units or
+        buildings.
+        """
         return all((self._walkable, self._unit_id is None, self._building_id is None))
 
     @property
     def pathable(self) -> bool:
+        """Call it to find if this node is available for pathfinding at all."""
         return self._allowed_for_pathfinding and self._building_id is None
 
     @property
@@ -430,7 +442,11 @@ class Pathfinder(Singleton, EventsCreator):
     def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:
         return [node.position for node in nodes_list]
 
-    def update(self):
+    def update(self) -> Optional[MapPath]:
+        """
+        Each frame get first request from queue and try to find path for it,
+        if successful, return the path, else enqueue the request again.
+        """
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:
@@ -460,5 +476,6 @@ class Pathfinder(Singleton, EventsCreator):
 
 
 if __name__:
-    from player import PlayerEntity
-    from units import Unit
+    # these imports are placed here to avoid circular-imports issue:
+    from players_and_factions.player import PlayerEntity
+    from units.units import Unit

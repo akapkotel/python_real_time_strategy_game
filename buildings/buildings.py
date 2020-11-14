@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, List, Optional, Set, Type
+from typing import Deque, List, Optional, Set, Tuple, Type
 
 from arcade.arcade_types import Point
 
-from map import MapNode, Sector
-from player import Player, PlayerEntity
-from utils.functions import is_visible
+from scenarios.map import MapNode, Sector
+from players_and_factions.player import Player, PlayerEntity
+from utils.functions import is_visible, close_enough
+
+# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 
 class IProducer:
@@ -16,31 +18,31 @@ class IProducer:
     An interface for all Buildings which can produce Units in game.
     """
     produced_objects: Optional[List[Type[PlayerEntity]]] = []
-    production_queue: Optional[Deque[PlayerEntity]] = None
+    production_queue: Optional[Deque[Type[PlayerEntity]]] = deque()
     production_progress: float = 0.0
     production_per_frame: float = 0.0
     is_producing: bool = False
 
-    def start_production(self, product: PlayerEntity):
+    def start_production(self, product: Type[PlayerEntity]):
         if product.__class__ not in self.produced_objects:
             return
-        elif self.production_queue is None:
-            self.production_queue = deque([product])
-        else:
-            self.production_queue.appendleft(product)
+        self.production_queue.appendleft(product)
+        self._start_production(product)
+
+    def _start_production(self, product: Type[PlayerEntity]):
         self.set_production_progress_and_speed(product)
 
     def cancel_production(self):
         if self.is_producing:
-            self.toggle_production()
+            self._toggle_production()
         self.production_progress = 0.0
         self.production_queue.clear()
 
-    def set_production_progress_and_speed(self, product: PlayerEntity):
+    def set_production_progress_and_speed(self, product: Type[PlayerEntity]):
         self.production_progress = 0.0
         self.production_per_frame = product.production_per_frame
 
-    def toggle_production(self):
+    def _toggle_production(self):
         self.is_producing = not self.is_producing
 
     def update_production(self):
@@ -52,16 +54,12 @@ class IProducer:
             self.start_production(product=self.production_queue[-1])
 
     def finish_production(self):
-        self.toggle_production()
+        self._toggle_production()
         self.production_progress = 0.0
         self.production_queue.pop()
 
 
 class Building(PlayerEntity, IProducer):
-
-    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
-        sectors = []
-        return sectors
 
     game: Optional[Game] = None
 
@@ -69,17 +67,19 @@ class Building(PlayerEntity, IProducer):
                  building_name: str,
                  player: Player,
                  position: Point,
-                 produces: Optional[PlayerEntity] = None):
+                 produces: Optional[Tuple[Type[PlayerEntity]]] = None):
         PlayerEntity.__init__(self, building_name, player, position, 4)
 
         if produces is not None:
             IProducer.__init__(self)
-            self.produced_objects.append(produces)
+            self.produced_objects.extend(produces)
+
+        # since buildings could be large, they must be visible for anyone
+        # who can see their boundaries, not just the center_xy:
+        self.detection_radius += self._get_collision_radius()
 
         self.position = self.place_building_properly_on_the_grid()
         self.occupied_nodes: List[MapNode] = self.block_map_nodes()
-        for node in self.occupied_nodes:
-            self.block_map_node(node)
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
     def place_building_properly_on_the_grid(self) -> Point:
@@ -112,7 +112,7 @@ class Building(PlayerEntity, IProducer):
     def block_map_node(self, node: MapNode):
         node.building_id = self.id
 
-    def update_current_sector(self):
+    def update_current_sector(self) -> Set[Sector]:
         distinct_sectors = set()
         for node in self.occupied_nodes:
             distinct_sectors.add(node.sector)
@@ -132,13 +132,11 @@ class Building(PlayerEntity, IProducer):
         if hasattr(self, 'update_production'):
             self.update_production()
 
-    def draw(self):
-        super().draw()
-
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
-        distance = self.detection_radius
-        return is_visible(self.position, other.position, obstacles, distance)
+        if close_enough(self.position, other.position, self.detection_radius):
+            return is_visible(self.position, other.position, obstacles)
+        return False
 
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         friends: Set[PlayerEntity] = set()
@@ -149,6 +147,12 @@ class Building(PlayerEntity, IProducer):
             )
         return friends
 
+    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
+        sectors = set()
+        for sector in self.occupied_sectors:
+            sectors.update(sector.adjacent_sectors())
+        return list(sectors)
+
     def kill(self):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
@@ -158,4 +162,5 @@ class Building(PlayerEntity, IProducer):
 
 
 if __name__:
+    # these imports are placed here to avoid circular-imports issue:
     from game import Game, TILE_HEIGHT, TILE_WIDTH
