@@ -66,12 +66,9 @@ To be done.
 4. More efficient visibility-tests to avoid as many tests as possible.
 5. Better collision-avoidance to replace tiles-reserving system -
    flocking maybe? How to make it working with pathfinding?
-6. Find way to avoid constant pathfinding calls when unit is given
-   move-order to the position which is impossible to reach (for. eg. it
-   is encircled by other units completely).
-7. Minimap and teleporting to the map-locations by clickling on the
+6. Minimap and teleporting to the map-locations by clickling on the
    minimap.
-8. Pathfinder switching to paths searching with 'walkable' instead of
+7. Pathfinder switching to paths searching with 'walkable' instead of
    'pathable' property in case where path would go through large group
    of units inside which it is impossible to make way for unit.
    Alternatively unit could go-around large groups without asking

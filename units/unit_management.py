@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Sequence, Set, Tuple, Iterator
+from typing import Optional, Sequence, Set, Tuple, Iterator, Collection
 
-from arcade import Sprite, SpriteSolidColor, load_texture
+from arcade import Sprite, SpriteSolidColor, load_textures
 from arcade.arcade_types import Color, Point
 
 from utils.colors import GREEN, RED, YELLOW
@@ -12,17 +12,18 @@ from players_and_factions.player import PlayerEntity
 from units.units import Unit
 from utils.functions import average_position_of_points_group, get_path_to_file
 
-selection_texture = load_texture(
-    get_path_to_file('unit_selection_marker.png'), 0, 0, 60, 60
+selection_textures = load_textures(
+    get_path_to_file('unit_selection_marker.png'),
+    [(i * 60, 0, 60, 60) for i in range(10)]
 )
 
 
 class SelectedEntityMarker:
     """
-    This class produces rectangle-unit-selection markers showing that a
-    particular Unit or Building is selected by player and displaying some
-    info about selected, like health level or lack of fuel icon. Each marker
-    can contain many Sprites which are dynamically created, updated and
+    This class produces rectangle-unit-or-building-selection markers showing
+    that a particular Unit or Building is selected by player and displaying
+    some info about selected, like health level or lack of fuel icon. Each
+    marker can contain many Sprites which are dynamically created, updated and
     destroyed. You must cache SelectionMarker instances and their Sprites in
     distinct data-structures. Markers are stored in ordinary list and
     Sprites in SpriteLists.
@@ -31,14 +32,28 @@ class SelectedEntityMarker:
 
     def __init__(self, selected: PlayerEntity):
         self.selected = selected
+        self.borders = Sprite()
+        self.sprites = []
+
+    def kill(self):
+        for sprite in self.sprites:
+            sprite.kill()
+
+
+class SelectionUnitMarket(SelectedEntityMarker):
+
+    def __init__(self, selected: Unit):
+        super().__init__(selected)
         selected.selection_marker = self
         self.health = health = selected.health
         self.position = selected.position
-        self.borders = borders = Sprite()
-        borders.texture = selection_texture
+
+        self.borders.texture = selection_textures[selected.permanent_units_group]
+
         self.healthbar = healthbar = SpriteSolidColor(
             *self.health_to_color_and_width(health))
-        self.sprites = sprites = [borders, healthbar]
+
+        self.sprites = sprites = [self.borders, healthbar]
         self.game.selection_markers_sprites.extend(sprites)
 
     @staticmethod
@@ -72,10 +87,6 @@ class SelectedEntityMarker:
         self.sprites.append(self.healthbar)
         self.game.selection_markers_sprites.append(bar)
 
-    def kill(self):
-        for sprite in self.sprites:
-            sprite.kill()
-
 
 class PermanentUnitsGroup:
     """
@@ -106,9 +117,14 @@ class PermanentUnitsGroup:
 
     @classmethod
     def create_new_permanent_units_group(cls, digit: int):
-        units = PermanentUnitsGroup.game.window.cursor.selected_units
+        game = PermanentUnitsGroup.game
+        units = game.window.cursor.selected_units.copy()
+        for unit in units:
+            unit.set_permanent_units_group(digit)
         new_group = PermanentUnitsGroup(group_id=digit, units=units)
-        PermanentUnitsGroup.game.permanent_units_groups[digit] = new_group
+        game.permanent_units_groups[digit] = new_group
+        game.window.cursor.unselect_units()
+        game.window.cursor.select_units(*units)
 
     @classmethod
     def select_permanent_units_group(cls, group_id: int):
@@ -123,3 +139,14 @@ class PermanentUnitsGroup:
                 game.window.cursor.select_units(*group.units)
         except KeyError:
             pass
+
+    @classmethod
+    def dissolve_permanent_units_group(cls, group_index: int):
+        del PermanentUnitsGroup.game.permanent_units_groups[group_index]
+
+
+class SelectedBuildingMarker(SelectedEntityMarker):
+
+    def __init__(self, building: PlayerEntity):
+        super().__init__(building)
+        self.borders.texture = selection_textures[0]

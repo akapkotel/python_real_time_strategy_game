@@ -32,6 +32,7 @@ from user_interface.user_interface import (
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
+from persistency.save_handling import SaveManager
 from utils.views import LoadingScreen, WindowView, Updateable
 from user_interface.menu import Menu, UiElementsBundle, UiBundlesHandler
 
@@ -69,6 +70,7 @@ class Window(arcade.Window, EventsCreator):
         self.center_window()
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
+        self.save_manger = SaveManager()
 
         self._updated: List[Updateable] = []
 
@@ -117,15 +119,19 @@ class Window(arcade.Window, EventsCreator):
             index=0,
             name='Main menu',
             elements=[
-                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 200,
+                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 100,
                        function_on_left_click=self.close),
-                Button(get_path_to_file('menu_button_options.png'), SCREEN_X, 400,
+                Button(get_path_to_file('menu_button_options.png'),
+                       SCREEN_X, 200,
                        function_on_left_click=partial(
                            self.menu_view.switch_submenu_of_index, 1)),
-                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 600,
+                Button(get_path_to_file('menu_button_loadgame.png'), SCREEN_X, 300,
+                       function_on_left_click=partial(
+                           self.menu_view.switch_to_submenu_of_name, 'saving menu')),
+                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 400,
                        function_on_left_click=self.start_new_game),
-                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 800,
-                       name='resume button', active=False, visible=False,
+                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 500,
+                       name='resume button', active=False,
                        function_on_left_click=partial(self.show_view, self.game_view)),
             ],
             register_to=self.menu_view

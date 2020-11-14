@@ -17,7 +17,7 @@ from gameobjects.gameobject import GameObject
 from utils.improved_spritelists import DividedSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
-from units.unit_management import SelectedEntityMarker
+from units.unit_management import SelectionUnitMarket
 from units.units import Unit, UnitTask
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, UiSpriteList
@@ -79,11 +79,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # that this unit is currently selected and will react for players's
         # actions. Sprites are actually drawn and updated in Game class,
         # but here we keep them cashed to easily manipulate them:
-        self.selection_markers: Set[SelectedEntityMarker] = set()
+        self.selection_markers: Set[SelectionUnitMarket] = set()
 
         self.attached_task: Optional[UnitTask] = None
 
-        self.menu = self.window.menu_view
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
 
@@ -213,12 +212,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.select_units(clicked_unit)
 
     def select_units(self, *units: Unit):
-        self.selected_units = list(units)
+        self.selected_units = HashedList(units)
         self.create_selection_markers(units)
 
     def create_selection_markers(self, units):
         for unit in units:
-            marker = SelectedEntityMarker(selected=unit)
+            marker = SelectionUnitMarket(selected=unit)
             self.selection_markers.add(marker)
 
     def remove_from_selection_markers(self, entity: PlayerEntity):
@@ -231,7 +230,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.clear_selection_markers()
 
     def clear_selection_markers(self,
-                                killed: Set[SelectedEntityMarker] = None):
+                                killed: Set[SelectionUnitMarket] = None):
         killed = killed if killed is not None else self.selection_markers
         for marker in killed:
             marker.kill()
@@ -341,18 +340,17 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def update_cursor_texture(self):
         if self.is_game_loaded_and_running:
             if self.selected_units:
-                self.cursor_texture_with_units_selected()
+                return self.cursor_texture_with_units_selected()
             elif entity := (self.pointed_unit or self.pointed_building):
-                self.cursor_texture_on_pointing_at_entity(entity)
-            else:
-                self.set_texture(CURSOR_NORMAL_TEXTURE)
+                return self.cursor_texture_on_pointing_at_entity(entity)
+        self.set_texture(CURSOR_NORMAL_TEXTURE)
 
     def cursor_texture_with_units_selected(self):
         if entity := (self.pointed_unit or self.pointed_building):
             if entity.selectable:
-                self.show_selecting_texture()
+                self.set_texture(CURSOR_SELECTION_TEXTURE)
             elif entity.is_enemy(self.selected_units[0]):
-                self.show_attack_texture()
+                self.set_texture(CURSOR_ATTACK_TEXTURE)
         elif not self.game.map.position_to_node(*self.position).walkable:
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
         else:
@@ -360,15 +358,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
         if entity.selectable:
-            self.show_selecting_texture()
+            self.set_texture(CURSOR_SELECTION_TEXTURE)
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
-
-    def show_attack_texture(self):
-        self.set_texture(CURSOR_ATTACK_TEXTURE)
-
-    def show_selecting_texture(self):
-        self.set_texture(CURSOR_SELECTION_TEXTURE)
 
     def set_texture(self, index: int):
         # we override the original method to work with AnimationKeyframe

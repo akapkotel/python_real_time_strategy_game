@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import logging
 import PIL
 from functools import lru_cache
@@ -107,8 +108,7 @@ def get_path_to_file(filename: str) -> str:
     """
     Build full absolute path to the filename and return it + /filename.
     """
-    import os
-    for directory in os.walk(os.getcwd() + '/resources'):
+    for directory in os.walk(os.getcwd()):
         if filename in directory[2]:
             return f'{directory[0]}/{filename}'
 

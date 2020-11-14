@@ -387,4 +387,5 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from units.units import Unit
     from buildings.buildings import Building
-    from controllers.mouse_handling import SelectedEntityMarker
+    from units.unit_management import SelectedEntityMarker
+

@@ -100,7 +100,8 @@ class UiBundlesHandler(ObjectsOwner):
                 return self._switch_to_submenu(submenu)
 
     def switch_to_submenu_of_name(self, name: str):
-        self._switch_to_submenu(self.ui_elements_bundles[name])
+        if name in self.ui_elements_bundles:
+            self._switch_to_submenu(self.ui_elements_bundles[name])
 
     def _switch_to_submenu(self, submenu: UiElementsBundle):
         log(f'Switched to submenu {submenu.name} of index: {submenu.index}')

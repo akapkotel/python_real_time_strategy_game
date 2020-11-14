@@ -188,9 +188,17 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
         self.bundle = None
         self.ui_spritelist = None
 
+    def _func_on_mouse_enter(self, cursor):
+        if self._active:
+            self.set_texture(1)
+
+    def _func_on_mouse_exit(self):
+        if self._active:
+            self.set_texture(0)
+
     def draw(self):
         super().draw()
-        if self.pointed:
+        if self.pointed and self._active:
             self.draw_highlight_around_element()
 
     def draw_highlight_around_element(self):
@@ -298,6 +306,12 @@ class Checkbox(UiElement):
             text_color
         )
         self.add_child(self.text_label)
+
+    def _func_on_mouse_enter(self, cursor):
+        pass
+
+    def _func_on_mouse_exit(self):
+        pass
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)

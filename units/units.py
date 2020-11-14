@@ -50,6 +50,8 @@ class Unit(PlayerEntity, TasksExecutor):
         self.speed = 4
         self.current_speed = 0
 
+        self.permanent_units_group: int = 0
+
     @property
     def current_task(self) -> Optional[UnitTask]:
         try:
@@ -250,6 +252,11 @@ class Unit(PlayerEntity, TasksExecutor):
             u.is_enemy(self)
         }
 
+    def set_permanent_units_group(self, index: int = 0):
+        if group := self.permanent_units_group:
+            self.game.permanent_units_groups[group].discard(self)
+        self.permanent_units_group = index
+
 
 class Vehicle(Unit):
 
@@ -295,3 +302,7 @@ class Soldier(AnimatedTimeBasedSprite):
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
         return health_gained
+
+
+if __name__:
+    from units.unit_management import PermanentUnitsGroup
