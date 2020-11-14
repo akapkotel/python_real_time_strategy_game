@@ -27,14 +27,14 @@ from utils.data_types import Viewport
 from utils.observers import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from user_interface.user_interface import (
-    UiSpriteList, Button, Checkbox, Frame
+    UiBundlesHandler, UiElementsBundle, UiSpriteList, Button, Checkbox, Frame
 )
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
 from persistency.save_handling import SaveManager
 from utils.views import LoadingScreen, WindowView, Updateable
-from user_interface.menu import Menu, UiElementsBundle, UiBundlesHandler
+from user_interface.menu import Menu
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -110,36 +110,39 @@ class Window(arcade.Window, EventsCreator):
             pass  # MouseCursor is not initialised yet
 
     def create_submenus(self):
+        switch_menu = self.menu_view.switch_to_submenu_of_name
         back_to_menu_button = Button(
-            get_path_to_file('menu_button_back.png'), SCREEN_X, 400,
-            function_on_left_click=partial(self.menu_view.switch_submenu_of_index, 0)
+            get_path_to_file('menu_button_back.png'), SCREEN_X, 100,
+            function_on_left_click=partial(switch_menu, 'main menu')
         )
 
         main_menu = UiElementsBundle(
             index=0,
-            name='Main menu',
+            name='main menu',
             elements=[
-                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 100,
+                Button(get_path_to_file('menu_button_exit.png'), SCREEN_X, 100,
                        function_on_left_click=self.close),
-                Button(get_path_to_file('menu_button_options.png'),
-                       SCREEN_X, 200,
-                       function_on_left_click=partial(
-                           self.menu_view.switch_submenu_of_index, 1)),
-                Button(get_path_to_file('menu_button_loadgame.png'), SCREEN_X, 300,
-                       function_on_left_click=partial(
-                           self.menu_view.switch_to_submenu_of_name, 'saving menu')),
-                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 400,
-                       function_on_left_click=self.start_new_game),
-                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 500,
+                Button(get_path_to_file('menu_button_credits.png'), SCREEN_X, 200,
+                       function_on_left_click=partial(switch_menu, 'credits')),
+                Button(get_path_to_file('menu_button_options.png'), SCREEN_X, 300,
+                       function_on_left_click=partial(switch_menu, 'options')),
+                Button(get_path_to_file('menu_button_loadgame.png'), SCREEN_X, 400,
+                       function_on_left_click=partial(switch_menu, 'saving menu')),
+                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 500,
+                       function_on_left_click=partial(switch_menu, 'new game menu')),
+                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 600,
                        name='resume button', active=False,
-                       function_on_left_click=partial(self.show_view, self.game_view)),
+                       function_on_left_click=self.start_new_game),
+                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 700,
+                       name='quit game button', active=False,
+                       function_on_left_click=self.quit_current_game),
             ],
             register_to=self.menu_view
         )
 
         options_menu = UiElementsBundle(
             index=1,
-            name='Second menu',
+            name='options',
             elements=[
                 back_to_menu_button,
                 # UiTextLabel(SCREEN_X - 100, 600, 'Draw debug:', 20),
@@ -151,14 +154,81 @@ class Window(arcade.Window, EventsCreator):
             register_to=self.menu_view
         )
 
+        saving_menu = UiElementsBundle(
+            index=2,
+            name='saving menu',
+            elements=[
+                back_to_menu_button,
+            ],
+            register_to=self.menu_view
+        )
+
+        x, y = SCREEN_WIDTH // 6, SCREEN_Y
+        new_game_menu = UiElementsBundle(
+            index=3,
+            name='new game menu',
+            elements=[
+                back_to_menu_button,
+                Button(get_path_to_file('menu_button_skirmish.png'), x, y,
+                       function_on_left_click=partial(switch_menu, 'skirmish menu')),
+                Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
+                       function_on_left_click=partial(switch_menu, 'campaign menu')),
+                Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x, y,
+                       function_on_left_click=partial(switch_menu, 'multiplayer')),
+            ],
+            register_to=self.menu_view
+        )
+
+        credits = UiElementsBundle(
+            index=4,
+            name='credits',
+            elements=[
+                back_to_menu_button,
+            ],
+            register_to=self.menu_view
+        )
+
+        skirmish_menu = UiElementsBundle(
+            index=5,
+            name='skirmish menu',
+            elements=[
+                back_to_menu_button,
+                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 200,
+                       function_on_left_click=self.start_new_game)
+            ],
+            register_to=self.menu_view
+        )
+
+        campaign_menu = UiElementsBundle(
+            index=6,
+            name='campaign menu',
+            elements=[
+                back_to_menu_button,
+            ],
+            register_to=self.menu_view
+        )
+
+        multiplayer_menu = UiElementsBundle(
+            index=7,
+            name='multiplayer menu',
+            elements=[
+                back_to_menu_button,
+            ],
+            register_to=self.menu_view
+        )
+
     @property
     def is_game_running(self) -> bool:
         return self.game_view is not None and self.current_view == self.game_view
 
     def start_new_game(self):
-        print(self.debug)
-        self.game_view = Game(self.debug)
+        if self.game_view is None:
+            self.game_view = Game(self.debug)
         self.show_view(self.game_view)
+
+    def quit_current_game(self):
+        self.game_view = None
+        self.menu_view.toggle_game_related_buttons()
 
     def on_update(self, delta_time: float):
         self.current_view.on_update(delta_time)
