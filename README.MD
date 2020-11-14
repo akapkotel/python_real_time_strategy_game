@@ -15,7 +15,7 @@ disadvantages of Arcade library are available here:
 
 For now, you have to clone or download this repository, create new
 virtual environment, install requirements and run it by running
-_pytanks.py_ script in your IDE (e.g. PyCharm) or in terminal.
+_game.py_ script in your IDE (e.g. PyCharm) or in terminal.
 
 #### PLAYING:
 To be done.
