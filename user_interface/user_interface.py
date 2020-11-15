@@ -4,6 +4,7 @@ from __future__ import annotations
 import PIL
 
 from dataclasses import dataclass
+from functools import partial
 from typing import Dict, List, Optional, Callable, Set, Tuple, Union
 
 from arcade import (
@@ -374,12 +375,12 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
-        if (sound := self.sound_on_mouse_click) is not None:
+        if (sound := self.sound_on_mouse_click) is not None and self._active:
             self.cursor.window.sound_player.play_sound(sound)
 
     def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
         super().on_mouse_enter(cursor)
-        if (sound := self.sound_on_mouse_enter) is not None:
+        if (sound := self.sound_on_mouse_enter) is not None and self._active:
             cursor.window.sound_player.play_sound(sound)
 
     def _func_on_mouse_enter(self, cursor):
@@ -423,15 +424,48 @@ class Frame(UiElement):
 
 
 class TabsGroup(UiElement):
-    ...
+    """
+    TabsGroup is a container for Tabs. It keeps track of the currently
+    displayed tabs,while each Tab is responsible for it's children UiElements.
+    TabsGroup switches visible Tabs when player clicks on any of them, making
+    the clicked Tab visible and hiding rest of them.
+    """
+
+    def __init__(self, texture_name: str, name: str, x: int, y: int,
+                 width: int, height: int, color: Color = None,
+                 active: bool = True, visible: bool = True,
+                 parent: Optional[Hierarchical] = None):
+        super().__init__(texture_name or '', x, y, name, active, visible, parent)
+        if not texture_name:
+            self.texture = make_texture(width, height, color)
+
+    def switch_visible_tabs(self, visible_tab: Tab):
+        for tab in (t for t in self._children if t is not visible_tab):
+            tab.hide()
 
 
 class Tab(UiElement):
-    ...
+
+    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
+                 visible: bool = True, parent: TabsGroup = None):
+        super().__init__(texture_name, x, y, None, active, visible)
+        self.function_on_left_click = partial(self._parent.switch_visible_tabs,
+                                             self)
+
+    def hide(self):
+        for child in self.children:
+            child.deactivate()
+            child.hide()
+
+    def show(self):
+        for child in self.children:
+            child.activate()
+            child.show()
 
 
 class Button(UiElement):
     sound_on_mouse_enter = 'cursor_over_ui_element.wav'
+    sound_on_mouse_click = 'click_on_ui_element.wav'
 
     def __init__(self, texture_name: str,
                  x: int,
@@ -497,8 +531,8 @@ class Checkbox(UiElement):
         self.ticked = ticked
         self.variable = variable
         self.textures = [
-            load_texture(texture_name, 0, 0, 40, 40),
-            load_texture(texture_name, 40, 0, 40, 40)
+            load_texture(texture_name, 0, 0, 30, 30),
+            load_texture(texture_name, 30, 0, 30, 30)
         ]
         self.set_texture(int(self.ticked))
         self.text_label = UiTextLabel(
@@ -515,12 +549,13 @@ class Checkbox(UiElement):
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
-        self.toggle_variable()
+        self.ticked = not self.ticked
+        self.set_texture(int(self.ticked))
+        if self.variable is not None:
+            self.toggle_variable()
 
     def toggle_variable(self):
-        self.ticked = not self.ticked
         setattr(self.variable[0], self.variable[1], self.ticked)
-        self.set_texture(int(self.ticked))
 
     def draw(self):
         self.text_label.draw()

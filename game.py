@@ -134,8 +134,8 @@ class Window(arcade.Window, EventsCreator):
                        function_on_left_click=partial(switch_menu, 'saving menu')),
                 Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 500,
                        function_on_left_click=partial(switch_menu, 'new game menu')),
-                Button(get_path_to_file('menu_button_resume.png'), SCREEN_X, 600,
-                       name='resume button', active=False,
+                Button(get_path_to_file('menu_button_continue.png'), SCREEN_X, 600,
+                       name='continue button', active=False,
                        function_on_left_click=self.start_new_game),
                 Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 700,
                        name='quit game button', active=False,
@@ -151,9 +151,19 @@ class Window(arcade.Window, EventsCreator):
                 back_to_menu_button,
                 # UiTextLabel(SCREEN_X - 100, 600, 'Draw debug:', 20),
                 Checkbox(
-                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 600,
+                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 200,
                     'Draw debug:', 20, ticked=self.debug, variable=(self, 'debug')
-                )
+                ),
+                Checkbox(
+                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 300,
+                    'Play sounds:', 20, ticked=self.sound_player.sound_on,
+                    variable=(self.sound_player, 'sound_on'),
+                ),
+                Checkbox(
+                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 400,
+                    'Full screen:', 20, ticked=self.fullscreen,
+                    function_on_left_click=self.toggle_fullscreen,
+                ),
             ],
             register_to=self.menu_view
         )
@@ -197,7 +207,7 @@ class Window(arcade.Window, EventsCreator):
             name='skirmish menu',
             elements=[
                 back_to_menu_button,
-                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 200,
+                Button(get_path_to_file('menu_button_play.png'), SCREEN_X, 200,
                        function_on_left_click=self.start_new_game)
             ],
             register_to=self.menu_view
@@ -220,6 +230,9 @@ class Window(arcade.Window, EventsCreator):
             ],
             register_to=self.menu_view
         )
+
+    def toggle_fullscreen(self):
+        self.set_fullscreen(not self.fullscreen)
 
     @property
     def is_game_running(self) -> bool:
@@ -441,6 +454,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
+        self.window.sound_player.play_music('background_theme.wav')
 
     def test_methods(self):
         self.test_scheduling_events()
