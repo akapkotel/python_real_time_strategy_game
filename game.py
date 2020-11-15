@@ -35,6 +35,7 @@ from utils.functions import (
 from persistency.save_handling import SaveManager
 from utils.views import LoadingScreen, WindowView, Updateable
 from user_interface.menu import Menu
+from audio.sound import SoundPlayer
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -70,7 +71,10 @@ class Window(arcade.Window, EventsCreator):
         self.center_window()
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
-        self.save_manger = SaveManager()
+
+        self.sound_player = SoundPlayer(sounds_directory='resources/sounds')
+
+        self.save_manger = SaveManager(saves_directory='saved_games')
 
         self._updated: List[Updateable] = []
 
@@ -110,7 +114,7 @@ class Window(arcade.Window, EventsCreator):
             pass  # MouseCursor is not initialised yet
 
     def create_submenus(self):
-        switch_menu = self.menu_view.switch_to_submenu_of_name
+        switch_menu = self.menu_view.switch_to_bundle_of_name
         back_to_menu_button = Button(
             get_path_to_file('menu_button_back.png'), SCREEN_X, 100,
             function_on_left_click=partial(switch_menu, 'main menu')
@@ -649,24 +653,6 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         return grid
 
 
-def start_profiling_code_execution():
-    try:
-        from pyprofiler import start_profile, end_profile
-        profiler = start_profile()
-        return end_profile, profiler
-    except Exception as e:
-        log(str(e), console=True)
-        return None, None
-
-
-def end_profiling_code_execution(profiler):
-    try:
-        # noinspection PyUnboundLocalVariable
-        end_profile(profiler, 30, True)
-    except NameError:
-        pass
-
-
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from scenarios.map import Map, Pathfinder
@@ -681,10 +667,12 @@ if __name__ == '__main__':
     from buildings.buildings import Building
     from scenarios.missions import Mission
 
-    if PYPROFILER:
-        end_profile, profiler = start_profiling_code_execution()
-    window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
-    arcade.run()
-
-    if PYPROFILER and profiler is not None:
-        end_profiling_code_execution(profiler)
+    if __status__ == 'development' and PYPROFILER:
+        from pyprofiler import start_profile, end_profile
+        with start_profile() as profiler:
+            window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+            arcade.run()
+        end_profile(profiler, 30, True)
+    else:
+        window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+        arcade.run()

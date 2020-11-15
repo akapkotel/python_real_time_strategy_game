@@ -15,8 +15,9 @@ class Menu(WindowView, UiBundlesHandler):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
-        self.switch_submenu_of_index(0)
+        self.switch_to_bundle_of_index(0)
         self.toggle_game_related_buttons()
+        self.window.sound_player.play_sound('menu_theme.wav', loop=True)
 
     def toggle_game_related_buttons(self):
         bundle = self.ui_elements_bundles['main menu']

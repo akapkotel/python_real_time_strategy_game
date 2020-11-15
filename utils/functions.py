@@ -6,7 +6,7 @@ import PIL
 from functools import lru_cache
 from math import atan2, cos, degrees, hypot, inf as INFINITY, radians, sin
 from time import perf_counter
-from typing import Any, Iterable, List, Sequence, Tuple
+from typing import Any, Iterable, List, Sequence, Tuple, Dict
 
 from arcade import Texture
 from arcade.arcade_types import RGB, RGBA, Color
@@ -127,6 +127,15 @@ def remove_path_from_name(filename):
 
 def object_name_to_filename(object_name: str) -> str:
     return '.'.join((object_name, '.png'))
+
+
+def find_paths_to_all_files_of_type(extension: str,
+                                    base_directory: str) -> Dict[str, str]:
+    names_to_paths = {}
+    for directory in os.walk(os.path.abspath(base_directory)):
+        for file_name in (f for f in directory[2] if f.endswith(extension)):
+            names_to_paths[file_name] = directory[0]
+    return names_to_paths
 
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
@@ -253,7 +262,6 @@ def make_texture(width: int, height: int, color: Color) -> Texture:
 
     :returns: New :class:`Texture` object.
     """
-    bg_color = color # fully transparent
-    img = PIL.Image.new("RGBA", (width, height), bg_color)
-    name = "{}:{}:{}:{}".format("rect", width, height, color)
+    img = PIL.Image.new("RGBA", (width, height), color)
+    name = "{}:{}:{}:{}".format("texture_rect", width, height, color)
     return Texture(name, img)

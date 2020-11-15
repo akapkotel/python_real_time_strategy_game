@@ -73,8 +73,3 @@ class QuadTree:
         self.min_y = min_y
         self.max_x = max_x
         self.max_y = max_y
-
-
-
-
-
