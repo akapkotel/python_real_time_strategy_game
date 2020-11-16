@@ -1,63 +1,413 @@
-WARNING: 11/16/2020 11:54:26 PM Loaded 5 sounds.
-INFO: 11/16/2020 11:54:26 PM Found 1 saved games in /home/akapkotel/Programowanie/Python/PyCharm projects/real_time_strategy_game/saved_games.
-INFO: 11/16/2020 11:54:26 PM Switched to WindowView: LoadingScreen
-INFO: 11/16/2020 11:54:26 PM Switched to WindowView: Menu
-INFO: 11/16/2020 11:54:26 PM MouseCursor state = True
-INFO: 11/16/2020 11:54:26 PM KeyboardHandler state = True
-INFO: 11/16/2020 11:54:26 PM Switched to submenu main menu of index: 0
-INFO: 11/16/2020 11:54:27 PM Mouse over Button id: 140347889572064
-INFO: 11/16/2020 11:54:27 PM Mouse left Button id: 140347889572064
-INFO: 11/16/2020 11:54:27 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:27 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:27 PM Mouse over Button id: 140347889408320
-INFO: 11/16/2020 11:54:28 PM Mouse left Button id: 140347889408320
-INFO: 11/16/2020 11:54:28 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:28 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:29 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:30 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:30 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:31 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:31 PM Mouse over Button id: 140347889572064
-INFO: 11/16/2020 11:54:32 PM Mouse left Button id: 140347889572064
-INFO: 11/16/2020 11:54:32 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:32 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:32 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889408320
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889408320
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:33 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:33 PM Mouse over Button id: 140347889572064
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889572064
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889408320
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889408320
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:34 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:34 PM Mouse over Button id: 140347889572064
-INFO: 11/16/2020 11:54:35 PM Mouse left Button id: 140347889572064
-INFO: 11/16/2020 11:54:35 PM Mouse over Button id: 140347889571056
-INFO: 11/16/2020 11:54:35 PM Mouse left Button id: 140347889571056
-INFO: 11/16/2020 11:54:35 PM Mouse over Button id: 140347889409952
-INFO: 11/16/2020 11:54:35 PM Mouse left Button id: 140347889409952
-INFO: 11/16/2020 11:54:35 PM Mouse over Button id: 140347889409376
-INFO: 11/16/2020 11:54:35 PM Mouse left Button id: 140347889409376
-INFO: 11/16/2020 11:54:35 PM Mouse over Button id: 140347889408320
-INFO: 11/16/2020 11:54:35 PM Left-clicked at x:938, y: 155
-INFO: 11/16/2020 11:54:35 PM Mouse button 1 clicked on Button id: 140347889408320
-INFO: 11/16/2020 11:54:35 PM Terminating application...
+WARNING: 11/17/2020 12:25:07 AM Loaded 5 sounds.
+INFO: 11/17/2020 12:25:07 AM Found 1 saved games in /home/akapkotel/Programowanie/Python/PyCharm projects/real_time_strategy_game/saved_games.
+INFO: 11/17/2020 12:25:07 AM Switched to WindowView: LoadingScreen
+INFO: 11/17/2020 12:25:08 AM Switched to WindowView: Menu
+INFO: 11/17/2020 12:25:08 AM MouseCursor state = True
+INFO: 11/17/2020 12:25:08 AM KeyboardHandler state = True
+INFO: 11/17/2020 12:25:08 AM Switched to submenu main menu of index: 0
+INFO: 11/17/2020 12:25:08 AM Mouse over Button id: 140529025651280
+INFO: 11/17/2020 12:25:08 AM Mouse left Button id: 140529025651280
+INFO: 11/17/2020 12:25:08 AM Mouse over Button id: 140529025651280
+INFO: 11/17/2020 12:25:09 AM Mouse left Button id: 140529025651280
+INFO: 11/17/2020 12:25:09 AM Mouse over Button id: 140529025982368
+INFO: 11/17/2020 12:25:09 AM Mouse left Button id: 140529025982368
+INFO: 11/17/2020 12:25:09 AM Mouse over Button id: 140529025981840
+INFO: 11/17/2020 12:25:09 AM Left-clicked at x:971, y: 627
+INFO: 11/17/2020 12:25:09 AM Mouse button 1 clicked on Button id: 140529025981840
+INFO: 11/17/2020 12:25:09 AM Switched to submenu new game menu of index: 3
+INFO: 11/17/2020 12:25:09 AM Mouse left Button id: 140529025981840
+INFO: 11/17/2020 12:25:09 AM Mouse over Button id: 140529025668720
+INFO: 11/17/2020 12:25:09 AM Mouse left Button id: 140529025668720
+INFO: 11/17/2020 12:25:09 AM Mouse over Button id: 140529025671808
+INFO: 11/17/2020 12:25:09 AM Left-clicked at x:403, y: 514
+INFO: 11/17/2020 12:25:09 AM Mouse button 1 clicked on Button id: 140529025671808
+INFO: 11/17/2020 12:25:09 AM Switched to submenu skirmish menu of index: 5
+INFO: 11/17/2020 12:25:09 AM Mouse left Button id: 140529025671808
+INFO: 11/17/2020 12:25:10 AM Mouse over Button id: 140529025724912
+INFO: 11/17/2020 12:25:10 AM Left-clicked at x:903, y: 303
+INFO: 11/17/2020 12:25:10 AM Mouse button 1 clicked on Button id: 140529025724912
+WARNING: 11/17/2020 12:25:10 AM Created 91 sectors.
+WARNING: 11/17/2020 12:25:10 AM Generated 5000 map nodes
+INFO: 11/17/2020 12:25:11 AM Scheduled event: Event scheduled by: Game, function: scheduling_test, args: (), kwargs: {}, frames left: None
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 1 at (30, 30), total objects: 1
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 2 at (30, 270), total objects: 2
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 3 at (30, 510), total objects: 3
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 4 at (30, 750), total objects: 4
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 5 at (30, 990), total objects: 5
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 6 at (270, 30), total objects: 6
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 7 at (270, 270), total objects: 7
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 8 at (270, 510), total objects: 8
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 9 at (270, 750), total objects: 9
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 10 at (270, 990), total objects: 10
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 11 at (510, 30), total objects: 11
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 12 at (510, 270), total objects: 12
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 13 at (510, 510), total objects: 13
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 14 at (510, 750), total objects: 14
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 15 at (510, 990), total objects: 15
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 16 at (750, 30), total objects: 16
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 17 at (750, 270), total objects: 17
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 18 at (750, 510), total objects: 18
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 19 at (750, 750), total objects: 19
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 20 at (750, 990), total objects: 20
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 21 at (990, 30), total objects: 21
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 22 at (990, 270), total objects: 22
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 23 at (990, 510), total objects: 23
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 24 at (990, 750), total objects: 24
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 25 at (990, 990), total objects: 25
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 26 at (1230, 30), total objects: 26
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 27 at (1230, 270), total objects: 27
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 28 at (1230, 510), total objects: 28
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 29 at (1230, 750), total objects: 29
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 30 at (1230, 990), total objects: 30
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 31 at (1470, 30), total objects: 31
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 32 at (1470, 270), total objects: 32
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 33 at (1470, 510), total objects: 33
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 34 at (1470, 750), total objects: 34
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 35 at (1470, 990), total objects: 35
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 36 at (1710, 30), total objects: 36
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 37 at (1710, 270), total objects: 37
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 38 at (1710, 510), total objects: 38
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 39 at (1710, 750), total objects: 39
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: jeep_blue.png id: 40 at (1710, 990), total objects: 40
+WARNING: 11/17/2020 12:25:11 AM Spawned GameObject: building_dummy.png id: 41 at (400, 600), total objects: 41
+INFO: 11/17/2020 12:25:11 AM Switched to WindowView: LoadingScreen
+INFO: 11/17/2020 12:25:11 AM MouseCursor state = False
+INFO: 11/17/2020 12:25:11 AM KeyboardHandler state = False
+INFO: 11/17/2020 12:25:11 AM Switched to WindowView: Game
+INFO: 11/17/2020 12:25:11 AM MouseCursor state = True
+INFO: 11/17/2020 12:25:11 AM KeyboardHandler state = True
+INFO: 11/17/2020 12:25:11 AM Mouse left Button id: 140529025724912
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Mouse over Frame id: 140528996013008
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Mouse left Frame id: 140528996013008
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Mouse over Frame id: 140528996013008
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Mouse left Frame id: 140528996013008
+INFO: 11/17/2020 12:25:12 AM Mouse over Frame id: 140529026204048
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:12 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:12 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 2 of faction: Freemen
+INFO: 11/17/2020 12:25:13 AM Updating faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Updating player: Player 4 of faction: Faction 4
+INFO: 11/17/2020 12:25:13 AM Terminating application...
