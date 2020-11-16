@@ -159,12 +159,15 @@ class Menu(WindowView, UiBundlesHandler):
 
     def toggle_game_related_buttons(self):
         bundle = self.ui_elements_bundles['main menu']
+        buttons = ('continue button', 'quit game button')
         if self.window.game_view is not None:
-            bundle.activate_element('continue button')
-            bundle.activate_element('quit game button')
+            for button in buttons:
+                bundle.show_element(button)
+                bundle.activate_element(button)
         else:
-            bundle.deactivate_element('continue button')
-            bundle.deactivate_element('quit game button')
+            for button in buttons:
+                bundle.hide_element(button)
+                bundle.deactivate_element(button)
 
 
 if __name__:

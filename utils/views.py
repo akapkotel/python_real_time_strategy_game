@@ -70,7 +70,6 @@ class WindowView(View):
         self.window.set_viewport(*self.viewport)
 
     def on_update(self, delta_time: float):
-        log(f'Time since last update call: {delta_time}')
         for obj in self.updated:
             obj.on_update(delta_time)
 

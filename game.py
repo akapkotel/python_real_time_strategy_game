@@ -12,6 +12,7 @@ __credits__ = []
 
 from typing import (Any, Dict, List, Optional, Set, Union)
 
+import csv
 import arcade
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line,
@@ -32,6 +33,7 @@ from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
 from persistency.save_handling import SaveManager
+from persistency.configs_handling import read_csv_files
 from utils.views import LoadingScreen, WindowView, Updateable
 # from user_interface.menu import Menu
 from audio.sound import SoundPlayer
@@ -54,11 +56,6 @@ UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = False
 DEBUG = True
-
-
-def spawn_test_unit(position, unit_name: str, player: Player) -> Unit:
-    unit_name = get_path_to_file(unit_name)
-    return Unit(unit_name, player, UnitWeight.LIGHT, position)
 
 
 class Window(arcade.Window, EventsCreator):
@@ -173,10 +170,6 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
-            if symbol == arcade.key.ENTER:
-                if self.game_view is not None and self.game_view.is_running:
-                    spawn_test_unit(self.cursor.position, 'jeep_blue.png',
-                                    self.game_view.players[2])
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -274,7 +267,10 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.drawn.insert(-2, self.fog_of_war)
 
         # Settings, game-progress data, etc.
+        self.configs: Dict[Dict[Dict[str, Any]]] = read_csv_files()
         self.player_configs: Dict[str, Any] = self.load_player_configs()
+
+        self.spawner = ObjectsSpawner(configs=self.configs)
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -365,7 +361,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         name = 'jeep_blue.png'
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                spawned_units.append(spawn_test_unit((x, y), name, player=player))
+                unit = self.spawner.spawn(name, Vehicle, player, x, y)
+                spawned_units.append(unit)
         return spawned_units
 
     def spawn_cpu_units(self) -> List[Unit]:
@@ -379,7 +376,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def test_buildings_spawning(self):
         building = Building(
-            get_path_to_file('building_dummy.png'),
+            'building_dummy.png',
             self.players[4],
             (400, 600),
             # produced_units=(Unit, ),
@@ -552,15 +549,16 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from scenarios.map import Map, Pathfinder
     from gameobjects.gameobject import GameObject
+    from scenarios.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )
     from controllers.keyboard_handling import KeyboardHandler
     from controllers.mouse_handling import MouseCursor
-    from units.units import Unit, UnitWeight
+    from units.units import Unit, Vehicle, UnitWeight
+    from gameobjects.spawning import ObjectsSpawner
     from scenarios.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission

@@ -389,8 +389,20 @@ class Pathfinder(Singleton, EventsCreator):
         while len(waypoints) < required_waypoints:
             adjacent = node.walkable_adjacent
             waypoints.update(n.grid for n in node.walkable_adjacent)
-            node = adjacent[0]
+            node = random.choice(adjacent)
         return [w for w in waypoints]
+
+    def get_closest_pathable_position(self, x: int, y: int) -> NormalizedPoint:
+        nearest_walkable = None
+        node = self.map.position_to_node(x, y)
+        while nearest_walkable is None:
+            adjacent = node.adjacent_nodes
+            for node in adjacent:
+                if node.pathable:
+                    return node.position
+                else:
+                    continue
+            node = random.choice(adjacent)
 
     @timer(level=2, global_profiling_level=PROFILING_LEVEL)
     def find_path(self,

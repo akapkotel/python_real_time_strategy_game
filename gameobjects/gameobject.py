@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, List, Optional, Set
+from typing import Optional
 
 from arcade import (
     AnimatedTimeBasedSprite, SpriteList, get_sprites_at_point
@@ -11,19 +11,8 @@ from arcade.arcade_types import Point
 from utils.improved_spritelists import DividedSpriteList
 from utils.enums import Robustness, UnitWeight
 from utils.observers import OwnedObject
-from utils.functions import filter_sequence, get_object_name
+from utils.functions import get_path_to_file, log
 from game import Game
-
-
-def get_gameobjects_at_position(position: Point,
-                                objects_list: List[Any]) -> Set[GameObject]:
-    gameobjects: Set[GameObject] = set()
-    for spritelist in reversed(filter_sequence(objects_list, SpriteList)):
-        gameobjects.update(
-            s for s in get_sprites_at_point(position, spritelist) if
-            isinstance(s, GameObject)
-        )
-    return gameobjects
 
 
 class GameObject(AnimatedTimeBasedSprite, OwnedObject):
@@ -35,16 +24,17 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
     total_objects_count = 0
 
     def __init__(self,
-                 filename: str,
+                 object_name: str,
                  robustness: Robustness = 0,
                  position: Point = (0, 0)):
         x, y = position
+        filename = get_path_to_file(object_name)
         super().__init__(filename, center_x=x, center_y=y)
         OwnedObject.__init__(self, owners=True)
-        self.object_name = get_object_name(filename)
+        self.object_name = object_name
 
         GameObject.total_objects_count += 1
-        self.id = GameObject.total_objects_count
+        self.id = count = GameObject.total_objects_count
 
         self._robustness = robustness  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile
@@ -52,6 +42,8 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self._visible = True
 
         self.divided_spritelist: Optional[DividedSpriteList] = None
+
+        log(f'Spawned {self} at {self.position}, total objects: {count}', True)
 
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'

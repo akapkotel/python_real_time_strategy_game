@@ -187,12 +187,23 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.unselect_units()
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        clicked: Union[Unit, Building]
         if clicked.selectable:
-            if not clicked.is_building:
-                self.on_unit_clicked(clicked)
-            else:
-                self.on_building_clicked(clicked)
+            self.on_friendly_player_entity_clicked(clicked)
+        elif units := self.selected_units:
+            self.on_hostile_player_entity_clicked(clicked, units)
+
+    def on_friendly_player_entity_clicked(self, clicked: PlayerEntity):
+        clicked: Union[Unit, Building]
+        if not clicked.is_building:
+            self.on_unit_clicked(clicked)
+        else:
+            self.on_building_clicked(clicked)
+
+    def on_hostile_player_entity_clicked(self, clicked, units):
+        for unit in self.selected_units:
+            unit.target_enemy(clicked)
+        position = self.game.pathfinder.get_closest_pathable_position(*clicked.position)
+        self.send_units_to_pointed_location(units, *position)
 
     def on_click_with_selected_units(self, x, y, modifiers, units, pointed):
         pointed: Union[PlayerEntity, None]

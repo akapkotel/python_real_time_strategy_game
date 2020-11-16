@@ -226,6 +226,10 @@ class PlayerEntity(GameObject, EventsCreator):
     This is an abstract class for all objects which can be controlled by the
     Player. It contains methods and attributes common for the Unit and Building
     classes, which inherit from PlayerEntity.
+    Many attributes are initialized with null values (0, 0.0, etc.) because
+    they are set just after spawn with data queried from self.game.config
+    dict generated from CSV config file -> see ObjectsSpawner class and it's
+    'spawn' method.
     """
     # game: Optional[Game] = None
 

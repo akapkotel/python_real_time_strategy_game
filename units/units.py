@@ -21,7 +21,9 @@ from utils.functions import (
 
 
 class Unit(PlayerEntity, TasksExecutor):
-    """Unit is a PlayerEntity which can move on map."""
+    """
+    Unit is a PlayerEntity which can move on map.
+    """
 
     def __init__(self,
                  unit_name: str,
@@ -51,6 +53,14 @@ class Unit(PlayerEntity, TasksExecutor):
         self.current_speed = 0
 
         self.permanent_units_group: int = 0
+
+        self.targeted_enemy: Optional[PlayerEntity] = None
+
+        self.weapons: List[Weapon] = []
+
+    @property
+    def moving(self) -> float:
+        return self.change_x or self.change_y
 
     @property
     def current_task(self) -> Optional[UnitTask]:
@@ -257,8 +267,22 @@ class Unit(PlayerEntity, TasksExecutor):
             self.game.permanent_units_groups[group].discard(self)
         self.permanent_units_group = index
 
+    def target_enemy(self, enemy: PlayerEntity):
+        self.targeted_enemy = enemy
+
 
 class Vehicle(Unit):
+
+    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+                 position: Point):
+        super().__init__(unit_name, player, weight, position)
+        self.fuel = 100.0
+        self.fuel_consumption = 0.0
+
+    def on_update(self, delta_time):
+        super().on_update(delta_time)
+        if self.moving:
+            self.fuel -= self.fuel_consumption
 
     @property
     def needs_repair(self) -> bool:
