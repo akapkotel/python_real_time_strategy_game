@@ -90,6 +90,15 @@ class UiElementsBundle(OwnedObject):
         if (element := self._find_by_name(name)) is not None:
             element.deactivate()
 
+    def switch_to_subgroup(self, subgroup: int):
+        for element in self.elements:
+            if element.subgroup == subgroup:
+                element.show()
+                element.activate()
+            else:
+                element.hide()
+                element.deactivate()
+
     def _find_by_name(self, name: str) -> Optional[UiElement]:
         try:
             return next(e for e in self.elements if e.name == name)
@@ -360,7 +369,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
-                 can_be_dragged: bool = False):
+                 can_be_dragged: bool = False, subgroup: Optional[int] = None):
         super().__init__(texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self,
@@ -371,6 +380,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
         OwnedObject.__init__(self, owners=True)
         self.name = name
         self.bundle = None
+        self.subgroup = subgroup
         self.ui_spritelist = None
 
     def on_mouse_press(self, button: int):
@@ -385,7 +395,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
 
     def _func_on_mouse_enter(self, cursor):
         if self._active:
-            self.set_texture(1)
+            self.set_texture(-1)
 
     def _func_on_mouse_exit(self):
         if self._active:
@@ -413,54 +423,16 @@ class Frame(UiElement):
                  color: Optional[Color] = None,
                  active: bool = False,
                  visible: bool = True,
-                 parent: Optional[Hierarchical] = None
+                 parent: Optional[Hierarchical] = None,
+                 subgroup: Optional[int] = None
                  ):
-        super().__init__(texture_name, x, y, name, active, visible, parent)
+        super().__init__(texture_name, x, y, name, active, visible, parent, subgroup)
         if not texture_name:
-            self.texture = make_texture(width, height, color or WHITE)
+            self.textures = [make_texture(width, height, color or WHITE)]
+            self.set_texture(0)
 
     def draw_highlight_around_element(self):
         pass
-
-
-class TabsGroup(UiElement):
-    """
-    TabsGroup is a container for Tabs. It keeps track of the currently
-    displayed tabs,while each Tab is responsible for it's children UiElements.
-    TabsGroup switches visible Tabs when player clicks on any of them, making
-    the clicked Tab visible and hiding rest of them.
-    """
-
-    def __init__(self, texture_name: str, name: str, x: int, y: int,
-                 width: int, height: int, color: Color = None,
-                 active: bool = True, visible: bool = True,
-                 parent: Optional[Hierarchical] = None):
-        super().__init__(texture_name or '', x, y, name, active, visible, parent)
-        if not texture_name:
-            self.texture = make_texture(width, height, color)
-
-    def switch_visible_tabs(self, visible_tab: Tab):
-        for tab in (t for t in self._children if t is not visible_tab):
-            tab.hide()
-
-
-class Tab(UiElement):
-
-    def __init__(self, texture_name: str, x: int, y: int, active: bool = True,
-                 visible: bool = True, parent: TabsGroup = None):
-        super().__init__(texture_name, x, y, None, active, visible)
-        self.function_on_left_click = partial(self._parent.switch_visible_tabs,
-                                             self)
-
-    def hide(self):
-        for child in self.children:
-            child.deactivate()
-            child.hide()
-
-    def show(self):
-        for child in self.children:
-            child.activate()
-            child.show()
 
 
 class Button(UiElement):
@@ -476,9 +448,11 @@ class Button(UiElement):
                  parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
+                 subgroup: Optional[int] = None
                  ):
         super().__init__('', x, y, name, active, visible, parent,
-                         function_on_left_click, function_on_right_click)
+                         function_on_left_click, function_on_right_click,
+                         subgroup=subgroup)
         # we load 2 textures for button: normal and for 'highlighted' button:
         image = PIL.Image.open(texture_name)
         width, height = image.size[0] // 2, image.size[1]
@@ -507,7 +481,8 @@ class Checkbox(UiElement):
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  function_on_right_click: Optional[Callable] = None,
                  function_on_left_click: Optional[Callable] = None,
-                 ticked: bool = False, variable: Tuple[object, str] = None):
+                 ticked: bool = False, variable: Tuple[object, str] = None,
+                 subgroup: Optional[int] = None):
         """
 
         :param texture_name:
@@ -526,8 +501,8 @@ class Checkbox(UiElement):
         attribute, e.g. (self, 'name_of_my_attribute').
         """
         super().__init__(texture_name, x, y, name, active, visible,
-                         parent,
-                         function_on_left_click, function_on_right_click)
+                         parent, function_on_left_click,
+                         function_on_right_click, subgroup=subgroup)
         self.ticked = ticked
         self.variable = variable
         self.textures = [
@@ -567,8 +542,9 @@ class UiTextLabel(UiElement):
     def __init__(self, x: int, y: int, text: str,
                  font_size: int = 10, text_color: Color = WHITE,
                  name: Optional[str] = None, active: bool = False,
-                 visible: bool = True, parent: Optional[Hierarchical] = None):
-        super().__init__('', x, y, name, active, visible, parent)
+                 visible: bool = True, parent: Optional[Hierarchical] = None,
+                 subgroup: Optional[int] = None):
+        super().__init__('', x, y, name, active, visible, parent, subgroup)
         self.text = text
         self.size = font_size
         self.text_color = text_color

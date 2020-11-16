@@ -23,7 +23,11 @@ class SoundPlayer(Singleton):
     themes and short sound effects.
     """
 
-    def __init__(self, sounds_directory: str, sound_on: bool = True):
+    def __init__(self,
+                 sounds_directory: str,
+                 sound_on: bool = True,
+                 music_on: bool = True,
+                 sound_effects_on: bool = True):
         """
         SoundPlayer is a singleton.
 
@@ -40,8 +44,12 @@ class SoundPlayer(Singleton):
         self.current_music: Optional[str] = None
 
         self._sound_on: bool = sound_on
+        self._music_on: bool = music_on
+        self._sound_effects_on: bool = sound_effects_on
 
         self.volume: float = 1.0
+        self.music_volume: float = self.volume
+        self.effects_volume: float = self.volume
 
     @staticmethod
     def _preload_sounds(sounds_directory=None) -> Dict[str, Source]:
@@ -65,6 +73,17 @@ class SoundPlayer(Singleton):
     def sound_on(self, value: bool):
         self.play() if value else self.pause()
 
+    @property
+    def music_on(self) -> bool:
+        return self._music_on
+
+    @music_on.setter
+    def music_on(self, value: bool):
+        self._music_on = value
+        for name, player in self.played.items():
+            if name == self.current_music:
+                player.pause() if not value else player.play()
+
     def play_sound(self, name: str,
                    loop: bool = False,
                    volume: Optional[float] = None):
@@ -85,9 +104,10 @@ class SoundPlayer(Singleton):
         Stop playing current music theme (if any is active) and start playing
         new music in loop.
         """
-        self.stop_sound(self.current_music)
-        self.current_music = name
-        self.play_sound(name, loop=True, volume=volume)
+        if self._music_on:
+            self.stop_sound(self.current_music)
+            self.current_music = name
+            self.play_sound(name, loop=True, volume=volume)
 
     def stop_sound(self, name: str):
         """Stop playing single sound, useful to stop playing music themes."""

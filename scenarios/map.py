@@ -7,12 +7,14 @@ import random
 
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
+
 from math import hypot
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
 from utils.data_types import BuildingId, GridPosition, Number, SectorId, UnitId
+from gameobjects.gameobject import TerrainObject
 from game import Game, PROFILING_LEVEL, TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from utils.scheduling import EventsCreator, ScheduledEvent
 from utils.classes import Singleton
@@ -188,22 +190,6 @@ class Map(GridHandler):
     def get_all_nodes(self) -> List[MapNode]:
         return list(self.nodes.values())
 
-    def group_of_waypoints(self,
-                           x: Number,
-                           y: Number,
-                           required_waypoints: int) -> List[GridPosition]:
-        first_waypoint = self.position_to_grid(x, y)
-        waypoints: Set[GridPosition] = {first_waypoint}
-        # all_adjacent = []
-        node = self.grid_to_node(first_waypoint)
-
-        while len(waypoints) < required_waypoints:
-            adjacent = [n.grid for n in node.walkable_adjacent if n not in waypoints]
-            waypoints.update(adjacent)
-            # all_adjacent.extend(a for a in adjacent if a not in all_adjacent)
-            node = self.grid_to_node(adjacent[-1])
-        return [w for w in waypoints]
-
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes[grid]
 
@@ -257,6 +243,7 @@ class MapNode(GridHandler, ABC):
         self._allowed_for_pathfinding = True
         self._walkable = True
 
+        self._terrain_object_id: Optional[int] = None
         self._unit_id: Optional[UnitId] = None
         self._building_id: Optional[BuildingId] = None
 
@@ -270,6 +257,14 @@ class MapNode(GridHandler, ABC):
 
     def diagonal_to_other(self, other: GridPosition):
         return self.grid[0] != other[0] and self.grid[1] != other[1]
+
+    @property
+    def obstacle_id(self) -> UnitId:
+        return self._terrain_object_id
+
+    @obstacle_id.setter
+    def unit_id(self, value: Optional[int]):
+        self._terrain_object_id = value
 
     @property
     def unit_id(self) -> UnitId:
@@ -295,12 +290,12 @@ class MapNode(GridHandler, ABC):
         Use it to find if node is not blocked at the moment by units or
         buildings.
         """
-        return all((self._walkable, self._unit_id is None, self._building_id is None))
+        return self.pathable and self._unit_id is None
 
     @property
     def pathable(self) -> bool:
         """Call it to find if this node is available for pathfinding at all."""
-        return self._allowed_for_pathfinding and self._building_id is None
+        return self._terrain_object_id is None and self._building_id is None
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:
@@ -384,6 +379,18 @@ class Pathfinder(Singleton, EventsCreator):
         for request in self.requests_for_paths.copy():
             if request[0] == unit:
                 self.requests_for_paths.remove(request)
+
+    def group_of_waypoints(self,
+                    x: int,
+                    y: int,
+                    required_waypoints: int) -> List[GridPosition]:
+        node = self.map.position_to_node(x, y)
+        waypoints = {node.grid}
+        while len(waypoints) < required_waypoints:
+            adjacent = node.walkable_adjacent
+            waypoints.update(n.grid for n in node.walkable_adjacent)
+            node = adjacent[0]
+        return [w for w in waypoints]
 
     @timer(level=2, global_profiling_level=PROFILING_LEVEL)
     def find_path(self,

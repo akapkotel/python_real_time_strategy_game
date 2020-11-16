@@ -12,7 +12,7 @@ from arcade import (
 
 from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
-from game import Game, Menu, UPDATE_RATE
+from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject
 from utils.improved_spritelists import DividedSpriteList
 from players_and_factions.player import PlayerEntity
@@ -43,7 +43,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     """
     window: Optional[Window] = None
     game: Optional[Game] = None
-    menu: Optional[Menu] = None
     instance: Optional['MouseCursor'] = None
 
     def __init__(self, window: Window, texture_name: str):
@@ -203,7 +202,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.send_units_to_pointed_location(units, x, y)
 
     def send_units_to_pointed_location(self, units, x, y):
-        waypoints = self.game.map.group_of_waypoints(x, y, len(units))
+        waypoints = self.game.pathfinder.group_of_waypoints(x, y, len(units))
         for i, unit in enumerate(units):
             unit.move_to(waypoints[i])
 
@@ -388,7 +387,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
         super().draw()
-        if self.is_game_loaded_and_running and self.game.debug:
+        if self.is_game_loaded_and_running and self.game.window.debug:
             self.draw_selected_units_counter()
 
     def draw_selected_units_counter(self):

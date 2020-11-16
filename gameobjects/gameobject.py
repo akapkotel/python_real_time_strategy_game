@@ -12,6 +12,7 @@ from utils.improved_spritelists import DividedSpriteList
 from utils.enums import Robustness, UnitWeight
 from utils.observers import OwnedObject
 from utils.functions import filter_sequence, get_object_name
+from game import Game
 
 
 def get_gameobjects_at_position(position: Point,
@@ -30,6 +31,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
     GameObject represents all in-game objects, like units, buildings,
     terrain props, trees etc.
     """
+    game: Optional[Game] = None
     total_objects_count = 0
 
     def __init__(self,
@@ -87,3 +89,11 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.unregister_from_all_owners()
         self.divided_spritelist.remove(self)
         super().kill()
+
+
+class TerrainObject(GameObject):
+
+    def __init__(self, filename: str):
+        super().__init__(filename)
+        grid = self.game.map.position_to_grid(*self.position)
+        self.game.map.nodes[grid].obstacle_id = self.id

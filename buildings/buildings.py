@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, List, Optional, Set, Tuple, Type
+from typing import Deque, List, Optional, Set, Tuple, Dict, Type
 
 from arcade.arcade_types import Point
 
+from utils.data_types import GridPosition
+from scenarios.research import Technology
 from scenarios.map import MapNode, Sector
 from players_and_factions.player import Player, PlayerEntity
 from utils.functions import is_visible, close_enough
@@ -13,18 +15,21 @@ from utils.functions import is_visible, close_enough
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 
-class IProducer:
+class UnitsProducer:
     """
     An interface for all Buildings which can produce Units in game.
     """
-    produced_objects: Optional[List[Type[PlayerEntity]]] = []
-    production_queue: Optional[Deque[Type[PlayerEntity]]] = deque()
-    production_progress: float = 0.0
-    production_per_frame: float = 0.0
-    is_producing: bool = False
+
+    def __init__(self, produced_units: Tuple[Type[PlayerEntity]]):
+        self.produced_units = produced_units
+        self.production_queue: Deque[Type[PlayerEntity]] = deque()
+        self.production_progress: float = 0.0
+        self.production_per_frame: float = 0.0
+        self.is_producing: bool = False
+        self.deployment_point: GridPosition = (0, 0)
 
     def start_production(self, product: Type[PlayerEntity]):
-        if product.__class__ not in self.produced_objects:
+        if product.__class__ not in self.produced_units:
             return
         self.production_queue.appendleft(product)
         self._start_production(product)
@@ -56,10 +61,58 @@ class IProducer:
     def finish_production(self):
         self._toggle_production()
         self.production_progress = 0.0
-        self.production_queue.pop()
+        spawned_unit = self.production_queue.pop()
 
 
-class Building(PlayerEntity, IProducer):
+class ResourceProducer:
+    def __init__(self,
+                 extracted_resource: str,
+                 require_transport: bool = False,
+                 recipient: Optional[Player] = None):
+        self.resource: str = extracted_resource
+        self.require_transport = require_transport
+        self.yield_per_frame = 0.033
+        self.reserves = 0.0
+        self.stockpile = 0.0
+        self.recipient: Optional[Player] = recipient
+
+    def update_resource_production(self):
+        self.reserves -= self.yield_per_frame
+        self.stockpile += self.yield_per_frame
+        if self.recipient is not None:
+            self.transfer_resource(self.recipient)
+
+    def transfer_resource(self, recipient: Player):
+        self.stockpile -= self.yield_per_frame
+        recipient.increase_resource_stock(self.resource, self.yield_per_frame)
+
+
+class ResearchFacility:
+
+    def __init__(self, owner: Player):
+        self.owner = owner
+        self.funding = 0
+        self.researched_technology: Optional[Technology] = None
+
+    def start_research(self, technology: Technology):
+        if self.owner.knows_all_required(technology.required):
+            self.researched_technology = technology
+
+    def update_research(self):
+        technology = self.researched_technology
+        progress = self.funding / technology.difficulty if self.funding else 0
+        tech_id = technology.id
+        total_progress = self.owner.current_research.get(tech_id, 0) + progress
+        self.owner.current_research[tech_id] = total_progress
+        if total_progress > 100:
+            self.finish_research(technology)
+
+    def finish_research(self, technology: Technology):
+        self.researched_technology = None
+        self.owner.update_known_technologies(technology)
+
+
+class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     game: Optional[Game] = None
 
@@ -67,12 +120,29 @@ class Building(PlayerEntity, IProducer):
                  building_name: str,
                  player: Player,
                  position: Point,
-                 produces: Optional[Tuple[Type[PlayerEntity]]] = None):
-        PlayerEntity.__init__(self, building_name, player, position, 4)
+                 produced_units: Optional[Tuple[Type[PlayerEntity]]] = None,
+                 produced_resource: Optional[str] = None,
+                 research_facility: bool = False):
+        """
 
-        if produces is not None:
-            IProducer.__init__(self)
-            self.produced_objects.extend(produces)
+        :param building_name: str -- texture name
+        :param player: Player -- which player controlls this building
+        :param position: Point -- coordinates of the center (x, y)
+        :param produces:
+        """
+        PlayerEntity.__init__(self, building_name, player, position, 4)
+        self.is_units_producer = produced_units is not None
+        self.is_resource_producer = produced_resource is not None
+        self.is_research_facility = research_facility
+
+        if produced_units is not None:
+            UnitsProducer.__init__(self, produced_units)
+
+        elif produced_resource is not None:
+            ResourceProducer.__init__(self, produced_resource, False, self.player)
+
+        elif research_facility:
+            ResearchFacility.__init__(self, self.player)
 
         # since buildings could be large, they must be visible for anyone
         # who can see their boundaries, not just the center_xy:
@@ -129,8 +199,12 @@ class Building(PlayerEntity, IProducer):
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
-        if hasattr(self, 'update_production'):
+        if self.is_units_producer:
             self.update_production()
+        elif self.is_resource_producer:
+            self.update_resource_production()
+        elif self.is_research_facility:
+            self.update_research()
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]

@@ -54,6 +54,10 @@ To be done.
     way.
 19. Pathfinder can now find paths leading to the encircled areas or with
     entrances blocked by units.
+20. Working sounds: music background tracks, sound-effects,
+    ui-sound-effects.
+21. Display currently selected permanent units group number above each
+   unit belonging to this group.
 
 #### TO BE DONE:
 #### Minor:
@@ -61,18 +65,13 @@ To be done.
    friendly Units which are very close to each other.
 2. Improve collisions-avoidance to get rid off the
    diagonal-movements-collisions.
-3. Display currently selected permanent units group number above each
-   unit belonging to this group.
-4. More efficient visibility-tests to avoid as many tests as possible.
-5. Better collision-avoidance to replace tiles-reserving system -
+3. More efficient visibility-tests to avoid as many tests as possible.
+4. Better collision-avoidance to replace tiles-reserving system -
    flocking maybe? How to make it working with pathfinding?
-6. Minimap and teleporting to the map-locations by clickling on the
+5. Minimap and teleporting to the map-locations by clickling on the
    minimap.
-7. Pathfinder switching to paths searching with 'walkable' instead of
-   'pathable' property in case where path would go through large group
-   of units inside which it is impossible to make way for unit.
-   Alternatively unit could go-around large groups without asking
-   Pathfinder?
+6. Units-radiochatter sounds. Battle sounds.
+7. 
 
 #### Major:
 1. User-interface. (currently being developed)
@@ -83,5 +82,17 @@ To be done.
 6. Multiplayer.
 7. "Playing" section above.
 8. Installer/executable for Windows and Linux.
+
+### Gameplay mechanics:
+1. Many various resources consumed to produce units and maintain
+   infrastructure and extracted in different ways.
+2. Technological advancement system - researching new technologies
+   allows player to build better units and buildings.
+3. Conscription system: to build units, especially infantry, player
+   needs to create recruitments facilities near civilian villages and
+   protect them from enemies.
+4. Supply-transportation and storage system. Units do not have infinite
+   ammunition and fuel and require to be resupplied from base by the
+   supply-transporting vehicles. Protecting supply-lines is required.
 
 Rafał "Akapkotel" Trąbski

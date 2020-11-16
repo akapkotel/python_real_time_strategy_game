@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict, List, Optional, Set, Union
+from collections import defaultdict
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from arcade.arcade_types import Point, Color
 
-from utils.data_types import FactionId, GridPosition
+from utils.data_types import FactionId, TechnologyId, GridPosition
+from scenarios.research import Technology
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, Robustness
 from scenarios.map import MapNode, Sector, TILE_WIDTH
@@ -102,13 +104,12 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
 
 
 class ResourcesManager:
-    oil: float = 0
-    fuel: float = 0
-    food: float = 0
-    energy: float = 0
-    iron: float = 0
-    steel: float = 0
-    conscripts: int = 0
+    resources = 'fuel', 'food', 'energy', 'steel', 'electronics', 'conscripts'
+
+    def __init__(self):
+        for resource in self.resources:
+            setattr(self, resource, 0)
+            setattr(self, f'{resource}_production_efficiency', 1)
 
 
 class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
@@ -129,12 +130,19 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color or self.game.next_free_player_color()
 
+        self.known_technologies: Set[int] = set()
+        self.current_research: Dict[int, float] = defaultdict()
+
+        self.technology_required: Optional[int] = None
+        self.resources_required: Optional[Tuple[str]] = None
+
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
 
         self.known_enemies: Set[PlayerEntity] = set()
         
         self.register_to_objectsowners(self.game, self.faction)
+        print(self.fuel_production_efficiency)
 
     def __repr__(self) -> str:
         return self.name
@@ -169,17 +177,12 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
 
     def update(self):
         log(f'Updating player: {self}')
-        # self.update_known_enemies()
         self.known_enemies.clear()
         self.clear_mutually_detected_enemies()
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
         self.known_enemies.update(enemies)
         self.faction.known_enemies.update(enemies)
-        # self.known_enemies.clear()
-        # for unit in self.units:
-        #     self.known_enemies.update(unit.known_enemies)
-        # self.faction.known_enemies.update(self.known_enemies)
 
     def clear_mutually_detected_enemies(self):
         for entity in self.units.union(self.buildings):
@@ -188,6 +191,20 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     @property
     def defeated(self) -> bool:
         return not self.units and not self.buildings
+
+    def knows_all_required(self, required: Tuple[TechnologyId]):
+        for technology_id in required:
+            if technology_id not in self.known_technologies:
+                return False
+        return True
+
+    def update_known_technologies(self, technology: Technology):
+        self.known_technologies.add(technology.id)
+        technology.gain_technology_effects(researcher=self)
+
+    def increase_resource_stock(self, resource, yield_per_frame):
+        old_value = getattr(self, resource)
+        setattr(self, resource, old_value + yield_per_frame)
 
 
 class CpuPlayer(Player):
@@ -210,7 +227,7 @@ class PlayerEntity(GameObject, EventsCreator):
     Player. It contains methods and attributes common for the Unit and Building
     classes, which inherit from PlayerEntity.
     """
-    game: Optional[Game] = None
+    # game: Optional[Game] = None
 
     production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
     production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
@@ -272,11 +289,11 @@ class PlayerEntity(GameObject, EventsCreator):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        super().on_update(delta_time)
         if self.alive:
             self.update_visibility()
             self.update_nearby_friends()
             self.update_known_enemies_set()
+            super().on_update(delta_time)
         else:
             self.kill()
 

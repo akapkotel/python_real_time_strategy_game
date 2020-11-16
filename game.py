@@ -10,7 +10,6 @@ __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
 __credits__ = []
 
-from functools import partial
 from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
@@ -34,7 +33,7 @@ from utils.functions import (
 )
 from persistency.save_handling import SaveManager
 from utils.views import LoadingScreen, WindowView, Updateable
-from user_interface.menu import Menu
+# from user_interface.menu import Menu
 from audio.sound import SoundPlayer
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -83,7 +82,7 @@ class Window(arcade.Window, EventsCreator):
         # views:
         self.menu_view = Menu()
         self.game_view: Optional[Game] = None
-        self.create_submenus()
+        # self.menu_view.create_submenus()
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
@@ -113,126 +112,9 @@ class Window(arcade.Window, EventsCreator):
         except AttributeError:
             pass  # MouseCursor is not initialised yet
 
-    def create_submenus(self):
-        switch_menu = self.menu_view.switch_to_bundle_of_name
-        back_to_menu_button = Button(
-            get_path_to_file('menu_button_back.png'), SCREEN_X, 100,
-            function_on_left_click=partial(switch_menu, 'main menu')
-        )
-
-        main_menu = UiElementsBundle(
-            index=0,
-            name='main menu',
-            elements=[
-                Button(get_path_to_file('menu_button_exit.png'), SCREEN_X, 100,
-                       function_on_left_click=self.close),
-                Button(get_path_to_file('menu_button_credits.png'), SCREEN_X, 200,
-                       function_on_left_click=partial(switch_menu, 'credits')),
-                Button(get_path_to_file('menu_button_options.png'), SCREEN_X, 300,
-                       function_on_left_click=partial(switch_menu, 'options')),
-                Button(get_path_to_file('menu_button_loadgame.png'), SCREEN_X, 400,
-                       function_on_left_click=partial(switch_menu, 'saving menu')),
-                Button(get_path_to_file('menu_button_newgame.png'), SCREEN_X, 500,
-                       function_on_left_click=partial(switch_menu, 'new game menu')),
-                Button(get_path_to_file('menu_button_continue.png'), SCREEN_X, 600,
-                       name='continue button', active=False,
-                       function_on_left_click=self.start_new_game),
-                Button(get_path_to_file('menu_button_quit.png'), SCREEN_X, 700,
-                       name='quit game button', active=False,
-                       function_on_left_click=self.quit_current_game),
-            ],
-            register_to=self.menu_view
-        )
-
-        options_menu = UiElementsBundle(
-            index=1,
-            name='options',
-            elements=[
-                back_to_menu_button,
-                # UiTextLabel(SCREEN_X - 100, 600, 'Draw debug:', 20),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 200,
-                    'Draw debug:', 20, ticked=self.debug, variable=(self, 'debug')
-                ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 300,
-                    'Play sounds:', 20, ticked=self.sound_player.sound_on,
-                    variable=(self.sound_player, 'sound_on'),
-                ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), SCREEN_X, 400,
-                    'Full screen:', 20, ticked=self.fullscreen,
-                    function_on_left_click=self.toggle_fullscreen,
-                ),
-            ],
-            register_to=self.menu_view
-        )
-
-        saving_menu = UiElementsBundle(
-            index=2,
-            name='saving menu',
-            elements=[
-                back_to_menu_button,
-            ],
-            register_to=self.menu_view
-        )
-
-        x, y = SCREEN_WIDTH // 4, SCREEN_Y
-        new_game_menu = UiElementsBundle(
-            index=3,
-            name='new game menu',
-            elements=[
-                back_to_menu_button,
-                Button(get_path_to_file('menu_button_skirmish.png'), x, y,
-                       function_on_left_click=partial(switch_menu, 'skirmish menu')),
-                Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
-                       function_on_left_click=partial(switch_menu, 'campaign menu')),
-                Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x, y,
-                       function_on_left_click=partial(switch_menu, 'multiplayer menu')),
-            ],
-            register_to=self.menu_view
-        )
-
-        credits = UiElementsBundle(
-            index=4,
-            name='credits',
-            elements=[
-                back_to_menu_button,
-            ],
-            register_to=self.menu_view
-        )
-
-        skirmish_menu = UiElementsBundle(
-            index=5,
-            name='skirmish menu',
-            elements=[
-                back_to_menu_button,
-                Button(get_path_to_file('menu_button_play.png'), SCREEN_X, 200,
-                       function_on_left_click=self.start_new_game)
-            ],
-            register_to=self.menu_view
-        )
-
-        campaign_menu = UiElementsBundle(
-            index=6,
-            name='campaign menu',
-            elements=[
-                back_to_menu_button,
-            ],
-            register_to=self.menu_view
-        )
-
-        multiplayer_menu = UiElementsBundle(
-            index=7,
-            name='multiplayer menu',
-            elements=[
-                back_to_menu_button,
-            ],
-            register_to=self.menu_view
-        )
-
     def toggle_fullscreen(self):
-        self.set_fullscreen(not self.fullscreen)
+        self.set_fullscreen(not self._fullscreen)
+        print(self.fullscreen)
 
     @property
     def is_game_running(self) -> bool:
@@ -240,7 +122,7 @@ class Window(arcade.Window, EventsCreator):
 
     def start_new_game(self):
         if self.game_view is None:
-            self.game_view = Game(self.debug)
+            self.game_view = Game()
         self.show_view(self.game_view)
 
     def quit_current_game(self):
@@ -365,7 +247,7 @@ class Window(arcade.Window, EventsCreator):
 class Game(WindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
-    def __init__(self, debug: bool):
+    def __init__(self):
         WindowView.__init__(self, requires_loading=True)
         EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)
@@ -414,9 +296,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.missions: Dict[int, Mission] = {}
         self.current_mission: Optional[Mission] = None
 
-        self.debug = debug
         self.debugged = []
-        if debug:
+        if self.window.debug:
             self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
@@ -480,20 +361,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
-        # player = self.players[2]
-        # name = 'jeep_blue.png'
-        # for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
-        #     for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        player = self.players[2]
+        name = 'jeep_blue.png'
+        for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
+            for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+                spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        name = "medic_truck_red.png"
-        player = self.players[4]
-        for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
-            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        # name = "medic_truck_red.png"
+        # player = self.players[4]
+        # for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
+        #     for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
         return spawned_units
 
     def test_buildings_spawning(self):
@@ -501,7 +382,9 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             get_path_to_file('building_dummy.png'),
             self.players[4],
             (400, 600),
-            produces=(Unit, )
+            # produced_units=(Unit, ),
+            # produced_resource='fuel',
+            # research_facility=True
         )
         self.buildings.append(building)
 
@@ -589,7 +472,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
-        if self.debug:
+        if self.window.debug:
             self.draw_debugging()
         if self.paused:
             self.draw_paused_dialog()
@@ -670,6 +553,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from scenarios.map import Map, Pathfinder
+    from gameobjects.gameobject import GameObject
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
@@ -680,6 +564,7 @@ if __name__ == '__main__':
     from scenarios.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission
+    from user_interface.menu import Menu
 
     if __status__ == 'development' and PYPROFILER:
         from pyprofiler import start_profile, end_profile
