@@ -3,9 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from arcade import (
-    AnimatedTimeBasedSprite, SpriteList, get_sprites_at_point
-)
+from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
 from utils.improved_spritelists import DividedSpriteList
@@ -29,6 +27,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
                  position: Point = (0, 0)):
         x, y = position
         filename = get_path_to_file(object_name)
+        print(filename)
         super().__init__(filename, center_x=x, center_y=y)
         OwnedObject.__init__(self, owners=True)
         self.object_name = object_name

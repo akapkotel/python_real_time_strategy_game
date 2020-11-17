@@ -12,7 +12,6 @@ __credits__ = []
 
 from typing import (Any, Dict, List, Optional, Set, Union)
 
-import csv
 import arcade
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line,
@@ -27,15 +26,14 @@ from utils.data_types import Viewport
 from utils.observers import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from user_interface.user_interface import (
-    UiBundlesHandler, UiElementsBundle, UiSpriteList, Button, Checkbox, Frame
+    UiBundlesHandler, UiElementsBundle, UiSpriteList, Frame
 )
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
 from persistency.save_handling import SaveManager
-from persistency.configs_handling import read_csv_files
+from persistency.configs_handling import read_csv_files, load_player_configs
 from utils.views import LoadingScreen, WindowView, Updateable
-# from user_interface.menu import Menu
 from audio.sound import SoundPlayer
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -47,7 +45,7 @@ SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
 
 TILE_WIDTH = 60
-TILE_HEIGHT = 60
+TILE_HEIGHT = 40
 SECTOR_SIZE = 8
 
 GAME_SPEED = 1.0
@@ -75,6 +73,10 @@ class Window(arcade.Window, EventsCreator):
         self._updated: List[Updateable] = []
 
         self.debug = DEBUG
+
+        # Settings, game-progress data, etc.
+        self.configs: Dict[Dict[Dict[str, Any]]] = read_csv_files()
+        self.player_configs: Dict[str, Any] = load_player_configs()
 
         # views:
         self.menu_view = Menu()
@@ -266,11 +268,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
 
-        # Settings, game-progress data, etc.
-        self.configs: Dict[Dict[Dict[str, Any]]] = read_csv_files()
-        self.player_configs: Dict[str, Any] = self.load_player_configs()
-
-        self.spawner = ObjectsSpawner(configs=self.configs)
+        # All GameObjects are initialized by the specialised factory:
+        self.spawner = ObjectsFactory(configs=self.window.configs)
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -307,7 +306,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def create_interface(self) -> UiSpriteList:
         ui_center = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_ui_panel = Frame('', *ui_center, *ui_size, None, DARK)
+        right_ui_panel = Frame('', *ui_center, *ui_size, name=None, color=DARK)
         right_panel = UiElementsBundle(
             name='right_panel',
             index=0,
@@ -358,10 +357,10 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
         player = self.players[2]
-        name = 'jeep_blue.png'
+        name = 'tank_heavy_red.png'
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                unit = self.spawner.spawn(name, Vehicle, player, x, y)
+                unit = self.spawner.spawn(name, player, (x, y))
                 spawned_units.append(unit)
         return spawned_units
 
@@ -375,15 +374,14 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         return spawned_units
 
     def test_buildings_spawning(self):
-        building = Building(
+        self.buildings.append(self.spawner.spawn(
             'building_dummy.png',
             self.players[4],
             (400, 600),
-            # produced_units=(Unit, ),
-            # produced_resource='fuel',
-            # research_facility=True
-        )
-        self.buildings.append(building)
+            produced_units=(Unit,),
+            produced_resource='fuel',
+            research_facility=True
+        ))
 
     def load_player_configs(self) -> Dict[str, Any]:
         configs: Dict[str, Any] = {}
@@ -493,9 +491,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
         for adj in node.adjacent_nodes + [node]:
             color = to_rgba(WHITE, 25) if adj.walkable else to_rgba(RED, 25)
-            draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH,
-                                         TILE_HEIGHT, color)
-            draw_circle_outline(*adj.position, 5, WHITE, 1)
+            draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH, TILE_HEIGHT, color)
+            draw_circle_outline(*adj.position, 5, color=WHITE, border_width=1)
 
     def draw_debugged(self):
         self.draw_debug_paths()
@@ -506,19 +503,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             for i, point in enumerate(path):
                 try:
                     end = path[i + 1]
-                    draw_line(*point, *end, GREEN, 1)
+                    draw_line(*point, *end, color=GREEN, line_width=1)
                 except IndexError:
                     pass
 
     def draw_debug_lines_of_sight(self):
         for unit in (u for u in self.local_human_player.units if u.known_enemies):
             for enemy in unit.known_enemies:
-                draw_line(*unit.position, *enemy.position, RED)
+                draw_line(*unit.position, *enemy.position, color=RED)
 
     def draw_paused_dialog(self):
         x, y = self.window.screen_center
         draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))
-        draw_text('GAME PAUSED', x, y, WHITE, 30, anchor_x='center', anchor_y='center')
+        text = 'GAME PAUSED'
+        draw_text(text, x, y, WHITE, 30, anchor_x='center', anchor_y='center')
 
     def toggle_pause(self):
         self.paused = paused = not self.paused
@@ -526,14 +524,16 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()
+        h_offset = TILE_HEIGHT // 2
+        w_offset = TILE_WIDTH // 2
         # horizontal lines:
         for i in range(self.map.rows):
             y = i * TILE_HEIGHT
             h_line = create_line(0, y, self.map.width, y, BLACK)
             grid.append(h_line)
 
-            y = i * TILE_HEIGHT + TILE_HEIGHT // 2
-            h2_line = create_line(TILE_WIDTH // 2, y, self.map.width, y, WHITE)
+            y = i * TILE_HEIGHT + h_offset
+            h2_line = create_line(w_offset, y, self.map.width, y, WHITE)
             grid.append(h2_line)
         # vertical lines:
         for j in range(self.map.columns * 2):
@@ -541,24 +541,23 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             v_line = create_line(x, 0, x, self.map.height, BLACK)
             grid.append(v_line)
 
-            x = j * TILE_WIDTH + TILE_WIDTH // 2
-            v2_line = create_line(x, TILE_HEIGHT // 2, x, self.map.height, WHITE)
+            x = j * TILE_WIDTH + w_offset
+            v2_line = create_line(x, h_offset, x, self.map.height, WHITE)
             grid.append(v2_line)
         return grid
 
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from gameobjects.gameobject import GameObject
     from scenarios.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )
-    from controllers.keyboard_handling import KeyboardHandler
-    from controllers.mouse_handling import MouseCursor
-    from units.units import Unit, Vehicle, UnitWeight
-    from gameobjects.spawning import ObjectsSpawner
+    from controllers.keyboard import KeyboardHandler
+    from controllers.mouse import MouseCursor
+    from units.units import Unit, Vehicle
+    from gameobjects.spawning import ObjectsFactory
     from scenarios.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission

@@ -34,8 +34,8 @@ class MoveTask(UnitTask):
     target: GridPosition
 
     def done(self, position: GridPosition):
-        print(position)
-        return position == self.target
+        x, y = position
+        return (int(x), int(y)) == self.target
 
 
 class TasksExecutor:
@@ -53,6 +53,7 @@ class TasksExecutor:
                 continue
             if (keys := task.evaluation_args) is not None:
                 args = tuple(getattr(self, key) for key in keys)
+                print(args)
                 if task.done(*args):
                     self.tasks.remove(task)
             elif task.done():

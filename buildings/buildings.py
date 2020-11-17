@@ -159,7 +159,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         """
         self.position = self.game.map.normalize_position(*self.position)
         offset_x = 0 if (self.width // TILE_WIDTH) % 3 == 0 else TILE_WIDTH // 2
-        offset_y = 0 if (self.height // TILE_WIDTH) % 3 == 0 else TILE_HEIGHT // 2
+        offset_y = 0 if (self.height // TILE_HEIGHT) % 3 == 0 else TILE_HEIGHT // 2
         return self.center_x + offset_x, self.center_y + offset_y
 
     def block_map_nodes(self) -> List[MapNode]:

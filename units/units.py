@@ -6,17 +6,19 @@ from abc import ABC, abstractmethod
 from collections import deque
 from typing import Deque, List, Set, Optional, Union, cast
 
-from arcade import AnimatedTimeBasedSprite
+from arcade import AnimatedTimeBasedSprite, load_textures
 from arcade.arcade_types import Point
 
+from .weapons import Weapon
 from buildings.buildings import Building
 from utils.enums import UnitWeight
 from game import UPDATE_RATE
 from scenarios.map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
 from players_and_factions.player import Player, PlayerEntity
-from units.units_tasking import TasksExecutor, UnitTask
+from units.units_tasking import TasksExecutor, UnitTask, MoveTask
 from utils.functions import (
-    calculate_angle, distance_2d, log, vector_2d
+    calculate_angle, distance_2d, log, vector_2d, get_path_to_file,
+    precalculate_8_angles
 )
 
 
@@ -24,6 +26,7 @@ class Unit(PlayerEntity, TasksExecutor):
     """
     Unit is a PlayerEntity which can move on map.
     """
+    angles = precalculate_8_angles()
 
     def __init__(self,
                  unit_name: str,
@@ -34,22 +37,25 @@ class Unit(PlayerEntity, TasksExecutor):
         PlayerEntity.__init__(self, unit_name, player, position)
         TasksExecutor.__init__(self, tasks_on_start)
 
+        self._load_textures_and_reset_hitbox(unit_name)
+
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
 
-        # pathfinding-related:
-        self.angle = random.random() * 360
+        # pathfinding and map-related:
+        # we replace angle with custom parameter used for determining which
+        # texture should be displayed, withour rotating actual sprite:
+        self.angle_to_texture(random.random() * 360)
         self.position = self.map.normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)
+        self.block_map_node(node)
         self.current_sector: Optional[Sector] = None
         self.update_current_sector()
-
-        self.block_map_node(node)
-
         self.path: Deque[GridPosition] = deque()
         self.waiting_for_path: List[int, MapPath] = [0, []]
-        self.speed = 4
+
+        self.max_speed = 0
         self.current_speed = 0
 
         self.permanent_units_group: int = 0
@@ -57,6 +63,31 @@ class Unit(PlayerEntity, TasksExecutor):
         self.targeted_enemy: Optional[PlayerEntity] = None
 
         self.weapons: List[Weapon] = []
+
+    def _load_textures_and_reset_hitbox(self, unit_name: str):
+        """
+        Since we use 8-texture spritesheet for Unit to work properly with
+        all possible facing-angles on the map, we load them and then we
+        reset Unit hitbox data to represent single texture of map tile size,
+        instead of the whole spritesheet. Otherwise, Unit would detect
+        collisions even being far away of eg. user cursor.
+        """
+        self.textures = load_textures(
+            get_path_to_file(unit_name), [(i * 60, 0, 60, 45) for i in range(8)]
+        )
+        self.set_hit_box(self.textures[0].hit_box_points)
+        self.set_texture(0)
+
+    def angle_to_texture(self, angle_to_target: float):
+        """
+        Our units can face only 8 possible angles, which are precalculated
+        for each one of 360 possible integer angles for fast lookup in existing
+        angles-dict.
+        TODO: change it to matrix 8x8 textures - 1 row for each hull angle
+         and 1 column for each turret angle.
+        """
+        index = self.angles[int(angle_to_target)]
+        self.set_texture(index)
 
     @property
     def moving(self) -> float:
@@ -208,8 +239,9 @@ class Unit(PlayerEntity, TasksExecutor):
         self.path.popleft()
 
     def move_to_current_waypoint(self, destination, distance_left):
-        self.angle = angle = calculate_angle(*self.position, *destination)
-        self.current_speed = speed = min(distance_left, self.speed)
+        angle = calculate_angle(*self.position, *destination)
+        self.angle_to_texture(angle)
+        self.current_speed = speed = min(distance_left, self.max_speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
 
     def move_to(self, destination: GridPosition):
@@ -267,7 +299,8 @@ class Unit(PlayerEntity, TasksExecutor):
             self.game.permanent_units_groups[group].discard(self)
         self.permanent_units_group = index
 
-    def target_enemy(self, enemy: PlayerEntity):
+    def target_enemy(self, enemy: Optional[PlayerEntity] = None):
+        """Call this method with 'None' to cancel current targeted enemy."""
         self.targeted_enemy = enemy
 
 
@@ -320,13 +353,10 @@ class Soldier(AnimatedTimeBasedSprite):
     _max_health = 25
     health = _max_health
     health_restoration = 0.003
+    weapon: Weapon = None
 
     def restore_health(self) -> float:
         wounds = round(self._max_health - self.health, 3)
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
         return health_gained
-
-
-if __name__:
-    from units.unit_management import PermanentUnitsGroup

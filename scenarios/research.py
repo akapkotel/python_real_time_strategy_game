@@ -20,12 +20,8 @@ class Technology:
         self.allow = allow
         self.difficulty = difficulty
 
-    def __setstate__(self, state):
-        raise NotImplementedError
-
-    def __getstate__(self) -> Dict:
-        state = self.__dict__.copy()
-        return state
+    def unlocked(self, researcher) -> bool:
+        return all(tech_id in researcher.known_technologies for tech_id in self.required)
 
     @abstractmethod
     def gain_technology_effects(self, researcher):

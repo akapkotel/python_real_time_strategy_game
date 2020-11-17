@@ -243,7 +243,6 @@ class Hierarchical:
         return self._children
 
     def add_child(self, child: Hierarchical):
-        print(f'Added new child: {child}')
         if self._children is None:
             self._children = set()
         self._children.add(child)
@@ -277,7 +276,6 @@ class CursorInteractive(Hierarchical):
 
     def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
         if not self.pointed:
-            log(f'Mouse over {self}')
             self.pointed = True
             self.cursor = cursor
             self._func_on_mouse_enter(cursor)
@@ -287,7 +285,6 @@ class CursorInteractive(Hierarchical):
 
     def on_mouse_exit(self):
         if self.pointed:
-            log(f'Mouse left {self}')
             self.pointed = False
             self.cursor = None
             self._func_on_mouse_exit()
@@ -302,7 +299,6 @@ class CursorInteractive(Hierarchical):
         self.dragged = self.can_be_dragged
 
     def on_mouse_release(self, button: int):
-        log(f'Released button {button} on {self}')
         self.dragged = False
 
     def on_mouse_drag(self, x: float = None, y: float = None):
@@ -361,8 +357,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     add_child method ot as child of another object by setting it as parent with
     parent property.
     """
-    sound_on_mouse_enter = None
-    sound_on_mouse_click = None
+    sound_on_mouse_enter = 'cursor_over_ui_element.wav'
+    sound_on_mouse_click = 'click_on_ui_element.wav'
 
     def __init__(self, texture_name: str, x: int, y: int,
                  name: Optional[str] = None, active: bool = True,
@@ -412,6 +408,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
 
 
 class Frame(UiElement):
+    sound_on_mouse_enter = None
+    sound_on_mouse_click = None
 
     def __init__(self,
                  texture_name: str,
@@ -436,8 +434,6 @@ class Frame(UiElement):
 
 
 class Button(UiElement):
-    sound_on_mouse_enter = 'cursor_over_ui_element.wav'
-    sound_on_mouse_click = 'click_on_ui_element.wav'
 
     def __init__(self, texture_name: str,
                  x: int,
@@ -538,6 +534,8 @@ class Checkbox(UiElement):
 
 
 class UiTextLabel(UiElement):
+    sound_on_mouse_enter = None
+    sound_on_mouse_click = None
 
     def __init__(self, x: int, y: int, text: str,
                  font_size: int = 10, text_color: Color = WHITE,
@@ -572,4 +570,6 @@ class TextInputField(UiElement):
 
 
 class ScrollBar(UiElement):
+    sound_on_mouse_enter = None
+    sound_on_mouse_click = None
     ...

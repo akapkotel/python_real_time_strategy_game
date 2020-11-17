@@ -32,7 +32,7 @@ MapPath = List[NormalizedPoint]
 
 MAP_TEXTURES = {
     'mud': load_spritesheet(
-        get_path_to_file('mud_tileset_6x6.png'), 60, 60, 4, 16, 0)
+        get_path_to_file('mud_tileset_6x6.png'), 60, 45, 4, 16, 0)
 }
 
 

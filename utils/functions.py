@@ -166,6 +166,21 @@ def to_rgba(color: RGB, alpha: int) -> RGBA:
     return color[0], color[1], color[2], clamp(alpha, 255, 0)
 
 
+def precalculate_8_angles():
+    """
+    Build dict of int angles. We chop 360 degrees circle by 8 slices
+    each of 45 degrees. First slice has it's center at 0/360 degrees,
+    second slice has it's center at 22.5 degrees etc. This dict allows
+    for fast replacing angle of range 0-359 to one of 24 pre-calculated
+    angles.
+    """
+    return {
+        i: j if j < 8 else 0 for j in range(0, 9) for i in
+        range(360)
+        if (j * 45) - i < 22.5
+    }
+
+
 @njit
 def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     """
@@ -205,7 +220,7 @@ def vector_2d(angle: float, scalar: float) -> Point:
     Calculate x and y parts of the current vector.
 
     :param angle: float -- angle of the vector
-    :param scalar: float -- scalar difference of the vector (e.g. speed)
+    :param scalar: float -- scalar difference of the vector (e.g. max_speed)
     :return: Point -- x and y parts of the vector in format: (float, float)
     """
     rad = -radians(angle)

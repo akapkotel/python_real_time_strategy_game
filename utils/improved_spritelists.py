@@ -51,7 +51,7 @@ class SpriteListWithSwitch(SpriteList):
 
 class DividedSpriteList(SpriteList):
     """
-    Reasons for this wrapper: (1) speed. Adding additional set allows to
+    Reasons for this wrapper: (1) max_speed. Adding additional set allows to
     store ID of each Sprite appended to this SpriteList for faster lookups.
     Hashed set provides lookup in O(1).
     (2) Separating SpriteLists for visible and drawn Sprites and invisible, so

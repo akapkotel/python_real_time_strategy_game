@@ -1,0 +1,3 @@
+object_name,class,produced_units,produced_resource,research_facility
+building_dummy.png,Building,None,None,False
+Barracks,Building,Infantry,None,False

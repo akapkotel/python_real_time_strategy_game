@@ -1,2 +1,2 @@
-object_name,class_name,id,name,description,required,allow,difficulty
+object_name,class,id,name,description,required,allow,difficulty
 technology_1,Technology,1,Technology 1,This technology exists only for testing purposes,0,(2;17),100
