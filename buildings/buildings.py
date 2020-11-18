@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, List, Optional, Set, Tuple, Dict, Type
+from typing import Deque, List, Optional, Set, Tuple, Type
 
 from arcade.arcade_types import Point
 
 from utils.data_types import GridPosition
 from scenarios.research import Technology
-from scenarios.map import MapNode, Sector
+from map.map import MapNode, Sector
 from players_and_factions.player import Player, PlayerEntity
 from utils.functions import is_visible, close_enough
 
@@ -177,17 +177,20 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     @staticmethod
     def unblock_map_node(node: MapNode):
-        node.building_id = None
+        node.building = None
 
     def block_map_node(self, node: MapNode):
-        node.building_id = self.id
+        node.building = self
 
     def update_current_sector(self) -> Set[Sector]:
         distinct_sectors = set()
         for node in self.occupied_nodes:
             distinct_sectors.add(node.sector)
         for sector in distinct_sectors:
-            sector.units_and_buildings.add(self)
+            try:
+                sector.units_and_buildings[self.player.id].add(self)
+            except KeyError:
+                sector.units_and_buildings[self.player.id] = {self, }
         return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
@@ -206,6 +209,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         elif self.is_research_facility:
             self.update_research()
 
+    def in_observed_area(self, other) -> bool:
+        return self.occupied_sectors.isdisjoint(other.observed_nodes)
+
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
         if close_enough(self.position, other.position, self.detection_radius):
@@ -215,10 +221,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         friends: Set[PlayerEntity] = set()
         for sector in self.occupied_sectors:
-            friends.update(
-                u for u in sector.units_and_buildings if not
-                u.is_enemy(self)
-            )
+            friends.update(u for u in sector.units_and_buildings[self.player.id])
         return friends
 
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:

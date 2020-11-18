@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from scenarios.map import GridHandler
+from map.map import GridHandler
 
 
 class TestGridHandler(TestCase):

@@ -8,7 +8,7 @@ from arcade import load_texture
 from utils.functions import get_path_to_file, get_enemies
 from utils.scheduling import log
 from players_and_factions.player import Player, CpuPlayer
-from scenarios.map import Map
+from map.map import Map
 
 
 class Event:

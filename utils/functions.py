@@ -176,7 +176,7 @@ def precalculate_8_angles():
     """
     return {
         i: j if j < 8 else 0 for j in range(0, 9) for i in
-        range(360)
+        range(361)
         if (j * 45) - i < 22.5
     }
 

@@ -11,7 +11,7 @@ from utils.data_types import FactionId, TechnologyId, GridPosition
 from scenarios.research import Technology
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, Robustness
-from scenarios.map import MapNode, Sector, TILE_WIDTH
+from map.map import MapNode, Sector, TILE_WIDTH
 from utils.observers import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 from utils.functions import (
@@ -267,7 +267,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self._health = self._max_health
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
-        self.observed_nodes: Set[GridPosition] = set()
+        self.observed_nodes: Set[MapNode] = set()
 
         self.register_to_objectsowners(self.game, self.player)
 
@@ -318,13 +318,18 @@ class PlayerEntity(GameObject, EventsCreator):
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
+        """
+        Find which MapNodes are inside visibility radius of this Entity and
+        update accordingly visible area on the map and reveal Fog of War.
+        Units and Building implement this method in different way.
+        """
         raise NotImplementedError
 
-    def calculate_observed_area(self) -> Set[GridPosition]:
+    def calculate_observed_area(self) -> Set[MapNode]:
         position = self.map.position_to_grid(*self.position)
         observed_area = calculate_observable_area(*position, 8)
         observed_area = self.map.in_bounds(observed_area)
-        return set(observed_area)
+        return {self.map.nodes[id] for id in observed_area}
 
     def update_nearby_friends(self):
         self.nearby_friends = self.get_nearby_friends()
@@ -354,26 +359,17 @@ class PlayerEntity(GameObject, EventsCreator):
             enemy.mutually_detected_enemies.add(self)
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        known_enemies = set()
-        potentially_visible = self.get_potentially_visible_enemies()
-        observed_nodes = self.observed_nodes
-        entity: Union[Unit, Building]
-        for entity in potentially_visible:
-            if entity.is_building:
-                if any(n.grid in observed_nodes for n in entity.occupied_nodes):
-                    known_enemies.add(entity)
-            elif entity.current_node.grid in observed_nodes:
-                known_enemies.add(entity)
-        return {e for e in known_enemies if e.visible_for(self)}
-
-    def get_potentially_visible_enemies(self) -> List[PlayerEntity]:
         sectors = self.get_sectors_to_scan_for_enemies()
-        enemies = []
+        enemies = set()
         for sector in sectors:
-            enemies.extend(
-                e for e in sector.units_and_buildings if e.is_enemy(self)
-            )
-        return [e for e in enemies if e not in self.mutually_detected_enemies]
+            for player_id, entities in sector.units_and_buildings.items():
+                if self.game.players[player_id].is_enemy(self.player):
+                    enemies.update(entities.difference(self.mutually_detected_enemies))
+        return {e for e in enemies if e.in_observed_area(self)}
+
+    @abstractmethod
+    def in_observed_area(self, other) -> bool:
+        raise NotImplementedError
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:

@@ -13,7 +13,9 @@ from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from utils.data_types import BuildingId, GridPosition, Number, SectorId, UnitId
+from utils.data_types import (
+    BuildingId, GridPosition, Number, SectorId, UnitId, PlayerId
+)
 from gameobjects.gameobject import TerrainObject
 from game import Game, PROFILING_LEVEL, TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from utils.scheduling import EventsCreator, ScheduledEvent
@@ -211,7 +213,7 @@ class Sector(GridHandler, ABC):
         this Sector: first column and first row of MapNodes, this Sector owns
         """
         self.grid = grid
-        self.units_and_buildings: Set[PlayerEntity] = set()
+        self.units_and_buildings: Dict[PlayerId, Set[PlayerEntity]] = {}
         self.map.sectors[grid] = self
 
     def adjacent_sectors(self) -> List[Sector]:
@@ -244,8 +246,8 @@ class MapNode(GridHandler, ABC):
         self._walkable = True
 
         self._terrain_object_id: Optional[int] = None
-        self._unit_id: Optional[UnitId] = None
-        self._building_id: Optional[BuildingId] = None
+        self._unit: Optional[Unit] = None
+        self._building: Optional[Building] = None
 
         self.terrain: TerrainCost = TerrainCost.GROUND
 
@@ -263,26 +265,26 @@ class MapNode(GridHandler, ABC):
         return self._terrain_object_id
 
     @obstacle_id.setter
-    def unit_id(self, value: Optional[int]):
+    def obstacle_id(self, value: Optional[int]):
         self._terrain_object_id = value
 
     @property
-    def unit_id(self) -> UnitId:
-        return self._unit_id
+    def unit(self) -> Optional[Unit]:
+        return self._unit
 
-    @unit_id.setter
-    def unit_id(self, value: Optional[UnitId]):
+    @unit.setter
+    def unit(self, value: Optional[Unit]):
         self.map.units[self.grid] = value
-        self._unit_id = value
+        self._unit = value
 
     @property
-    def building_id(self) -> Optional[BuildingId]:
-        return self._unit_id
+    def building(self) -> Optional[Building]:
+        return self._building
 
-    @building_id.setter
-    def building_id(self, value: Optional[BuildingId]):
+    @building.setter
+    def building(self, value: Optional[Building]):
         self.map.buildings[self.grid] = value
-        self._building_id = value
+        self._building = value
 
     @property
     def walkable(self) -> bool:
@@ -290,12 +292,12 @@ class MapNode(GridHandler, ABC):
         Use it to find if node is not blocked at the moment by units or
         buildings.
         """
-        return self.pathable and self._unit_id is None
+        return self.pathable and self._unit is None
 
     @property
     def pathable(self) -> bool:
         """Call it to find if this node is available for pathfinding at all."""
-        return self._terrain_object_id is None and self._building_id is None
+        return self._terrain_object_id is None and self._building is None
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:
@@ -358,6 +360,7 @@ class Pathfinder(Singleton, EventsCreator):
         EventsCreator.__init__(self)
         self.map = map
         self.requests_for_paths: Deque[PathRequest] = deque()
+        self.pathfinding_calls = 0
         Pathfinder.instance = self
 
     def __bool__(self) -> bool:
@@ -413,6 +416,7 @@ class Pathfinder(Singleton, EventsCreator):
         Find shortest path from <start> to <end> position using A* algorithm.
         """
         log(f'Searching for path from {start} to {end}...')
+        self.pathfinding_calls += 1
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes
@@ -466,6 +470,7 @@ class Pathfinder(Singleton, EventsCreator):
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
         """
+        print(f'Pathfinding calls: {self.pathfinding_calls}')
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:
@@ -498,3 +503,4 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from players_and_factions.player import PlayerEntity
     from units.units import Unit
+    from buildings.buildings import Building

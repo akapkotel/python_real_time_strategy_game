@@ -12,6 +12,8 @@ __credits__ = []
 
 from typing import (Any, Dict, List, Optional, Set, Union)
 
+import random
+
 import arcade
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line,
@@ -359,20 +361,26 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
         player = self.players[2]
-        name = 'tank_heavy_red.png'
+        name = 'tank_medium_green.png'
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
-            for y in range(30, SCREEN_HEIGHT, TILE_HEIGHT * 4):
+            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
                 unit = self.spawner.spawn(name, player, (x, y))
                 spawned_units.append(unit)
         return spawned_units
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        # name = "medic_truck_red.png"
-        # player = self.players[4]
-        # for x in range(90, SCREEN_WIDTH, TILE_WIDTH * 4):
-        #     for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-        #         spawned_units.append(spawn_test_unit((x, y), name, player=player))
+        name = "tank_medium_red.png"
+        player = self.players[4]
+        for _ in range(30):
+            no_position = True
+            while no_position:
+                node = random.choice([n for n in self.map.nodes.values()])
+                if node.walkable:
+                    x, y = node.position
+                    unit = self.spawner.spawn(name, player, (x, y))
+                    spawned_units.append(unit)
+                    no_position = False
         return spawned_units
 
     def test_buildings_spawning(self):
@@ -551,16 +559,16 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
-    from scenarios.map import Map, Pathfinder
+    from map.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit, Vehicle
+    from units.units import Unit
     from gameobjects.spawning import ObjectsFactory
-    from scenarios.fog_of_war import FogOfWar
+    from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission
     from user_interface.menu import Menu
@@ -570,7 +578,7 @@ if __name__ == '__main__':
         with start_profile() as profiler:
             window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
             arcade.run()
-        end_profile(profiler, 30, True)
+        end_profile(profiler, 35, True)
     else:
         window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
         arcade.run()

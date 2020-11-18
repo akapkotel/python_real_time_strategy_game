@@ -1,3 +1,5 @@
 object_name,class,max_speed,fuel_consumption
 jeep_blue.png,Vehicle,4,0.0005
 tank_heavy_red.png,Vehicle,2,0.005
+tank_medium_green.png,Vehicle,3,0.003
+tank_medium_red.png,Vehicle,3,0.003

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import random
+import PIL
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Deque, List, Set, Optional, Union, cast
@@ -13,9 +14,9 @@ from .weapons import Weapon
 from buildings.buildings import Building
 from utils.enums import UnitWeight
 from game import UPDATE_RATE
-from scenarios.map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
+from map.map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
 from players_and_factions.player import Player, PlayerEntity
-from units.units_tasking import TasksExecutor, UnitTask, MoveTask
+from units.units_tasking import TasksExecutor, UnitTask
 from utils.functions import (
     calculate_angle, distance_2d, log, vector_2d, get_path_to_file,
     precalculate_8_angles
@@ -72,8 +73,13 @@ class Unit(PlayerEntity, TasksExecutor):
         instead of the whole spritesheet. Otherwise, Unit would detect
         collisions even being far away of eg. user cursor.
         """
+        name = get_path_to_file(unit_name)
+        print(name)
+        image = PIL.Image.open(name)
+        width, height = image.size[0] // 8, image.size[1]
         self.textures = load_textures(
-            get_path_to_file(unit_name), [(i * 60, 0, 60, 45) for i in range(8)]
+            get_path_to_file(unit_name),
+            [(i * width, 0, width, height) for i in range(8)]
         )
         self.set_hit_box(self.textures[0].hit_box_points)
         self.set_texture(0)
@@ -118,10 +124,10 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def update_observed_area(self, new_current_node: MapNode):
         if self.observed_nodes and new_current_node == self.current_node:
-            self.game.fog_of_war.explore_map(self.observed_nodes)
+            self.game.fog_of_war.explore_map(n.grid for n in self.observed_nodes)
         else:
-            self.observed_nodes = self.calculate_observed_area()
-            self.game.fog_of_war.explore_map(self.observed_nodes)
+            self.observed_nodes = observed = self.calculate_observed_area()
+            self.game.fog_of_war.explore_map(n.grid for n in observed)
 
     def update_blocked_map_nodes(self, new_current_node):
         """
@@ -149,17 +155,16 @@ class Unit(PlayerEntity, TasksExecutor):
 
     @staticmethod
     def unblock_map_node(node: MapNode):
-        node.unit_id = None
+        node.unit = None
 
     def block_map_node(self, node: MapNode):
-        node.unit_id = self.id
+        node.unit = self
 
     def scan_next_nodes_for_collisions(self):
         if self.path:
             next_node = self.map.position_to_node(*self.path[0])
-            if not next_node.walkable and next_node.unit_id != self.id:
-                blocker = self.game.units.get_id(next_node.unit_id)
-                self.find_best_way_to_avoid_collision(blocker)
+            if not next_node.walkable and next_node.unit != self:
+                self.find_best_way_to_avoid_collision(next_node.unit)
 
     def find_best_way_to_avoid_collision(self, blocker):
         if (blocker.path or blocker.waiting_for_path[0] or
@@ -208,10 +213,13 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def update_current_sector(self):
         if (sector := self.current_node.sector) != self.current_sector:
-            if self.current_sector is not None:
-                self.current_sector.units_and_buildings.discard(self)
+            if (current_sector := self.current_sector) is not None:
+                current_sector.units_and_buildings[self.player.id].discard(self)
             self.current_sector = sector
-            sector.units_and_buildings.add(self)
+            try:
+                sector.units_and_buildings[self.player.id].add(self)
+            except KeyError:
+                sector.units_and_buildings[self.player.id] = {self, }
 
     def update_pathfinding(self):
         if self.waiting_for_path[0]:
@@ -281,6 +289,9 @@ class Unit(PlayerEntity, TasksExecutor):
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
+    def in_observed_area(self, other: PlayerEntity) -> bool:
+        return self.current_node in other.observed_nodes
+
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
         if self.player is self.game.local_human_player and not other.is_building:
@@ -290,8 +301,7 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         return {
-            u for u in self.current_sector.units_and_buildings if not
-            u.is_enemy(self)
+            u for u in self.current_sector.units_and_buildings[self.player.id]
         }
 
     def set_permanent_units_group(self, index: int = 0):

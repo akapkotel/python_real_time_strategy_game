@@ -50,10 +50,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness
 
-    def update(self):
-        self.on_update()
-
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self, delta_time: float = 1 / 60):
         self.center_x += self.change_x
         self.center_y += self.change_y
         if self.frames:
