@@ -29,7 +29,6 @@ class ObjectsFactory(Singleton):
         return self._spawn_terrain_object(name, position)
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
-        print(kwargs)
         building = Building(name, player, position, **kwargs)
         category = 'buildings'
         return self._configure_spawned_attributes(category, name, building)

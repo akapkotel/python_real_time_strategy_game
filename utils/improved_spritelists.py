@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, Iterable, List, Optional, Callable
+from typing import Dict, Optional
 
 from arcade import SpriteList, Sprite
+
+from utils.functions import log
 
 
 class SpriteListWithSwitch(SpriteList):
@@ -49,98 +51,89 @@ class SpriteListWithSwitch(SpriteList):
         self._draw_on = not self._draw_on
 
 
-class DividedSpriteList(SpriteList):
+class SelectiveSpriteList(SpriteList):
     """
-    Reasons for this wrapper: (1) max_speed. Adding additional set allows to
-    store ID of each Sprite appended to this SpriteList for faster lookups.
-    Hashed set provides lookup in O(1).
-    (2) Separating SpriteLists for visible and drawn Sprites and invisible, so
-    not drawn. Each Sprite can be stored in drawn, updated or both SpriteLists.
-    Not-drawing all Sprites each frame, but only visible saves CPU-time.
+    This SpriteList works with Sprites having attributes: 'id', 'updated' and
+    'rendered'. It is possible to switch updating and drawing of single
+    sprites by changing their 'updated' and 'rendered' attributes inside
+    their own logic, or by calling 'start_updating', 'start_drawing',
+    'stop_updating' and 'stop_drawing' methods of SelectableSpriteList with
+    the chosen Sprite as parameter.
+    SelectableSpriteList also maintains hashmap of all Sprites which allows for
+    fast lookups by their 'id' attribute.
     """
 
     def __init__(self, use_spatial_hash=False, is_static=False):
-        super().__init__(use_spatial_hash, is_static)  # to comply with
-        # SpriteList interface
-        self.id_elements_dict = {}
-        del self.sprite_list  # we replace it with two SpriteLists below:
-        self.updated = SpriteList(use_spatial_hash, is_static)
-        self.drawn = SpriteList(use_spatial_hash, is_static)
+        super().__init__(use_spatial_hash, is_static)
+        # to keep track of items in spritelist, fast lookups:
+        self.registry: Dict[int, Sprite] = {}
 
-    def __repr__(self) -> str:
-        return f'DividedSpriteList, contains: {self.id_elements_dict}'
-
-    def __len__(self) -> int:
-        return len(self.id_elements_dict)
-
-    def __bool__(self) -> bool:
-        return len(self.id_elements_dict) > 0
-
-    def __getitem__(self, item):
-        return self.updated[item]
-
-    def __iter__(self) -> Iterable:
-        return iter(self.updated)
-
-    def __contains__(self, sprite) -> bool:
-        return sprite.id in self.id_elements_dict
-
-    def append(self, sprite, start_drawing=False):
-        if (item_id := sprite.id) not in self.id_elements_dict:
-            sprite.divided_spritelist = self
-            self.id_elements_dict[item_id] = sprite
-            self.start_updating(sprite)
-            if start_drawing or sprite.visible:
-                self.start_drawing(sprite)
-
-    def remove(self, sprite):
-        if (item_id := sprite.id) in self.id_elements_dict:
-            self.stop_updating(sprite)
-            self.stop_drawing(sprite)
-            del self.id_elements_dict[item_id]
-
-    def extend(self, iterable):
-        for sprite in iterable:
-            self.append(sprite)
-
-    def start_updating(self, sprite):
-        self.updated.append(sprite)
-
-    def stop_updating(self, sprite):
+    def get_id(self, sprite_id: int) -> Optional[Sprite]:
         try:
-            self.updated.remove(sprite)
-        except ValueError:
-            pass
-
-    def start_drawing(self, sprite):
-        self.drawn.append(sprite)
-
-    def stop_drawing(self, sprite):
-        try:
-            self.drawn.remove(sprite)
-        except ValueError:
-            pass
-
-    def update(self):
-        self.updated.update()
-
-    def on_update(self, delta_time: float = 1/60):
-        for sprite in self.updated:
-            sprite.on_update(delta_time)
-
-    def draw(self):
-        self.drawn.draw()
-
-    def pop(self, index: int = -1):
-        poped_item = self.updated.pop(index)
-        self.remove(poped_item)
-        return poped_item
-
-    def get_id(self, sprite_id: int) -> Optional[Any]:
-        try:
-            return self.id_elements_dict[sprite_id]
+            return self.registry[sprite_id]
         except KeyError:
             return None
 
-    def where(self, condition: Callable) -> List[Sprite]:
-        return [item for item in self.updated if condition(item)]
+    def __contains__(self, sprite) -> bool:
+        return sprite.id in self.registry
+
+    def append(self, sprite):
+        self.registry[sprite.id] = sprite
+        super().append(sprite)
+
+    def remove(self, sprite):
+        try:
+            del self.registry[sprite.id]
+        except KeyError:
+            pass
+
+    def extend(self, iterable):
+        for sprite in iterable:
+            self.registry[sprite.id] = sprite
+        super().extend(iterable)
+
+    @staticmethod
+    def start_updating(sprite):
+        try:
+            sprite.updated = True
+        except AttributeError:
+            log(f'Tried to draw Sprite instance without "updated" attribute')
+
+    @staticmethod
+    def stop_updating(sprite):
+        try:
+            sprite.updated = False
+        except AttributeError:
+            log(f'Tried stop drawing Sprite instance without "updated" attribute')
+
+    @staticmethod
+    def start_drawing(sprite):
+        try:
+            sprite.drawn = True
+        except AttributeError:
+            log(f'Tried to draw Sprite instance without "drawn" attribute')
+
+    @staticmethod
+    def stop_drawing(sprite):
+        try:
+            sprite.rendered = False
+        except AttributeError:
+            log(f'Tried stop drawing Sprite instance without "drawn" attribute')
+
+    def on_update(self, delta_time: float = 1/60):
+        for sprite in (s for s in self if s.updated):
+            sprite.on_update(delta_time)
+
+    def draw(self):
+        for sprite in (s for s in self if s.rendered):
+            sprite.draw()
+
+    def pop(self, index: int = -1) -> Sprite:
+        sprite = super().pop(index)
+        del self.registry[sprite.id]
+        return sprite
+
+    def clear(self):
+        """Safe clearing of the whole SpriteList using reversed order."""
+        for _ in range(len(self)):
+            self.pop()

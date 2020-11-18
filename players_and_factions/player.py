@@ -301,6 +301,10 @@ class PlayerEntity(GameObject, EventsCreator):
         else:
             self.kill()
 
+    def draw(self):
+        if self.rendered:
+            super().draw()
+
     @property
     def alive(self) -> bool:
         return self._health > 0
@@ -311,10 +315,6 @@ class PlayerEntity(GameObject, EventsCreator):
                 self.start_drawing()
         elif self.rendered:
             self.stop_drawing()
-
-    @property
-    def rendered(self) -> bool:
-        return self in self.divided_spritelist.drawn
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):

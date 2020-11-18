@@ -14,7 +14,7 @@ from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject
-from utils.improved_spritelists import DividedSpriteList
+from utils.improved_spritelists import SelectiveSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
 from units.unit_management import SelectionUnitMarket
@@ -25,7 +25,7 @@ from user_interface.user_interface import (
 from utils.classes import HashedList
 from utils.functions import get_path_to_file, log
 
-DrawnAndUpdated = Union[SpriteList, DividedSpriteList, 'MouseCursor']
+DrawnAndUpdated = Union[SpriteList, SelectiveSpriteList, 'MouseCursor']
 
 CURSOR_NORMAL_TEXTURE = 0
 CURSOR_FORBIDDEN_TEXTURE = 1
@@ -128,7 +128,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @updated_spritelists.setter
     def updated_spritelists(self, value: List[SpriteList]):
         self._updated_spritelists = [
-            v for v in value if isinstance(v, (SpriteList, DividedSpriteList))
+            v for v in value if isinstance(v, (SpriteList, SelectiveSpriteList))
         ]
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
@@ -317,7 +317,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # be mouse-pointed (it lies on the top)
         if (pointed_sprite := self.dragged_ui_element) is None:
             for drawn in reversed(self._updated_spritelists):
-                if not isinstance(drawn, (DividedSpriteList, UiSpriteList)):
+                if not isinstance(drawn, (SelectiveSpriteList, UiSpriteList)):
                     continue
                 if pointed_sprite := self.cursor_points(drawn, x, y):
                     break

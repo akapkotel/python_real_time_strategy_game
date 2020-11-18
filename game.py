@@ -20,7 +20,9 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from utils.colors import BLACK, GREEN, RED, WHITE, DARK
-from utils.improved_spritelists import DividedSpriteList, SpriteListWithSwitch
+from utils.improved_spritelists import (
+    SelectiveSpriteList, SpriteListWithSwitch
+)
 from utils.data_types import Viewport
 
 from utils.observers import OwnedObject
@@ -52,7 +54,7 @@ GAME_SPEED = 1.0
 
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = False
+PYPROFILER = True
 DEBUG = True
 
 
@@ -252,9 +254,9 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
         # SpriteLists:
         self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
-        self.vehicles_threads = SpriteList(is_static=True)
-        self.buildings = DividedSpriteList(is_static=True)
-        self.units = DividedSpriteList()
+        self.vehicles_threads = SelectiveSpriteList(is_static=True)
+        self.buildings = SelectiveSpriteList(is_static=True)
+        self.units = SelectiveSpriteList()
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()
