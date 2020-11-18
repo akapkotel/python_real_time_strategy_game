@@ -175,8 +175,7 @@ def precalculate_8_angles():
     angles.
     """
     return {
-        i: j if j < 8 else 0 for j in range(0, 9) for i in
-        range(361)
+        i: j if j < 8 else 0 for j in range(0, 9) for i in range(361)
         if (j * 45) - i < 22.5
     }
 
@@ -192,8 +191,8 @@ def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     :param:ey float -- y coordinate of end point
     :return: float -- degrees in range 0-360.
     """
-    radians = atan2(ex - sx, ey - sy)
-    return -degrees(radians) % 360
+    rads = atan2(ex - sx, ey - sy)
+    return -degrees(rads) % 360
 
 
 def distance_2d(coord_a: Point, coord_b: Point) -> float:

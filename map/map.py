@@ -470,7 +470,6 @@ class Pathfinder(Singleton, EventsCreator):
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
         """
-        print(f'Pathfinding calls: {self.pathfinding_calls}')
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:

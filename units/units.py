@@ -38,15 +38,13 @@ class Unit(PlayerEntity, TasksExecutor):
         PlayerEntity.__init__(self, unit_name, player, position)
         TasksExecutor.__init__(self, tasks_on_start)
 
-        self._load_textures_and_reset_hitbox(unit_name)
+        # self._load_textures_and_reset_hitbox(unit_name)
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
 
         # pathfinding and map-related:
-        # we replace angle with custom parameter used for determining which
-        # texture should be displayed, withour rotating actual sprite:
-        self.angle_to_texture(random.random() * 360)
+        # self.angle_to_texture(random.random() * 360)
         self.position = self.map.normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)
@@ -65,24 +63,16 @@ class Unit(PlayerEntity, TasksExecutor):
 
         self.weapons: List[Weapon] = []
 
+    @abstractmethod
     def _load_textures_and_reset_hitbox(self, unit_name: str):
         """
-        Since we use 8-texture spritesheet for Unit to work properly with
-        all possible facing-angles on the map, we load them and then we
-        reset Unit hitbox data to represent single texture of map tile size,
-        instead of the whole spritesheet. Otherwise, Unit would detect
-        collisions even being far away of eg. user cursor.
+        Since we can have many different spritesheets representing our Unit.
+        Some units have rotating turrets, so above the normal 8-texture
+        spritesheets, they require 8 textures for each hull direction x8
+        turret directions, what makes 8x8 spritesheet, whereas other Units
+        use single row 8-texture spritesheet.
         """
-        name = get_path_to_file(unit_name)
-        print(name)
-        image = PIL.Image.open(name)
-        width, height = image.size[0] // 8, image.size[1]
-        self.textures = load_textures(
-            get_path_to_file(unit_name),
-            [(i * width, 0, width, height) for i in range(8)]
-        )
-        self.set_hit_box(self.textures[0].hit_box_points)
-        self.set_texture(0)
+        raise NotImplementedError
 
     def angle_to_texture(self, angle_to_target: float):
         """
@@ -314,22 +304,97 @@ class Unit(PlayerEntity, TasksExecutor):
         self.targeted_enemy = enemy
 
 
-class Vehicle(Unit):
+class Vehicle:
+    """An interface for all Units which are engine-powered vehicles."""
+    fuel = 100.0
+    fuel_consumption = 0.0
 
-    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
-                 position: Point):
-        super().__init__(unit_name, player, weight, position)
-        self.fuel = 100.0
-        self.fuel_consumption = 0.0
-
-    def on_update(self, delta_time):
-        super().on_update(delta_time)
-        if self.moving:
-            self.fuel -= self.fuel_consumption
+    def consume_fuel(self):
+        self.fuel -= self.fuel_consumption
+        print(self.fuel)
 
     @property
     def needs_repair(self) -> bool:
         return self._health < self._max_health
+
+
+class NoTurret:
+
+    def _load_textures_and_reset_hitbox(self, unit_name: str):
+        name = get_path_to_file(unit_name)
+        image = PIL.Image.open(name)
+        width, height = image.size[0] // 8, image.size[1]
+        self.textures = load_textures(
+            get_path_to_file(unit_name),
+            [(i * width, 0, width, height) for i in range(8)]
+        )
+
+
+class Tank(Unit, Vehicle):
+
+    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+                 position: Point):
+        super().__init__(unit_name, player, weight, position)
+        # combine texture from these two indexes:
+        self._load_textures_and_reset_hitbox(unit_name)
+        self.turret_aim_target = None
+
+    def needs_repair(self) -> bool:
+        pass
+
+    def _load_textures_and_reset_hitbox(self, unit_name: str):
+        """
+        Create 8 lists of 8-texture spritesheets for each combination of hull
+        and turret directions.
+        """
+        name = get_path_to_file(unit_name)
+        image = PIL.Image.open(name)
+        width, height = image.size[0] // 8, image.size[1] // 8
+        self.textures = [load_textures(get_path_to_file(unit_name),
+            [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
+        ]
+        i, j = random.randint(0, 7), random.randint(0, 7)
+        self.set_texture(i, j)
+        self.set_hit_box(self.texture.hit_box_points)
+
+    def angle_to_texture(self, angle_to_target: float):
+        hull_texture_index = self.angles[int(angle_to_target)]
+        if (target := self.turret_aim_target) is None:
+            turret_texture_index = hull_texture_index
+        else:
+            angle = calculate_angle(*self.position, *target.position)
+            turret_texture_index = self.angles[int(angle)]
+        self.set_texture(hull_texture_index, turret_texture_index)
+
+    def set_texture(self, hull_texture_index: int, turret_texture_index: int):
+        """
+        Sets texture by texture id. Should be renamed because it takes
+        a number rather than a texture, but keeping
+        this for backwards compatibility.
+        """
+        texture = self.textures[hull_texture_index][turret_texture_index]
+        if texture == self._texture:
+            return
+
+        self.clear_spatial_hashes()
+        self._point_list_cache = None
+        self._texture = texture
+        self._width = texture.width * self.scale
+        self._height = texture.height * self.scale
+        self.add_spatial_hashes()
+        for sprite_list in self.sprite_lists:
+            sprite_list.update_texture(self)
+
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
+        if self.moving:
+            self.consume_fuel()
+        self.update_turret_target()
+
+    def update_turret_target(self):
+        self.turret_aim_target = None
+        if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
+            self.turret_aim_target = enemy
 
 
 class Infantry(Unit, ABC):

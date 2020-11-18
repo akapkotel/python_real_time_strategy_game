@@ -8,7 +8,7 @@ from arcade.arcade_types import Point
 from players_and_factions.player import Player
 from .gameobject import GameObject
 from buildings.buildings import Building
-from units.units import Unit, Vehicle
+from units.units import Unit, Vehicle, Tank
 from utils.enums import UnitWeight
 from utils.classes import Singleton
 

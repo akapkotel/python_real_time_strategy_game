@@ -15,7 +15,7 @@ from map.map import MapNode, Sector, TILE_WIDTH
 from utils.observers import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 from utils.functions import (
-    calculate_observable_area, is_visible, log
+    calculate_observable_area, is_visible, log, distance_2d
 )
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -267,6 +267,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self._health = self._max_health
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
+        self.attack_radius = TILE_WIDTH * 5
         self.observed_nodes: Set[MapNode] = set()
 
         self.register_to_objectsowners(self.game, self.player)
@@ -370,6 +371,9 @@ class PlayerEntity(GameObject, EventsCreator):
     @abstractmethod
     def in_observed_area(self, other) -> bool:
         raise NotImplementedError
+
+    def in_range(self, other: PlayerEntity) -> bool:
+        return distance_2d(self.position, other.position) < self.attack_radius
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
