@@ -303,7 +303,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         GameObjects placed at the MouseCursor position.
         """
         pointed = self.get_pointed_sprite(*self.position)
-        if isinstance(pointed, PlayerEntity):
+        if isinstance(pointed, PlayerEntity) and pointed.rendered:
             self.pointed_gameobject = pointed
             self.update_mouse_pointed_ui_element(None)
         else:
@@ -332,8 +332,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # for first child, which is pointed instead:
         if pointed := get_sprites_at_point((x, y), spritelist):
             s: Union[CursorInteractive, PlayerEntity]
-            for sprite in (
-                    s for s in pointed if not getattr(s, 'children', False)):
+            for sprite in (s for s in pointed if not getattr(s, 'children', False)):
                 return sprite  # first pointed children
             else:
                 return pointed[0]  # return pointed Sprite if no children found

@@ -168,7 +168,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         max_x_grid = int(self.right // TILE_WIDTH)
         max_y_grid = int(self.top // TILE_HEIGHT)
-        for x in range(min_x_grid, max_x_grid):
+        for x in range(min_x_grid, max_x_grid + 1):
             for y in range(min_y_grid, max_y_grid):
                 node = self.game.map.grid_to_node((x, y))
                 occupied_nodes.add(node)
@@ -233,8 +233,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def kill(self):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
-        for sector in (self.game.map.sectors[id] for id in self.occupied_sectors):
-            sector.units_and_buildings.discard(self)
+        for sector in self.occupied_sectors:
+            sector.units_and_buildings[self.player.id].discard(self)
         super().kill()
 
 

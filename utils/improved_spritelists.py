@@ -78,6 +78,7 @@ class SelectiveSpriteList(SpriteList):
         return sprite.id in self.registry
 
     def append(self, sprite):
+        sprite.selective_spritelist = self
         self.registry[sprite.id] = sprite
         super().append(sprite)
 
@@ -86,11 +87,11 @@ class SelectiveSpriteList(SpriteList):
             del self.registry[sprite.id]
         except KeyError:
             pass
+        super().remove(sprite)
 
     def extend(self, iterable):
         for sprite in iterable:
-            self.registry[sprite.id] = sprite
-        super().extend(iterable)
+            self.append(sprite)
 
     @staticmethod
     def start_updating(sprite):

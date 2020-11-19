@@ -259,7 +259,7 @@ class Unit(PlayerEntity, TasksExecutor):
         log(f'{self} found path to {destination}, path: {path}')
 
     def kill(self):
-        self.current_sector.units_and_buildings.discard(self)
+        self.current_sector.units_and_buildings[self.player.id].discard(self)
 
         self.cancel_path_requests()
 
@@ -307,7 +307,6 @@ class Vehicle:
 
     def consume_fuel(self):
         self.fuel -= self.fuel_consumption
-        print(self.fuel)
 
     @property
     def needs_repair(self) -> bool:
@@ -334,6 +333,7 @@ class Tank(Unit, Vehicle):
         # combine texture from these two indexes:
         self._load_textures_and_reset_hitbox(unit_name)
         self.turret_aim_target = None
+        self._weapons.append(Weapon())
 
     def needs_repair(self) -> bool:
         pass
@@ -387,8 +387,9 @@ class Tank(Unit, Vehicle):
         if self.moving:
             self.consume_fuel()
 
-    def update_fighting(self):
-        self.turret_aim_target = self.targeted_enemy
+    def update_fighting(self, enemy: PlayerEntity):
+        self.turret_aim_target = enemy
+        super().update_fighting(enemy)
 
 
 class Infantry(Unit, ABC):

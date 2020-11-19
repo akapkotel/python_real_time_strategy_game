@@ -40,7 +40,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.updated = True
         self.rendered = True
 
-        self.divided_spritelist: Optional[SelectiveSpriteList] = None
+        self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
         log(f'Spawned {self} at {self.position}, total objects: {count}')
 
@@ -72,9 +72,9 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.updated = False
 
     def kill(self):
-        self.sprite_lists.clear()
         self.unregister_from_all_owners()
-        self.divided_spritelist.remove(self)
+        self.selective_spritelist.remove(self)
+        self.sprite_lists.clear()
         super().kill()
 
 

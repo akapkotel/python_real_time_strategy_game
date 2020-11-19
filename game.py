@@ -10,11 +10,13 @@ __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
 __credits__ = []
 
+import random
+
 from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
 from arcade import (
-    SpriteList, create_line, draw_circle_outline, draw_line,
+    SpriteList, create_line, draw_circle_outline, draw_line, draw_text,
     draw_rectangle_filled, draw_text
 )
 from arcade.arcade_types import Color, Point
@@ -292,8 +294,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.current_mission: Optional[Mission] = None
 
         self.debugged = []
-        if self.window.debug:
-            self.map_grid = self.create_map_debug_grid()
+        self.map_grid = self.create_map_debug_grid()
 
         self.test_methods()
 
@@ -335,8 +336,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def test_methods(self):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
+        self.test_buildings_spawning()
         self.test_units_spawning()
-        # self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
@@ -345,49 +346,31 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
         player = Player(id=2, color=RED, faction=faction)
-        cpu_player = CpuPlayer()
+        cpu_player = CpuPlayer(color=GREEN)
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)
 
-    def test_units_spawning(self):
-        player_units = self.spawn_local_human_player_units()
-        cpu_units = self.spawn_cpu_units()
-        self.units.extend(player_units + cpu_units)
-
-    def spawn_local_human_player_units(self) -> List[Unit]:
-        spawned_units = []
-        player = self.players[2]
-        name = 'tank_medium.png'
-        for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
-            for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
-                unit = self.spawner.spawn(name, player, (x, y))
-                spawned_units.append(unit)
-        return spawned_units
-
-    def spawn_cpu_units(self) -> List[Unit]:
-        spawned_units = []
-        # name = "tank_medium_red.png"
-        # player = self.players[4]
-        # for _ in range(30):
-        #     no_position = True
-        #     while no_position:
-        #         node = random.choice([n for n in self.map.nodes.values()])
-        #         if node.walkable:
-        #             x, y = node.position
-        #             unit = self.spawner.spawn(name, player, (x, y))
-        #             spawned_units.append(unit)
-        #             no_position = False
-        return spawned_units
-
     def test_buildings_spawning(self):
         self.buildings.append(self.spawner.spawn(
-            'building_dummy.png',
-            self.players[4],
+            'capitol.png',
+            self.players[2],
             (400, 600),
-            produced_units=(Unit,),
-            produced_resource='fuel',
-            research_facility=True
         ))
+
+    def test_units_spawning(self):
+        spawned_units = []
+        unit_name = 'tank_medium.png'
+        for player in (self.players.values()):
+            for _ in range(30):
+                no_position = True
+                while no_position:
+                    node = random.choice([n for n in self.map.nodes.values()])
+                    if node.walkable:
+                        x, y = node.position
+                        unit = self.spawner.spawn(unit_name, player, (x, y))
+                        spawned_units.append(unit)
+                        no_position = False
+        self.units.extend(spawned_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
         configs: Dict[str, Any] = {}
@@ -503,6 +486,14 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def draw_debugged(self):
         self.draw_debug_paths()
         self.draw_debug_lines_of_sight()
+        self.draw_debug_units()
+
+    def draw_debug_units(self):
+        for unit in self.units:
+            x, y = unit.position
+            draw_text(str(unit.id), x, y + 40, color=GREEN)
+            if (target := unit.targeted_enemy) is not None:
+                draw_text(str(target.id), x, y -40, color=RED)
 
     def draw_debug_paths(self):
         for path in (u.path for u in self.local_human_player.units if u.path):

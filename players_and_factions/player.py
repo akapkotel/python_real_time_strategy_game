@@ -267,6 +267,7 @@ class PlayerEntity(GameObject, EventsCreator):
 
         self._max_health = 100
         self._health = self._max_health
+        self.armour = 0
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
         self.attack_radius = TILE_WIDTH * 5
@@ -312,7 +313,7 @@ class PlayerEntity(GameObject, EventsCreator):
             self.update_nearby_friends()
             self.update_known_enemies_set()
             if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
-                self.update_fighting()
+                self.update_fighting(enemy)
             super().on_update(delta_time)
         else:
             self.kill()
@@ -390,13 +391,19 @@ class PlayerEntity(GameObject, EventsCreator):
     def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
-    def update_fighting(self):
-        self.engage_enemy() if self.weapons else self.run_away()
+    def update_fighting(self, enemy: PlayerEntity):
+        self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
 
-    def engage_enemy(self):
-        pass
+    def engage_enemy(self, enemy: PlayerEntity):
+        if enemy.alive:
+            for weapon in self._weapons:
+                if weapon.effective_against(enemy) and weapon.reload():
+                    if was_enemy_killed := weapon.shoot(enemy):
+                        self.targeted_enemy = None
+        else:
+            self.targeted_enemy = None
 
-    def run_away(self):
+    def run_away(self, enemy: PlayerEntity):
         pass
 
     @abstractmethod
@@ -426,6 +433,15 @@ class PlayerEntity(GameObject, EventsCreator):
     @abstractmethod
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         raise NotImplementedError
+
+    def on_being_hit(self, damage: float) -> bool:
+        """
+        :param damage: float
+        :return: bool -- if hit entity was destroyed/kiled or not,
+        it is propagated to the damage-dealer.
+        """
+        self._health -= damage
+        return self._health < 0
 
 
 if __name__:

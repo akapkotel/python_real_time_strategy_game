@@ -23,7 +23,7 @@ class ObjectsFactory(Singleton):
         self.configs = configs
 
     def spawn(self, name: str, player: Player, position: Point, **kwargs):
-        if kwargs:
+        if name in self.configs['buildings']:
             return self._spawn_building(name, player, position, **kwargs)
         elif name in self.configs['units']:
             return self._spawn_unit(name, player, position)
