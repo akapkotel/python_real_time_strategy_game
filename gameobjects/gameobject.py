@@ -6,11 +6,11 @@ from typing import Optional
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
-from utils.improved_spritelists import SelectiveSpriteList
-from utils.enums import Robustness, UnitWeight
-from utils.observers import OwnedObject
-from utils.functions import get_path_to_file, log
 from game import Game
+from utils.enums import Robustness, UnitWeight
+from utils.functions import get_path_to_file, log
+from utils.improved_spritelists import SelectiveSpriteList
+from utils.observers import OwnedObject
 
 
 class GameObject(AnimatedTimeBasedSprite, OwnedObject):

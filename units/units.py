@@ -2,25 +2,25 @@
 from __future__ import annotations
 
 import random
-import PIL
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Deque, List, Set, Optional, Union, cast
+from typing import Deque, List, Optional, Set, Union, cast
 
+import PIL
 from arcade import AnimatedTimeBasedSprite, load_textures
 from arcade.arcade_types import Point
 
-from .weapons import Weapon
 from buildings.buildings import Building
-from utils.enums import UnitWeight
 from game import UPDATE_RATE
-from map.map import GridPosition, MapNode, MapPath, PATH, Sector, Pathfinder
+from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
 from players_and_factions.player import Player, PlayerEntity
 from units.units_tasking import TasksExecutor, UnitTask
+from utils.enums import UnitWeight
 from utils.functions import (
-    calculate_angle, distance_2d, log, vector_2d, get_path_to_file,
-    precalculate_8_angles
+    calculate_angle, distance_2d, get_path_to_file, log,
+    precalculate_8_angles, vector_2d
 )
+from .weapons import Weapon
 
 
 class Unit(PlayerEntity, TasksExecutor):
@@ -58,10 +58,6 @@ class Unit(PlayerEntity, TasksExecutor):
         self.current_speed = 0
 
         self.permanent_units_group: int = 0
-
-        self.targeted_enemy: Optional[PlayerEntity] = None
-
-        self.weapons: List[Weapon] = []
 
     @abstractmethod
     def _load_textures_and_reset_hitbox(self, unit_name: str):
@@ -386,15 +382,13 @@ class Tank(Unit, Vehicle):
             sprite_list.update_texture(self)
 
     def on_update(self, delta_time: float = 1/60):
+        self.turret_aim_target = None
         super().on_update(delta_time)
         if self.moving:
             self.consume_fuel()
-        self.update_turret_target()
 
-    def update_turret_target(self):
-        self.turret_aim_target = None
-        if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
-            self.turret_aim_target = enemy
+    def update_fighting(self):
+        self.turret_aim_target = self.targeted_enemy
 
 
 class Infantry(Unit, ABC):

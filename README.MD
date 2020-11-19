@@ -58,6 +58,11 @@ To be done.
     ui-sound-effects.
 21. Display currently selected permanent units group number above each
    unit belonging to this group.
+22. Units are now 1x8 or 8x8 (tanks with turrets) spritesheets, so they
+    can face 8 directions (and other 8 directions for turrets). Each
+    Unit can be spawned in many, various colors, depending opf the
+    player's choice.
+23. Optimized visibility-detection, to reduce cpu overhead.
 
 #### TO BE DONE:
 #### Minor:
@@ -65,13 +70,14 @@ To be done.
    friendly Units which are very close to each other.
 2. Improve collisions-avoidance to get rid off the
    diagonal-movements-collisions.
-3. More efficient visibility-tests to avoid as many tests as possible.
-4. Better collision-avoidance to replace tiles-reserving system -
+3. Better collision-avoidance to replace tiles-reserving system -
    flocking maybe? How to make it working with pathfinding?
-5. Minimap and teleporting to the map-locations by clickling on the
+4. Minimap and teleporting to the map-locations by clickling on the
    minimap.
-6. Units-radiochatter sounds. Battle sounds.
-7. 
+5. Units-radiochatter sounds. Battle sounds.
+6. Shot, hit and destruction graphic effects and sounds.
+7. Skirmish mission customisation submenu (this is the only available
+   game mode for now).
 
 #### Major:
 1. User-interface. (currently being developed)

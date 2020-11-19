@@ -12,8 +12,6 @@ __credits__ = []
 
 from typing import (Any, Dict, List, Optional, Set, Union)
 
-import random
-
 import arcade
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line,
@@ -21,24 +19,22 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from utils.colors import BLACK, GREEN, RED, WHITE, DARK
-from utils.improved_spritelists import (
-    SelectiveSpriteList, SpriteListWithSwitch
-)
+from audio.sound import SoundPlayer
+from persistency.configs_handling import load_player_configs, read_csv_files
+from persistency.save_handling import SaveManager
+from user_interface.user_interface import (Frame, UiBundlesHandler,
+    UiElementsBundle, UiSpriteList)
+from utils.colors import BLACK, DARK, GREEN, RED, WHITE
 from utils.data_types import Viewport
-
-from utils.observers import OwnedObject
-from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
-from user_interface.user_interface import (
-    UiBundlesHandler, UiElementsBundle, UiSpriteList, Frame
-)
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
 )
-from persistency.save_handling import SaveManager
-from persistency.configs_handling import read_csv_files, load_player_configs
-from utils.views import LoadingScreen, WindowView, Updateable
-from audio.sound import SoundPlayer
+from utils.improved_spritelists import (
+    SelectiveSpriteList, SpriteListWithSwitch
+)
+from utils.observers import OwnedObject
+from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
+from utils.views import LoadingScreen, Updateable, WindowView
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -340,7 +336,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
         self.test_units_spawning()
-        self.test_buildings_spawning()
+        # self.test_buildings_spawning()
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
@@ -348,7 +344,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
-        player = Player(id=2, faction=faction)
+        player = Player(id=2, color=RED, faction=faction)
         cpu_player = CpuPlayer()
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)
@@ -361,7 +357,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def spawn_local_human_player_units(self) -> List[Unit]:
         spawned_units = []
         player = self.players[2]
-        name = 'tank_medium_green.png'
+        name = 'tank_medium.png'
         for x in range(30, SCREEN_WIDTH, TILE_WIDTH * 4):
             for y in range(90, SCREEN_HEIGHT, TILE_HEIGHT * 4):
                 unit = self.spawner.spawn(name, player, (x, y))
@@ -370,17 +366,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def spawn_cpu_units(self) -> List[Unit]:
         spawned_units = []
-        name = "tank_medium_red.png"
-        player = self.players[4]
-        for _ in range(30):
-            no_position = True
-            while no_position:
-                node = random.choice([n for n in self.map.nodes.values()])
-                if node.walkable:
-                    x, y = node.position
-                    unit = self.spawner.spawn(name, player, (x, y))
-                    spawned_units.append(unit)
-                    no_position = False
+        # name = "tank_medium_red.png"
+        # player = self.players[4]
+        # for _ in range(30):
+        #     no_position = True
+        #     while no_position:
+        #         node = random.choice([n for n in self.map.nodes.values()])
+        #         if node.walkable:
+        #             x, y = node.position
+        #             unit = self.spawner.spawn(name, player, (x, y))
+        #             spawned_units.append(unit)
+        #             no_position = False
         return spawned_units
 
     def test_buildings_spawning(self):

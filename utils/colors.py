@@ -3,13 +3,14 @@
 from arcade.arcade_types import Color
 
 # RGBA colors:
+RED: Color = (255, 0, 0, 255)
 GREEN: Color = (0, 255, 0, 255)
+BLUE: Color = (0, 0, 255, 255)
 CLEAR_GREEN: Color = (0, 255, 0, 25)
 MAP_GREEN: Color = (141, 182, 0, 255)
 GRASS_GREEN: Color = (85, 107, 47, 255)
 BROWN: Color = (165, 42, 42, 266)
 YELLOW: Color = (255, 255, 0, 255)
-RED: Color = (255, 0, 0, 255)
 SUN: Color = (255, 255, 224, 255)
 WHITE: Color = (255, 255, 255, 255)
 DARK: Color = (32, 32, 32, 255)
@@ -24,3 +25,8 @@ CIV_COLOR: Color = (250, 218, 94, 255)
 AMBIENT_COLOR: Color = (125, 125, 75, 255)
 NO_FOV_COLOR: Color = (0, 0, 0, 255)
 TRANSPARENT: Color = (0, 0, 0, 0)
+
+
+colors_names = {
+    GREEN: 'green', RED: 'red', YELLOW: 'yellow', BLUE: 'blue'
+}

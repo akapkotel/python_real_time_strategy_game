@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 
-import os
 import logging
-import PIL
+import os
 from functools import lru_cache
 from math import atan2, cos, degrees, hypot, inf as INFINITY, radians, sin
 from time import perf_counter
-from typing import Any, Iterable, List, Sequence, Tuple, Dict
+from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
+import PIL
 from arcade import Texture
-from arcade.arcade_types import RGB, RGBA, Color
+from arcade.arcade_types import Color, RGB, RGBA
 from numba import njit
 from shapely import speedups
 from shapely.geometry import LineString, Polygon
 
 from utils.data_types import Number, Point, Union
+from .colors import colors_names
 
 speedups.enable()
 
@@ -136,6 +137,12 @@ def find_paths_to_all_files_of_type(extension: str,
         for file_name in (f for f in directory[2] if f.endswith(extension)):
             names_to_paths[file_name] = directory[0]
     return names_to_paths
+
+
+def add_player_color_to_name(name: str, color: Color) -> str:
+    splitted = name.split('.')
+    color = colors_names[color]
+    return f'{splitted[0]}_{color}.{splitted[1]}'
 
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:

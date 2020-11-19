@@ -5,18 +5,19 @@ from abc import abstractmethod
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-from arcade.arcade_types import Point, Color
+from arcade.arcade_types import Color, Point
 
-from utils.data_types import FactionId, TechnologyId, GridPosition
-from scenarios.research import Technology
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH
+from scenarios.research import Technology
+from utils.data_types import FactionId, TechnologyId
+from utils.functions import (
+    calculate_observable_area, distance_2d, is_visible, log
+)
 from utils.observers import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
-from utils.functions import (
-    calculate_observable_area, is_visible, log, distance_2d
-)
+
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -142,7 +143,6 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.known_enemies: Set[PlayerEntity] = set()
         
         self.register_to_objectsowners(self.game, self.faction)
-        print(self.fuel_production_efficiency)
 
     def __repr__(self) -> str:
         return self.name
@@ -258,6 +258,8 @@ class PlayerEntity(GameObject, EventsCreator):
 
         self.nearby_friends: Set[PlayerEntity] = set()
 
+        self.targeted_enemy: Optional[PlayerEntity] = None
+
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
         # this is checked so frequent that it is worth caching it:
@@ -270,11 +272,22 @@ class PlayerEntity(GameObject, EventsCreator):
         self.attack_radius = TILE_WIDTH * 5
         self.observed_nodes: Set[MapNode] = set()
 
+        self._weapons: List[Weapon] = []
+        self._ammunition = 100
+
         self.register_to_objectsowners(self.game, self.player)
 
     @property
     def health(self) -> float:
         return self._health
+
+    @property
+    def weapons(self) -> bool:
+        return self._weapons and self.ammunition
+
+    @property
+    def ammunition(self) -> bool:
+        return self._ammunition > 0
 
     @health.setter
     def health(self, value: float):
@@ -298,6 +311,8 @@ class PlayerEntity(GameObject, EventsCreator):
             self.update_visibility()
             self.update_nearby_friends()
             self.update_known_enemies_set()
+            if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
+                self.update_fighting()
             super().on_update(delta_time)
         else:
             self.kill()
@@ -375,6 +390,15 @@ class PlayerEntity(GameObject, EventsCreator):
     def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
+    def update_fighting(self):
+        self.engage_enemy() if self.weapons else self.run_away()
+
+    def engage_enemy(self):
+        pass
+
+    def run_away(self):
+        pass
+
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         raise NotImplementedError
@@ -407,6 +431,7 @@ class PlayerEntity(GameObject, EventsCreator):
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from units.units import Unit
+    from units.weapons import Weapon
     from buildings.buildings import Building
     from units.unit_management import SelectedEntityMarker
 

@@ -4,24 +4,20 @@ from __future__ import annotations
 import heapq
 import math
 import random
-
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
-
 from math import hypot
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from utils.data_types import (
-    BuildingId, GridPosition, Number, SectorId, UnitId, PlayerId
-)
-from gameobjects.gameobject import TerrainObject
-from game import Game, PROFILING_LEVEL, TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
-from utils.scheduling import EventsCreator, ScheduledEvent
+from game import Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
 from utils.classes import Singleton
-from utils.functions import get_path_to_file, log, timer
+from utils.data_types import (BuildingId, GridPosition, Number, PlayerId,
+    SectorId, UnitId)
 from utils.enums import TerrainCost
+from utils.functions import get_path_to_file, log, timer
+from utils.scheduling import EventsCreator, ScheduledEvent
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
