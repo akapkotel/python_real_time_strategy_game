@@ -201,13 +201,16 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return self.health < self._max_health
 
     def on_update(self, delta_time: float = 1/60):
-        super().on_update(delta_time)
-        if self.is_units_producer:
-            self.update_production()
-        elif self.is_resource_producer:
-            self.update_resource_production()
-        elif self.is_research_facility:
-            self.update_research()
+        if self.alive:
+            super().on_update(delta_time)
+            if self.is_units_producer:
+                self.update_production()
+            elif self.is_resource_producer:
+                self.update_resource_production()
+            elif self.is_research_facility:
+                self.update_research()
+        else:
+            self.kill()
 
     def in_observed_area(self, other) -> bool:
         return self.occupied_sectors.isdisjoint(other.observed_nodes)

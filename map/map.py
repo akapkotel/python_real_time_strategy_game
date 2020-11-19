@@ -107,8 +107,6 @@ class Map(GridHandler):
         # adjacent ones instead of whole map for enemies:
         self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
-        self.units: Dict[GridPosition, UnitId] = {}
-        self.buildings: Dict[GridPosition, BuildingId] = {}
 
         self.generate_sectors()
         self.generate_nodes()
@@ -270,7 +268,6 @@ class MapNode(GridHandler, ABC):
 
     @unit.setter
     def unit(self, value: Optional[Unit]):
-        self.map.units[self.grid] = value
         self._unit = value
 
     @property
@@ -279,7 +276,6 @@ class MapNode(GridHandler, ABC):
 
     @building.setter
     def building(self, value: Optional[Building]):
-        self.map.buildings[self.grid] = value
         self._building = value
 
     @property
@@ -397,7 +393,7 @@ class Pathfinder(Singleton, EventsCreator):
         while nearest_walkable is None:
             adjacent = node.adjacent_nodes
             for node in adjacent:
-                if node.pathable:
+                if node.walkable:
                     return node.position
                 else:
                     continue

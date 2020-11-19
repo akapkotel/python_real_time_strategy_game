@@ -10,6 +10,7 @@ import PIL
 from arcade import AnimatedTimeBasedSprite, load_textures
 from arcade.arcade_types import Point
 
+from effects.explosions import Explosion
 from buildings.buildings import Building
 from game import UPDATE_RATE
 from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
@@ -97,16 +98,19 @@ class Unit(PlayerEntity, TasksExecutor):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        super().on_update(delta_time)
-        self.evaluate_tasks()
+        if self.alive:
+            super().on_update(delta_time)
+            self.evaluate_tasks()
 
-        new_current_node = self.map.position_to_node(*self.position)
-        if self in self.game.local_human_player.faction.units:
-            self.update_observed_area(new_current_node)
+            new_current_node = self.map.position_to_node(*self.position)
+            if self in self.game.local_human_player.faction.units:
+                self.update_observed_area(new_current_node)
 
-        self.update_blocked_map_nodes(new_current_node)
-        self.update_current_sector()
-        self.update_pathfinding()
+            self.update_blocked_map_nodes(new_current_node)
+            self.update_current_sector()
+            self.update_pathfinding()
+        else:
+            self.kill()
 
     def update_observed_area(self, new_current_node: MapNode):
         if self.observed_nodes and new_current_node == self.current_node:
@@ -258,17 +262,6 @@ class Unit(PlayerEntity, TasksExecutor):
         self.game.debugged.append([PATH, path])
         log(f'{self} found path to {destination}, path: {path}')
 
-    def kill(self):
-        self.current_sector.units_and_buildings[self.player.id].discard(self)
-
-        self.cancel_path_requests()
-
-        for node in (self.current_node, self.reserved_node):
-            if node is not None:
-                self.unblock_map_node(node)
-
-        super().kill()
-
     def cancel_path_requests(self):
         self.game.pathfinder.cancel_path_requests(self)
 
@@ -298,6 +291,22 @@ class Unit(PlayerEntity, TasksExecutor):
     def target_enemy(self, enemy: Optional[PlayerEntity] = None):
         """Call this method with 'None' to cancel current targeted enemy."""
         self.targeted_enemy = enemy
+
+    def kill(self):
+        self.current_sector.units_and_buildings[self.player.id].discard(self)
+        self.cancel_path_requests()
+        self.clear_all_blocked_nodes()
+        self.create_death_animation()
+        super().kill()
+
+    def clear_all_blocked_nodes(self):
+        for node in (self.current_node, self.reserved_node):
+            if node is not None:
+                self.unblock_map_node(node)
+
+    def create_death_animation(self):
+        self.game.effects.append(Explosion(*self.position))
+        self.game.window.sound_player.play_sound('explosion.wav')
 
 
 class Vehicle:
@@ -331,6 +340,9 @@ class Tank(Unit, Vehicle):
                  position: Point):
         super().__init__(unit_name, player, weight, position)
         # combine texture from these two indexes:
+        self.hull_texture_index = random.randint(0, 7)
+        self.turret_texture_index = random.randint(0, 7)
+
         self._load_textures_and_reset_hitbox(unit_name)
         self.turret_aim_target = None
         self._weapons.append(Weapon())
@@ -349,26 +361,28 @@ class Tank(Unit, Vehicle):
         self.textures = [load_textures(get_path_to_file(unit_name),
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
-        i, j = random.randint(0, 7), random.randint(0, 7)
-        self.set_texture(i, j)
+        self.set_texture(self.hull_texture_index)
         self.set_hit_box(self.texture.hit_box_points)
 
-    def angle_to_texture(self, angle_to_target: float):
-        hull_texture_index = self.angles[int(angle_to_target)]
-        if (target := self.turret_aim_target) is None:
-            turret_texture_index = hull_texture_index
+    def angle_to_texture(self,
+                         hull_angle: float = None,
+                         turret_angle: float = None):
+        if hull_angle is not None:
+            self.hull_texture_index = self.angles[int(hull_angle)]
+        # for Tank we need to set it's turret direction too:
+        if turret_angle is None:
+            self.turret_texture_index = self.hull_texture_index
         else:
-            angle = calculate_angle(*self.position, *target.position)
-            turret_texture_index = self.angles[int(angle)]
-        self.set_texture(hull_texture_index, turret_texture_index)
+            self.turret_texture_index = self.angles[int(turret_angle)]
+        self.set_texture(self.hull_texture_index)
 
-    def set_texture(self, hull_texture_index: int, turret_texture_index: int):
+    def set_texture(self, hull_texture_index: int):
         """
-        Sets texture by texture id. Should be renamed because it takes
-        a number rather than a texture, but keeping
-        this for backwards compatibility.
+        We override original method to work with 2 texture indexes combined:
+        first for the hull (which list of textures to use) and second for
+        turret for actual texture to be chosen from the list.
         """
-        texture = self.textures[hull_texture_index][turret_texture_index]
+        texture = self.textures[hull_texture_index][self.turret_texture_index]
         if texture == self._texture:
             return
 
@@ -389,6 +403,8 @@ class Tank(Unit, Vehicle):
 
     def update_fighting(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
+        angle = calculate_angle(*self.position, *enemy.position)
+        self.angle_to_texture(turret_angle=angle)
         super().update_fighting(enemy)
 
 

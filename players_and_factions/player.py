@@ -308,15 +308,13 @@ class PlayerEntity(GameObject, EventsCreator):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        if self.alive:
-            self.update_visibility()
-            self.update_nearby_friends()
-            self.update_known_enemies_set()
-            if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
-                self.update_fighting(enemy)
-            super().on_update(delta_time)
-        else:
-            self.kill()
+        self.update_visibility()
+        self.update_nearby_friends()
+        self.update_known_enemies_set()
+        self.update_targeted_enemy()
+        if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
+            self.update_fighting(enemy)
+        super().on_update(delta_time)
 
     def draw(self):
         if self.rendered:
@@ -356,7 +354,7 @@ class PlayerEntity(GameObject, EventsCreator):
             self.player.update_known_enemies(enemies)
             self.notify_detected_enemies_about_self(enemies)
             self.notify_all_nearby_friends_about_enemies(enemies)
-        self.known_enemies = enemies
+        self.known_enemies = enemies.union(self.mutually_detected_enemies)
 
     def notify_all_nearby_friends_about_enemies(self, enemies):
         """
@@ -425,11 +423,6 @@ class PlayerEntity(GameObject, EventsCreator):
     def needs_repair(self) -> bool:
         raise NotImplementedError
 
-    def kill(self):
-        if self.selection_marker is not None:
-            self.selection_marker.kill()
-        super().kill()
-
     @abstractmethod
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         raise NotImplementedError
@@ -442,6 +435,21 @@ class PlayerEntity(GameObject, EventsCreator):
         """
         self._health -= damage
         return self._health < 0
+
+    def update_targeted_enemy(self):
+        """
+        Set the weakest of the enemies in range of this entity weapons as the
+        current target to attack.
+        """
+        if enemies := self.known_enemies:
+            if in_range := list(filter(lambda e: e.in_range(self), enemies)):
+                weakest = sorted(in_range, key=lambda e: e.health)[0]
+                self.targeted_enemy = weakest
+
+    def kill(self):
+        if self.selection_marker is not None:
+            self.selection_marker.kill()
+        super().kill()
 
 
 if __name__:

@@ -54,8 +54,8 @@ GAME_SPEED = 1.0
 
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = True
-DEBUG = True
+PYPROFILER = False
+DEBUG = False
 
 
 class Window(arcade.Window, EventsCreator):
@@ -257,6 +257,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.vehicles_threads = SelectiveSpriteList(is_static=True)
         self.buildings = SelectiveSpriteList(is_static=True)
         self.units = SelectiveSpriteList()
+        self.effects = SpriteList()
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()

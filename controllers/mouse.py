@@ -303,8 +303,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         GameObjects placed at the MouseCursor position.
         """
         pointed = self.get_pointed_sprite(*self.position)
-        if isinstance(pointed, PlayerEntity) and pointed.rendered:
-            self.pointed_gameobject = pointed
+        if isinstance(pointed, PlayerEntity):
+            self.pointed_gameobject = pointed if pointed.rendered else None
             self.update_mouse_pointed_ui_element(None)
         else:
             self.pointed_gameobject = None
@@ -360,10 +360,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 self.set_texture(CURSOR_SELECTION_TEXTURE)
             elif entity.is_enemy(self.selected_units[0]):
                 self.set_texture(CURSOR_ATTACK_TEXTURE)
-        elif not self.game.map.position_to_node(*self.position).walkable:
-            self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
-        else:
+        elif self.game.map.position_to_node(*self.position).walkable:
             self.set_texture(CURSOR_MOVE_TEXTURE)
+        else:
+            self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
         if entity.selectable:
