@@ -1,1 +1,2 @@
-object_name,class,damage,penetration,accuracy,range,rate_of_fire,shot_sound
+object_name,class,damage,penetration,accuracy,range,rate_of_fire
+'medium_tank_gun',Weapon,10.0,2.0,75.0,200,2.0

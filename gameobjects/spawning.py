@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Sequence
 
 from arcade.arcade_types import Point
 
@@ -16,10 +16,13 @@ from .gameobject import GameObject
 
 class ObjectsFactory(Singleton):
 
-    def __init__(self, configs: Dict[str, Dict[str, Dict[str, Any]]]):
+    def __init__(self,
+                 pathfinder,
+                 configs: Dict[str, Dict[str, Dict[str, Any]]]):
         """
         :param configs: Dict -- data read from the CSV files in configs dir.
         """
+        self.pathfinder = pathfinder
         self.configs = configs
 
     def spawn(self, name: str, player: Player, position: Point, **kwargs):
@@ -28,6 +31,17 @@ class ObjectsFactory(Singleton):
         elif name in self.configs['units']:
             return self._spawn_unit(name, player, position)
         return self._spawn_terrain_object(name, position)
+
+    def spawn_group(self,
+                    names: Sequence[str],
+                    player: Player,
+                    position: Point, **kwargs) -> List[GameObject]:
+        positions = self.pathfinder.group_of_waypoints(*position, len(names))
+        spawned = []
+        for i, name in enumerate(names):
+            position = self.pathfinder.map.grid_to_position(positions[i])
+            spawned.append(self.spawn(name, player, position))
+        return spawned
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
         # since player can pick various Colors we need to 'colorize" name of

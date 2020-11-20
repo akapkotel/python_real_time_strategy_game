@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import random
+
 from abc import abstractmethod
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -266,6 +268,7 @@ class PlayerEntity(GameObject, EventsCreator):
 
         # this is checked so frequent that it is worth caching it:
         self.is_building = isinstance(self, Building)
+        self.is_infantry = isinstance(self, Infantry)
 
         self._max_health = 100
         self._health = self._max_health
@@ -279,6 +282,8 @@ class PlayerEntity(GameObject, EventsCreator):
         # use this number to animate shot blast from weapon:
         self.barrel_end = self.cur_texture_index
         self._ammunition = 100
+
+        self.experience = 0
 
         self.register_to_objectsowners(self.game, self.player)
 
@@ -316,7 +321,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self.update_nearby_friends()
         self.update_known_enemies_set()
         self.update_targeted_enemy()
-        if (enemy := self.targeted_enemy) is not None and enemy.in_range(self):
+        if (enemy := self.targeted_enemy) is not None:
             self.update_fighting(enemy)
         super().on_update(delta_time)
 
@@ -393,6 +398,25 @@ class PlayerEntity(GameObject, EventsCreator):
     def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
+    def update_targeted_enemy(self):
+        """
+        Set the random or weakest of the enemies in range of this entity
+        weapons as the current hit to attack if not targeting any yet.
+        """
+        if (enemies := self.known_enemies) and self.no_current_target:
+            if in_range := list(filter(lambda e: e.in_range(self), enemies)):
+                if self.experience > 35:
+                    weakest = sorted(in_range, key=lambda e: e.health)[0]
+                else:
+                    weakest = random.choice(in_range)
+                self.targeted_enemy = weakest
+            else:
+                self.targeted_enemy = None
+
+    @property
+    def no_current_target(self) -> bool:
+        return self.targeted_enemy is None or not self.targeted_enemy.in_range(self)
+
     def update_fighting(self, enemy: PlayerEntity):
         self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
 
@@ -401,12 +425,16 @@ class PlayerEntity(GameObject, EventsCreator):
             for weapon in self._weapons:
                 if weapon.effective_against(enemy) and weapon.reload():
                     if was_enemy_killed := weapon.shoot(enemy):
+                        self.gain_experience(enemy)
                         self.targeted_enemy = None
         else:
             self.targeted_enemy = None
 
     def run_away(self, enemy: PlayerEntity):
         pass
+
+    def gain_experience(self, enemy: PlayerEntity):
+        self.experience += 1  # TODO: get experience from configs
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
@@ -439,21 +467,11 @@ class PlayerEntity(GameObject, EventsCreator):
         """
         self.create_hit_audio_visual_effects()
         self._health -= damage
-        return self._health < 0
+        return self._health <= 0
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)
         self.game.create_effect(Explosion(*position, 'HITBLAST'))
-
-    def update_targeted_enemy(self):
-        """
-        Set the weakest of the enemies in range of this entity weapons as the
-        current hit to attack.
-        """
-        if enemies := self.known_enemies:
-            if in_range := list(filter(lambda e: e.in_range(self), enemies)):
-                weakest = sorted(in_range, key=lambda e: e.health)[0]
-                self.targeted_enemy = weakest
 
     def kill(self):
         if self.selection_marker is not None:
@@ -463,8 +481,8 @@ class PlayerEntity(GameObject, EventsCreator):
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
-    from units.units import Unit
     from units.weapons import Weapon
+    from units.units import Unit, Infantry
     from buildings.buildings import Building
     from units.unit_management import SelectedEntityMarker
 

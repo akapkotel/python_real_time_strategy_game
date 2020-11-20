@@ -175,6 +175,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.block_map_node(node)
         return list(occupied_nodes)
 
+    @property
+    def moving(self) -> bool:
+        return False
+
     @staticmethod
     def unblock_map_node(node: MapNode):
         node.building = None

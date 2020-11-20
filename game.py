@@ -264,7 +264,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
         self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
                        TILE_HEIGHT)
-        self.pathfinder = Pathfinder(map=self.map)
+        self.pathfinder: Pathfinder = Pathfinder(map=self.map)
 
         self.fog_of_war = FogOfWar()
         # we put FoW before the interface to list of rendered layers to
@@ -272,7 +272,10 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.drawn.insert(-2, self.fog_of_war)
 
         # All GameObjects are initialized by the specialised factory:
-        self.spawner = ObjectsFactory(configs=self.window.configs)
+        self.spawner = ObjectsFactory(
+            pathfinder=self.pathfinder,
+            configs=self.window.configs
+        )
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -369,15 +372,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         spawned_units = []
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
-            for _ in range(30):
-                no_position = True
-                while no_position:
-                    node = random.choice([n for n in self.map.nodes.values()])
-                    if node.walkable:
-                        x, y = node.position
-                        unit = self.spawner.spawn(unit_name, player, (x, y))
-                        spawned_units.append(unit)
-                        no_position = False
+            node = self.map.nodes[random.randint(0, 49), random.randint(0, 49)]
+            names = [unit_name] * 30
+            spawned_units.extend(
+                self.spawner.spawn_group(names, player, node.position)
+            )
+            # for _ in range(30):
+            #     no_position = True
+            #     while no_position:
+            #         node = random.choice([n for n in self.map.nodes.values()])
+            #         if node.walkable:
+            #             x, y = node.position
+            #             unit = self.spawner.spawn(unit_name, player, (x, y))
+            #             spawned_units.append(unit)
+            #             no_position = False
         self.units.extend(spawned_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
@@ -556,7 +564,7 @@ if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
-    from effects.explosions import Explosion
+    from effects.explosions import Explosion, explosions
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )

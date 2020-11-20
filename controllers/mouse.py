@@ -200,8 +200,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_building_clicked(clicked)
 
     def on_hostile_player_entity_clicked(self, clicked, units):
-        for unit in self.selected_units:
-            unit.target_enemy(clicked)
         position = self.game.pathfinder.get_closest_pathable_position(*clicked.position)
         self.send_units_to_pointed_location(units, *position)
 

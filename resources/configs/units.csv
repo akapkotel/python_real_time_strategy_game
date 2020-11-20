@@ -1,3 +1,2 @@
-object_name,class,max_speed,fuel_consumption
-jeep_blue.png,Vehicle,4,0.0005
-tank_medium.png,Tank,3,0.003
+object_name,class,max_speed,fuel_consumption,weapons_names,armour
+tank_medium.png,Tank,2,0.003,('medium_tank_gun'),1.75
