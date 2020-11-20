@@ -5,7 +5,7 @@ import os
 from functools import lru_cache
 from math import atan2, cos, degrees, hypot, inf as INFINITY, radians, sin
 from time import perf_counter
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Sequence, Tuple, Optional
 
 import PIL
 from arcade import Texture
@@ -231,6 +231,35 @@ def vector_2d(angle: float, scalar: float) -> Point:
     """
     rad = -radians(angle)
     return sin(rad) * scalar, cos(rad) * scalar
+
+
+def move_along_vector(start: Point,
+                      velocity: float,
+                      target: Optional[Point] = None,
+                      angle: Optional[float] = None) -> Point:
+    """
+    Create movement vector starting at 'start' point angled in direction of
+    'target' point with scalar velocity 'velocity'. Optionally, instead of
+    'target' position, you can pass starting 'angle' of the vector.
+
+    Use 'current_waypoint' position only, when you now the point and do not know the
+    angle between two points, but want quickly calculate position of the
+    another point lying on the line connecting two, known points.
+
+    :param start: tuple -- point from vector starts
+    :param target: tuple -- current_waypoint that vector 'looks at'
+    :param velocity: float -- scalar length of the vector
+    :param angle: float -- angle of the vector direction
+    :return: tuple -- (optional)position of the vector end
+    """
+    if target is None and angle is None:
+        raise ValueError("You MUST pass current_waypoint position or vector angle!")
+    p1 = (start[0], start[1])
+    if target:
+        p2 = (target[0], target[1])
+        angle = calculate_angle(*p1, *p2)
+    vector = vector_2d(angle, velocity)
+    return p1[0] + vector[0], p1[1] + vector[1]
 
 
 def is_visible(position_a: Point,

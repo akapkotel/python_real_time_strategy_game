@@ -255,8 +255,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         # SpriteLists:
         self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SelectiveSpriteList(is_static=True)
-        self.buildings = SelectiveSpriteList(is_static=True)
         self.units = SelectiveSpriteList()
+        self.buildings = SelectiveSpriteList(is_static=True)
         self.effects = SpriteList()
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_interface()
@@ -328,6 +328,13 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         if top - dy < SCREEN_HEIGHT or top - dy > self.map.height:
             dy = 0
         self.interface.move(-dx, -dy)
+
+    def create_effect(self, effect: Explosion):
+        """
+        Add animated sprite to the self.effects spritelist to display e.g.:
+        explosions.
+        """
+        self.effects.append(effect)
 
     def on_show_view(self):
         super().on_show_view()
@@ -549,6 +556,7 @@ if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
+    from effects.explosions import Explosion
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )

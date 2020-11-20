@@ -35,7 +35,6 @@ def convert_csv_data(row) -> Dict:
             converted[key] = unpack_value(value, value[0])
         else:
             converted[key] = convert_value(value)
-    print(converted)
     return converted
 
 

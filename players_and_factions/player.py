@@ -5,9 +5,11 @@ from abc import abstractmethod
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
 from game import Game, UPDATE_RATE
+from effects.explosions import Explosion
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH
 from scenarios.research import Technology
@@ -274,6 +276,8 @@ class PlayerEntity(GameObject, EventsCreator):
         self.observed_nodes: Set[MapNode] = set()
 
         self._weapons: List[Weapon] = []
+        # use this number to animate shot blast from weapon:
+        self.barrel_end = self.cur_texture_index
         self._ammunition = 100
 
         self.register_to_objectsowners(self.game, self.player)
@@ -433,13 +437,18 @@ class PlayerEntity(GameObject, EventsCreator):
         :return: bool -- if hit entity was destroyed/kiled or not,
         it is propagated to the damage-dealer.
         """
+        self.create_hit_audio_visual_effects()
         self._health -= damage
         return self._health < 0
+
+    def create_hit_audio_visual_effects(self):
+        position = rand_in_circle(self.position, self.collision_radius // 3)
+        self.game.create_effect(Explosion(*position, 'HITBLAST'))
 
     def update_targeted_enemy(self):
         """
         Set the weakest of the enemies in range of this entity weapons as the
-        current target to attack.
+        current hit to attack.
         """
         if enemies := self.known_enemies:
             if in_range := list(filter(lambda e: e.in_range(self), enemies)):

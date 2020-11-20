@@ -51,7 +51,7 @@ class SelectionUnitMarket(SelectedEntityMarker):
         self.borders.texture = selection_textures[selected.permanent_units_group]
 
         self.healthbar = healthbar = SpriteSolidColor(
-            *self.health_to_color_and_width(health))
+            *self.health_to_color_and_width(max(health, 0)))
 
         self.sprites = sprites = [self.borders, healthbar]
         self.game.selection_markers_sprites.extend(sprites)

@@ -305,7 +305,7 @@ class Unit(PlayerEntity, TasksExecutor):
                 self.unblock_map_node(node)
 
     def create_death_animation(self):
-        self.game.effects.append(Explosion(*self.position))
+        self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
         self.game.window.sound_player.play_sound('explosion.wav')
 
 
@@ -345,7 +345,8 @@ class Tank(Unit, Vehicle):
 
         self._load_textures_and_reset_hitbox(unit_name)
         self.turret_aim_target = None
-        self._weapons.append(Weapon())
+        self._weapons.append(Weapon(name='tank_light_gun', owner=self))
+        self.barrel_end = self.turret_texture_index
 
     def needs_repair(self) -> bool:
         pass
@@ -374,6 +375,7 @@ class Tank(Unit, Vehicle):
             self.turret_texture_index = self.hull_texture_index
         else:
             self.turret_texture_index = self.angles[int(turret_angle)]
+        self.barrel_end = self.turret_texture_index
         self.set_texture(self.hull_texture_index)
 
     def set_texture(self, hull_texture_index: int):
