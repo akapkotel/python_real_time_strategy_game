@@ -8,7 +8,7 @@ from utils.functions import get_path_to_file
 
 path = get_path_to_file
 explosions = {
-    'EXPLOSION': load_spritesheet(path('explosion.png'), 256, 256, 16, 96),
+    'EXPLOSION': load_spritesheet(path('explosion.png'), 256, 256, 16, 64),
     'SHOTBLAST': load_spritesheet(path('shot_blast.png'), 256, 256, 4, 16),
     'HITBLAST': load_spritesheet(path('hit_blast.png'), 256, 256, 8, 48),
     'SMALL_EXPLOSION_5': load_spritesheet(path('explosion_small_5.png'), 256, 256, 15, 60)

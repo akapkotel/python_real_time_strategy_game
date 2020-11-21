@@ -321,9 +321,28 @@ class PlayerEntity(GameObject, EventsCreator):
         self.update_nearby_friends()
         self.update_known_enemies_set()
         self.update_targeted_enemy()
-        if (enemy := self.targeted_enemy) is not None:
-            self.update_fighting(enemy)
+        self.update_fighting()
         super().on_update(delta_time)
+
+    def update_targeted_enemy(self):
+        """
+        Set the random or weakest of the enemies in range of this entity
+        weapons as the current hit to attack if not targeting any yet.
+        """
+        if (enemies := self.known_enemies) and self.no_current_target:
+            if in_range := [e for e in enemies if e.in_range(self)]:
+                if self.experience > 35:
+                    self.targeted_enemy = sorted(in_range, key=lambda e: e.health)[0]
+                else:
+                    self.targeted_enemy = random.choice(in_range)
+            else:
+                self.targeted_enemy = None
+
+    def update_fighting(self):
+        if (enemy := self.targeted_enemy) is not None:
+            self.fight_or_run_away(enemy)
+        elif (enemies := self.known_enemies) and not self.is_building:
+            self.move_towards_enemies_nearby(enemies)
 
     def draw(self):
         if self.rendered:
@@ -398,26 +417,11 @@ class PlayerEntity(GameObject, EventsCreator):
     def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
-    def update_targeted_enemy(self):
-        """
-        Set the random or weakest of the enemies in range of this entity
-        weapons as the current hit to attack if not targeting any yet.
-        """
-        if (enemies := self.known_enemies) and self.no_current_target:
-            if in_range := list(filter(lambda e: e.in_range(self), enemies)):
-                if self.experience > 35:
-                    weakest = sorted(in_range, key=lambda e: e.health)[0]
-                else:
-                    weakest = random.choice(in_range)
-                self.targeted_enemy = weakest
-            else:
-                self.targeted_enemy = None
-
     @property
     def no_current_target(self) -> bool:
         return self.targeted_enemy is None or not self.targeted_enemy.in_range(self)
 
-    def update_fighting(self, enemy: PlayerEntity):
+    def fight_or_run_away(self, enemy: PlayerEntity):
         self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
 
     def engage_enemy(self, enemy: PlayerEntity):
@@ -451,9 +455,8 @@ class PlayerEntity(GameObject, EventsCreator):
     def selectable(self) -> bool:
         return self.player is self.game.local_human_player
 
-    @abstractmethod
-    def needs_repair(self) -> bool:
-        raise NotImplementedError
+    def damaged(self) -> bool:
+        return self._health < self._max_health
 
     @abstractmethod
     def get_nearby_friends(self) -> Set[PlayerEntity]:
@@ -477,6 +480,10 @@ class PlayerEntity(GameObject, EventsCreator):
         if self.selection_marker is not None:
             self.selection_marker.kill()
         super().kill()
+
+    @abstractmethod
+    def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
+        raise NotImplementedError
 
 
 if __name__:

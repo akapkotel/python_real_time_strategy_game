@@ -7,7 +7,7 @@ from collections import deque
 from typing import Deque, List, Optional, Set, Union, cast
 
 import PIL
-from arcade import AnimatedTimeBasedSprite, load_textures
+from arcade import SpriteList, AnimatedTimeBasedSprite, load_textures
 from arcade.arcade_types import Point
 
 from effects.explosions import Explosion
@@ -93,10 +93,6 @@ class Unit(PlayerEntity, TasksExecutor):
         except IndexError:
             return None
 
-    @abstractmethod
-    def needs_repair(self) -> bool:
-        raise NotImplementedError
-
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
@@ -157,13 +153,16 @@ class Unit(PlayerEntity, TasksExecutor):
                 self.find_best_way_to_avoid_collision(next_node.unit)
 
     def find_best_way_to_avoid_collision(self, blocker):
-        if (blocker.path or blocker.waiting_for_path[0] or
-                self.is_enemy(blocker) or blocker in Pathfinder.instance):
+        if blocker.has_destination or self.is_enemy(blocker):
             self.wait_for_free_path()
         elif self.find_alternative_path() is not None:
             pass
         else:
             self.ask_for_pass(blocker)
+
+    @property
+    def has_destination(self) -> bool:
+        return self.path or self.waiting_for_path[0] or self in Pathfinder.instance
 
     def wait_for_free_path(self):
         """
@@ -243,13 +242,12 @@ class Unit(PlayerEntity, TasksExecutor):
         self.change_x, self.change_y = vector_2d(angle, speed)
 
     def move_to(self, destination: GridPosition):
-        self.path.clear()
         self.cancel_path_requests()
         start = self.map.position_to_grid(*self.position)
         Pathfinder.instance.request_path(self, start, destination)
 
-    def create_new_path(self, path: MapPath):
-        self.path = deque(path[1:])
+    def create_new_path(self, new_path: MapPath):
+        self.path = deque(new_path[1:])
         self.waiting_for_path[0] = 0
         self.unschedule_earlier_move_orders()
 
@@ -292,6 +290,17 @@ class Unit(PlayerEntity, TasksExecutor):
         """Call this method with 'None' to cancel current targeted enemy."""
         self.targeted_enemy = enemy
 
+    def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
+        """
+        When Unit detected enemies but they are out of attack range, it can
+        move closer to engage them.
+        """
+        if not self.has_destination:
+            enemy_to_attack = random.choice([e for e in known_enemies])
+            position = self.game.pathfinder.get_closest_pathable_position(
+                *enemy_to_attack.position)
+            self.move_to(self.map.position_to_grid(*position))
+
     def kill(self):
         self.current_sector.units_and_buildings[self.player.id].discard(self)
         self.cancel_path_requests()
@@ -316,10 +325,6 @@ class Vehicle:
 
     def consume_fuel(self):
         self.fuel -= self.fuel_consumption
-
-    @property
-    def needs_repair(self) -> bool:
-        return self._health < self._max_health
 
 
 class NoTurret:
@@ -347,9 +352,6 @@ class Tank(Unit, Vehicle):
         self.turret_aim_target = None
         self._weapons.append(Weapon(name='tank_light_gun', owner=self))
         self.barrel_end = self.turret_texture_index
-
-    def needs_repair(self) -> bool:
-        pass
 
     def _load_textures_and_reset_hitbox(self, unit_name: str):
         """
@@ -403,38 +405,51 @@ class Tank(Unit, Vehicle):
         if self.moving:
             self.consume_fuel()
 
-    def update_fighting(self, enemy: PlayerEntity):
+    def fight_or_run_away(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
         angle = calculate_angle(*self.position, *enemy.position)
         self.angle_to_texture(turret_angle=angle)
-        super().update_fighting(enemy)
+        super().fight_or_run_away(enemy)
 
 
-class Infantry(Unit, ABC):
+class Infantry(Unit):
 
     def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
                  position: Point):
         super().__init__(unit_name, player, weight, position)
 
         self.max_soldiers = 4
-        self.soldiers: List[Soldier] = []
+        self.soldiers: SpriteList[Soldier] = SpriteList()
+        self.soldiers.extend([Soldier() for _ in range(self.max_soldiers)])
 
-        self.health_restoration = 0.003
+    def _load_textures_and_reset_hitbox(self, unit_name: str):
+        pass
+
+    @property
+    def needs_reinforcements(self) -> bool:
+        return len(self.soldiers) < self.max_soldiers
 
     def __len__(self):
         return len(self.soldiers)
 
     @property
-    def needs_medic(self) -> bool:
+    def damaged(self) -> bool:
         return cast(int, self._health) < 25 * len(self.soldiers)
 
-    def update(self):
+    def on_update(self, delta_time: float = 1/60):
         super().update()
+        self.soldiers.on_update(delta_time)
         self.restore_soldiers_health()
 
     def restore_soldiers_health(self):
+        soldier: Soldier
         for soldier in self.soldiers:
             self._health += soldier.restore_health()
+
+    def on_being_hit(self, damage: float) -> bool:
+        hit_soldier = random.choice(self.soldiers)
+        hit_soldier.on_being_hit(damage)
+        return len(self.soldiers) > 0
 
 
 class Soldier(AnimatedTimeBasedSprite):
@@ -443,8 +458,14 @@ class Soldier(AnimatedTimeBasedSprite):
     health_restoration = 0.003
     weapon: Weapon = None
 
+    def on_being_hit(self, damage: float) -> bool:
+        pass
+
     def restore_health(self) -> float:
         wounds = round(self._max_health - self.health, 3)
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
         return health_gained
+
+    def kill(self):
+        pass

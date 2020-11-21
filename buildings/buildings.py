@@ -198,10 +198,11 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
-        self.observed_nodes = self.calculate_observed_area()
+        self.observed_nodes = nodes = self.calculate_observed_area()
+        self.game.fog_of_war.explore_map([n.grid for n in nodes])
 
     @property
-    def needs_repair(self) -> bool:
+    def damaged(self) -> bool:
         return self.health < self._max_health
 
     def on_update(self, delta_time: float = 1/60):
@@ -213,6 +214,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.update_resource_production()
             elif self.is_research_facility:
                 self.update_research()
+            self.update_observed_area()
         else:
             self.kill()
 

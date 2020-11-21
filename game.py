@@ -64,7 +64,6 @@ class Window(arcade.Window, EventsCreator):
         arcade.Window.__init__(self, width, height, update_rate=update_rate)
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
-        self.center_window()
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
@@ -114,8 +113,10 @@ class Window(arcade.Window, EventsCreator):
             pass  # MouseCursor is not initialised yet
 
     def toggle_fullscreen(self):
-        self.set_fullscreen(not self._fullscreen)
-        print(self.fullscreen)
+        self.set_fullscreen(not self.fullscreen)
+        if not self.fullscreen:
+            self.set_size(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1)
+            self.center_window()
 
     @property
     def is_game_running(self) -> bool:

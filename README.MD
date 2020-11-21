@@ -63,6 +63,8 @@ To be done.
     Unit can be spawned in many, various colors, depending opf the
     player's choice.
 23. Optimized visibility-detection, to reduce cpu overhead.
+24. Units automatically moving towards detected enemies out of their
+    attack range.
 
 #### TO BE DONE:
 #### Minor:
@@ -78,6 +80,9 @@ To be done.
 6. Shot, hit and destruction graphic effects and sounds.
 7. Skirmish mission customisation submenu (this is the only available
    game mode for now).
+8. Playlist for background music tracks.
+9. Better Ai for Units autonomous behaviour.
+10. Flocking for Soldier class.
 
 #### Major:
 1. User-interface. (currently being developed)

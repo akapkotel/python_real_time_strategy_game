@@ -387,7 +387,9 @@ class Pathfinder(Singleton, EventsCreator):
             node = random.choice(adjacent)
         return [w for w in waypoints]
 
-    def get_closest_pathable_position(self, x: int, y: int) -> NormalizedPoint:
+    def get_closest_pathable_position(self,
+                                      x: Number,
+                                      y: Number) -> NormalizedPoint:
         nearest_walkable = None
         node = self.map.position_to_node(x, y)
         while nearest_walkable is None:
