@@ -273,6 +273,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self._max_health = 100
         self._health = self._max_health
         self.armour = 0
+        self.cover = 0
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
         self.attack_radius = TILE_WIDTH * 5
@@ -286,6 +287,10 @@ class PlayerEntity(GameObject, EventsCreator):
         self.experience = 0
 
         self.register_to_objectsowners(self.game, self.player)
+
+    @abstractmethod
+    def moving(self) -> bool:
+        raise NotImplementedError
 
     @property
     def health(self) -> float:

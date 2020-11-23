@@ -4,6 +4,7 @@ from __future__ import annotations
 import heapq
 import math
 import random
+
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 from math import hypot
@@ -11,13 +12,15 @@ from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from game import Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
+from game import (
+    Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
+)
 from utils.classes import Singleton
-from utils.data_types import (BuildingId, GridPosition, Number, PlayerId,
-    SectorId, UnitId)
+from utils.data_types import (
+    GridPosition, Number, PlayerId, SectorId, UnitId
+)
 from utils.enums import TerrainCost
 from utils.functions import get_path_to_file, log, timer
-from utils.scheduling import EventsCreator, ScheduledEvent
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -91,6 +94,7 @@ class Map(GridHandler):
 
     """
     game: Optional[Game] = None
+    instance = None
 
     def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
         MapNode.map = Sector.map = self
@@ -111,6 +115,8 @@ class Map(GridHandler):
         self.generate_sectors()
         self.generate_nodes()
         self.calculate_distances_between_nodes()
+
+        Map.instance = self
 
     def __len__(self) -> int:
         return len(self.nodes)
@@ -149,9 +155,9 @@ class Map(GridHandler):
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     def generate_nodes(self):
         print(f'map rows: {self.rows}, columns: {self.columns}')
-        for x in range(self.columns):
+        for x in range(self.columns + 1):
             sector_x = x // SECTOR_SIZE
-            for y in range(self.rows):
+            for y in range(self.rows + 1):
                 sector_y = y // SECTOR_SIZE
                 sector = self.sectors[sector_x, sector_y]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
@@ -289,7 +295,7 @@ class MapNode(GridHandler, ABC):
     @property
     def pathable(self) -> bool:
         """Call it to find if this node is available for pathfinding at all."""
-        return self._terrain_object_id is None and self._building is None
+        return self._allowed_for_pathfinding and self._building is None
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:
@@ -335,7 +341,7 @@ class PriorityQueue:
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
-class Pathfinder(Singleton, EventsCreator):
+class Pathfinder(Singleton):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
     """
@@ -349,7 +355,6 @@ class Pathfinder(Singleton, EventsCreator):
 
         :param map: Map -- actual instance of game Map loaded.
         """
-        EventsCreator.__init__(self)
         self.map = map
         self.requests_for_paths: Deque[PathRequest] = deque()
         self.pathfinding_calls = 0
@@ -402,15 +407,12 @@ class Pathfinder(Singleton, EventsCreator):
             node = random.choice(adjacent)
 
     @timer(level=2, global_profiling_level=PROFILING_LEVEL)
-    def find_path(self,
-                  start: GridPosition,
-                  end: GridPosition,
+    def find_path(self, start: GridPosition, end: GridPosition,
                   pathable: bool = False) -> Union[MapPath, bool]:
         """
         Find shortest path from <start> to <end> position using A* algorithm.
         """
         log(f'Searching for path from {start} to {end}...')
-        self.pathfinding_calls += 1
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes
@@ -445,8 +447,7 @@ class Pathfinder(Singleton, EventsCreator):
     def heuristic(start, end):
         return hypot(start[0] - end[0], start[1] - end[1])
 
-    def reconstruct_path(self,
-                         map_nodes: Dict[GridPosition, MapNode],
+    def reconstruct_path(self, map_nodes: Dict[GridPosition, MapNode],
                          previous_nodes: Dict[GridPosition, GridPosition],
                          current_node: GridPosition) -> MapPath:
         path = [map_nodes[current_node]]
@@ -459,7 +460,7 @@ class Pathfinder(Singleton, EventsCreator):
     def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:
         return [node.position for node in nodes_list]
 
-    def update(self) -> Optional[MapPath]:
+    def update(self):
         """
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
@@ -470,26 +471,6 @@ class Pathfinder(Singleton, EventsCreator):
                 if path := self.find_path(start, destination):
                     return unit.create_new_path(path)
             self.request_path(unit, start, destination)
-
-    def schedule_pathfinding_for_later(self,
-                                       unit: Unit,
-                                       start: GridPosition,
-                                       destination: GridPosition,
-                                       delay: int = 30):
-        """
-        Rather costly way to delay pathfinding execution. It is used only
-        when Unit already have not found correct path to the destination
-        because it is blocked for a longer while.
-        """
-        self.schedule_event(
-            ScheduledEvent(
-                creator=self,
-                delay=1,
-                function=self.request_path,
-                args=(unit, start, destination),
-                frames_left=delay,
-            )
-        )
 
 
 if __name__:

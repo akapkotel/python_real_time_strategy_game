@@ -38,20 +38,27 @@ class Weapon:
         return False
 
     def shoot(self, target: PlayerEntity) -> bool:
-        # TODO: infantry difficult to hit [ ]
         self.create_shot_audio_visual_effects()
-        self_movement = -25 if self.owner.moving else 0
-        target_movement = -15 if target.moving else 0
-        accuracy = self.accuracy + self_movement + target_movement
-        if not random.gauss(accuracy, accuracy // 10) < accuracy:
+        hit_chance = self.calculate_hit_chance(target)
+        if not random.gauss(hit_chance, hit_chance // 10) < hit_chance:
             return False
         return target.on_being_hit(random.gauss(self.damage, self.damage // 4))
+
+    def calculate_hit_chance(self, target):
+        cover = target.cover
+        experience = self.owner.experience // 20
+        movement = 25 if self.owner.moving else 0
+        target_movement = 15 if target.moving else 0
+        hit_chance = sum(
+            (self.accuracy, experience, -movement, -target_movement, -cover)
+        )
+        return hit_chance
 
     def create_shot_audio_visual_effects(self):
         self.owner.game.window.sound_player.play_sound(self.shot_sound)
         barrel_angle = 45 * self.owner.barrel_end
-        start = self.owner.position
-        blast_position = move_along_vector(start, 35, angle=barrel_angle)
+        x, y = self.owner.center_x, self.owner.center_y + 10
+        blast_position = move_along_vector((x, y), 35, angle=barrel_angle)
         self.owner.game.create_effect(Explosion(*blast_position, 'SHOTBLAST'))
 
     def effective_against(self, enemy: PlayerEntity) -> bool:
@@ -62,6 +69,4 @@ class Weapon:
         :param enemy: PlayerEntity
         :return: bool -- if this Weapon can damage targeted enemy
         """
-        if enemy.is_infantry:
-            return self.effective_against_infantry
         return self.penetration >= enemy.armour

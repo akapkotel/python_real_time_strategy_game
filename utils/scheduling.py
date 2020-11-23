@@ -1,30 +1,51 @@
 #!/usr/bin/env python
 from __future__ import annotations
-import numpy as np
-from dataclasses import dataclass, field
+from math import inf
+from time import time as get_time
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
 from utils.functions import log
 
 
-@dataclass
 class ScheduledEvent:
-    creator: Any
-    delay: int
-    function: Callable
-    args: Optional[Tuple] = field(default_factory=tuple)
-    kwargs: Optional[Dict] = field(default_factory=dict)
-    repeat: int = 0
-    infinite: bool = False
-    frames_left: Optional[int] = None
+    """
+    This event is an alternative to the pyglet.clock.schedule. ScheduledEvent
+    can be pickled with shelve module and does not require scheduled functions
+    to have additional float parameter for schedule delay, so it's signature is
+    not touched.
+    """
+
+    def __init__(self, creator: Any, delay: float, function: Callable,
+                 args: Optional[Tuple] = None, kwargs: Optional[Dict] = None,
+                 repeat: int = 0, delay_left: Optional[float] = None):
+        """
+        :param creator: python object, which created this event
+        :param delay: float -- seconds to wait for event to be executed
+        :param function: bound method o function
+        :param args: tuple -- positional arguments for scheduled function
+        :param kwargs: dict -- named arguments for scheduled function
+        :param repeat: int -- how many times this event should be executed,
+        set it to -1 to create event scheduled in infinite loop
+        :param delay_left: float -- for internal use, ignore it
+        """
+        self.creator = creator
+        self.delay = delay
+        self.function = function
+        self.args = args or ()
+        self.kwargs = kwargs or {}
+        self.repeat = inf if repeat == -1 else repeat
+        self.delay_left = delay_left
 
     def __repr__(self):
         return (f'Event scheduled by: {self.creator.__class__.__name__}, '
                 f'function: {self.function.__name__}, args: {self.args}, '
-                f'kwargs: {self.kwargs}, frames left: {self.frames_left}')
+                f'kwargs: {self.kwargs}, time left: {self.delay_left}')
 
     def execute(self):
-        self.function(*self.args, **self.kwargs)
+        try:
+            self.function(*self.args, **self.kwargs)
+        except Exception as e:
+            log(f'{self} failed to execute with exception: {str(e)}')
 
 
 class EventsScheduler:
@@ -39,45 +60,39 @@ class EventsScheduler:
     def __init__(self, update_rate: float):
         self.update_rate = update_rate
         self.scheduled_events: List[ScheduledEvent] = []
-        self.frames_left: List[int] = []
+        self.execution_times: List[float] = []
         EventsScheduler.instance = self
 
     def schedule(self, event: ScheduledEvent):
-        log(f'Scheduled event: {event}')
         self.scheduled_events.append(event)
-        frames_left = event.frames_left or int(event.delay / self.update_rate)
-        self.frames_left.append(frames_left)
+        delay = event.delay_left or event.delay
+        self.execution_times.append(get_time() + delay)
+        log(f'Scheduled event: {event}')
 
     def unschedule(self, event: ScheduledEvent):
-        log(f'Unscheduled event: {event}')
         try:
             index = self.scheduled_events.index(event)
             self.scheduled_events.pop(index)
-            self.frames_left.pop(index)
+            self.execution_times.pop(index)
+            log(f'Unscheduled event: {event}')
         except ValueError:
             pass
 
     def update(self):
-        self.decrease_frames_left()
-        self.execute_events()
-
-    def decrease_frames_left(self):
-        self.frames_left = list(np.array(self.frames_left) - 1)
-
-    def execute_events(self):
+        time = get_time()
         for i, event in enumerate(self.scheduled_events):
-            if not self.frames_left[i]:
+            # if not self.frames_left[i]:
+            if time >= self.execution_times[i]:
                 event.execute()
                 self.unschedule(event)
                 log(f'Executed event: {event}')
                 if event.repeat:
+                    event.repeat -= 1
                     self.schedule(event)
-                    if not event.infinite:
-                        event.repeat -= 1
 
-    def frames_left_to_event_execution(self, event: ScheduledEvent) -> int:
+    def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         index = self.scheduled_events.index(event)
-        return self.frames_left[index]
+        return self.execution_times[index] - get_time()
 
 
 class EventsCreator:
@@ -112,14 +127,13 @@ class EventsCreator:
          """
         scheduler = EventsScheduler.instance
         return [
-            {'frames_left': scheduler.frames_left_to_event_execution(event),
+            {'delay_left': scheduler.time_left_to_event_execution(event),
              'delay': event.delay,
              'function_name': event.function.__name__,
              'self': 'self' if hasattr(event.function, '__self__') else None,
              'args': event.args,
              'kwargs': event.kwargs,
-             'repeat': event.repeat,
-             'infinite': event.infinite} for event in self.scheduled_events
+             'repeat': event.repeat} for event in self.scheduled_events
         ]
 
     def shelve_data_to_scheduled_events(self, shelve_data: List[Dict]) -> List[ScheduledEvent]:
@@ -133,8 +147,7 @@ class EventsCreator:
                 args=data['args'],
                 kwargs=data['kwargs'],
                 repeat=data['repeat'],
-                infinite=data['infinite'],
-                frames_left=data['frames_left']
+                delay_left=data['delay_left']
             )
             for data in shelve_data
         ]
@@ -153,4 +166,4 @@ class EventsCreator:
         event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
         self.schedule_event(event)
         """
-        log(f'Hi, this is an event created by: {self}', console=True)
+        log(f'Hi, event created by: {self} was executed properly', console=True)

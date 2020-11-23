@@ -17,7 +17,7 @@ from typing import (Any, Dict, List, Optional, Set, Union)
 import arcade
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line, draw_text,
-    draw_rectangle_filled, draw_text
+    draw_rectangle_filled, draw_text, unschedule
 )
 from arcade.arcade_types import Color, Point
 
@@ -348,11 +348,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def test_methods(self):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
-        self.test_buildings_spawning()
+        # self.test_buildings_spawning()
         self.test_units_spawning()
 
     def test_scheduling_events(self):
-        event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
+        event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
         self.schedule_event(event)
 
     def test_factions_and_players_creation(self):
@@ -373,20 +373,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         spawned_units = []
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
-            node = self.map.nodes[random.randint(0, 49), random.randint(0, 49)]
+            node = random.choice(list(self.map.nodes.values()))
             names = [unit_name] * 30
             spawned_units.extend(
                 self.spawner.spawn_group(names, player, node.position)
             )
-            # for _ in range(30):
-            #     no_position = True
-            #     while no_position:
-            #         node = random.choice([n for n in self.map.nodes.values()])
-            #         if node.walkable:
-            #             x, y = node.position
-            #             unit = self.spawner.spawn(unit_name, player, (x, y))
-            #             spawned_units.append(unit)
-            #             no_position = False
         self.units.extend(spawned_units)
 
     def load_player_configs(self) -> Dict[str, Any]:

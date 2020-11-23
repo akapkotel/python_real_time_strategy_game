@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Sequence, Set, Tuple, Iterator, Collection
+from typing import Optional, Sequence, Set, Tuple, Iterator
 
 from arcade import Sprite, SpriteSolidColor, load_textures
 from arcade.arcade_types import Color, Point
@@ -107,6 +107,8 @@ class PermanentUnitsGroup:
         self.group_id = group_id
         self.units: Set[Unit] = set(units)
         self.game.permanent_units_groups[group_id] = self
+        for unit in units:
+            unit.set_permanent_units_group(group_id)
 
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units
@@ -121,13 +123,13 @@ class PermanentUnitsGroup:
 
     def discard(self, unit: Unit):
         self.units.discard(unit)
+        if not self.units:
+            del self.game.permanent_units_groups[self.group_id]
 
     @classmethod
     def create_new_permanent_units_group(cls, digit: int):
         game = PermanentUnitsGroup.game
         units = game.window.cursor.selected_units.copy()
-        for unit in units:
-            unit.set_permanent_units_group(digit)
         new_group = PermanentUnitsGroup(group_id=digit, units=units)
         game.permanent_units_groups[digit] = new_group
         game.window.cursor.unselect_units()
