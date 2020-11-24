@@ -110,10 +110,10 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def update_observed_area(self, new_current_node: MapNode):
         if self.observed_nodes and new_current_node == self.current_node:
-            self.game.fog_of_war.explore_map(n.grid for n in self.observed_nodes)
+            observed = self.observed_nodes
         else:
             self.observed_nodes = observed = self.calculate_observed_area()
-            self.game.fog_of_war.explore_map(n.grid for n in observed)
+        self.game.fog_of_war.explore_map(n.grid for n in observed)
 
     def update_blocked_map_nodes(self, new_current_node):
         """
@@ -261,7 +261,7 @@ class Unit(PlayerEntity, TasksExecutor):
         log(f'{self} found path to {destination}, path: {path}')
 
     def cancel_path_requests(self):
-        self.game.pathfinder.cancel_path_requests(self)
+        self.game.pathfinder.cancel_unit_path_requests(self)
 
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()

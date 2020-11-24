@@ -28,8 +28,7 @@ class Robustness(IntEnum):
 
 class TerrainCost(IntEnum):
     ASPHALT = 1
-    GROUND = 1.25
-    GRASS = 1.5
-    SAND = 1.75
-    MUD = 2
-    SWAMP = 3
+    GROUND = 2
+    GRASS = 3
+    SAND = 4
+    MUD = 5

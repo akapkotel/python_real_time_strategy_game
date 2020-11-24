@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from functools import lru_cache
-from typing import Dict, KeysView, Optional, Set
+from typing import Dict, KeysView, Optional, Set, List, Tuple
+from shapely.geometry import Polygon
 
 from arcade import Sprite, SpriteList, make_circle_texture
 from numba import njit
@@ -44,21 +45,31 @@ class FogOfWar:
 
         # Dict to find and manipulate Sprites in the spritelist:
         self.grids_to_sprites: Dict[GridPosition, FogSprite] = {}
-        # Black or semi-transparent grey sprites are drawn on the screen:
-        self.fog_sprite_list = self.create_dark_sprites()
+        # Black or semi-transparent grey sprites are drawn on the screen width
+        # normal SpriteLists. We divide map for smaller areas with distinct
+        # spritelists to avoid updating too large sets each frame:
+        self.fog_sprite_lists = self.create_dark_sprites()
+
+        self.viewport = None
 
     def create_dark_sprites(self):
         """
         Fill whole map with black tiles representing unexplored, hidden area.
         """
-        fog_sprite_list = SpriteList(is_static=True)
-        append_to_sprites = fog_sprite_list.append
+        cols, rows = self.game.map.columns // 50, self.game.map.rows // 50
+
+        sprite_lists = {}
+        for col in range(rows + 1):
+            for row in range(cols + 1):
+                sprite_lists[(row, col)] = SpriteList(is_static=True)
+
         get_tile_position = self.get_tile_position
-        for grid in self.map_grids:
-            sprite = FogSprite(get_tile_position(*grid), DARK_TEXTURE)
-            self.grids_to_sprites[grid] = sprite
-            append_to_sprites(sprite)
-        return fog_sprite_list
+        for x, y in self.map_grids:
+            sprite_list = sprite_lists[(x // 50, y // 50)]
+            sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
+            self.grids_to_sprites[(x, y)] = sprite
+            sprite_list.append(sprite)
+        return sprite_lists
 
     def explore_map(self, explored: Set[GridPosition]):
         """
@@ -67,25 +78,34 @@ class FogOfWar:
         """
         self.visible.update(explored)
 
-    def update(self):
+    def update(self, viewport: Tuple):
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
+        self.viewport = viewport
         grids_to_sprites = self.grids_to_sprites
-        fog_sprite_list = self.fog_sprite_list
-        remove_from_sprites = fog_sprite_list.remove
         for grid in visible.intersection(grids_to_sprites):
-            remove_from_sprites(grids_to_sprites[grid])
+            sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
+            sprite_list.remove(grids_to_sprites[grid])
             del grids_to_sprites[grid]
         # add grey-semi-transparent fog to the tiles which are no longer seen:
         fog = self.explored - visible
-        append_to_sprites = fog_sprite_list.append
         get_tile_position = self.get_tile_position
         for grid in fog.difference(grids_to_sprites):
             x, y = get_tile_position(*grid)
             grids_to_sprites[grid] = sprite = FogSprite((x, y), FOG_TEXTURE)
-            append_to_sprites(sprite)
+            sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
+            sprite_list.append(sprite)
         self.explored.update(visible)
         visible.clear()
+
+    def get_tiles_in_viewport(self):
+        tiles = self.game.map.nodes.values()
+        viewport = self.game.viewport
+        return {
+            t.grid for t in tiles if
+            (viewport[0] - 360 < t.x < viewport[1] + 360 and viewport[2] -
+             240 < t.y < viewport[3] + 240)
+        }
 
     @staticmethod
     @lru_cache()
@@ -94,4 +114,5 @@ class FogOfWar:
         return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
 
     def draw(self):
-        self.fog_sprite_list.draw()
+        for sprite_list in self.fog_sprite_lists.values():
+            sprite_list.draw()

@@ -65,6 +65,7 @@ To be done.
 23. Optimized visibility-detection, to reduce cpu overhead.
 24. Units automatically moving towards detected enemies out of their
     attack range.
+25. Subdivided FogOfWar SpriteList to optimize FoW updates performance.
 
 #### TO BE DONE:
 #### Minor:
@@ -83,6 +84,7 @@ To be done.
 8. Playlist for background music tracks.
 9. Better Ai for Units autonomous behaviour.
 10. Flocking for Soldier class.
+11. Implement Jump Point Search to optimize A* performance.
 
 #### Major:
 1. User-interface. (currently being developed)

@@ -49,12 +49,14 @@ SCREEN_CENTER = SCREEN_X, SCREEN_Y
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
+ROWS = 100
+COLUMNS = 100
 
 GAME_SPEED = 1.0
 
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = False
+PYPROFILER = True
 DEBUG = False
 
 
@@ -263,8 +265,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()
 
-        self.map = Map(100 * TILE_WIDTH, 50 * TILE_HEIGHT, TILE_WIDTH,
-                       TILE_HEIGHT)
+        self.map = Map(COLUMNS, ROWS, TILE_WIDTH, TILE_HEIGHT)
         self.pathfinder: Pathfinder = Pathfinder(map=self.map)
 
         self.fog_of_war = FogOfWar()
@@ -323,7 +324,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             ],
             register_to=self
         )
-        return self.ui_elements_spritelist
+        return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, dx, dy):
         right, top = self.interface[0].right, self.interface[0].top
@@ -332,6 +333,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         if top - dy < SCREEN_HEIGHT or top - dy > self.map.height:
             dy = 0
         self.interface.move(-dx, -dy)
+
+    def inside_extended_viewport(self, x, y):
+        viewport = self.viewport
+        return (viewport[0] - 360 < x < viewport[1] + 360 and
+                viewport[2] - 240 < y < viewport[3] + 240)
 
     def create_effect(self, effect: Explosion):
         """
@@ -344,11 +350,13 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_music('background_theme.wav')
+        # TODO: remove this when testing is done
+        self.window.move_viewport_to_the_position(*self.units_position)
 
     def test_methods(self):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
-        # self.test_buildings_spawning()
+        self.test_buildings_spawning()
         self.test_units_spawning()
 
     def test_scheduling_events(self):
@@ -364,7 +372,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def test_buildings_spawning(self):
         self.buildings.append(self.spawner.spawn(
-            'capitol.png',
+            'medium_factory.png',
             self.players[2],
             (400, 600),
         ))
@@ -373,11 +381,13 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         spawned_units = []
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
-            node = random.choice(list(self.map.nodes.values()))
-            names = [unit_name] * 30
-            spawned_units.extend(
-                self.spawner.spawn_group(names, player, node.position)
-            )
+            if player is self.local_human_player:
+                node = random.choice(list(self.map.nodes.values()))
+                self.units_position = node.position
+                names = [unit_name] * 30
+                spawned_units.extend(
+                    self.spawner.spawn_group(names, player, node.position)
+                )
         self.units.extend(spawned_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
@@ -441,7 +451,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             super().on_update(delta_time)
             self.update_local_drawn_units_and_buildings()
             self.pathfinder.update()
-            self.fog_of_war.update()
+            self.fog_of_war.update(self.viewport)
             self.update_factions_and_players()
 
     def update_local_drawn_units_and_buildings(self):

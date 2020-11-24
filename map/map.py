@@ -26,6 +26,7 @@ from utils.functions import get_path_to_file, log, timer
 
 
 PATH = 'PATH'
+DIAGONAL = 1.4142  # approx square root of 2
 
 # typing aliases:
 NormalizedPoint = Tuple[int, int]
@@ -96,14 +97,14 @@ class Map(GridHandler):
     game: Optional[Game] = None
     instance = None
 
-    def __init__(self, width=0, height=0, grid_width=0, grid_height=0):
+    def __init__(self, columns: int, rows: int, grid_width: int, grid_height: int):
         MapNode.map = Sector.map = self
-        self.width = width
-        self.height = height
+        self.rows = rows
+        self.columns = columns
         self.grid_width = grid_width
         self.grid_height = grid_height
-        self.rows = self.height // self.grid_height
-        self.columns = self.width // self.grid_width
+        self.width = columns * grid_width
+        self.height = rows * grid_height
 
         # map is divided for sectors containing 10x10 Nodes each to split
         # space for smaller chunks in order to make enemies-detection
@@ -179,7 +180,7 @@ class Map(GridHandler):
         for node in self.nodes.values():
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
-                distance = 1.4 if self.diagonal(node.grid, grid) else 1
+                distance = DIAGONAL if self.diagonal(node.grid, grid) else 1
                 distance *= (node.terrain + adjacent_node.terrain)
                 node.costs[grid] = distance
 
@@ -222,7 +223,8 @@ class Sector(GridHandler, ABC):
 
     def in_bounds(self, grids: List[GridPosition]):
         # TODO: fix setting correct bounds for sectors
-        return [p for p in grids if 0 <= p[0] < 13 and 0 <= p[1] < 7]
+        c, r = self.map.columns // SECTOR_SIZE, self.map.rows // SECTOR_SIZE
+        return [p for p in grids if 0 <= p[0] < c and 0 <= p[1] < r]
 
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         return [(x + p[0], y + p[1]) for p in cls.adjacent_offsets]
@@ -341,6 +343,7 @@ class PriorityQueue:
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
+
 class Pathfinder(Singleton):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
@@ -352,7 +355,6 @@ class Pathfinder(Singleton):
         This class is a Singleton, so there is only one instance of
         Pathfinder in the game, and it will be returned each time the
         Pathfinder() is instantiated.
-
         :param map: Map -- actual instance of game Map loaded.
         """
         self.map = map
@@ -375,7 +377,7 @@ class Pathfinder(Singleton):
                      destination: GridPosition):
         self.requests_for_paths.appendleft((unit, start, destination))
 
-    def cancel_path_requests(self, unit: Unit):
+    def cancel_unit_path_requests(self, unit: Unit):
         for request in self.requests_for_paths.copy():
             if request[0] == unit:
                 self.requests_for_paths.remove(request)
@@ -442,6 +444,10 @@ class Pathfinder(Singleton):
         if not pathable:
             return self.find_path(start, end, pathable=True)
         return False  # no third pass, if there is no possible path!
+
+    def jump(self):
+        # TODO: implement Jump Point Search
+        pass
 
     @staticmethod
     def heuristic(start, end):

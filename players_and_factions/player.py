@@ -7,7 +7,7 @@ from abc import abstractmethod
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-from arcade import rand_in_circle
+from arcade import rand_in_circle, is_point_in_polygon
 from arcade.arcade_types import Color, Point
 
 from game import Game, UPDATE_RATE

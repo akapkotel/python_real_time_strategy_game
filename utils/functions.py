@@ -49,7 +49,7 @@ def timer(level=0, global_profiling_level=0, forced=False):
             execution_time = end_time - start_time
             fps = 1 / execution_time
             fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
-            log(fr, console=level)
+            log(fr, console=True)
             return result
         return wrapper
     return decorator
