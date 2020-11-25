@@ -130,6 +130,8 @@ class UiBundlesHandler(ObjectsOwner):
         self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
         # currently displayed UiElements of the chosen bundle/s:
         self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
+        # set used to quickly check if a bundle is displayed or not:
+        self.active_bundles: Set[int] = set()
 
     def register(self, acquired: OwnedObject):
         acquired: UiElementsBundle
@@ -157,6 +159,7 @@ class UiBundlesHandler(ObjectsOwner):
         log(f'Switched to submenu {bundle.name} of index: {bundle.index}')
         self._unload_all()
         self._load_bundle(bundle)
+        self.active_bundles.add(bundle.index)
 
     def bind_ui_elements_with_ui_spritelist(self, elements):
         for ui_element in elements:
@@ -200,16 +203,28 @@ class UiBundlesHandler(ObjectsOwner):
             return
 
     def _load_bundle(self, bundle: UiElementsBundle):
+        self.active_bundles.add(bundle.index)
         self.ui_elements_spritelist.extend(bundle.elements)
         self.bind_ui_elements_with_ui_spritelist(bundle.elements)
 
     def _unload_bundle(self, bundle: UiElementsBundle):
+        self.active_bundles.discard(bundle.index)
         for element in self.ui_elements_spritelist[::-1]:
             if element.bundle == bundle:
                 self.ui_elements_spritelist.remove(element)
 
-    def _unload_all(self):
+    def _unload_all(self, exception: Optional[str] = None):
+        self.active_bundles.clear()
         self.ui_elements_spritelist.clear()
+        if exception is not None:
+            self.load_bundle(name=exception)
+
+    def update_not_displayed_bundles(self, dx, dy):
+        for bundle in self.ui_elements_bundles.values():
+            if bundle.index not in self.active_bundles:
+                for element in bundle.elements:
+                    element.center_x -= dx
+                    element.center_y -= dy
 
 
 class Hierarchical:

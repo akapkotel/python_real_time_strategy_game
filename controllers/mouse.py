@@ -223,6 +223,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def select_units(self, *units: Unit):
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
+        self.game.change_interface_context(context=units)
 
     def create_selection_markers(self, units):
         for unit in units:
@@ -237,6 +238,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def unselect_units(self):
         self.selected_units.clear()
         self.clear_selection_markers()
+        self.game.change_interface_context()
 
     def clear_selection_markers(self,
                                 killed: Set[SelectionUnitMarket] = None):
@@ -248,6 +250,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_building_clicked(self, clicked_building: Building):
         # TODO: resolving possible building-related tasks for units first
         self.selected_building = clicked_building
+        self.game.change_interface_context(context=clicked_building)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):

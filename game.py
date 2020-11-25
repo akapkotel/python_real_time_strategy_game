@@ -12,7 +12,7 @@ __credits__ = []
 
 import random
 
-from typing import (Any, Dict, List, Optional, Set, Union)
+from typing import (Any, Dict, List, Optional, Set, Union, Collection)
 
 import arcade
 from functools import partial
@@ -330,12 +330,30 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             ],
             register_to=self
         )
+        units_panel = UiElementsBundle(
+            name='units_panel',
+            index=1,
+            elements=[
+                Button(get_path_to_file('game_button_stop.png'),
+                       ui_center[0], 800),
+            ],
+            register_to=self
+        )
+
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, right, top):
         diff_x = self.interface[0].right - right
         diff_y = self.interface[0].top - top
         self.interface.move(-diff_x, -diff_y)
+        self.update_not_displayed_bundles(diff_x, diff_y)
+
+    def change_interface_context(self, context=None):
+        self._unload_all(exception='right_panel')
+        if isinstance(context, Building):
+            self.load_bundle(name='buildings_panel')
+        elif context:
+            self.load_bundle(name='units_panel')
 
     def inside_extended_viewport(self, x, y):
         viewport = self.viewport
@@ -353,6 +371,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_music('background_theme.wav')
+        self.change_interface_context()
         # TODO: remove this when testing is done
         self.window.move_viewport_to_the_position(*self.units_position)
 
