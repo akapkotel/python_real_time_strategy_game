@@ -78,10 +78,9 @@ class FogOfWar:
         """
         self.visible.update(explored)
 
-    def update(self, viewport: Tuple):
+    def update(self):
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
-        self.viewport = viewport
         grids_to_sprites = self.grids_to_sprites
         for grid in visible.intersection(grids_to_sprites):
             sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
@@ -98,15 +97,6 @@ class FogOfWar:
         self.explored.update(visible)
         visible.clear()
 
-    def get_tiles_in_viewport(self):
-        tiles = self.game.map.nodes.values()
-        viewport = self.game.viewport
-        return {
-            t.grid for t in tiles if
-            (viewport[0] - 360 < t.x < viewport[1] + 360 and viewport[2] -
-             240 < t.y < viewport[3] + 240)
-        }
-
     @staticmethod
     @lru_cache()
     @njit(["int64, int64"], nogil=True, fastmath=True)
@@ -114,5 +104,9 @@ class FogOfWar:
         return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
 
     def draw(self):
-        for sprite_list in self.fog_sprite_lists.values():
-            sprite_list.draw()
+        left, right, bottom, top = self.game.viewport
+        for key, sprite_list in self.fog_sprite_lists.items():
+            s_left, s_right = key[0] * 3000, (key[0] + 1) * 3000
+            s_bottom, s_top = key[1] * 2000, (key[1] +1) * 3000
+            if left < s_right and right > s_left and bottom < s_top and top > s_bottom:
+                sprite_list.draw()

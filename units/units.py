@@ -39,20 +39,21 @@ class Unit(PlayerEntity, TasksExecutor):
         PlayerEntity.__init__(self, unit_name, player, position)
         TasksExecutor.__init__(self, tasks_on_start)
 
-        # self._load_textures_and_reset_hitbox(unit_name)
-
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
 
         # pathfinding and map-related:
-        # self.angle_to_texture(random.random() * 360)
         self.position = self.map.normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = node = self.map.position_to_node(*self.position)
         self.block_map_node(node)
         self.current_sector: Optional[Sector] = None
         self.update_current_sector()
+
         self.path: Deque[GridPosition] = deque()
+        self.path_wait_counter: int = 0
+        self.awaited_path: Optional[MapPath] = None
+
         self.waiting_for_path: List[int, MapPath] = [0, []]
 
         self.max_speed = 0
@@ -154,7 +155,7 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def find_best_way_to_avoid_collision(self, blocker):
         if blocker.has_destination or self.is_enemy(blocker):
-            self.wait_for_free_path()
+            self.wait_for_free_path(self.path)
         elif self.find_alternative_path() is not None:
             pass
         else:
@@ -162,16 +163,17 @@ class Unit(PlayerEntity, TasksExecutor):
 
     @property
     def has_destination(self) -> bool:
-        return self.path or self.waiting_for_path[0] or self in Pathfinder.instance
+        return self.path or self.awaited_path or self in Pathfinder.instance
 
-    def wait_for_free_path(self):
+    def wait_for_free_path(self, path):
         """
         Waiting for free path is useful when next node is only temporarily
         blocked (blocking Unit is moving) and allows to avoid pathfinding
         the path with A* algorthm. Instead, Unit 'shelves' currently found
         path and after 1 second 'unshelves' it in countdown_waiting method.
         """
-        self.waiting_for_path = [1 // UPDATE_RATE, self.path.copy()]
+        self.path_wait_counter = 1 // UPDATE_RATE
+        self.awaited_path = path.copy()
         self.path.clear()
         self.stop()
 
@@ -185,7 +187,7 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def ask_for_pass(self, blocker: Unit):
         if blocker.find_free_tile_to_unblock_way(self.path):
-            self.wait_for_free_path()
+            self.wait_for_free_path(self.path)
         else:
             destination = self.map.position_to_grid(*self.path[-1])
             self.move_to(destination)
@@ -211,7 +213,7 @@ class Unit(PlayerEntity, TasksExecutor):
                 sector.units_and_buildings[self.player.id] = {self, }
 
     def update_pathfinding(self):
-        if self.waiting_for_path[0]:
+        if self.awaited_path is not None:
             self.countdown_waiting()
         if self.path:
             self.follow_path()
@@ -219,10 +221,21 @@ class Unit(PlayerEntity, TasksExecutor):
             self.stop()
 
     def countdown_waiting(self):
-        self.waiting_for_path[0] -= 1
-        if self.waiting_for_path[0] == 0:
-            destination_position = self.waiting_for_path[1][-1]
+        self.path_wait_counter -= 1
+        if not self.path_wait_counter:
+            path = self.awaited_path
+            if self.map.position_to_node(*path[0]).walkable or len(path) < 20:
+                self.restart_path(path)
+            else:
+                self.wait_for_free_path(path)
+
+    def restart_path(self, path):
+        if len(path) > 20:
+            self.path = deque(path)
+        else:
+            destination_position = path[-1]
             self.move_to(self.map.position_to_grid(*destination_position))
+        self.awaited_path = None
 
     def follow_path(self):
         destination = self.path[0]
@@ -248,7 +261,7 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def create_new_path(self, new_path: MapPath):
         self.path = deque(new_path[1:])
-        self.waiting_for_path[0] = 0
+        self.awaited_path = None
         self.unschedule_earlier_move_orders()
 
     def unschedule_earlier_move_orders(self):
@@ -256,7 +269,6 @@ class Unit(PlayerEntity, TasksExecutor):
             self.unschedule_event(event)
 
     def debug_found_path(self, path: MapPath, destination: GridPosition):
-        self.game.debugged.clear()
         self.game.debugged.append([PATH, path])
         log(f'{self} found path to {destination}, path: {path}')
 
@@ -297,7 +309,7 @@ class Unit(PlayerEntity, TasksExecutor):
         """
         if not self.has_destination:
             enemy_to_attack = random.choice([e for e in known_enemies])
-            position = self.game.pathfinder.get_closest_pathable_position(
+            position = self.game.pathfinder.get_closest_walkable_position(
                 *enemy_to_attack.position)
             self.move_to(self.map.position_to_grid(*position))
 

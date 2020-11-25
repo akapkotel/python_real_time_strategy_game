@@ -15,6 +15,7 @@ import random
 from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
+from functools import partial
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line, draw_text,
     draw_rectangle_filled, draw_text, unschedule
@@ -24,7 +25,7 @@ from arcade.arcade_types import Color, Point
 from audio.sound import SoundPlayer
 from persistency.configs_handling import load_player_configs, read_csv_files
 from persistency.save_handling import SaveManager
-from user_interface.user_interface import (Frame, UiBundlesHandler,
+from user_interface.user_interface import (Frame, Button, UiBundlesHandler,
     UiElementsBundle, UiSpriteList)
 from utils.colors import BLACK, DARK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -205,8 +206,8 @@ class Window(arcade.Window, EventsCreator):
         left, right, bottom, top = self.get_viewport()
         new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
-        if self.is_game_running:
-            self.game_view.update_interface_position(dx, dy)
+        # if self.is_game_running:
+        #     self.game_view.update_interface_position(dx, dy)
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def update_viewport_coordinates(self, new_bottom, new_left):
@@ -214,6 +215,8 @@ class Window(arcade.Window, EventsCreator):
         new_top = new_bottom + SCREEN_HEIGHT
         self.current_view.viewport = new_left, new_right, new_bottom, new_top
         self.set_viewport(new_left, new_right, new_bottom, new_top)
+        if self.is_game_running:
+            self.game_view.update_interface_position(new_right, new_top)
 
     def move_viewport_to_the_position(self, x: int, y: int):
         """
@@ -313,26 +316,26 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def create_interface(self) -> UiSpriteList:
         ui_center = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_ui_panel = Frame('', *ui_center, *ui_size, name=None, color=DARK)
+        right_ui_panel = Frame('ui_right_panel.png', *ui_center, *ui_size, name=None, color=DARK)
         right_panel = UiElementsBundle(
             name='right_panel',
             index=0,
             elements=[
                 right_ui_panel,
-                Frame('', ui_center[0], SCREEN_HEIGHT - 125, ui_size[0], 200,
-                      None, BLACK, parent=right_ui_panel)
+                Button(get_path_to_file('game_button_menu.png'),
+                       ui_center[0], 100,
+                       function_on_left_click=partial(
+                           self.window.show_view, self.window.menu_view),
+                       parent=right_ui_panel)
             ],
             register_to=self
         )
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
-    def update_interface_position(self, dx, dy):
-        right, top = self.interface[0].right, self.interface[0].top
-        if right - dx < SCREEN_WIDTH or right - dx > self.map.width:
-            dx = 0
-        if top - dy < SCREEN_HEIGHT or top - dy > self.map.height:
-            dy = 0
-        self.interface.move(-dx, -dy)
+    def update_interface_position(self, right, top):
+        diff_x = self.interface[0].right - right
+        diff_y = self.interface[0].top - top
+        self.interface.move(-diff_x, -diff_y)
 
     def inside_extended_viewport(self, x, y):
         viewport = self.viewport
@@ -448,16 +451,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
         if not self.paused:
+            self.debugged.clear()
             super().on_update(delta_time)
             self.update_local_drawn_units_and_buildings()
-            self.pathfinder.update()
-            self.fog_of_war.update(self.viewport)
+            self.fog_of_war.update()
             self.update_factions_and_players()
+            self.pathfinder.update()
 
     def update_local_drawn_units_and_buildings(self):
         """
-        We draw on the screen only these PlayerEntities, which belongs to
-        the local Player's Faction, or are detected by his Faction.
+        We draw on the screen only these PlayerEntities, which belongs to the
+        local Player's Faction, or are detected by his Faction.
         """
         self.local_drawn_units_and_buildings.clear()
         local_faction = self.local_human_player.faction

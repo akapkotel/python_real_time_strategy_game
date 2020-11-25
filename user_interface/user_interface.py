@@ -15,7 +15,7 @@ from arcade.arcade_types import Color
 
 from utils.observers import ObjectsOwner, OwnedObject
 
-from utils.functions import log, make_texture
+from utils.functions import log, make_texture, get_path_to_file
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
@@ -424,6 +424,8 @@ class Frame(UiElement):
                  parent: Optional[Hierarchical] = None,
                  subgroup: Optional[int] = None
                  ):
+        if texture_name:
+            texture_name = get_path_to_file(texture_name)
         super().__init__(texture_name, x, y, name, active, visible, parent, subgroup)
         if not texture_name:
             self.textures = [make_texture(width, height, color or WHITE)]

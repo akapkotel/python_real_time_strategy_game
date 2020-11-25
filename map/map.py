@@ -177,12 +177,14 @@ class Map(GridHandler):
         return texture
 
     def calculate_distances_between_nodes(self):
+        distances: Dict[(GridPosition, GridPosition), float] = {}
         for node in self.nodes.values():
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = DIAGONAL if self.diagonal(node.grid, grid) else 1
                 distance *= (node.terrain + adjacent_node.terrain)
                 node.costs[grid] = distance
+        return distances
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -194,7 +196,12 @@ class Map(GridHandler):
         return list(self.nodes.values())
 
     def node(self, grid: GridPosition) -> MapNode:
-        return self.nodes[grid]
+        try:
+            return self.nodes[grid]
+        except KeyError:
+            node = MapNode(-1, -1, None)
+            node._allowed_for_pathfinding = False
+            return node
 
 
 class Sector(GridHandler, ABC):
@@ -251,7 +258,7 @@ class MapNode(GridHandler, ABC):
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
 
-        self.terrain: TerrainCost = TerrainCost.GROUND
+        self.terrain: TerrainCost = TerrainCost.GROUND + random.random()
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
@@ -343,7 +350,6 @@ class PriorityQueue:
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
-
 class Pathfinder(Singleton):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
@@ -371,10 +377,8 @@ class Pathfinder(Singleton):
     def __contains__(self, unit: Unit) -> bool:
         return any(request[0] == unit for request in self.requests_for_paths)
 
-    def request_path(self,
-                     unit: Unit,
-                     start: GridPosition,
-                     destination: GridPosition):
+    def request_path(self, unit: Unit, start: GridPosition, destination: GridPosition):
+        """Enqueue new path-request. It will be resolved when possible."""
         self.requests_for_paths.appendleft((unit, start, destination))
 
     def cancel_unit_path_requests(self, unit: Unit):
@@ -386,15 +390,18 @@ class Pathfinder(Singleton):
                     x: int,
                     y: int,
                     required_waypoints: int) -> List[GridPosition]:
+        """
+        Find requested number of valid waypoints around requested position.
+        """
         node = self.map.position_to_node(x, y)
         waypoints = {node.grid}
         while len(waypoints) < required_waypoints:
-            adjacent = node.walkable_adjacent
-            waypoints.update(n.grid for n in node.walkable_adjacent)
-            node = random.choice(adjacent)
+            if adjacent := node.walkable_adjacent:
+                waypoints.update(n.grid for n in node.walkable_adjacent)
+                node = random.choice(adjacent)
         return [w for w in waypoints]
 
-    def get_closest_pathable_position(self,
+    def get_closest_walkable_position(self,
                                       x: Number,
                                       y: Number) -> NormalizedPoint:
         nearest_walkable = None
@@ -413,64 +420,76 @@ class Pathfinder(Singleton):
                   pathable: bool = False) -> Union[MapPath, bool]:
         """
         Find shortest path from <start> to <end> position using A* algorithm.
+
+        :param start: GridPosition -- (int, int) path-start point.
+        :param end: GridPosition -- (int, int) path-destination point.
+        :param pathable: bool -- should pathfinder check only walkable tiles
+        (default) or all pathable map area? Use it to get into 'blocked'
+        areas, e.g. places enclosed by units.
+        :return: Union[MapPath, bool] -- list of points or False if no path
+        found
         """
+        self.pathfinding_calls += 1
         log(f'Searching for path from {start} to {end}...')
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes
-        unexplored = PriorityQueue(start, heuristic(start, end) * 1.001)
+        unexplored = PriorityQueue(start, heuristic(start, end) * 1.1)
+        explored = set()
         previous: Dict[GridPosition, GridPosition] = {}
 
-        get_best_unexploed = unexplored.get
+        get_best_unexplored = unexplored.get
         put_to_unexplored = unexplored.put
 
         cost_so_far = defaultdict(lambda: math.inf)
         cost_so_far[start] = 0
 
         while unexplored:
-            if (current := get_best_unexploed()) == end:
+            if (current := get_best_unexplored()) == end:
                 return self.reconstruct_path(map_nodes, previous, current)
+            explored.add(current)
             node = map_nodes[current]
             walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
-            for adjacent in (a for a in walkable if a.grid not in unexplored):
-                total = cost_so_far[current] + node.costs[adjacent.grid]
+            for adjacent in (a for a in walkable if a.grid not in explored):
+                if adjacent.grid in unexplored:
+                    continue
+                # TODO: implement Jum Point Search, for now, we resign from
+                #  using real terrain costs and calculate fast heuristic for
+                #  each waypoints pair, because it efficiently finds best
+                #  path, but it ignores tiles-moving-costs:
+                total = cost_so_far[current] + heuristic(adjacent.grid, current)
                 if total < cost_so_far[adjacent.grid]:
                     previous[adjacent.grid] = current
                     cost_so_far[adjacent.grid] = total
-                    priority = total + heuristic(adjacent.grid, end) * 1.001
+                    priority = total + heuristic(adjacent.grid, end) * 1.1
                     put_to_unexplored(adjacent.grid, priority)
+            explored.update(walkable)
         # if path was not found searching by walkable tiles, we call second
         # pass and search for pathable nodes this time
         if not pathable:
             return self.find_path(start, end, pathable=True)
         return False  # no third pass, if there is no possible path!
 
-    def jump(self):
-        # TODO: implement Jump Point Search
-        pass
-
     @staticmethod
     def heuristic(start, end):
-        return hypot(start[0] - end[0], start[1] - end[1])
+        return abs(end[0] - start[0]) + abs(end[1] - start[1])
 
-    def reconstruct_path(self, map_nodes: Dict[GridPosition, MapNode],
+    @staticmethod
+    def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
                          previous_nodes: Dict[GridPosition, GridPosition],
                          current_node: GridPosition) -> MapPath:
         path = [map_nodes[current_node]]
         while current_node in previous_nodes.keys():
             current_node = previous_nodes[current_node]
             path.append(map_nodes[current_node])
-        return self.nodes_list_to_path(path[::-1])
-
-    @staticmethod
-    def nodes_list_to_path(nodes_list: List[MapNode]) -> MapPath:
-        return [node.position for node in nodes_list]
+        return [node.position for node in path[::-1]]
 
     def update(self):
         """
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
         """
+        print(f'Pathfinding calls: {self.pathfinding_calls}')
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:
