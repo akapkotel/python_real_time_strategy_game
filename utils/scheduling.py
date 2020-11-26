@@ -21,9 +21,9 @@ class ScheduledEvent:
         """
         :param creator: python object, which created this event
         :param delay: float -- seconds to wait for event to be executed
-        :param function: bound method o function
-        :param args: tuple -- positional arguments for scheduled function
-        :param kwargs: dict -- named arguments for scheduled function
+        :param function: bound method o functions
+        :param args: tuple -- positional arguments for scheduled functions
+        :param kwargs: dict -- named arguments for scheduled functions
         :param repeat: int -- how many times this event should be executed,
         set it to -1 to create event scheduled in infinite loop
         :param delay_left: float -- for internal use, ignore it
@@ -38,7 +38,7 @@ class ScheduledEvent:
 
     def __repr__(self):
         return (f'Event scheduled by: {self.creator.__class__.__name__}, '
-                f'function: {self.function.__name__}, args: {self.args}, '
+                f'functions: {self.function.__name__}, args: {self.args}, '
                 f'kwargs: {self.kwargs}, time left: {self.delay_left}')
 
     def execute(self):
@@ -52,7 +52,7 @@ class EventsScheduler:
     """
     EventScheduler keeps track of scheduled events and counts down frames
     checking each time if there are any events which should be executed. It
-    replaces arcade schedule function allowing to serialize and save scheduled
+    replaces arcade schedule functions allowing to serialize and save scheduled
     events, which arcade does not offer.
     """
     instance = None

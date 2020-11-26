@@ -156,9 +156,9 @@ def get_enemies(war: int) -> Tuple[int, int]:
     be combined to sum, being an unique identifier, for eg.
     Player with id 8 and Player with id 128 make unique sum
     136. To save pairs of hostile Players you can sum their
-    id's and this function allows to retrieve pair from the
+    id's and this functions allows to retrieve pair from the
     saved value. Limit of Players in game is 16, since 2^32
-    gives 8589934592, which is highest id checked by function.
+    gives 8589934592, which is highest id checked by functions.
     """
     index = 8589934592  # 2 to power of 32
     while index > 2:

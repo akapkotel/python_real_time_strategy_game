@@ -23,7 +23,7 @@ class Menu(WindowView, UiBundlesHandler):
         switch_menu = self.switch_to_bundle_of_name
         back_to_menu_button = Button(
             get_path_to_file('menu_button_back.png'), SCREEN_X, 150,
-            function_on_left_click=partial(switch_menu, 'main menu')
+            functions=partial(switch_menu, 'main menu')
         )
 
         x, y = SCREEN_X, (i for i in range(150, SCREEN_HEIGHT, 125))
@@ -32,21 +32,21 @@ class Menu(WindowView, UiBundlesHandler):
             name='main menu',
             elements=[
                 Button(get_path_to_file('menu_button_exit.png'), x, next(y),
-                       function_on_left_click=window.close),
+                       functions=window.close),
                 Button(get_path_to_file('menu_button_credits.png'), x, next(y),
-                       function_on_left_click=partial(switch_menu, 'credits')),
+                       functions=partial(switch_menu, 'credits')),
                 Button(get_path_to_file('menu_button_options.png'), x, next(y),
-                       function_on_left_click=partial(switch_menu, 'options')),
+                       functions=partial(switch_menu, 'options')),
                 Button(get_path_to_file('menu_button_loadgame.png'), x, next(y),
-                       function_on_left_click=partial(switch_menu, 'saving menu')),
+                       functions=partial(switch_menu, 'saving menu')),
                 Button(get_path_to_file('menu_button_newgame.png'), x, next(y),
-                       function_on_left_click=partial(switch_menu, 'new game menu')),
+                       functions=partial(switch_menu, 'new game menu')),
                 Button(get_path_to_file('menu_button_continue.png'), x, next(y),
                        name='continue button', active=False,
-                       function_on_left_click=window.start_new_game),
+                       functions=window.start_new_game),
                 Button(get_path_to_file('menu_button_quit.png'), x, next(y),
                        name='quit game button', active=False,
-                       function_on_left_click=window.quit_current_game),
+                       functions=window.quit_current_game),
             ],
             register_to=self
         )
@@ -55,13 +55,18 @@ class Menu(WindowView, UiBundlesHandler):
         options_menu = UiElementsBundle(
             index=1,
             name='options',
-            elements=[
+            elements=[],
+            register_to=self
+        )
+        options_menu.extend(
+            [
                 back_to_menu_button,
-                # UiTextLabel(SCREEN_X - 100, 600, 'Draw debug:', 20),
+                # set 'subgroup' index for each element to assign it to the
+                # proper tab in options sub-menu:
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
                     'Draw debug:', 20, ticked=window.debug,
-                    variable=(window, 'debug'), subgroup=1
+                    variable=(window, 'debug'), subgroup=1  # 'Graphics' tab
                 ),
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
@@ -76,16 +81,28 @@ class Menu(WindowView, UiBundlesHandler):
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
                     'Sound effects:', 20, ticked=window.sound_player.sound_on,
-                    variable=(window.sound_player, '_sound_effects_on'), subgroup=2
+                    variable=(window.sound_player, '_sound_effects_on'),
+                    subgroup=2
                 ),
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
                     'Full screen:', 20, ticked=window.fullscreen,
-                    function_on_left_click=window.toggle_fullscreen, subgroup=1
+                    functions=window.toggle_fullscreen, subgroup=1
                 ),
-            ],
-            register_to=self
+                # tabs switching what groups of elements are visible by
+                # switching between subgroups:
+                Button(get_path_to_file('menu_tab_sound.png'), 320,
+                       SCREEN_HEIGHT - 64, functions=partial(
+                        options_menu.switch_to_subgroup, 2), subgroup=1),
+                Button(get_path_to_file('menu_tab_graphics.png'), 960,
+                       SCREEN_HEIGHT - 64, functions=partial(
+                        options_menu.switch_to_subgroup, 1), subgroup=2),
+                Button(get_path_to_file('menu_tab_blank.png'), 1600,
+                       SCREEN_HEIGHT - 64, functions=partial(
+                        options_menu.switch_to_subgroup, 3), subgroup=3)
+            ]
         )
+        options_menu.switch_to_subgroup(1)
 
         saving_menu = UiElementsBundle(
             index=2,
@@ -103,11 +120,11 @@ class Menu(WindowView, UiBundlesHandler):
             elements=[
                 back_to_menu_button,
                 Button(get_path_to_file('menu_button_skirmish.png'), x, y,
-                       function_on_left_click=partial(switch_menu, 'skirmish menu')),
+                       functions=partial(switch_menu, 'skirmish menu')),
                 Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
-                       function_on_left_click=partial(switch_menu, 'campaign menu')),
+                       functions=partial(switch_menu, 'campaign menu')),
                 Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x, y,
-                       function_on_left_click=partial(switch_menu, 'multiplayer menu')),
+                       functions=partial(switch_menu, 'multiplayer menu')),
             ],
             register_to=self
         )
@@ -127,7 +144,7 @@ class Menu(WindowView, UiBundlesHandler):
             elements=[
                 back_to_menu_button,
                 Button(get_path_to_file('menu_button_play.png'), SCREEN_X, 300,
-                       function_on_left_click=window.start_new_game)
+                       functions=window.start_new_game)
             ],
             register_to=self
         )

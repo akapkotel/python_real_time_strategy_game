@@ -323,11 +323,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             elements=[
                 right_ui_panel,
                 Button(get_path_to_file('game_button_menu.png'), ui_x, 100,
-                       function_on_left_click=partial(
+                       functions=partial(
                            self.window.show_view, self.window.menu_view),
                        parent=right_ui_panel),
                 Button(get_path_to_file('game_button_pause.png'), ui_x - 100, 100,
-                       function_on_left_click=partial(self.toggle_pause),
+                       functions=partial(self.toggle_pause),
                        parent=right_ui_panel)
             ],
             register_to=self
@@ -337,10 +337,9 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             index=1,
             elements=[
                 Button(get_path_to_file('game_button_stop.png'), ui_x - 100,
-                       800, function_on_left_click=self.stop_all_units),
+                       800, functions=self.stop_all_units),
                 Button(get_path_to_file('game_button_attack.png'), ui_x, 800,
-                       function_on_left_click=partial(
-                           self.window.cursor.force_cursor, 2))
+                       functions=partial(self.window.cursor.force_cursor, 2))
             ],
             register_to=self
         )
@@ -348,8 +347,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             name='building_panel',
             index=2,
             elements=[
-                Button(get_path_to_file('game_button_stop.png'),
-                       ui_x, 800),
+                Button(get_path_to_file('game_button_stop.png'), ui_x, 800),
             ],
             register_to=self
         )

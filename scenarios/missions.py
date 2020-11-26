@@ -87,7 +87,7 @@ class Mission:
         consecutive powers of 2, what allows for easy calculation of indexes
         from their sums (eg. 258 = 256 + 2) what is usefull to save and load
         pairs of enemies from missions.cfg files. See functions.get_enemies()
-        function in helpers module.
+        functions in helpers module.
         """
         players = {}
         index = 2  # first human Player has always index 2

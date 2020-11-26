@@ -4,7 +4,6 @@ from __future__ import annotations
 import PIL
 
 from dataclasses import dataclass
-from functools import partial
 from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 
 from arcade import (
@@ -59,8 +58,15 @@ class UiElementsBundle(OwnedObject):
 
     def __post_init__(self):
         self.register_to_objectsowners(self.register_to)
-        for element in self.elements:
+        self.bind_elements_to_bundle(self.elements)
+
+    def bind_elements_to_bundle(self, elements):
+        for element in elements:
             element.bundle = self
+
+    def extend(self, elements):
+        for element in elements:
+            self.add(element)
 
     def add(self, element: UiElement):
         self.elements.append(element)
@@ -92,7 +98,7 @@ class UiElementsBundle(OwnedObject):
 
     def switch_to_subgroup(self, subgroup: int):
         for element in self.elements:
-            if element.subgroup == subgroup:
+            if element.subgroup in (None, subgroup):
                 element.show()
                 element.activate()
             else:
@@ -279,17 +285,26 @@ class Hierarchical:
 class CursorInteractive(Hierarchical):
     """Interface for all objects which are clickable etc."""
 
-    def __init__(self,
-                 can_be_dragged: bool = False,
-                 function_on_left_click: Optional[Callable] = None,
-                 function_on_right_click: Optional[Callable] = None,
+    def __init__(self, can_be_dragged: bool = False,
+                 functions: Optional[Union[Callable, Tuple[Callable, ...]]] = None,
                  parent: Optional[Hierarchical] = None):
+        """
+        :param can_be_dragged: bool -- default: False
+        :param functions: None or Callable or Tuple[Callable]
+        :param parent: Hierarchical object
+        """
         Hierarchical.__init__(self, parent)
         self.pointed = False
         self.dragged = False
         self.can_be_dragged = can_be_dragged
-        self.function_on_left_click = function_on_left_click
-        self.function_on_right_click = function_on_right_click
+
+        if functions is None:
+            self.functions = []
+        elif isinstance(functions, Callable):
+            self.functions = [functions, ]
+        else:
+            self.functions = [f for f in functions]
+
         self.cursor = None
 
     def __repr__(self):
@@ -315,9 +330,19 @@ class CursorInteractive(Hierarchical):
 
     def on_mouse_press(self, button: int):
         log(f'Mouse button {button} clicked on {self}')
-        if self.function_on_left_click is not None:
-            self.function_on_left_click()
+        if self.functions:
+            self._call_bound_functions()
         self.dragged = self.can_be_dragged
+
+    def _call_bound_functions(self):
+        for function in self.functions:
+            function()
+
+    def bind_function(self, function: Callable):
+        self.functions.append(function)
+
+    def unbind_function(self, function=None):
+        self.functions.remove(function)
 
     def on_mouse_release(self, button: int):
         self.dragged = False
@@ -384,16 +409,11 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     def __init__(self, texture_name: str, x: int, y: int,
                  name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
-                 function_on_right_click: Optional[Callable] = None,
-                 function_on_left_click: Optional[Callable] = None,
+                 functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None):
         super().__init__(texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
-        CursorInteractive.__init__(self,
-                                   can_be_dragged,
-                                   function_on_right_click,
-                                   function_on_left_click,
-                                   parent=parent)
+        CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
         OwnedObject.__init__(self, owners=True)
         self.name = name
         self.bundle = None
@@ -426,6 +446,10 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
     def draw_highlight_around_element(self):
         color = RED if 'exit' in self.textures[-1].name else GREEN
         draw_rectangle_outline(*self.position, self.width + 4, self.height + 4, color, 2)
+
+    def deactivate(self):
+        self._func_on_mouse_exit()
+        super().deactivate()
 
 
 class Frame(UiElement):
@@ -465,13 +489,11 @@ class Button(UiElement):
                  active: bool = True,
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None,
-                 function_on_right_click: Optional[Callable] = None,
-                 function_on_left_click: Optional[Callable] = None,
+                 functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  subgroup: Optional[int] = None
                  ):
         super().__init__('', x, y, name, active, visible, parent,
-                         function_on_left_click, function_on_right_click,
-                         subgroup=subgroup)
+                         functions, subgroup=subgroup)
         # we load 2 textures for button: normal and for 'highlighted' button:
         image = PIL.Image.open(texture_name)
         width, height = image.size[0] // 2, image.size[1]
@@ -489,7 +511,7 @@ class Button(UiElement):
 
 class Checkbox(UiElement):
     """
-    Checkbox is a UiElement which function is to allow user toggling the
+    Checkbox is a UiElement which functions is to allow user toggling the
     boolean value of some variable - if Checkbox is 'ticked' the value is
     set to True, else it is considered False.
     """
@@ -498,8 +520,7 @@ class Checkbox(UiElement):
                  font_size: int = 10, text_color: Color = WHITE,
                  name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
-                 function_on_right_click: Optional[Callable] = None,
-                 function_on_left_click: Optional[Callable] = None,
+                 functions: Optional[Callable] = None,
                  ticked: bool = False, variable: Tuple[object, str] = None,
                  subgroup: Optional[int] = None):
         """
@@ -512,7 +533,7 @@ class Checkbox(UiElement):
         :param visible:
         :param parent:
         :param function_on_right_click:
-        :param function_on_left_click:
+        :param functions:
         :param ticked:
         :param variable: Tuple[object, str] -- to bind a variable to this
         Checkbox you must pass a tuple which first element is an reference
@@ -520,8 +541,7 @@ class Checkbox(UiElement):
         attribute, e.g. (self, 'name_of_my_attribute').
         """
         super().__init__(texture_name, x, y, name, active, visible,
-                         parent, function_on_left_click,
-                         function_on_right_click, subgroup=subgroup)
+                         parent, functions, subgroup=subgroup)
         self.ticked = ticked
         self.variable = variable
         self.textures = [

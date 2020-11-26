@@ -257,7 +257,7 @@ class PlayerEntity(GameObject, EventsCreator):
         self.known_enemies: Set[PlayerEntity] = set()
 
         # when an Unit or Building detect enemy, enemy detects it too
-        # automatically, to decrease number of is_visible function calls:
+        # automatically, to decrease number of is_visible functions calls:
         self.mutually_detected_enemies: Set[PlayerEntity] = set()
 
         self.nearby_friends: Set[PlayerEntity] = set()

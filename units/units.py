@@ -300,9 +300,9 @@ class Unit(PlayerEntity, TasksExecutor):
         }
 
     def set_permanent_units_group(self, index: int = 0):
-        if group := self.permanent_units_group:
+        if (group_index := self.permanent_units_group) and group_index != index:
             try:
-                self.game.permanent_units_groups[group].discard(self)
+                self.game.permanent_units_groups[group_index].discard(self)
             except KeyError:
                 pass
         self.permanent_units_group = index

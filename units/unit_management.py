@@ -148,3 +148,7 @@ class PermanentUnitsGroup:
                 game.window.cursor.select_units(*group.units)
         except KeyError:
             pass
+
+    def __del__(self):
+        for unit in self.units:
+            unit.permanent_units_group = 0

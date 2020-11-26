@@ -89,10 +89,10 @@ class FogOfWar:
         # add grey-semi-transparent fog to the tiles which are no longer seen:
         fog = self.explored - visible
         get_tile_position = self.get_tile_position
-        for grid in fog.difference(grids_to_sprites):
-            x, y = get_tile_position(*grid)
-            grids_to_sprites[grid] = sprite = FogSprite((x, y), FOG_TEXTURE)
-            sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
+        for grid_x, grid_y in fog.difference(grids_to_sprites):
+            x, y = get_tile_position(grid_x, grid_y)
+            grids_to_sprites[(grid_x, grid_y)] = sprite = FogSprite((x, y), FOG_TEXTURE)
+            sprite_list = self.fog_sprite_lists[(grid_x // 50, grid_y // 50)]
             sprite_list.append(sprite)
         self.explored.update(visible)
         visible.clear()
