@@ -22,7 +22,7 @@ from units.units import Unit, UnitTask
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, UiSpriteList
 )
-from utils.classes import HashedList
+from utils.classes import HashedList, Singleton
 from utils.functions import get_path_to_file, log
 
 DrawnAndUpdated = Union[SpriteList, SelectiveSpriteList, 'MouseCursor']
@@ -35,7 +35,8 @@ CURSOR_MOVE_TEXTURE = 4
 CURSOR_REPAIR_TEXTURE = 5
 
 
-class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
+class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
+                  EventsCreator):
     """
     MouseCursor replaces system-cursor with it's own Sprite and process all
     mouse-related calls from arcade.Window to call proper methods and functions
@@ -81,6 +82,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.selection_markers: Set[SelectionUnitMarket] = set()
 
         self.attached_task: Optional[UnitTask] = None
+
+        self.forced_cursor: Optional[int] = None
 
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
@@ -164,16 +167,17 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
-        if self.mouse_drag_selection is None:
-            units = self.selected_units
-            pointed = self.pointed_unit or self.pointed_building
-            if units:
-                self.on_click_with_selected_units(x, y, modifiers, units,
-                                                  pointed)
-            elif pointed is not None:
-                self.on_player_entity_clicked(pointed)
-        else:
-            self.close_drag_selection()
+        if not self.pointed_ui_element:
+            if self.mouse_drag_selection is None:
+                units = self.selected_units
+                pointed = self.pointed_unit or self.pointed_building
+                if units:
+                    self.on_click_with_selected_units(x, y, modifiers, units,
+                                                      pointed)
+                elif pointed is not None:
+                    self.on_player_entity_clicked(pointed)
+            else:
+                self.close_drag_selection()
 
     def close_drag_selection(self):
         self.unselect_units()
@@ -181,10 +185,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
+        self.forced_cursor = None
         if self.mouse_dragging:
             self.mouse_dragging = False
         elif self.selected_units:
             self.unselect_units()
+        elif self.selected_building is not None:
+            self.selected_building = None
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         if clicked.selectable:
@@ -223,7 +230,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def select_units(self, *units: Unit):
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
-        self.game.change_interface_context(context=units)
+        self.game.update_interface_content(context=units)
 
     def create_selection_markers(self, units):
         for unit in units:
@@ -238,7 +245,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def unselect_units(self):
         self.selected_units.clear()
         self.clear_selection_markers()
-        self.game.change_interface_context()
+        self.game.update_interface_content()
 
     def clear_selection_markers(self,
                                 killed: Set[SelectionUnitMarket] = None):
@@ -250,7 +257,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_building_clicked(self, clicked_building: Building):
         # TODO: resolving possible building-related tasks for units first
         self.selected_building = clicked_building
-        self.game.change_interface_context(context=clicked_building)
+        self.game.update_interface_content(context=clicked_building)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -266,11 +273,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:
                 new, lost = self.mouse_drag_selection.update(x, y)
-                self.actualize_selection_markers_set(new, lost)
+                self.update_selection_markers_set(new, lost)
             else:
                 self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
 
-    def actualize_selection_markers_set(self, new, lost):
+    def update_selection_markers_set(self, new, lost):
         discarded = {m for m in self.selection_markers if m.selected in lost}
         self.clear_selection_markers(discarded)
         self.create_selection_markers(new)
@@ -350,7 +357,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update_cursor_texture(self):
         if self.is_game_loaded_and_running:
-            if self.selected_units:
+            if self.pointed_ui_element:
+                self.set_texture(CURSOR_NORMAL_TEXTURE)
+            elif (forced := self.forced_cursor) is not None:
+                self.set_texture(forced)
+            elif self.selected_units:
                 return self.cursor_texture_with_units_selected()
             elif entity := (self.pointed_unit or self.pointed_building):
                 return self.cursor_texture_on_pointing_at_entity(entity)
@@ -378,6 +389,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # lists which we set-up at cursor initialization. Instead of
         # displaying static texture we switch updated cursor animation:
         self.frames = self.all_frames_lists[index]
+
+    def force_cursor(self, index: int):
+        self.forced_cursor = index
 
     @property
     def is_game_loaded_and_running(self) -> bool:
@@ -440,15 +454,15 @@ class MouseDragSelection:
         :param y: float -- y coordinate of current closing corner
         """
         self.end = (x, y)  # actual mouse-cursor position
-        self.calculate_selection_rectangle_bounds()
-        return self.update_units()  # to update visible selection markers
+        self._calculate_selection_rectangle_bounds()
+        return self._update_units()  # to update visible selection markers
 
-    def calculate_selection_rectangle_bounds(self):
+    def _calculate_selection_rectangle_bounds(self):
         corners = self.start, self.end
         self.left, self.right = sorted([x[0] for x in corners])
         self.bottom, self.top = sorted([x[1] for x in corners])
 
-    def update_units(self) -> Tuple[Set[Unit], Set[Unit]]:
+    def _update_units(self) -> Tuple[Set[Unit], Set[Unit]]:
         """
         Update list of currently selected_units accordingly to the shape of
         the selection rectangle: units inside the shape are considered as
@@ -459,23 +473,23 @@ class MouseDragSelection:
         units_to_discard = set()
         # check units if they should be selected or not:
         for unit in (u for u in all_player_units if u.selectable):
-            if self.inside_selection_rect(*unit.position):
+            if self._inside_selection_rect(*unit.position):
                 if unit not in self.units:
                     units_to_add.add(unit)
             elif unit in self.units:
                 units_to_discard.add(unit)
         # update selection units set:
-        self.remove_units_from_selection(units_to_discard)
-        self.add_units_to_selection(units_to_add)
+        self._remove_units_from_selection(units_to_discard)
+        self._add_units_to_selection(units_to_add)
         return units_to_add, units_to_discard
 
-    def inside_selection_rect(self, x: float, y: float) -> bool:
+    def _inside_selection_rect(self, x: float, y: float) -> bool:
         return self.left < x < self.right and self.bottom < y < self.top
 
-    def remove_units_from_selection(self, units: Set[Unit]):
+    def _remove_units_from_selection(self, units: Set[Unit]):
         self.units.difference_update(units)
 
-    def add_units_to_selection(self, units: Set[Unit]):
+    def _add_units_to_selection(self, units: Set[Unit]):
         self.units.update(units)
 
     def draw(self):

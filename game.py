@@ -314,18 +314,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         Game.instance = self.window.cursor.game = self
 
     def create_interface(self) -> UiSpriteList:
-        ui_center = SCREEN_WIDTH * 0.9, SCREEN_Y
+        ui_x, ui_y = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_ui_panel = Frame('ui_right_panel.png', *ui_center, *ui_size, name=None, color=DARK)
+        right_ui_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         right_panel = UiElementsBundle(
-            name='right_panel',
+            name='basic_ui',
             index=0,
             elements=[
                 right_ui_panel,
-                Button(get_path_to_file('game_button_menu.png'),
-                       ui_center[0], 100,
+                Button(get_path_to_file('game_button_menu.png'), ui_x, 100,
                        function_on_left_click=partial(
                            self.window.show_view, self.window.menu_view),
+                       parent=right_ui_panel),
+                Button(get_path_to_file('game_button_pause.png'), ui_x - 100, 100,
+                       function_on_left_click=partial(self.toggle_pause),
                        parent=right_ui_panel)
             ],
             register_to=self
@@ -334,8 +336,20 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             name='units_panel',
             index=1,
             elements=[
+                Button(get_path_to_file('game_button_stop.png'), ui_x - 100,
+                       800, function_on_left_click=self.stop_all_units),
+                Button(get_path_to_file('game_button_attack.png'), ui_x, 800,
+                       function_on_left_click=partial(
+                           self.window.cursor.force_cursor, 2))
+            ],
+            register_to=self
+        )
+        biuilding_panel = UiElementsBundle(
+            name='building_panel',
+            index=2,
+            elements=[
                 Button(get_path_to_file('game_button_stop.png'),
-                       ui_center[0], 800),
+                       ui_x, 800),
             ],
             register_to=self
         )
@@ -346,19 +360,25 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         diff_x = self.interface[0].right - right
         diff_y = self.interface[0].top - top
         self.interface.move(-diff_x, -diff_y)
-        self.update_not_displayed_bundles(diff_x, diff_y)
+        self.update_not_displayed_bundles_positions(diff_x, diff_y)
 
-    def change_interface_context(self, context=None):
-        self._unload_all(exception='right_panel')
-        if isinstance(context, Building):
-            self.load_bundle(name='buildings_panel')
-        elif context:
-            self.load_bundle(name='units_panel')
+    def update_interface_content(self, context=None):
+        """
+        Change elements displayed in interface to proper for currently selected
+        gameobjects giving player access to context-options.
+        """
+        self._unload_all(exception='basic_ui')
+        if context:
+            if isinstance(context, Building):
+                self.configure_building_interface(context)
+            else:
+                self.configure_units_interface(context)
 
-    def inside_extended_viewport(self, x, y):
-        viewport = self.viewport
-        return (viewport[0] - 360 < x < viewport[1] + 360 and
-                viewport[2] - 240 < y < viewport[3] + 240)
+    def configure_building_interface(self, context: Building):
+        self.load_bundle(name='building_panel')
+
+    def configure_units_interface(self, context: List[Unit]):
+        self.load_bundle(name='units_panel')
 
     def create_effect(self, effect: Explosion):
         """
@@ -371,7 +391,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_music('background_theme.wav')
-        self.change_interface_context()
+        self.update_interface_content()
         # TODO: remove this when testing is done
         self.window.move_viewport_to_the_position(*self.units_position)
 
@@ -583,6 +603,10 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             v2_line = create_line(x, h_offset, x, self.map.height, WHITE)
             grid.append(v2_line)
         return grid
+
+    def stop_all_units(self):
+        for unit in self.window.cursor.selected_units:
+            unit.stop_completely()
 
 
 if __name__ == '__main__':

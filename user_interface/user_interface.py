@@ -5,7 +5,7 @@ import PIL
 
 from dataclasses import dataclass
 from functools import partial
-from typing import Dict, List, Optional, Callable, Set, Tuple, Union
+from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 
 from arcade import (
     Sprite, SpriteList, load_texture, draw_rectangle_outline, draw_text,
@@ -105,9 +105,17 @@ class UiElementsBundle(OwnedObject):
         except StopIteration:
             return
 
+    def get_elements_of_type(self, class_name: Type[UiElement]) -> List:
+        return [e for e in self.elements if isinstance(e, class_name)]
+
     def _remove(self, element: UiElement):
         self.elements.remove(element)
         element.bundle = None
+
+    def update_elements_positions(self, dx, dy):
+        for element in self.elements:
+            element.center_x -= dx
+            element.center_y -= dy
 
 
 class UiBundlesHandler(ObjectsOwner):
@@ -219,12 +227,10 @@ class UiBundlesHandler(ObjectsOwner):
         if exception is not None:
             self.load_bundle(name=exception)
 
-    def update_not_displayed_bundles(self, dx, dy):
+    def update_not_displayed_bundles_positions(self, dx, dy):
         for bundle in self.ui_elements_bundles.values():
             if bundle.index not in self.active_bundles:
-                for element in bundle.elements:
-                    element.center_x -= dx
-                    element.center_y -= dy
+                bundle.update_elements_positions(dx, dy)
 
 
 class Hierarchical:

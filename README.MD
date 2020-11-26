@@ -66,6 +66,7 @@ To be done.
 24. Units automatically moving towards detected enemies out of their
     attack range.
 25. Subdivided FogOfWar SpriteList to optimize FoW updates performance.
+26. Shot, hit and destruction graphic effects and sounds.
 
 #### TO BE DONE:
 #### Minor:
@@ -78,13 +79,12 @@ To be done.
 4. Minimap and teleporting to the map-locations by clickling on the
    minimap.
 5. Units-radiochatter sounds. Battle sounds.
-6. Shot, hit and destruction graphic effects and sounds.
-7. Skirmish mission customisation submenu (this is the only available
+6. Skirmish mission customisation submenu (this is the only available
    game mode for now).
-8. Playlist for background music tracks.
-9. Better Ai for Units autonomous behaviour.
-10. Flocking for Soldier class.
-11. Implement Jump Point Search to optimize A* performance.
+7. Playlist for background music tracks.
+8. Better Ai for Units autonomous behaviour.
+9. Flocking for Soldier class.
+10. Implement Jump Point Search to optimize A* performance.
 
 #### Major:
 1. User-interface. (currently being developed)

@@ -275,6 +275,12 @@ class Unit(PlayerEntity, TasksExecutor):
     def cancel_path_requests(self):
         self.game.pathfinder.cancel_unit_path_requests(self)
 
+    def stop_completely(self):
+        self.cancel_path_requests()
+        self.awaited_path = None
+        self.path.clear()
+        self.stop()
+
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
@@ -295,7 +301,10 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def set_permanent_units_group(self, index: int = 0):
         if group := self.permanent_units_group:
-            self.game.permanent_units_groups[group].discard(self)
+            try:
+                self.game.permanent_units_groups[group].discard(self)
+            except KeyError:
+                pass
         self.permanent_units_group = index
 
     def target_enemy(self, enemy: Optional[PlayerEntity] = None):
