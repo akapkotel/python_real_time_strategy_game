@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import random
-from abc import ABC, abstractmethod
+
+from abc import abstractmethod
 from collections import deque
 from typing import Deque, List, Optional, Set, Union, cast
 
 import PIL
-from arcade import SpriteList, AnimatedTimeBasedSprite, load_textures
+from arcade import SpriteList, Sprite, AnimatedTimeBasedSprite, load_textures
 from arcade.arcade_types import Point
 
 from effects.explosions import Explosion
@@ -153,7 +154,7 @@ class Unit(PlayerEntity, TasksExecutor):
             if not next_node.walkable and next_node.unit != self:
                 self.find_best_way_to_avoid_collision(next_node.unit)
 
-    def find_best_way_to_avoid_collision(self, blocker):
+    def find_best_way_to_avoid_collision(self, blocker: Unit):
         if blocker.has_destination or self.is_enemy(blocker):
             self.wait_for_free_path(self.path)
         elif self.find_alternative_path() is not None:
@@ -339,16 +340,18 @@ class Unit(PlayerEntity, TasksExecutor):
         self.game.window.sound_player.play_sound('explosion.wav')
 
 
-class Vehicle:
+class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
-    fuel = 100.0
-    fuel_consumption = 0.0
 
-    def consume_fuel(self):
-        self.fuel -= self.fuel_consumption
+    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+                 position: Point):
+        super().__init__(unit_name, player, weight, position)
+        thread_texture = f'{self.object_name.rsplit("_", 1)[0]}_threads.png'
+        self.thread_texture = get_path_to_file(thread_texture)
+        self.threads_time = 0
 
-
-class NoTurret:
+        self.fuel = 100.0
+        self.fuel_consumption = 0.0
 
     def _load_textures_and_reset_hitbox(self, unit_name: str):
         name = get_path_to_file(unit_name)
@@ -359,8 +362,46 @@ class NoTurret:
             [(i * width, 0, width, height) for i in range(8)]
         )
 
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
+        if self.moving:
+            self.consume_fuel()
+            self.leave_threads()
 
-class Tank(Unit, Vehicle):
+    def consume_fuel(self):
+        self.fuel -= self.fuel_consumption
+
+    def leave_threads(self):
+        if self.rendered:
+            if self.threads_time > 4:
+                self.threads_time = 0
+                self.game.vehicles_threads.append(
+                    VehicleThreads(self.thread_texture,
+                                   self.cur_texture_index,
+                                   *self.position),
+                )
+            else:
+                self.threads_time += 1
+
+
+class VehicleThreads(Sprite):
+
+    def __init__(self, texture, index, x, y):
+        super().__init__(texture, center_x=x, center_y=y)
+        self.textures = load_textures(
+            texture, [(i * 29, 0, 29, 28) for i in range(8)]
+        )
+        self.set_texture(index)
+
+    def on_update(self, delta_time: float = 1 / 60):
+        # threads slowly disappearing through time
+        if self.alpha > 1:
+            self.alpha -= 2
+        else:
+            self.kill()
+
+
+class Tank(Vehicle):
 
     def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
                  position: Point):
@@ -373,6 +414,8 @@ class Tank(Unit, Vehicle):
         self.turret_aim_target = None
         self._weapons.append(Weapon(name='tank_light_gun', owner=self))
         self.barrel_end = self.turret_texture_index
+
+        self.threads_time = 0
 
     def _load_textures_and_reset_hitbox(self, unit_name: str):
         """
@@ -423,8 +466,16 @@ class Tank(Unit, Vehicle):
     def on_update(self, delta_time: float = 1/60):
         self.turret_aim_target = None
         super().on_update(delta_time)
-        if self.moving:
-            self.consume_fuel()
+
+    def leave_threads(self):
+        self.threads_time += 1
+        if self.threads_time > 4:
+            self.threads_time = 0
+            self.game.vehicles_threads.append(
+                VehicleThreads(self.thread_texture,
+                               self.hull_texture_index,
+                               *self.position),
+            )
 
     def fight_or_run_away(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy

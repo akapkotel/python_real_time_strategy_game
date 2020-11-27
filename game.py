@@ -46,12 +46,14 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
+MINIMAP_WIDTH = 390
+MINIMAP_HEIGHT = 195
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 100
-COLUMNS = 100
+ROWS = 200
+COLUMNS = 200
 
 GAME_SPEED = 1.0
 
@@ -260,7 +262,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
         # SpriteLists:
         self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
-        self.vehicles_threads = SelectiveSpriteList(is_static=True)
+        self.vehicles_threads = SpriteList(is_static=True)
         self.units = SelectiveSpriteList()
         self.buildings = SelectiveSpriteList(is_static=True)
         self.effects = SpriteList()
@@ -281,6 +283,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             pathfinder=self.pathfinder,
             configs=self.window.configs
         )
+
+        self.mini_map = MiniMap()
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -494,6 +498,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             self.fog_of_war.update()
             self.update_factions_and_players()
             self.pathfinder.update()
+            self.mini_map.update()
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -515,6 +520,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
+        self.mini_map.draw()
         if self.window.debug:
             self.draw_debugging()
         if self.paused:
@@ -623,6 +629,7 @@ if __name__ == '__main__':
     from buildings.buildings import Building
     from scenarios.missions import Mission
     from user_interface.menu import Menu
+    from user_interface.minimap import MiniMap
 
     if __status__ == 'development' and PYPROFILER:
         from pyprofiler import start_profile, end_profile

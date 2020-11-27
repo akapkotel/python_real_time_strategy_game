@@ -7,7 +7,7 @@ import random
 
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
-from math import hypot
+from multiprocessing import Pool, cpu_count
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
@@ -366,6 +366,7 @@ class Pathfinder(Singleton):
         self.map = map
         self.requests_for_paths: Deque[PathRequest] = deque()
         self.pathfinding_calls = 0
+        self.pool = Pool()
         Pathfinder.instance = self
 
     def __bool__(self) -> bool:
@@ -429,12 +430,11 @@ class Pathfinder(Singleton):
         :return: Union[MapPath, bool] -- list of points or False if no path
         found
         """
-        self.pathfinding_calls += 1
         log(f'Searching for path from {start} to {end}...')
         heuristic = self.heuristic
 
         map_nodes = self.map.nodes
-        unexplored = PriorityQueue(start, heuristic(start, end) * 1.1)
+        unexplored = PriorityQueue(start, heuristic(start, end) * 1.001)
         explored = set()
         previous: Dict[GridPosition, GridPosition] = {}
 
@@ -453,7 +453,7 @@ class Pathfinder(Singleton):
             for adjacent in (a for a in walkable if a.grid not in explored):
                 if adjacent.grid in unexplored:
                     continue
-                # TODO: implement Jum Point Search, for now, we resign from
+                # TODO: implement Jump Point Search, for now, we resign from
                 #  using real terrain costs and calculate fast heuristic for
                 #  each waypoints pair, because it efficiently finds best
                 #  path, but it ignores tiles-moving-costs:
@@ -461,7 +461,7 @@ class Pathfinder(Singleton):
                 if total < cost_so_far[adjacent.grid]:
                     previous[adjacent.grid] = current
                     cost_so_far[adjacent.grid] = total
-                    priority = total + heuristic(adjacent.grid, end) * 1.1
+                    priority = total + heuristic(adjacent.grid, end) * 1.001
                     put_to_unexplored(adjacent.grid, priority)
             explored.update(walkable)
         # if path was not found searching by walkable tiles, we call second
@@ -490,6 +490,18 @@ class Pathfinder(Singleton):
         if successful, return the path, else enqueue the request again.
         """
         if self.requests_for_paths:
+            # find_path = Pathfinder.find_path
+            # count = min(cpu_count(), len(self.requests_for_paths))
+            # requests = [self.requests_for_paths.pop() for _ in range(count)]
+            # results = [self.pool.apply_async(find_path, args=r[1:]) for r in requests]
+            #
+            # for i, path in enumerate(results):
+            #     if p := path.get():
+            #         unit = requests[i][0]
+            #         unit.create_new_path(p)
+            #     else:
+            #         self.request_path(*requests[i])
+
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:
                 if path := self.find_path(start, destination):
