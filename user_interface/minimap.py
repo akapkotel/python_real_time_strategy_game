@@ -71,8 +71,8 @@ class MiniMap:
 
     def update_revealed_areas(self):
         for grid, sector in self.game.map.sectors.items():
-            if any(p for p in sector.units_and_buildings):
-                if grid not in self.drawn_area:
+            if grid not in self.drawn_area:
+                if any(p for p in sector.units_and_buildings):
                     self.reveal_minimap_area(grid)
 
     def update_drawn_areas_positions(self, dx, dy):

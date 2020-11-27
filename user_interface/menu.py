@@ -4,9 +4,10 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Checkbox
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, Frame
 )
 from utils.functions import get_path_to_file
+from utils.colors import BLACK
 from utils.views import WindowView
 
 
@@ -37,11 +38,13 @@ class Menu(WindowView, UiBundlesHandler):
                        functions=partial(switch_menu, 'credits')),
                 Button(get_path_to_file('menu_button_options.png'), x, next(y),
                        functions=partial(switch_menu, 'options')),
-                Button(get_path_to_file('menu_button_loadgame.png'), x, next(y),
+                Button(get_path_to_file('menu_button_loadgame.png'), x,
+                       next(y),
                        functions=partial(switch_menu, 'saving menu')),
                 Button(get_path_to_file('menu_button_newgame.png'), x, next(y),
                        functions=partial(switch_menu, 'new game menu')),
-                Button(get_path_to_file('menu_button_continue.png'), x, next(y),
+                Button(get_path_to_file('menu_button_continue.png'), x,
+                       next(y),
                        name='continue button', active=False,
                        functions=window.start_new_game),
                 Button(get_path_to_file('menu_button_quit.png'), x, next(y),
@@ -55,19 +58,32 @@ class Menu(WindowView, UiBundlesHandler):
         options_menu = UiElementsBundle(
             index=1,
             name='options',
-            elements=[],
-            register_to=self
-        )
-        options_menu.extend(
-            [
+            elements=[
                 back_to_menu_button,
                 # set 'subgroup' index for each element to assign it to the
                 # proper tab in options sub-menu:
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
-                    'Draw debug:', 20, ticked=window.debug,
-                    variable=(window, 'debug'), subgroup=1  # 'Graphics' tab
+                    'Draw debug:', 20, ticked=window.settings.debug,
+                    variable=(window.settings, 'debug'), subgroup=1
                 ),
+                Checkbox(
+                    get_path_to_file('menu_checkbox.png'), x, next(y),
+                    'Vehicles threads:', 20, ticked=window.settings.vehicles_threads,
+                    variable=(window.settings, 'vehicles_threads'), subgroup=1
+                ),
+                Checkbox(
+                    get_path_to_file('menu_checkbox.png'), x, next(y),
+                    'Full screen:', 20, ticked=window.fullscreen,
+                    functions=window.toggle_fullscreen, subgroup=1
+                ),
+            ],
+            register_to=self
+        )
+        # sound:
+        y = (i for i in range(300, SCREEN_HEIGHT, 75))
+        options_menu.extend(
+            [
                 Checkbox(
                     get_path_to_file('menu_checkbox.png'), x, next(y),
                     'Sound:', 20, ticked=window.sound_player.sound_on,
@@ -83,26 +99,25 @@ class Menu(WindowView, UiBundlesHandler):
                     'Sound effects:', 20, ticked=window.sound_player.sound_on,
                     variable=(window.sound_player, '_sound_effects_on'),
                     subgroup=2
-                ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
-                    'Full screen:', 20, ticked=window.fullscreen,
-                    functions=window.toggle_fullscreen, subgroup=1
-                ),
-                # tabs switching what groups of elements are visible by
-                # switching between subgroups:
-                Button(get_path_to_file('menu_tab_sound.png'), 320,
-                       SCREEN_HEIGHT - 64, functions=partial(
-                        options_menu.switch_to_subgroup, 2), subgroup=1),
-                Button(get_path_to_file('menu_tab_graphics.png'), 960,
-                       SCREEN_HEIGHT - 64, functions=partial(
-                        options_menu.switch_to_subgroup, 1), subgroup=2),
-                Button(get_path_to_file('menu_tab_blank.png'), 1600,
-                       SCREEN_HEIGHT - 64, functions=partial(
-                        options_menu.switch_to_subgroup, 3), subgroup=3)
+                )
             ]
         )
-        options_menu.switch_to_subgroup(1)
+
+        # tabs switching what groups of elements are visible by
+        # switching between subgroups:
+        graphics_tab = Tab(get_path_to_file('menu_tab_graphics.png'), 960,
+                           SCREEN_HEIGHT - 34, functions=partial(
+                           options_menu.switch_to_subgroup, 1))
+        sound_tab = Tab(get_path_to_file('menu_tab_sound.png'), 320,
+                        SCREEN_HEIGHT - 34, functions=partial(
+                        options_menu.switch_to_subgroup, 2),
+                        other_tabs=(graphics_tab, ))
+        game_tab = Tab(get_path_to_file('menu_tab_blank.png'), 1600,
+                        SCREEN_HEIGHT - 34, functions=partial(
+                        options_menu.switch_to_subgroup, 3),
+                        other_tabs=(graphics_tab, sound_tab))
+        options_menu.extend((sound_tab, graphics_tab, game_tab))
+        sound_tab.on_mouse_press(1)
 
         saving_menu = UiElementsBundle(
             index=2,
@@ -123,7 +138,8 @@ class Menu(WindowView, UiBundlesHandler):
                        functions=partial(switch_menu, 'skirmish menu')),
                 Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
                        functions=partial(switch_menu, 'campaign menu')),
-                Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x, y,
+                Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x,
+                       y,
                        functions=partial(switch_menu, 'multiplayer menu')),
             ],
             register_to=self

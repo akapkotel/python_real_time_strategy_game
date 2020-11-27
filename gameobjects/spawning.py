@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
+import PIL
 
+from typing import Any, Dict, List, Sequence, Tuple
+
+from arcade import load_texture
 from arcade.arcade_types import Point
 
 from buildings.buildings import Building
 from players_and_factions.player import Player
 from units.units import Unit, Vehicle, Tank
 from utils.classes import Singleton
-from utils.enums import UnitWeight
-from utils.functions import add_player_color_to_name
-from .gameobject import GameObject
+from utils.enums import UnitWeight, Robustness
+from utils.functions import add_player_color_to_name, get_path_to_file
+from .gameobject import GameObject, TerrainObject
 
 
 class ObjectsFactory(Singleton):
@@ -25,12 +28,13 @@ class ObjectsFactory(Singleton):
         self.pathfinder = pathfinder
         self.configs = configs
 
-    def spawn(self, name: str, player: Player, position: Point, **kwargs):
+    def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
+        if player is None:
+            return self._spawn_terrain_object(name, position, *args, **kwargs)
         if name in self.configs['buildings']:
             return self._spawn_building(name, player, position, **kwargs)
         elif name in self.configs['units']:
             return self._spawn_unit(name, player, position)
-        return self._spawn_terrain_object(name, position)
 
     def spawn_group(self,
                     names: Sequence[str],
@@ -66,6 +70,31 @@ class ObjectsFactory(Singleton):
                 setattr(spawned, key, value)
         return spawned
 
-    def _spawn_terrain_object(self, name, position) -> GameObject:
+    def _spawn_terrain_object(self, name, position, *args, **kwagrs) -> GameObject:
+        if 'wreck' in name:
+            texture_index = args[0]
+            return self._spawn_wreck(name, position, texture_index)
         category = 'terrain'
         return GameObject(name, position=position)
+
+    def _spawn_wreck(self, name, position, texture_index) -> GameObject:
+        wreck = TerrainObject(name, Robustness.INDESTRUCTIBLE, position)
+        texture_name = get_path_to_file(name)
+        width, height = PIL.Image.open(texture_name).size
+        if isinstance(texture_index, Tuple):
+            i, j = texture_index
+            wreck.texture = load_texture(texture_name, j * (width // 8),
+                                         i * (height // 8), width // 8,
+                                         height // 8)
+        else:
+            wreck.texture = load_texture(texture_name,
+                                         texture_index * (width // 8),
+                                         0, width // 8, height)
+        return wreck
+
+    @staticmethod
+    def despawn(game_object: GameObject):
+        try:
+            game_object.kill()
+        except AttributeError:
+            pass

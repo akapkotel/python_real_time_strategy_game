@@ -38,6 +38,11 @@ class UiSpriteList(SpriteList):
         for ui_element in (u for u in self if u.visible):
             ui_element.draw()
 
+    def on_update(self, delta_time: float = 1/60):
+        # noinspection PyUnresolvedReferences
+        for ui_element in (u for u in self if u.active):
+            ui_element.on_update()
+
 
 @dataclass
 class UiElementsBundle(OwnedObject):
@@ -471,7 +476,8 @@ class Frame(UiElement):
                  ):
         if texture_name:
             texture_name = get_path_to_file(texture_name)
-        super().__init__(texture_name, x, y, name, active, visible, parent, subgroup)
+        super().__init__(texture_name, x, y, name, active, visible, parent,
+                         subgroup=subgroup)
         if not texture_name:
             self.textures = [make_texture(width, height, color or WHITE)]
             self.set_texture(0)
@@ -507,6 +513,47 @@ class Button(UiElement):
         super().draw()
         if not self._active:
             draw_rectangle_filled(*self.position, self.width, self.height, FOG)
+
+
+class Tab(Button):
+    """
+    Tab is a subclass of Button which can be grouped with other Tabs to work
+    unison. When one tab is activated, all other, connected Tabs are
+    deactivated and vice versa. When used simultaneously with subgroups,
+    Tab can be easily used to switch between 'pages' or 'tabs' of menus and
+    submenus.
+    """
+
+    def __init__(self, texture_name: str, x: int, y: int,
+                 name: Optional[str] = None, active: bool = True,
+                 visible: bool = True, parent: Optional[Hierarchical] = None,
+                 functions: Optional[Union[Callable, Tuple[Callable]]] = None,
+                 subgroup: Optional[int] = None,
+                 other_tabs: Tuple[Tab, ...] = ()):
+        super().__init__(texture_name, x, y, name, active, visible, parent,
+                         functions, subgroup)
+        self.other_tabs = [tab for tab in other_tabs]
+        for tab in other_tabs:
+            if self not in tab.other_tabs:
+                tab.other_tabs.append(self)
+
+    def switch_to(self):
+        self.bundle.switch_to_subgroup(self.subgroup)
+        self.deactivate()
+
+    def _call_bound_functions(self):
+        super()._call_bound_functions()
+        self.deactivate()
+
+    def activate(self):
+        super().activate()
+        for tab in (t for t in self.other_tabs if t.active):
+            tab.active = False
+
+    def deactivate(self):
+        super().deactivate()
+        for tab in (t for t in self.other_tabs if not t.active):
+            tab.active = True
 
 
 class Checkbox(UiElement):
@@ -553,7 +600,6 @@ class Checkbox(UiElement):
             x - int(len(text) * font_size * 0.45), y, text, font_size,
             text_color
         )
-        self.add_child(self.text_label)
 
     def _func_on_mouse_enter(self, cursor):
         pass

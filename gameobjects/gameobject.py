@@ -10,10 +10,11 @@ from game import Game
 from utils.enums import Robustness, UnitWeight
 from utils.functions import get_path_to_file, log
 from utils.improved_spritelists import SelectiveSpriteList
+from utils.scheduling import EventsCreator
 from utils.observers import OwnedObject
 
 
-class GameObject(AnimatedTimeBasedSprite, OwnedObject):
+class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     """
     GameObject represents all in-game objects, like units, buildings,
     terrain props, trees etc.
@@ -29,6 +30,7 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         filename = get_path_to_file(object_name)
         super().__init__(filename, center_x=x, center_y=y)
         OwnedObject.__init__(self, owners=True)
+        EventsCreator.__init__(self)
         self.object_name = object_name
 
         GameObject.total_objects_count += 1
@@ -72,15 +74,20 @@ class GameObject(AnimatedTimeBasedSprite, OwnedObject):
         self.updated = False
 
     def kill(self):
+        log(f'Removing GameObject: {self.object_name}')
         self.unregister_from_all_owners()
         self.selective_spritelist.remove(self)
-        self.sprite_lists.clear()
         super().kill()
 
 
 class TerrainObject(GameObject):
 
-    def __init__(self, filename: str):
-        super().__init__(filename)
-        grid = self.game.map.position_to_grid(*self.position)
-        self.game.map.nodes[grid].obstacle_id = self.id
+    def __init__(self, filename: str, robustness: Robustness, position: Point):
+        super().__init__(filename, robustness, position)
+        node = self.game.map.position_to_node(*self.position)
+        node.set_pathable(False)
+
+    def kill(self):
+        node = self.game.map.position_to_node(*self.position)
+        node.set_pathable(True)
+        super().kill()

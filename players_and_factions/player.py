@@ -225,7 +225,7 @@ class CpuPlayer(Player):
         super().update()
 
 
-class PlayerEntity(GameObject, EventsCreator):
+class PlayerEntity(GameObject):
     """
     This is an abstract class for all objects which can be controlled by the
     Player. It contains methods and attributes common for the Unit and Building
@@ -246,7 +246,6 @@ class PlayerEntity(GameObject, EventsCreator):
                  position: Point,
                  robustness: Robustness = 0):
         GameObject.__init__(self, entity_name, robustness, position)
-        EventsCreator.__init__(self)
         self.map = self.game.map
 
         self.player: Player = player

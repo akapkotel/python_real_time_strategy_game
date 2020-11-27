@@ -63,6 +63,17 @@ PYPROFILER = True
 DEBUG = False
 
 
+class Settings:
+    """
+    Just a simple data container for convenient storage and acces to bunch of
+    minor variables, which would overcrowd Window __init__.
+    """
+    debug = DEBUG
+    vehicles_threads = True
+    threads_fadeout = 2
+    shot_blasts = True
+
+
 class Window(arcade.Window, EventsCreator):
 
     def __init__(self, width: int, height: int, update_rate: float):
@@ -79,6 +90,7 @@ class Window(arcade.Window, EventsCreator):
         self._updated: List[Updateable] = []
 
         self.debug = DEBUG
+        self.settings = Settings()  # shared with Game class
 
         # Settings, game-progress data, etc.
         self.configs: Dict[Dict[Dict[str, Any]]] = read_csv_files()
@@ -258,6 +270,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         UiBundlesHandler.__init__(self)
         self.assign_reference_to_self_for_all_classes()
 
+        self.settings = self.window.settings  # shared with Window class
         self.paused = False
 
         # SpriteLists:
@@ -445,18 +458,21 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def register(self, acquired: OwnedObject):
         acquired: Union[Player, Faction, PlayerEntity, UiElementsBundle]
-        if isinstance(acquired, (Unit, Building)):
-            self.register_player_entity(acquired)
+        if isinstance(acquired, GameObject):
+            self.register_gameobject(acquired)
         elif isinstance(acquired, (Player, Faction)):
             self.register_player_or_faction(acquired)
         else:
             super().register(acquired)
 
-    def register_player_entity(self, registered: Union[Unit, Building]):
-        if not registered.is_building:
-            self.units.append(registered)
+    def register_gameobject(self, registered: GameObject):
+        if isinstance(registered, PlayerEntity):
+            if registered.is_building:
+                self.buildings.append(registered)
+            else:
+                self.units.append(registered)
         else:
-            self.buildings.append(registered)
+            self.terrain_objects.append(registered)
 
     def register_player_or_faction(self, registered: Union[Player, Faction]):
         if isinstance(registered, Player):
@@ -466,19 +482,21 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def unregister(self, owned: OwnedObject):
         owned: Union[PlayerEntity, Player, Faction, UiElementsBundle]
-        if isinstance(owned, PlayerEntity):
-            self.unregister_player_entity(owned)
+        if isinstance(owned, GameObject):
+            self.unregister_gameobject(owned)
         elif isinstance(owned, (Player, Faction)):
             self.unregister_player_or_faction(owned)
         else:
             super().unregister(owned)
 
-    def unregister_player_entity(self, owned: PlayerEntity):
-        owned: Union[Unit, Building]
-        if not owned.is_building:
-            self.units.remove(owned)
+    def unregister_gameobject(self, owned: GameObject):
+        if isinstance(owned, PlayerEntity):
+            if owned.is_building:
+                self.buildings.remove(owned)
+            else:
+                self.units.remove(owned)
         else:
-            self.buildings.remove(owned)
+            self.terrain_objects.remove(owned)
 
     def unregister_player_or_faction(self, owned: Union[Player, Faction]):
         if isinstance(owned, Player):
@@ -521,7 +539,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def on_draw(self):
         super().on_draw()
         self.mini_map.draw()
-        if self.window.debug:
+        if self.settings.debug:
             self.draw_debugging()
         if self.paused:
             self.draw_paused_dialog()
@@ -624,6 +642,7 @@ if __name__ == '__main__':
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
     from units.units import Unit
+    from gameobjects.gameobject import GameObject
     from gameobjects.spawning import ObjectsFactory
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building

@@ -340,8 +340,11 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         # be first to interact with cursor, we discard all parents and seek
         # for first child, which is pointed instead:
         if pointed := get_sprites_at_point((x, y), spritelist):
-            s: Union[CursorInteractive, PlayerEntity]
-            for sprite in (s for s in pointed if not getattr(s, 'children', False)):
+            if not isinstance(spritelist, UiSpriteList):
+                return pointed[0]
+            s: UiElement
+            for sprite in (s for s in pointed if s.active and not s.children):
+                print(sprite)
                 return sprite  # first pointed children
             else:
                 return pointed[0]  # return pointed Sprite if no children found

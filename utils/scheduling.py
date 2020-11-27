@@ -67,21 +67,20 @@ class EventsScheduler:
         self.scheduled_events.append(event)
         delay = event.delay_left or event.delay
         self.execution_times.append(get_time() + delay)
-        log(f'Scheduled event: {event}')
+        log(f'Scheduled event: {event}', True)
 
     def unschedule(self, event: ScheduledEvent):
         try:
             index = self.scheduled_events.index(event)
             self.scheduled_events.pop(index)
             self.execution_times.pop(index)
-            log(f'Unscheduled event: {event}')
+            log(f'Unscheduled event: {event}', True)
         except ValueError:
             pass
 
     def update(self):
         time = get_time()
         for i, event in enumerate(self.scheduled_events):
-            # if not self.frames_left[i]:
             if time >= self.execution_times[i]:
                 event.execute()
                 self.unschedule(event)
@@ -101,7 +100,6 @@ class EventsCreator:
     ScheduledEvents. It keeps track of all events created by the object making
     it possible to shelve them when application state is saved to shelve file.
     """
-    event_scheduler: Optional[EventsScheduler] = None
 
     def __init__(self):
         self.scheduled_events: List[ScheduledEvent] = []

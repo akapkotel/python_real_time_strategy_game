@@ -306,6 +306,9 @@ class MapNode(GridHandler, ABC):
         """Call it to find if this node is available for pathfinding at all."""
         return self._allowed_for_pathfinding and self._building is None
 
+    def set_pathable(self, value: bool):
+        self._allowed_for_pathfinding = value
+
     @property
     def walkable_adjacent(self) -> List[MapNode]:
         return self.map.walkable_adjacent(*self.position)

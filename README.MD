@@ -70,6 +70,7 @@ To be done.
 27. Simple minimap showing current viewport position and revealed map
     area.
 28. Vehicles leave tires/tracks traces on the ground.
+29. When Vehicles are destroyed, they leave wrecks.
 
 #### TO BE DONE:
 #### Minor:
@@ -89,7 +90,7 @@ To be done.
 9. Flocking for Soldier class.
 10. Implement Jump Point Search to optimize A* performance.
 11. Less cpu-heavy VehicleThreads.
-12. Complete MiniMap functionality, use ShapeElementList maybe?
+12. Nicer MiniMap without ugly rectangles representing discovered area.
 
 #### Major:
 1. User-interface. (currently being developed)

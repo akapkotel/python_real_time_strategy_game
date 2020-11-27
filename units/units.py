@@ -18,6 +18,7 @@ from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
 from players_and_factions.player import Player, PlayerEntity
 from units.units_tasking import TasksExecutor, UnitTask
 from utils.enums import UnitWeight
+from utils.scheduling import ScheduledEvent
 from utils.functions import (
     calculate_angle, distance_2d, get_path_to_file, log,
     precalculate_8_angles, vector_2d
@@ -151,7 +152,7 @@ class Unit(PlayerEntity, TasksExecutor):
     def scan_next_nodes_for_collisions(self):
         if self.path:
             next_node = self.map.position_to_node(*self.path[0])
-            if not next_node.walkable and next_node.unit != self:
+            if next_node.unit not in (self, None):
                 self.find_best_way_to_avoid_collision(next_node.unit)
 
     def find_best_way_to_avoid_collision(self, blocker: Unit):
@@ -366,7 +367,8 @@ class Vehicle(Unit):
         super().on_update(delta_time)
         if self.moving:
             self.consume_fuel()
-            self.leave_threads()
+            if self.game.settings.vehicles_threads:
+                self.leave_threads()
 
     def consume_fuel(self):
         self.fuel -= self.fuel_consumption
@@ -382,6 +384,23 @@ class Vehicle(Unit):
                 )
             else:
                 self.threads_time += 1
+
+    def kill(self):
+        self.spawn_wreck()
+        super().kill()
+
+    def spawn_wreck(self):
+        wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'
+        wreck = self.game.spawner.spawn(
+            wreck_name, None, self.position, self.cur_texture_index
+        )
+        self.configure_wreck(wreck)
+
+    def configure_wreck(self, wreck):
+        wreck.register_to_objectsowners(self.game)
+        wreck.schedule_event(ScheduledEvent(wreck, 10.0, wreck.kill))
+        map_tile = self.map.position_to_node(*wreck.position)
+        map_tile._allowed_for_pathfinding = False
 
 
 class VehicleThreads(Sprite):
@@ -482,6 +501,14 @@ class Tank(Vehicle):
         angle = calculate_angle(*self.position, *enemy.position)
         self.angle_to_texture(turret_angle=angle)
         super().fight_or_run_away(enemy)
+
+    def spawn_wreck(self):
+        wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'
+        wreck = self.game.spawner.spawn(
+            wreck_name, None, self.position,
+            (self.hull_texture_index, self.turret_texture_index)
+        )
+        self.configure_wreck(wreck)
 
 
 class Infantry(Unit):
