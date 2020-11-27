@@ -67,6 +67,9 @@ To be done.
     attack range.
 25. Subdivided FogOfWar SpriteList to optimize FoW updates performance.
 26. Shot, hit and destruction graphic effects and sounds.
+27. Simple minimap showing current viewport position and revealed map
+    area.
+28. Vehicles leave tires/tracks traces on the ground.
 
 #### TO BE DONE:
 #### Minor:
@@ -85,6 +88,8 @@ To be done.
 8. Better Ai for Units autonomous behaviour.
 9. Flocking for Soldier class.
 10. Implement Jump Point Search to optimize A* performance.
+11. Less cpu-heavy VehicleThreads.
+12. Complete MiniMap functionality, use ShapeElementList maybe?
 
 #### Major:
 1. User-interface. (currently being developed)

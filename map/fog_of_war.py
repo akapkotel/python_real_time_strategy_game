@@ -45,7 +45,7 @@ class FogOfWar:
 
         # Dict to find and manipulate Sprites in the spritelist:
         self.grids_to_sprites: Dict[GridPosition, FogSprite] = {}
-        # Black or semi-transparent grey sprites are drawn on the screen width
+        # Black or semi-transparent grey sprites are drawn_area on the screen width
         # normal SpriteLists. We divide map for smaller areas with distinct
         # spritelists to avoid updating too large sets each frame:
         self.fog_sprite_lists = self.create_dark_sprites()

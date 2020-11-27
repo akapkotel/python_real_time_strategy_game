@@ -52,13 +52,13 @@ class WindowView(View):
 
         or:
 
-        for obj in self.drawn:
+        for obj in self.drawn_area:
             obj.draw()
 
         :param ignore_update: put here all SpriteLists and other objects
         which have on_update method but you want them to be NOT updated
         :param ignored: instead you can declare types of objects, you do not
-        want to be updated, nor drawn
+        want to be updated, nor drawn_area
         """
         updated = get_attributes_with_attribute(self, 'on_update', ignored)
         self.drawn = get_attributes_with_attribute(self, 'draw', ignored)

@@ -12,7 +12,7 @@ class SpriteListWithSwitch(SpriteList):
     """
     This is a arcade Spritelist improved with parameters: update_on, draw_on
     and method toggle_update() and toggle_draw() which controls if this
-    SpriteList is updated and drawn each frame or not.
+    SpriteList is updated and drawn_area each frame or not.
     """
 
     def __init__(self, use_spatial_hash=False,
@@ -110,16 +110,16 @@ class SelectiveSpriteList(SpriteList):
     @staticmethod
     def start_drawing(sprite):
         try:
-            sprite.drawn = True
+            sprite.drawn_area = True
         except AttributeError:
-            log(f'Tried to draw Sprite instance without "drawn" attribute')
+            log(f'Tried to draw Sprite instance without "drawn_area" attribute')
 
     @staticmethod
     def stop_drawing(sprite):
         try:
             sprite.rendered = False
         except AttributeError:
-            log(f'Tried stop drawing Sprite instance without "drawn" attribute')
+            log(f'Tried stop drawing Sprite instance without "drawn_area" attribute')
 
     def on_update(self, delta_time: float = 1/60):
         for sprite in (s for s in self if s.updated):

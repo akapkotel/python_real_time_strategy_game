@@ -56,7 +56,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.all_frames_lists: List[List[AnimationKeyframe]] = []
         self.load_textures()
 
-        # cache currently updated and drawn spritelists of the active View:
+        # cache currently updated and drawn_area spritelists of the active View:
         self._updated_spritelists: List[DrawnAndUpdated] = []
 
         self.mouse_dragging = False
@@ -77,7 +77,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.selected_building: Optional[Building] = None
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
         # that this unit is currently selected and will react for players's
-        # actions. Sprites are actually drawn and updated in Game class,
+        # actions. Sprites are actually drawn_area and updated in Game class,
         # but here we keep them cashed to easily manipulate them:
         self.selection_markers: Set[SelectionUnitMarket] = set()
 
@@ -320,7 +320,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
             self.update_mouse_pointed_ui_element(pointed)
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
-        # Since we have many spritelists which are drawn in some
+        # Since we have many spritelists which are drawn_area in some
         # hierarchical order, we must iterate over them catching
         # cursor-pointed elements in backward order: last draw, is first to
         # be mouse-pointed (it lies on the top)

@@ -46,14 +46,14 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
-MINIMAP_WIDTH = 390
+MINIMAP_WIDTH = 380
 MINIMAP_HEIGHT = 195
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 200
-COLUMNS = 200
+ROWS = 100
+COLUMNS = 150
 
 GAME_SPEED = 1.0
 
@@ -425,13 +425,13 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         spawned_units = []
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
+            node = random.choice(list(self.map.nodes.values()))
             if player is self.local_human_player:
-                node = random.choice(list(self.map.nodes.values()))
                 self.units_position = node.position
-                names = [unit_name] * 30
-                spawned_units.extend(
-                    self.spawner.spawn_group(names, player, node.position)
-                )
+            names = [unit_name] * 30
+            spawned_units.extend(
+                self.spawner.spawn_group(names, player, node.position)
+            )
         self.units.extend(spawned_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
