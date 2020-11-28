@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from collections import deque
+from typing import Dict, Deque
 
 from arcade import Sprite, load_spritesheet
 
+from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
 path = get_path_to_file
@@ -15,22 +18,63 @@ explosions = {
 }
 
 
+class ExplosionsPool(Singleton):
+    """
+    Pooling allows to avoid initializing many, often-used objects lowering
+    CPU load. Number of pooled Explosions is dynamically adjusted to number of
+    Units in game.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.explosions: Dict[str, Deque] = {
+            name: deque([Explosion(name, self) for _ in range(20)]) for name
+            in explosions
+        }
+
+    def get(self, explosion_name, x, y) -> Explosion:
+        explosion = self.explosions[explosion_name].popleft()
+        explosion.position = x, y
+        return explosion
+
+    def put(self, explosion: Explosion):
+        self.explosions[explosion.name].append(explosion)
+
+    def add(self, explosion_name: str, required: int):
+        explosions_count = len(self.explosions[explosion_name])
+        if explosions_count < required:
+            self.put(Explosion(explosion_name, self))
+        elif explosions_count > required:
+            self.explosions[explosion_name].popleft()
+
+
 class Explosion(Sprite):
     """ This class creates an explosion animation """
 
-    def __init__(self, x, y, spritesheet_name: str):
+    def __init__(self, spritesheet_name: str, pool):
         super().__init__()
-        self.center_x = x
-        self.center_y = y
+        self.name = spritesheet_name
+        self.pool = pool
         self.textures = explosions[spritesheet_name]
         self.set_texture(0)
+        self.exploding = False
+
+    def play(self):
+        self.set_texture(0)
         self.cur_texture_index = 0  # Start at the first frame
+        self.exploding = True
 
     def on_update(self, delta_time: float = 1/60):
         # Update to the next frame of the animation. If we are at the end
-        # of our frames, then delete this sprite.
-        self.cur_texture_index += 1
-        if self.cur_texture_index < len(self.textures):
-            self.set_texture(self.cur_texture_index)
-        else:
-            self.kill()
+        # of our frames, then put it back to the pool.
+        if self.exploding:
+            self.cur_texture_index += 1
+            if self.cur_texture_index < len(self.textures):
+                self.set_texture(self.cur_texture_index)
+            else:
+                self.return_to_pool()
+
+    def return_to_pool(self):
+        self.exploding = False
+        self.remove_from_sprite_lists()
+        self.pool.put(self)

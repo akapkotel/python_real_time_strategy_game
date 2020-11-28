@@ -296,6 +296,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             pathfinder=self.pathfinder,
             configs=self.window.configs
         )
+        self.explosions_pool = ExplosionsPool()
 
         self.mini_map = MiniMap()
 
@@ -395,12 +396,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def configure_units_interface(self, context: List[Unit]):
         self.load_bundle(name='units_panel')
 
-    def create_effect(self, effect: Explosion):
+    def create_effect(self, effect_type: Any, name: str, x, y):
         """
         Add animated sprite to the self.effects spritelist to display e.g.:
         explosions.
         """
+        if effect_type == Explosion:
+            effect = self.explosions_pool.get(name, x, y)
+        else:
+            return
         self.effects.append(effect)
+        effect.play()
 
     def on_show_view(self):
         super().on_show_view()
@@ -572,11 +578,12 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.draw_debug_units()
 
     def draw_debug_units(self):
+        unit: Unit
         for unit in self.units:
             x, y = unit.position
             draw_text(str(unit.id), x, y + 40, color=GREEN)
             if (target := unit.targeted_enemy) is not None:
-                draw_text(str(target.id), x, y -40, color=RED)
+                draw_text(str(target.id), x, y - 40, color=RED)
 
     def draw_debug_paths(self):
         for path in (u.path for u in self.local_human_player.units if u.path):
@@ -635,7 +642,7 @@ if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map.map import Map, Pathfinder
     from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
-    from effects.explosions import Explosion, explosions
+    from effects.explosions import Explosion, ExplosionsPool
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
     )

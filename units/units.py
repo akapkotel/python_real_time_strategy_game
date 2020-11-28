@@ -63,6 +63,14 @@ class Unit(PlayerEntity, TasksExecutor):
 
         self.permanent_units_group: int = 0
 
+        self.explosion_name = 'EXPLOSION'
+        self.update_explosions_pool()
+
+    def update_explosions_pool(self):
+        name = self.explosion_name
+        required = len([u for u in self.game.units if u.explosion_name == name])
+        self.game.explosions_pool.add(name, required)
+
     @abstractmethod
     def _load_textures_and_reset_hitbox(self, unit_name: str):
         """
@@ -337,7 +345,8 @@ class Unit(PlayerEntity, TasksExecutor):
                 self.unblock_map_node(node)
 
     def create_death_animation(self):
-        self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
+        self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
+        # self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
         self.game.window.sound_player.play_sound('explosion.wav')
 
 

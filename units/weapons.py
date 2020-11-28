@@ -8,7 +8,6 @@ from typing import List
 
 from arcade.texture import Texture
 
-from game import UPDATE_RATE
 from audio.sound import SOUNDS_EXTENSION
 from utils.functions import move_along_vector
 from effects.explosions import Explosion
@@ -30,6 +29,8 @@ class Weapon:
         self.last_firing_time = 0
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
+        self.explosion_name = 'SHOTBLAST'
+        self.owner.game.explosions_pool.add(self.explosion_name, 75)
 
     def reload(self) -> bool:
         if (now := get_time()) >= self.last_firing_time + self.rate_of_fire:
@@ -59,7 +60,7 @@ class Weapon:
         barrel_angle = 45 * self.owner.barrel_end
         x, y = self.owner.center_x, self.owner.center_y + 10
         blast_position = move_along_vector((x, y), 35, angle=barrel_angle)
-        self.owner.game.create_effect(Explosion(*blast_position, 'SHOTBLAST'))
+        self.owner.game.create_effect(Explosion, 'SHOTBLAST', *blast_position)
 
     def effective_against(self, enemy: PlayerEntity) -> bool:
         """

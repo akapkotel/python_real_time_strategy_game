@@ -71,6 +71,7 @@ To be done.
     area.
 28. Vehicles leave tires/tracks traces on the ground.
 29. When Vehicles are destroyed, they leave wrecks.
+30. Implemented pooling to boost Explosions efficiency.
 
 #### TO BE DONE:
 #### Minor:

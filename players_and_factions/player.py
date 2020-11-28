@@ -478,7 +478,7 @@ class PlayerEntity(GameObject):
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)
-        self.game.create_effect(Explosion(*position, 'HITBLAST'))
+        # self.game.create_effect(Explosion(*position, 'HITBLAST'))
 
     def kill(self):
         if self.selection_marker is not None:
