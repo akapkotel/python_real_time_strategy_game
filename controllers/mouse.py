@@ -416,7 +416,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
         super().draw()
-        if self.is_game_loaded_and_running and self.game.window.debug:
+        if self.is_game_loaded_and_running and self.game.settings.debug:
             self.draw_selected_units_counter()
 
     def draw_selected_units_counter(self):

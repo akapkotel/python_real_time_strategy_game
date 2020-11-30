@@ -46,8 +46,8 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
-MINIMAP_WIDTH = 380
-MINIMAP_HEIGHT = 195
+MINIMAP_WIDTH = 388
+MINIMAP_HEIGHT = 196
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
@@ -81,6 +81,8 @@ class Window(arcade.Window, EventsCreator):
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
+        self.settings = Settings()  # shared with Game class
+
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
         self.sound_player = SoundPlayer(sounds_directory='resources/sounds')
@@ -89,12 +91,8 @@ class Window(arcade.Window, EventsCreator):
 
         self._updated: List[Updateable] = []
 
-        self.debug = DEBUG
-        self.settings = Settings()  # shared with Game class
-
-        # Settings, game-progress data, etc.
-        self.configs: Dict[Dict[Dict[str, Any]]] = read_csv_files()
-        self.player_configs: Dict[str, Any] = load_player_configs()
+        # Settings, gameobjects configs, game-progress data, etc.
+        self.configs: Dict[str, Dict[str, Dict[str, Any]]] = read_csv_files('resources/configs')
 
         # views:
         self.menu_view = Menu()
@@ -220,8 +218,6 @@ class Window(arcade.Window, EventsCreator):
         left, right, bottom, top = self.get_viewport()
         new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
-        # if self.is_game_running:
-        #     self.game_view.update_interface_position(dx, dy)
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def update_viewport_coordinates(self, new_bottom, new_left):
@@ -241,7 +237,6 @@ class Window(arcade.Window, EventsCreator):
         new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
         left, _, bottom, _ = self.current_view.viewport
-        self.game_view.update_interface_position(left - new_left, bottom - new_bottom)
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def get_viewport(self) -> Viewport:
@@ -373,10 +368,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, right, top):
-        diff_x = self.interface[0].right - right
-        diff_y = self.interface[0].top - top
-        self.interface.move(-diff_x, -diff_y)
-        self.update_not_displayed_bundles_positions(diff_x, diff_y)
+        diff_x = right - self.interface[0].right
+        diff_y = top - self.interface[0].top
+        self.interface.move(diff_x, diff_y)
+        self.update_not_displayed_bundles_positions(-diff_x, -diff_y)
+        self.mini_map.update_position(diff_x, diff_y)
 
     def update_interface_content(self, context=None):
         """

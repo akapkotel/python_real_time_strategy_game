@@ -133,7 +133,7 @@ class Unit(PlayerEntity, TasksExecutor):
         """
         self.scan_next_nodes_for_collisions()
         self.update_current_blocked_node(new_current_node)
-        if len(self.path) > 1:
+        if self.path:
             self.update_reserved_node()
 
     def update_current_blocked_node(self, new_current_node: MapNode):
@@ -203,14 +203,11 @@ class Unit(PlayerEntity, TasksExecutor):
             self.move_to(destination)
 
     def find_free_tile_to_unblock_way(self, path) -> bool:
-        adjacent = self.current_node.walkable_adjacent
-        possible = [n for n in adjacent if n.position not in path]
-        try:
-            free_tile = random.choice(possible)
+        if adjacent := self.current_node.walkable_adjacent:
+            free_tile = random.choice(adjacent)
             self.move_to(self.map.position_to_grid(*free_tile.position))
             return True
-        except IndexError:
-            return False
+        return False
 
     def update_current_sector(self):
         if (sector := self.current_node.sector) != self.current_sector:

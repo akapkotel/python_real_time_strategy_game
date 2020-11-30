@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Optional, Set, Dict, List
+from typing import Optional, Dict, List
 
 from arcade import draw_rectangle_filled, draw_rectangle_outline, draw_point
 from arcade.arcade_types import Color
@@ -19,7 +19,7 @@ class MiniMap:
     def __init__(self):
         self.width = MINIMAP_WIDTH
         self.height = MINIMAP_HEIGHT
-        self.position = (SCREEN_WIDTH - 200, SCREEN_HEIGHT - 100)
+        self.position = (SCREEN_WIDTH - MINIMAP_WIDTH // 2, SCREEN_HEIGHT - MINIMAP_HEIGHT // 2)
 
         if self.height < self.width:
             self.ratio = self.height / self.game.map.height
@@ -38,17 +38,14 @@ class MiniMap:
         self.drawn_entities: List[List[float, float, Color, int]] = []
 
     def update(self):
-        self.update_position()
-        self.update_viewport()
         self.update_drawn_units()
         self.update_revealed_areas()
 
-    def update_position(self):
+    def update_position(self, dx, dy):
         _, right, _, top = self.game.viewport
-        x, y = [p for p in self.position]
         self.position = (right - 195, top - 95)
-        dx, dy = self.position[0] - x, self.position[1] - y
         self.update_drawn_areas_positions(dx, dy)
+        self.update_viewport()
 
     def update_viewport(self):
         x, y = self.game.window.screen_center

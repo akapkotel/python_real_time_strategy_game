@@ -411,7 +411,7 @@ class PlayerEntity(GameObject):
         for sector in sectors:
             for player_id, entities in sector.units_and_buildings.items():
                 if self.game.players[player_id].is_enemy(self.player):
-                    enemies.update(entities.difference(self.mutually_detected_enemies))
+                    enemies.update(entities)
         return {e for e in enemies if e.in_observed_area(self)}
 
     @abstractmethod
