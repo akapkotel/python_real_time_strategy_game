@@ -236,6 +236,15 @@ class Sector(GridHandler, ABC):
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         return [(x + p[0], y + p[1]) for p in cls.adjacent_offsets]
 
+    def __getstate__(self) -> Dict:
+        saved_sector = self.__dict__.copy()
+        saved_sector['map'] = None
+        saved_sector['units_and_buildings'] = {}
+        return saved_sector
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
 
 class MapNode(GridHandler, ABC):
     """
@@ -320,6 +329,15 @@ class MapNode(GridHandler, ABC):
     @property
     def adjacent_nodes(self) -> List[MapNode]:
         return self.map.adjacent_nodes(*self.position)
+
+    def __getstate__(self) -> Dict:
+        saved_node = self.__dict__.copy()
+        for key in ('_unit', '_building'):
+            saved_node[key] = None
+        return saved_node
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 class PriorityQueue:

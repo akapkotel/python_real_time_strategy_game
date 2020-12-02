@@ -35,7 +35,7 @@ from utils.functions import (
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch
 )
-from utils.observers import OwnedObject
+from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, Updateable, WindowView
 
@@ -87,12 +87,12 @@ class Window(arcade.Window, EventsCreator):
 
         self.sound_player = SoundPlayer(sounds_directory='resources/sounds')
 
-        self.save_manger = SaveManager(saves_directory='saved_games')
+        self.save_manger = SaveManager('saved_games', 'scenarios')
 
         self._updated: List[Updateable] = []
 
         # Settings, gameobjects configs, game-progress data, etc.
-        self.configs: Dict[str, Dict[str, Dict[str, Any]]] = read_csv_files('resources/configs')
+        self.configs = read_csv_files('resources/configs')
 
         # views:
         self.menu_view = Menu()
@@ -190,6 +190,8 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
+            if self.is_game_running and symbol == arcade.key.S:
+                self.save_game()  # TODO: remove after saving testing is done
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -246,7 +248,7 @@ class Window(arcade.Window, EventsCreator):
 
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
-        raise NotImplementedError
+        self.save_manger.save_game('save_01', self.game_view)
 
     def load_game(self):
         raise NotImplementedError
@@ -312,7 +314,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
-        self.missions: Dict[int, Mission] = {}
+        self.mission: Optional[Mission] = None
         self.current_mission: Optional[Mission] = None
 
         self.debugged = []
@@ -508,6 +510,9 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def get_notified(self, *args, **kwargs):
         pass
+
+    def show_dialog(self, dialog_name: str):
+        print(dialog_name)
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):

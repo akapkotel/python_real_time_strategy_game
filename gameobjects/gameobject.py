@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Dict
 
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
@@ -11,7 +11,7 @@ from utils.enums import Robustness, UnitWeight
 from utils.functions import get_path_to_file, log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator
-from utils.observers import OwnedObject
+from utils.ownership_relations import OwnedObject
 
 
 class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
@@ -48,6 +48,15 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
 
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
+
+    def __getstate__(self) -> Dict:
+        saved_data = {
+            'id': self.id,
+            'object_name': self.object_name,
+            'position': self.position,
+            'scheduled_events': self.scheduled_events_to_shelve_data()
+        }
+        return saved_data
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness

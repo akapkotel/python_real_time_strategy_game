@@ -19,7 +19,7 @@ from utils.data_types import FactionId, TechnologyId
 from utils.functions import (
     calculate_observable_area, distance_2d, is_visible, log
 )
-from utils.observers import ObjectsOwner, OwnedObject
+from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 
 
@@ -106,6 +106,12 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         self.known_enemies.clear()
         for player in self.players:
             player.update()
+
+    def __getstate__(self) -> Dict:
+        return {'id': self.id, 'name': self.name}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 class ResourcesManager:
@@ -209,6 +215,16 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     def increase_resource_stock(self, resource, yield_per_frame):
         old_value = getattr(self, resource)
         setattr(self, resource, old_value + yield_per_frame)
+
+    def __getstate__(self) -> Dict:
+        saved_player = self.__dict__.copy()
+        saved_player['units'].clear()
+        saved_player['buildings'].clear()
+        saved_player['known_enemies'].clear()
+        return saved_player
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 class CpuPlayer(Player):
@@ -488,6 +504,20 @@ class PlayerEntity(GameObject):
     @abstractmethod
     def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
         raise NotImplementedError
+
+    def __getstate__(self) -> Dict:
+        saved_entity = super().__getstate__()
+        saved_entity.update(
+            {
+                'player': self.player.id,
+                '_health': self._health,
+                'experience': self.experience
+            }
+        )
+        return saved_entity
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 if __name__:

@@ -68,7 +68,8 @@ class SelectiveSpriteList(SpriteList):
         # to keep track of items in spritelist, fast lookups:
         self.registry: Dict[int, Sprite] = {}
 
-    def get_id(self, sprite_id: int) -> Optional[Sprite]:
+    def get_by_id(self, sprite_id: int) -> Optional[Sprite]:
+        """Return element with particular 'id' attribute value or None."""
         try:
             return self.registry[sprite_id]
         except KeyError:

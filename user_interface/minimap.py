@@ -37,6 +37,15 @@ class MiniMap:
         self.drawn_area: Dict[GridPosition, List] = {}
         self.drawn_entities: List[List[float, float, Color, int]] = []
 
+    def __getstate__(self) -> Dict:
+        return {
+            'drawn_area': self.drawn_area,
+            'drawn_entities': self.drawn_entities
+        }
+
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)
+
     def update(self):
         self.update_drawn_units()
         self.update_revealed_areas()

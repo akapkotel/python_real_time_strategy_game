@@ -30,9 +30,6 @@ class FogOfWar:
     game: Optional[Game] = None
 
     def __init__(self):
-        """
-        TO DO:
-        """
         # grid-data of the game-map:
         self.map_grids: KeysView[GridPosition] = self.game.map.nodes.keys()
         # Tiles which have not been revealed yet:
@@ -45,12 +42,10 @@ class FogOfWar:
 
         # Dict to find and manipulate Sprites in the spritelist:
         self.grids_to_sprites: Dict[GridPosition, FogSprite] = {}
-        # Black or semi-transparent grey sprites are drawn_area on the screen width
-        # normal SpriteLists. We divide map for smaller areas with distinct
-        # spritelists to avoid updating too large sets each frame:
+        # Black or semi-transparent grey sprites are drawn_area on the screen
+        # width normal SpriteLists. We divide map for smaller areas with
+        # distinct spritelists to avoid updating too large sets each frame:
         self.fog_sprite_lists = self.create_dark_sprites()
-
-        self.viewport = None
 
     def create_dark_sprites(self):
         """
@@ -110,3 +105,13 @@ class FogOfWar:
             s_bottom, s_top = key[1] * 2000, (key[1] +1) * 3000
             if left < s_right and right > s_left and bottom < s_top and top > s_bottom:
                 sprite_list.draw()
+
+    def __getstate__(self) -> Dict:
+        saved_fow = self.__dict__.copy()
+        del saved_fow['map_grids']
+        del saved_fow['grids_to_sprites']
+        del saved_fow['fog_sprite_lists']
+        return saved_fow
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, List, Optional, Set, Tuple, Type
+from typing import Deque, List, Optional, Set, Tuple, Type, Dict
 
 from arcade.arcade_types import Point
 
@@ -63,6 +63,12 @@ class UnitsProducer:
         self.production_progress = 0.0
         spawned_unit = self.production_queue.pop()
 
+    def __getstate__(self) -> Dict:
+        return {}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
 
 class ResourceProducer:
     def __init__(self,
@@ -85,6 +91,12 @@ class ResourceProducer:
     def transfer_resource(self, recipient: Player):
         self.stockpile -= self.yield_per_frame
         recipient.increase_resource_stock(self.resource, self.yield_per_frame)
+
+    def __getstate__(self) -> Dict:
+        return {}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 class ResearchFacility:
@@ -110,6 +122,20 @@ class ResearchFacility:
     def finish_research(self, technology: Technology):
         self.researched_technology = None
         self.owner.update_known_technologies(technology)
+
+    def __getstate__(self) -> Dict:
+        if self.researched_technology is None:
+            return {'funding': self.funding, 'researched_technology': None}
+        return {
+            'funding': self.funding,
+            'researched_technology': self.researched_technology.name
+        }
+
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)
+        if (tech_name := state['researched_technology']) is not None:
+            self.researched_technology = self.owner.game.window.configs[
+                'technologies'][tech_name]
 
 
 class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
@@ -245,6 +271,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         for sector in self.occupied_sectors:
             sector.units_and_buildings[self.player.id].discard(self)
         super().kill()
+
+    def __getstate__(self) -> Dict:
+        saved_building = super().__getstate__()
+        if self.is_units_producer:
+            saved_building.update(UnitsProducer.__getstate__(self))
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 if __name__:

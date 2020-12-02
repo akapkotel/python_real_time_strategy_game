@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Set
+from typing import Set, Dict
 
 
 class OwnedObject:
@@ -54,6 +54,11 @@ class OwnedObject:
             for owner in self._owners.copy():
                 owner.unregister(self)
             self._owners.clear()
+
+    def __getstate__(self) -> Dict:
+        saved_object = self.__dict__.copy()
+        saved_object['_owners'] = None
+        return saved_object
 
 
 class ObjectsOwner:

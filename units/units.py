@@ -5,7 +5,7 @@ import random
 
 from abc import abstractmethod
 from collections import deque
-from typing import Deque, List, Optional, Set, Union, cast
+from typing import Deque, List, Dict, Optional, Set, Union, cast
 
 import PIL
 from arcade import SpriteList, Sprite, AnimatedTimeBasedSprite, load_textures
@@ -56,8 +56,6 @@ class Unit(PlayerEntity, TasksExecutor):
         self.path_wait_counter: int = 0
         self.awaited_path: Optional[MapPath] = None
 
-        self.waiting_for_path: List[int, MapPath] = [0, []]
-
         self.max_speed = 0
         self.current_speed = 0
 
@@ -67,6 +65,10 @@ class Unit(PlayerEntity, TasksExecutor):
         self.update_explosions_pool()
 
     def update_explosions_pool(self):
+        """
+        Assure that there would be enough Explosion instances in the pool to
+        get one when this Unit is destroyed.
+        """
         name = self.explosion_name
         required = len([u for u in self.game.units if u.explosion_name == name])
         self.game.explosions_pool.add(name, required)
@@ -133,7 +135,7 @@ class Unit(PlayerEntity, TasksExecutor):
         """
         self.scan_next_nodes_for_collisions()
         self.update_current_blocked_node(new_current_node)
-        if self.path:
+        if len(self.path) > 1:
             self.update_reserved_node()
 
     def update_current_blocked_node(self, new_current_node: MapNode):
@@ -345,6 +347,21 @@ class Unit(PlayerEntity, TasksExecutor):
         self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
         # self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
         self.game.window.sound_player.play_sound('explosion.wav')
+
+    def __getstate__(self) -> Dict:
+        saved_unit = super().__getstate__()
+        saved_unit.update(
+            {
+                'path': [p for p in self.path],
+                'path_wait_counter': self.path_wait_counter,
+                'awaited_path': self.awaited_path,
+                'permanent_units_group': self.permanent_units_group
+            }
+        )
+        return saved_unit
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
 
 class Vehicle(Unit):

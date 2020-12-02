@@ -12,7 +12,7 @@ from arcade import (
 )
 from arcade.arcade_types import Color
 
-from utils.observers import ObjectsOwner, OwnedObject
+from utils.ownership_relations import ObjectsOwner, OwnedObject
 
 from utils.functions import log, make_texture, get_path_to_file
 

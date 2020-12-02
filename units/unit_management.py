@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Sequence, Set, Tuple, Iterator
+from typing import Optional, Sequence, Set, Tuple, Dict, Iterator
 
 from arcade import Sprite, SpriteSolidColor, load_textures
 from arcade.arcade_types import Color, Point
@@ -109,6 +109,13 @@ class PermanentUnitsGroup:
         self.game.permanent_units_groups[group_id] = self
         for unit in units:
             unit.set_permanent_units_group(group_id)
+
+    def __getstate__(self) -> Dict:
+        return {'group_id': self.group_id, 'units': [u.id for u in self.units]}
+
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)
+        self.units = {self.game.units.get_by_id(u_id) for u_id in self.units}
 
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units

@@ -132,6 +132,10 @@ def object_name_to_filename(object_name: str) -> str:
 
 def find_paths_to_all_files_of_type(extension: str,
                                     base_directory: str) -> Dict[str, str]:
+    """
+    Find and return a Dict containing all dirs where files with 'extension' are
+    found.
+    """
     names_to_paths = {}
     for directory in os.walk(os.path.abspath(base_directory)):
         for file_name in (f for f in directory[2] if f.endswith(extension)):
