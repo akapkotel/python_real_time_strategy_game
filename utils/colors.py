@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from arcade.arcade_types import Color
+from arcade.color import SAND as ARCADE_SAND
 
 # RGBA colors:
 RED: Color = (255, 0, 0, 255)
@@ -12,6 +13,7 @@ GRASS_GREEN: Color = (85, 107, 47, 255)
 BROWN: Color = (165, 42, 42, 266)
 YELLOW: Color = (255, 255, 0, 255)
 SUN: Color = (255, 255, 224, 255)
+SAND: Color = ARCADE_SAND
 WHITE: Color = (255, 255, 255, 255)
 DARK: Color = (32, 32, 32, 255)
 LIGHT: Color = (192, 192, 192, 255)

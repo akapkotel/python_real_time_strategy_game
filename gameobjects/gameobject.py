@@ -25,7 +25,8 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     def __init__(self,
                  object_name: str,
                  robustness: Robustness = 0,
-                 position: Point = (0, 0)):
+                 position: Point = (0, 0),
+                 id: Optional[int] = None):
         x, y = position
         filename = get_path_to_file(object_name)
         super().__init__(filename, center_x=x, center_y=y)
@@ -34,7 +35,10 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         self.object_name = object_name
 
         GameObject.total_objects_count += 1
-        self.id = count = GameObject.total_objects_count
+        if id is None:
+            self.id = count = GameObject.total_objects_count
+        else:
+            self.id = id
 
         self._robustness = robustness  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile
@@ -49,14 +53,14 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
 
-    def __getstate__(self) -> Dict:
-        saved_data = {
+    def save(self) -> Dict:
+        saved_object = {
             'id': self.id,
             'object_name': self.object_name,
-            'position': self.position,
+            'position': (self.center_x, self.center_y),
             'scheduled_events': self.scheduled_events_to_shelve_data()
         }
-        return saved_data
+        return saved_object
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness

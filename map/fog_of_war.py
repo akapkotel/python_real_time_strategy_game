@@ -2,7 +2,6 @@
 
 from functools import lru_cache
 from typing import Dict, KeysView, Optional, Set, List, Tuple
-from shapely.geometry import Polygon
 
 from arcade import Sprite, SpriteList, make_circle_texture
 from numba import njit
@@ -115,3 +114,6 @@ class FogOfWar:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.map_grids = self.game.map.nodes.keys()
+        self.grids_to_sprites = {}
+        self.fog_sprite_lists = self.create_dark_sprites()

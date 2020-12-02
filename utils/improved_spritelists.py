@@ -75,6 +75,9 @@ class SelectiveSpriteList(SpriteList):
         except KeyError:
             return None
 
+    def __len__(self) -> int:
+        return len(self.registry)
+
     def __contains__(self, sprite) -> bool:
         return sprite.id in self.registry
 

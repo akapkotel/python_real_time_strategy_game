@@ -110,13 +110,6 @@ class PermanentUnitsGroup:
         for unit in units:
             unit.set_permanent_units_group(group_id)
 
-    def __getstate__(self) -> Dict:
-        return {'group_id': self.group_id, 'units': [u.id for u in self.units]}
-
-    def __setstate__(self, state: Dict):
-        self.__dict__.update(state)
-        self.units = {self.game.units.get_by_id(u_id) for u_id in self.units}
-
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units
 
@@ -155,6 +148,13 @@ class PermanentUnitsGroup:
                 game.window.cursor.select_units(*group.units)
         except KeyError:
             pass
+
+    def __getstate__(self) -> Dict:
+        return {'group_id': self.group_id, 'units': [u.id for u in self.units]}
+
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)
+        self.units = {self.game.units.get_by_id(u_id) for u_id in self.units}
 
     def __del__(self):
         for unit in self.units:

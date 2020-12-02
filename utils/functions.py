@@ -149,6 +149,19 @@ def add_player_color_to_name(name: str, color: Color) -> str:
     return f'{splitted[0]}_{color}.{splitted[1]}'
 
 
+def decolorized_name(name: str) -> str:
+    for color in ('red', 'green', 'blue', 'yellow'):
+        if color in name:
+            return name.rsplit('_', 1)[0]
+    return name
+
+
+def to_texture_name(name: str) -> str:
+    if '.png' not in name:
+        return name + '.png'
+    return name
+
+
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will by larger than min and less than max."""
     return max(minimum, min(value, maximum))

@@ -9,7 +9,7 @@ from game import (
     Game, SCREEN_WIDTH, SCREEN_HEIGHT, MINIMAP_WIDTH, MINIMAP_HEIGHT,
     SECTOR_SIZE, TILE_WIDTH, TILE_HEIGHT
 )
-from utils.colors import WHITE
+from utils.colors import WHITE, SAND
 from utils.data_types import GridPosition
 
 
@@ -36,15 +36,6 @@ class MiniMap:
 
         self.drawn_area: Dict[GridPosition, List] = {}
         self.drawn_entities: List[List[float, float, Color, int]] = []
-
-    def __getstate__(self) -> Dict:
-        return {
-            'drawn_area': self.drawn_area,
-            'drawn_entities': self.drawn_entities
-        }
-
-    def __setstate__(self, state: Dict):
-        self.__dict__.update(state)
 
     def update(self):
         self.update_drawn_units()
@@ -98,7 +89,7 @@ class MiniMap:
             bottom + offset_y + grid[1] * height,
             width,
             height,
-            WHITE
+            SAND
         ]
 
     def draw(self):
@@ -109,3 +100,13 @@ class MiniMap:
             draw_point(*entity)
         # draw current viewport position on the game map:
         draw_rectangle_outline(*self.viewport, color=WHITE)
+
+    def __getstate__(self) -> Dict:
+        return {
+            'position': self.position,
+            'drawn_area': self.drawn_area,
+            'drawn_entities': self.drawn_entities
+        }
+
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)

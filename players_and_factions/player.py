@@ -107,11 +107,8 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         for player in self.players:
             player.update()
 
-    def __getstate__(self) -> Dict:
+    def save(self) -> Dict:
         return {'id': self.id, 'name': self.name}
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
 
 class ResourcesManager:
@@ -218,13 +215,15 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
 
     def __getstate__(self) -> Dict:
         saved_player = self.__dict__.copy()
-        saved_player['units'].clear()
-        saved_player['buildings'].clear()
-        saved_player['known_enemies'].clear()
+        saved_player['faction'] = self.faction.id
+        saved_player['units'] = set()
+        saved_player['buildings'] = set()
+        saved_player['known_enemies'] = set()
         return saved_player
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.faction = self.game.factions[self.faction]
 
 
 class CpuPlayer(Player):
@@ -260,8 +259,9 @@ class PlayerEntity(GameObject):
                  entity_name: str,
                  player: Player,
                  position: Point,
-                 robustness: Robustness = 0):
-        GameObject.__init__(self, entity_name, robustness, position)
+                 robustness: Robustness = 0,
+                 id: Optional[int] = None):
+        GameObject.__init__(self, entity_name, robustness, position, id)
         self.map = self.game.map
 
         self.player: Player = player
@@ -505,8 +505,8 @@ class PlayerEntity(GameObject):
     def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
         raise NotImplementedError
 
-    def __getstate__(self) -> Dict:
-        saved_entity = super().__getstate__()
+    def save(self) -> Dict:
+        saved_entity = super().save()
         saved_entity.update(
             {
                 'player': self.player.id,
@@ -515,9 +515,6 @@ class PlayerEntity(GameObject):
             }
         )
         return saved_entity
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
 
 if __name__:

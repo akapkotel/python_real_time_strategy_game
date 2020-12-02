@@ -146,6 +146,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                  building_name: str,
                  player: Player,
                  position: Point,
+                 id: Optional[int] = None,
                  produced_units: Optional[Tuple[Type[PlayerEntity]]] = None,
                  produced_resource: Optional[str] = None,
                  research_facility: bool = False):
@@ -156,7 +157,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :param position: Point -- coordinates of the center (x, y)
         :param produces:
         """
-        PlayerEntity.__init__(self, building_name, player, position, 4)
+        PlayerEntity.__init__(self, building_name, player, position, 4, id)
         self.is_units_producer = produced_units is not None
         self.is_resource_producer = produced_resource is not None
         self.is_research_facility = research_facility
@@ -272,13 +273,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             sector.units_and_buildings[self.player.id].discard(self)
         super().kill()
 
-    def __getstate__(self) -> Dict:
-        saved_building = super().__getstate__()
+    def save(self) -> Dict:
+        saved_building = super().save()
         if self.is_units_producer:
             saved_building.update(UnitsProducer.__getstate__(self))
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
+        if self.is_resource_producer:
+            saved_building.update(ResourceProducer.__getstate__(self))
+        if self.is_research_facility:
+            saved_building.update(ResearchFacility.__getstate__(self))
+        return saved_building
 
 
 if __name__:

@@ -244,6 +244,7 @@ class Sector(GridHandler, ABC):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.map = Sector.map
 
 
 class MapNode(GridHandler, ABC):

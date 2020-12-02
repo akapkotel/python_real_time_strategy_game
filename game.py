@@ -24,13 +24,13 @@ from arcade.arcade_types import Color, Point
 
 from audio.sound import SoundPlayer
 from persistency.configs_handling import load_player_configs, read_csv_files
-from persistency.save_handling import SaveManager
 from user_interface.user_interface import (Frame, Button, UiBundlesHandler,
     UiElementsBundle, UiSpriteList)
 from utils.colors import BLACK, DARK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
-    clamp, get_path_to_file, get_screen_size, log, timer, to_rgba
+    clamp, get_path_to_file, get_screen_size, log, timer, to_rgba,
+    average_position_of_points_group
 )
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch
@@ -190,8 +190,13 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
-            if self.is_game_running and symbol == arcade.key.S:
-                self.save_game()  # TODO: remove after saving testing is done
+
+            # TODO: remove after saving testing is done:
+            if self.is_game_running:
+                if symbol == arcade.key.S:
+                    self.save_game()
+                elif symbol == arcade.key.L:
+                    self.load_game()
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -249,9 +254,10 @@ class Window(arcade.Window, EventsCreator):
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
         self.save_manger.save_game('save_01', self.game_view)
+        print(len(self.game_view.units))
 
     def load_game(self):
-        raise NotImplementedError
+        self.save_manger.load_game('save_01', self.game_view)
 
     def close(self):
         log(f'Terminating application...')
@@ -411,13 +417,16 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_music('background_theme.wav')
         self.update_interface_content()
-        # TODO: remove this when testing is done
-        self.window.move_viewport_to_the_position(*self.units_position)
+        # TODO: remove this when testing is done:
+        position = average_position_of_points_group(
+            [u.position for u in self.local_human_player.units]
+        )
+        self.window.move_viewport_to_the_position(*position)
 
     def test_methods(self):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
-        self.test_buildings_spawning()
+        # self.test_buildings_spawning()
         self.test_units_spawning()
 
     def test_scheduling_events(self):
@@ -432,22 +441,45 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         player.start_war_with(cpu_player)
 
     def test_buildings_spawning(self):
-        self.buildings.append(self.spawner.spawn(
+        self.buildings.append(self.spawn(
             'medium_factory.png',
             self.players[2],
             (400, 600),
         ))
+
+    def spawn(self,
+              object_name: str,
+              player: Union[Player, int],
+              position: Point,
+              id: Optional[int] = None) -> Optional[GameObject]:
+        if (player := self.get_player_instance(player)) is not None:
+            return self.spawner.spawn(object_name, player, position, id)
+        return None
+
+    def get_player_instance(self, player: Union[Player, int]):
+        if isinstance(player, int):
+            try:
+                return self.players[player]
+            except KeyError:
+                return None
+        return player
+
+    def spawn_group(self,
+                    names: List[str],
+                    player: Union[Player, int],
+                    position: Point):
+        if (player := self.get_player_instance(player)) is not None:
+            return self.spawner.spawn_group(names, player, position)
+        return None
 
     def test_units_spawning(self):
         spawned_units = []
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
             node = random.choice(list(self.map.nodes.values()))
-            if player is self.local_human_player:
-                self.units_position = node.position
             names = [unit_name] * 30
             spawned_units.extend(
-                self.spawner.spawn_group(names, player, node.position)
+                self.spawn_group(names, player, node.position)
             )
         self.units.extend(spawned_units)
 
@@ -657,6 +689,7 @@ if __name__ == '__main__':
     from scenarios.missions import Mission
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
+    from persistency.save_handling import SaveManager
 
     if __status__ == 'development' and PYPROFILER:
         from pyprofiler import start_profile, end_profile

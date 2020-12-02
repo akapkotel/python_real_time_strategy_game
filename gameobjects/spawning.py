@@ -13,7 +13,10 @@ from players_and_factions.player import Player
 from units.units import Unit, Vehicle, Tank
 from utils.classes import Singleton
 from utils.enums import UnitWeight, Robustness
-from utils.functions import add_player_color_to_name, get_path_to_file
+from utils.functions import (
+    add_player_color_to_name, get_path_to_file, to_texture_name,
+    decolorized_name
+)
 from .gameobject import GameObject, TerrainObject
 
 
@@ -29,12 +32,16 @@ class ObjectsFactory(Singleton):
         self.configs = configs
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
+        name = to_texture_name(decolorized_name(name))
         if player is None:
-            return self._spawn_terrain_object(name, position, *args, **kwargs)
+            obj = self._spawn_terrain_object(name, position, *args, **kwargs)
         if name in self.configs['buildings']:
-            return self._spawn_building(name, player, position, **kwargs)
+            obj = self._spawn_building(name, player, position, **kwargs)
         elif name in self.configs['units']:
-            return self._spawn_unit(name, player, position)
+            obj = self._spawn_unit(name, player, position, **kwargs)
+        if 'id' in kwargs:
+            obj.id = kwargs['id']
+        return obj
 
     def spawn_group(self,
                     names: Sequence[str],
@@ -56,11 +63,14 @@ class ObjectsFactory(Singleton):
         category = 'buildings'
         return self._configure_spawned_attributes(category, name, building)
 
-    def _spawn_unit(self, name: str, player, position) -> Unit:
+    def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = 'units'
-        classname = eval(self.configs[category][name]['class'])
+        class_name = eval(self.configs[category][name]['class'])
         colorized_name = add_player_color_to_name(name, player.color)
-        unit = classname(colorized_name, player, UnitWeight.LIGHT, position)
+        if 'id' in kwargs:
+            unit = class_name(colorized_name, player, UnitWeight.LIGHT, position, kwargs['id'])
+        else:
+            unit = class_name(colorized_name, player, UnitWeight.LIGHT, position)
         return self._configure_spawned_attributes(category, name, unit)
 
     def _configure_spawned_attributes(self, category, name, spawned):

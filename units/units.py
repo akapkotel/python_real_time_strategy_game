@@ -348,8 +348,8 @@ class Unit(PlayerEntity, TasksExecutor):
         # self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
         self.game.window.sound_player.play_sound('explosion.wav')
 
-    def __getstate__(self) -> Dict:
-        saved_unit = super().__getstate__()
+    def save(self) -> Dict:
+        saved_unit = super().save()
         saved_unit.update(
             {
                 'path': [p for p in self.path],
@@ -359,9 +359,6 @@ class Unit(PlayerEntity, TasksExecutor):
             }
         )
         return saved_unit
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
 
 class Vehicle(Unit):
