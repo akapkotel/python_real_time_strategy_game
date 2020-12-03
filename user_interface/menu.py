@@ -22,8 +22,7 @@ class Menu(WindowView, UiBundlesHandler):
     def create_submenus(self):
         window = self.window
         switch_menu = self.switch_to_bundle_of_name
-        back_to_menu_button = Button(
-            get_path_to_file('menu_button_back.png'), SCREEN_X, 150,
+        back_to_menu_button = Button('menu_button_back.png', SCREEN_X, 150,
             functions=partial(switch_menu, 'main menu')
         )
 
@@ -32,22 +31,20 @@ class Menu(WindowView, UiBundlesHandler):
             index=0,
             name='main menu',
             elements=[
-                Button(get_path_to_file('menu_button_exit.png'), x, next(y),
+                Button('menu_button_exit.png', x, next(y),
                        functions=window.close),
-                Button(get_path_to_file('menu_button_credits.png'), x, next(y),
+                Button('menu_button_credits.png', x, next(y),
                        functions=partial(switch_menu, 'credits')),
-                Button(get_path_to_file('menu_button_options.png'), x, next(y),
+                Button('menu_button_options.png', x, next(y),
                        functions=partial(switch_menu, 'options')),
-                Button(get_path_to_file('menu_button_loadgame.png'), x,
-                       next(y),
+                Button('menu_button_loadgame.png', x, next(y),
                        functions=partial(switch_menu, 'saving menu')),
-                Button(get_path_to_file('menu_button_newgame.png'), x, next(y),
+                Button('menu_button_newgame.png', x, next(y),
                        functions=partial(switch_menu, 'new game menu')),
-                Button(get_path_to_file('menu_button_continue.png'), x,
-                       next(y),
+                Button('menu_button_continue.png', x, next(y),
                        name='continue button', active=False,
                        functions=window.start_new_game),
-                Button(get_path_to_file('menu_button_quit.png'), x, next(y),
+                Button('menu_button_quit.png', x, next(y),
                        name='quit game button', active=False,
                        functions=window.quit_current_game),
             ],
@@ -62,21 +59,16 @@ class Menu(WindowView, UiBundlesHandler):
                 back_to_menu_button,
                 # set 'subgroup' index for each element to assign it to the
                 # proper tab in options sub-menu:
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
-                    'Draw debug:', 20, ticked=window.settings.debug,
-                    variable=(window.settings, 'debug'), subgroup=1
-                ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
-                    'Vehicles threads:', 20, ticked=window.settings.vehicles_threads,
-                    variable=(window.settings, 'vehicles_threads'), subgroup=1
-                ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
-                    'Full screen:', 20, ticked=window.fullscreen,
-                    functions=window.toggle_fullscreen, subgroup=1
-                ),
+                Checkbox('menu_checkbox.png', x, next(y), 'Draw debug:', 20,
+                         ticked=window.settings.debug,
+                         variable=(window.settings, 'debug'), subgroup=1),
+                Checkbox('menu_checkbox.png', x, next(y), 'Vehicles threads:',
+                         20, ticked=window.settings.vehicles_threads,
+                         variable=(window.settings, 'vehicles_threads'),
+                         subgroup=1),
+                Checkbox('menu_checkbox.png', x, next(y), 'Full screen:',
+                         20, ticked=window.fullscreen,
+                         functions=window.toggle_fullscreen, subgroup=1),
             ],
             register_to=self
         )
@@ -84,18 +76,15 @@ class Menu(WindowView, UiBundlesHandler):
         y = (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu.extend(
             [
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
+                Checkbox('menu_checkbox.png', x, next(y),
                     'Sound:', 20, ticked=window.sound_player.sound_on,
                     variable=(window.sound_player, 'sound_on'), subgroup=2
                 ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
+                Checkbox('menu_checkbox.png', x, next(y),
                     'Music:', 20, ticked=window.sound_player.sound_on,
                     variable=(window.sound_player, 'music_on'), subgroup=2
                 ),
-                Checkbox(
-                    get_path_to_file('menu_checkbox.png'), x, next(y),
+                Checkbox('menu_checkbox.png', x, next(y),
                     'Sound effects:', 20, ticked=window.sound_player.sound_on,
                     variable=(window.sound_player, '_sound_effects_on'),
                     subgroup=2
@@ -105,14 +94,14 @@ class Menu(WindowView, UiBundlesHandler):
 
         # tabs switching what groups of elements are visible by
         # switching between subgroups:
-        graphics_tab = Tab(get_path_to_file('menu_tab_graphics.png'), 960,
+        graphics_tab = Tab('menu_tab_graphics.png', 960,
                            SCREEN_HEIGHT - 34, functions=partial(
                            options_menu.switch_to_subgroup, 1))
-        sound_tab = Tab(get_path_to_file('menu_tab_sound.png'), 320,
+        sound_tab = Tab('menu_tab_sound.png', 320,
                         SCREEN_HEIGHT - 34, functions=partial(
                         options_menu.switch_to_subgroup, 2),
                         other_tabs=(graphics_tab, ))
-        game_tab = Tab(get_path_to_file('menu_tab_blank.png'), 1600,
+        game_tab = Tab('menu_tab_blank.png', 1600,
                         SCREEN_HEIGHT - 34, functions=partial(
                         options_menu.switch_to_subgroup, 3),
                         other_tabs=(graphics_tab, sound_tab))
@@ -134,12 +123,11 @@ class Menu(WindowView, UiBundlesHandler):
             name='new game menu',
             elements=[
                 back_to_menu_button,
-                Button(get_path_to_file('menu_button_skirmish.png'), x, y,
+                Button('menu_button_skirmish.png', x, y,
                        functions=partial(switch_menu, 'skirmish menu')),
-                Button(get_path_to_file('menu_button_campaign.png'), 2 * x, y,
+                Button('menu_button_campaign.png', 2 * x, y,
                        functions=partial(switch_menu, 'campaign menu')),
-                Button(get_path_to_file('menu_button_multiplayer.png'), 3 * x,
-                       y,
+                Button('menu_button_multiplayer.png', 3 * x, y,
                        functions=partial(switch_menu, 'multiplayer menu')),
             ],
             register_to=self
@@ -159,7 +147,7 @@ class Menu(WindowView, UiBundlesHandler):
             name='skirmish menu',
             elements=[
                 back_to_menu_button,
-                Button(get_path_to_file('menu_button_play.png'), SCREEN_X, 300,
+                Button('menu_button_play.png', SCREEN_X, 300,
                        functions=window.start_new_game)
             ],
             register_to=self

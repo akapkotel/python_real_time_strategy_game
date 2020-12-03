@@ -14,7 +14,7 @@ from arcade.arcade_types import Color
 
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 
-from utils.functions import log, make_texture, get_path_to_file
+from utils.functions import log, make_texture, get_path_to_file, to_texture_name
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
@@ -310,7 +310,7 @@ class CursorInteractive(Hierarchical):
         else:
             self.functions = [f for f in functions]
 
-        self.cursor = None
+        self.cursor: Optional['MouseCursor'] = None
 
     def __repr__(self):
         return f'{self.__class__.__name__} id: {id(self)}'
@@ -326,9 +326,9 @@ class CursorInteractive(Hierarchical):
 
     def on_mouse_exit(self):
         if self.pointed:
+            self._func_on_mouse_exit()
             self.pointed = False
             self.cursor = None
-            self._func_on_mouse_exit()
 
     def _func_on_mouse_exit(self):
         pass
@@ -416,7 +416,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None):
-        super().__init__(texture_name, center_x=x, center_y=y)
+        full_texture_name = get_path_to_file(to_texture_name(texture_name))
+        super().__init__(full_texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
         OwnedObject.__init__(self, owners=True)
@@ -436,6 +437,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
             cursor.window.sound_player.play_sound(sound)
 
     def _func_on_mouse_enter(self, cursor):
+        if isinstance(self._parent, ScrollableContainer):
+            self.cursor.pointed_scrollable = self._parent
         if self._active:
             self.set_texture(-1)
 
@@ -474,8 +477,6 @@ class Frame(UiElement):
                  parent: Optional[Hierarchical] = None,
                  subgroup: Optional[int] = None
                  ):
-        if texture_name:
-            texture_name = get_path_to_file(texture_name)
         super().__init__(texture_name, x, y, name, active, visible, parent,
                          subgroup=subgroup)
         if not texture_name:
@@ -501,11 +502,12 @@ class Button(UiElement):
         super().__init__('', x, y, name, active, visible, parent,
                          functions, subgroup=subgroup)
         # we load 2 textures for button: normal and for 'highlighted' button:
-        image = PIL.Image.open(texture_name)
+        full_texture_name = get_path_to_file(texture_name)
+        image = PIL.Image.open(full_texture_name)
         width, height = image.size[0] // 2, image.size[1]
         self.textures = [
-            load_texture(texture_name, 0, 0, width, height),
-            load_texture(texture_name, width, 0, width, height)
+            load_texture(full_texture_name, 0, 0, width, height),
+            load_texture(full_texture_name, width, 0, width, height)
         ]
         self.set_texture(0)
 
@@ -591,9 +593,10 @@ class Checkbox(UiElement):
                          parent, functions, subgroup=subgroup)
         self.ticked = ticked
         self.variable = variable
+        full_texture_name = get_path_to_file(texture_name)
         self.textures = [
-            load_texture(texture_name, 0, 0, 30, 30),
-            load_texture(texture_name, 30, 0, 30, 30)
+            load_texture(full_texture_name, 0, 0, 30, 30),
+            load_texture(full_texture_name, 30, 0, 30, 30)
         ]
         self.set_texture(int(self.ticked))
         self.text_label = UiTextLabel(
@@ -648,6 +651,53 @@ class UiTextLabel(UiElement):
 
     def draw_highlight_around_element(self):
         pass
+
+
+class ScrollableContainer(UiElement):
+    """
+    Container organizes other UiElements and allows user to use mouse-scroll to
+    navigate among elements changing position of all objects at once.
+    """
+
+    def __init__(self, texture_name: str, x: int, y: int,
+                 name: Optional[str] = None, active: bool = True,
+                 visible: bool = True, parent: Optional[Hierarchical] = None,
+                 functions: Optional[Union[Callable, Tuple[Callable]]] = None,
+                 can_be_dragged: bool = False, subgroup: Optional[int] = None):
+        super().__init__(texture_name, x, y, name, active, visible, parent,
+                         functions, can_be_dragged, subgroup)
+        self.scrollable = set()
+
+    def add_child(self, child: Hierarchical):
+        self.scrollable.add(child)
+
+    def put_child_before_self(self, child):
+        if child in self.bundle.elements:
+            self.bundle.elements.remove(child)
+        index = self.bundle.elements.index(self)
+        self.bundle.elements.insert(index, child)
+
+    def _func_on_mouse_enter(self, cursor):
+        super()._func_on_mouse_enter(cursor)
+        cursor.pointed_scrollable = self
+
+    def _func_on_mouse_exit(self):
+        super()._func_on_mouse_exit()
+        self.cursor.pointed_scrollable = None
+
+    def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
+        if self.scrollable:
+            for child in self.scrollable:
+                child.center_y -= scroll_y * 15
+                self._manage_child_visibility(child)
+
+    def _manage_child_visibility(self, child):
+        if child.top >= self.top or child.bottom <= self.bottom:
+            child.deactivate()
+            child.hide()
+        else:
+            child.activate()
+            child.show()
 
 
 class ListBox(UiElement):

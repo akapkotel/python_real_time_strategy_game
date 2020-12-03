@@ -67,23 +67,25 @@ class MiniMap:
             self.drawn_entities.append([x, y, entity.player.color, size])
 
     def update_revealed_areas(self):
-        for grid, sector in self.game.map.sectors.items():
-            if grid not in self.drawn_area:
-                if any(p for p in sector.units_and_buildings):
-                    self.reveal_minimap_area(grid)
-
-    def update_drawn_areas_positions(self, dx, dy):
-        for element in self.drawn_area.values():
-            element[0] += dx
-            element[1] += dy
-
-    def reveal_minimap_area(self, grid):
         left = self.position[0] - self.width // 2
         bottom = self.position[1] - self.height // 2
         offset_x = 240 * self.ratio
         offset_y = 160 * self.ratio
         width = SECTOR_SIZE * TILE_WIDTH * self.ratio
         height = SECTOR_SIZE * TILE_HEIGHT * self.ratio
+        data = left, bottom, offset_x, offset_y, width, height
+        for grid, sector in self.game.map.sectors.items():
+            if grid not in self.drawn_area:
+                if any(p for p in sector.units_and_buildings):
+                    self.reveal_minimap_area(grid, data)
+
+    def update_drawn_areas_positions(self, dx, dy):
+        for element in self.drawn_area.values():
+            element[0] += dx
+            element[1] += dy
+
+    def reveal_minimap_area(self, grid, data):
+        left, bottom, offset_x, offset_y, width, height = data
         self.drawn_area[grid] = [
             left + offset_x + grid[0] * width,
             bottom + offset_y + grid[1] * height,

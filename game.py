@@ -12,7 +12,7 @@ __credits__ = []
 
 import random
 
-from typing import (Any, Dict, List, Optional, Set, Union, Collection)
+from typing import (Any, Dict, List, Optional, Set, Union)
 
 import arcade
 from functools import partial
@@ -24,8 +24,10 @@ from arcade.arcade_types import Color, Point
 
 from audio.sound import SoundPlayer
 from persistency.configs_handling import load_player_configs, read_csv_files
-from user_interface.user_interface import (Frame, Button, UiBundlesHandler,
-    UiElementsBundle, UiSpriteList)
+from user_interface.user_interface import (
+    Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
+    ScrollableContainer
+)
 from utils.colors import BLACK, DARK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
@@ -343,11 +345,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             index=0,
             elements=[
                 right_ui_panel,
-                Button(get_path_to_file('game_button_menu.png'), ui_x, 100,
+                Button('game_button_menu.png', ui_x, 100,
                        functions=partial(
                            self.window.show_view, self.window.menu_view),
                        parent=right_ui_panel),
-                Button(get_path_to_file('game_button_pause.png'), ui_x - 100, 100,
+                Button('game_button_pause.png', ui_x - 100, 100,
                        functions=partial(self.toggle_pause),
                        parent=right_ui_panel)
             ],
@@ -357,9 +359,9 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             name='units_panel',
             index=1,
             elements=[
-                Button(get_path_to_file('game_button_stop.png'), ui_x - 100,
-                       800, functions=self.stop_all_units),
-                Button(get_path_to_file('game_button_attack.png'), ui_x, 800,
+                Button('game_button_stop.png', ui_x - 100, 800,
+                       functions=self.stop_all_units),
+                Button('game_button_attack.png', ui_x, 800,
                        functions=partial(self.window.cursor.force_cursor, 2))
             ],
             register_to=self
@@ -368,11 +370,26 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             name='building_panel',
             index=2,
             elements=[
-                Button(get_path_to_file('game_button_stop.png'), ui_x, 800),
+                Button('game_button_stop.png', ui_x, 800),
             ],
             register_to=self
         )
 
+        editor_panel = UiElementsBundle(
+            name='editor',
+            index=3,
+            elements=[
+                ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
+                                    'scrollable'),
+            ],
+            register_to=self,
+        )
+        editor_panel.extend(
+            [
+                Button('small_button_none.png', ui_x, 100 * i,
+                       parent=editor_panel.elements[0]) for i in range(5)
+            ]
+        )
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, right, top):
@@ -399,6 +416,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
     def configure_units_interface(self, context: List[Unit]):
         self.load_bundle(name='units_panel')
+        self.load_bundle(name='editor')
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """

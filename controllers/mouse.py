@@ -20,7 +20,8 @@ from utils.scheduling import EventsCreator
 from units.unit_management import SelectionUnitMarket
 from units.units import Unit, UnitTask
 from user_interface.user_interface import (
-    CursorInteractive, ToggledElement, UiElement, UiSpriteList
+    CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
+    UiSpriteList
 )
 from utils.classes import HashedList, Singleton
 from utils.functions import get_path_to_file, log
@@ -64,6 +65,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
         self.pointed_gameobject: Optional[GameObject] = None
+        self.pointed_scrollable: Optional[ScrollableContainer] = None
 
         # player can select Units by dragging mouse cursor with left-button
         # pressed: all Units inside selection-rectangle will be added to the
@@ -283,8 +285,9 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.create_selection_markers(new)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        # TODO
-        raise NotImplementedError
+        print(f'Mouse scrolled x: {scroll_x}, y: {scroll_y}')
+        if self.pointed_scrollable is not None:
+            self.pointed_scrollable.on_mouse_scroll(scroll_x, scroll_y)
 
     def update(self):
         super().update()
