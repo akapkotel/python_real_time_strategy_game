@@ -39,18 +39,16 @@ def log(logged_message: str, console: Union[int, bool] = False):
 def timer(level=0, global_profiling_level=0, forced=False):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            if forced or level > global_profiling_level:
-                return func(*args, **kwargs)
+            if forced or level < global_profiling_level:
+                start_time = perf_counter()
+                result = func(*args, **kwargs)
 
-            start_time = perf_counter()
-            result = func(*args, **kwargs)
-            end_time = perf_counter()
-
-            execution_time = end_time - start_time
-            fps = 1 / execution_time
-            fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
-            log(fr, console=True)
-            return result
+                execution_time = perf_counter() - start_time
+                fps = 1 / execution_time
+                fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
+                log(fr, console=True)
+                return result
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -304,7 +302,7 @@ def is_visible(position_a: Point,
 
 @lru_cache(maxsize=None)
 @njit(['int64, int64, int64'], nogil=True, fastmath=True)
-def calculate_observable_area(grid_x, grid_y, max_distance):
+def calculate_circular_area(grid_x, grid_y, max_distance):
     radius = max_distance * 1.6
     observable_area = []
     for x in range(-max_distance, max_distance + 1):

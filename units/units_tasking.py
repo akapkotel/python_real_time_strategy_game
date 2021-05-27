@@ -60,6 +60,13 @@ class TasksExecutor:
                 self.tasks.remove(task)
         return len(self.tasks)
 
+    @property
+    def current_task(self) -> Optional[UnitTask]:
+        try:
+            return self.tasks[0]
+        except IndexError:
+            return None
+
     def add_task(self, task: UnitTask):
         self.tasks.append(task)
         self.paused_tasks.append(0)

@@ -12,7 +12,7 @@ class SpriteListWithSwitch(SpriteList):
     """
     This is a arcade Spritelist improved with parameters: update_on, draw_on
     and method toggle_update() and toggle_draw() which controls if this
-    SpriteList is updated and drawn_area each frame or not.
+    SpriteList is updated and drawn each frame or not.
     """
 
     def __init__(self, use_spatial_hash=False,
@@ -21,34 +21,26 @@ class SpriteListWithSwitch(SpriteList):
                  update_on=True,
                  draw_on=True):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
-        self._update_on = update_on
-        self._draw_on = draw_on
-
-    @property
-    def update_on(self) -> bool:
-        return self._update_on
-
-    @property
-    def draw_on(self) -> bool:
-        return self._draw_on
+        self.update_on = update_on
+        self.draw_on = draw_on
 
     def on_update(self, delta_time: float = 1/60):
-        if self._update_on:
+        if self.update_on:
             super().on_update(delta_time)
 
     def update(self):
-        if self._update_on:
+        if self.update_on:
             super().update()
 
     def draw(self, **kwargs):
-        if self._draw_on:
+        if self.draw_on:
             super().draw(**kwargs)
 
     def toggle_update(self):
-        self._update_on = not self._update_on
+        self.update_on = not self.update_on
 
     def toggle_draw(self):
-        self._draw_on = not self._draw_on
+        self.draw_on = not self.draw_on
 
 
 class SelectiveSpriteList(SpriteList):
@@ -63,8 +55,8 @@ class SelectiveSpriteList(SpriteList):
     fast lookups by their 'id' attribute.
     """
 
-    def __init__(self, use_spatial_hash=False, is_static=False):
-        super().__init__(use_spatial_hash, is_static)
+    def __init__(self, use_spatial_hash=False, spatial_hash_cell_size=128, is_static=False):
+        super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
         # to keep track of items in spritelist, fast lookups:
         self.registry: Dict[int, Sprite] = {}
 

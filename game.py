@@ -17,8 +17,8 @@ from typing import (Any, Dict, List, Optional, Set, Union)
 import arcade
 from functools import partial
 from arcade import (
-    SpriteList, create_line, draw_circle_outline, draw_line, draw_text,
-    draw_rectangle_filled, draw_text, unschedule
+    SpriteList, create_line, draw_circle_outline, draw_circle_filled,
+    draw_line, draw_rectangle_filled, draw_text
 )
 from arcade.arcade_types import Color, Point
 
@@ -28,7 +28,7 @@ from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
     ScrollableContainer
 )
-from utils.colors import BLACK, DARK, GREEN, RED, WHITE
+from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba,
@@ -42,7 +42,9 @@ from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, Updateable, WindowView
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
-
+EDITOR = 'editor'
+BUILDINGS_PANEL = 'building_panel'
+UNITS_PANEL = 'units_panel'
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -61,7 +63,7 @@ GAME_SPEED = 1.0
 
 UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = True
+PYPROFILER = False
 DEBUG = False
 
 
@@ -277,10 +279,12 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
 
         self.settings = self.window.settings  # shared with Window class
         self.paused = False
+        self.current_frame = 0
 
         # SpriteLists:
         self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
+        self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = SelectiveSpriteList()
         self.buildings = SelectiveSpriteList(is_static=True)
         self.effects = SpriteList()
@@ -356,7 +360,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             register_to=self
         )
         units_panel = UiElementsBundle(
-            name='units_panel',
+            name=UNITS_PANEL,
             index=1,
             elements=[
                 Button('game_button_stop.png', ui_x - 100, 800,
@@ -367,7 +371,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             register_to=self
         )
         biuilding_panel = UiElementsBundle(
-            name='building_panel',
+            name=BUILDINGS_PANEL,
             index=2,
             elements=[
                 Button('game_button_stop.png', ui_x, 800),
@@ -376,7 +380,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         )
 
         editor_panel = UiElementsBundle(
-            name='editor',
+            name=EDITOR,
             index=3,
             elements=[
                 ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
@@ -412,11 +416,11 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
                 self.configure_units_interface(context)
 
     def configure_building_interface(self, context: Building):
-        self.load_bundle(name='building_panel')
+        self.load_bundle(name=('%s' % BUILDINGS_PANEL))
 
     def configure_units_interface(self, context: List[Unit]):
-        self.load_bundle(name='units_panel')
-        self.load_bundle(name='editor')
+        self.load_bundle(name=('%s' % UNITS_PANEL))
+        self.load_bundle(name=EDITOR)
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -495,7 +499,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
             node = random.choice(list(self.map.nodes.values()))
-            names = [unit_name] * 30
+            names = [unit_name] * 20
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
@@ -570,8 +574,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             self.debugged.clear()
             super().on_update(delta_time)
             self.update_local_drawn_units_and_buildings()
-            self.fog_of_war.update()
             self.update_factions_and_players()
+            self.fog_of_war.update()
             self.pathfinder.update()
             self.mini_map.update()
 
@@ -699,7 +703,7 @@ if __name__ == '__main__':
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit
+    from units.units import Unit, UnitsOrderedDestinations
     from gameobjects.gameobject import GameObject
     from gameobjects.spawning import ObjectsFactory
     from map.fog_of_war import FogOfWar

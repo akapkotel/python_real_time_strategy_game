@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 import heapq
-import math
 import random
 
 from abc import ABC, abstractmethod
-from collections import defaultdict, deque
-from multiprocessing import Pool, cpu_count
+from collections import deque
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union
 
 from arcade import Sprite, Texture, load_spritesheet
@@ -20,29 +18,32 @@ from utils.data_types import (
     GridPosition, Number, PlayerId, SectorId, UnitId
 )
 from utils.enums import TerrainCost
-from utils.functions import get_path_to_file, log, timer
+from utils.scheduling import EventsCreator
+from utils.functions import (
+    get_path_to_file, calculate_circular_area, distance_2d, log, timer
+)
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 
 PATH = 'PATH'
 DIAGONAL = 1.4142  # approx square root of 2
-
-# typing aliases:
-NormalizedPoint = Tuple[int, int]
-MapPath = List[NormalizedPoint]
-
 MAP_TEXTURES = {
     'mud': load_spritesheet(
         get_path_to_file('mud_tileset_6x6.png'), 60, 45, 4, 16, 0)
 }
+ADJACENT_OFFSETS = [
+    (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0), (+1, +1)
+]
+OPTIMAL_PATH_LENGTH = 50
+
+# typing aliases:
+NormalizedPoint = Tuple[int, int]
+MapPath = List[NormalizedPoint]
+PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
 class GridHandler:
-    adjacent_offsets = [
-        (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0),
-        (+1, +1)
-    ]
 
     @abstractmethod
     def position_to_node(self, x: Number, y: Number) -> MapNode:
@@ -70,7 +71,7 @@ class GridHandler:
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         """Return list of map-normalised grid-positions adjacent to (x, y)."""
         grid = cls.position_to_grid(x, y)
-        return [(grid[0] + p[0], grid[1] + p[1]) for p in cls.adjacent_offsets]
+        return [(grid[0] + p[0], grid[1] + p[1]) for p in ADJACENT_OFFSETS]
 
     @abstractmethod
     def in_bounds(self, *args, **kwargs):
@@ -182,7 +183,7 @@ class Map(GridHandler):
             for grid in self.in_bounds(self.adjacent_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = DIAGONAL if self.diagonal(node.grid, grid) else 1
-                distance *= (node.terrain + adjacent_node.terrain)
+                distance *= (node.terrain_cost + adjacent_node.terrain_cost)
                 node.costs[grid] = distance
         return distances
 
@@ -234,7 +235,7 @@ class Sector(GridHandler, ABC):
         return [p for p in grids if 0 <= p[0] < c and 0 <= p[1] < r]
 
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
-        return [(x + p[0], y + p[1]) for p in cls.adjacent_offsets]
+        return [(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS]
 
     def __getstate__(self) -> Dict:
         saved_sector = self.__dict__.copy()
@@ -262,13 +263,12 @@ class MapNode(GridHandler, ABC):
         self.costs: Dict[GridPosition, float] = {}
 
         self._allowed_for_pathfinding = True
-        self._walkable = True
 
         self._terrain_object_id: Optional[int] = None
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
 
-        self.terrain: TerrainCost = TerrainCost.GROUND + random.random()
+        self.terrain_cost: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:
         return f'MapNode(grid position: {self.grid}, position: {self.position})'
@@ -369,10 +369,89 @@ class PriorityQueue:
         return heapq.heappop(self.elements)[1]  # (priority, item)
 
 
-PathRequest = Tuple['Unit', GridPosition, GridPosition]
+class NavigatingUnitsGroup:
+    """
+    To avoid calling Pathfinde.a_star A* algorithm for very long paths for
+    many Units at once, we use this class. NavigatingUnitsGroup call a_star
+    method for the full path only once, and then divides this path for shorter
+    ones and call a_star for particular units for those short distances.
+    """
+
+    def __init__(self, units: List[Unit], x: Number, y: Number):
+        self.map = Map.instance
+        self.destination = Map.position_to_grid(x, y)
+        self.units_paths = {unit: [] for unit in units}
+        self.reset_units_navigating_groups(units)
+        self.create_units_group_paths(units)
+
+    def reset_units_navigating_groups(self, units):
+        for unit in (u for u in units if u.navigating_group is not None):
+            del unit.navigating_group.units_paths[unit]
+            unit.navigating_group = self
+
+    def create_units_group_paths(self, units: List[Unit]):
+        start = units[0].current_node.grid
+        path = a_star(self.map.nodes, start, self.destination)
+        destinations = self.get_next_units_steps(len(units), path[-1])
+        if (path_length := len(path)) > OPTIMAL_PATH_LENGTH:
+            self.slice_paths(units, destinations, path, path_length)
+        else:
+            self.navigate_straightly_to_destination(destinations, units)
+        self.add_visible_indicators_of_destinations(destinations)
+
+    def navigate_straightly_to_destination(self, destinations, units):
+        self.units_paths = {
+            unit: [destination] for unit, destination in
+            zip(units, destinations)
+        }
+
+    def slice_paths(self, units, destinations, path, path_length):
+        path_steps = OPTIMAL_PATH_LENGTH // 2
+        amount = len(units)
+        for i in range(path_length // path_steps):
+            step = path[i * path_steps]
+            units_steps = self.get_next_units_steps(amount, step)
+            for unit, grid in zip(units, units_steps):
+                self.units_paths[unit].append(grid)
+                self.units_paths[unit].append(destinations[units.index(unit)])
+
+    def add_visible_indicators_of_destinations(self, destinations):
+        self.map.game.units_ordered_destinations.new_destinations(
+            [self.map.grid_to_position(g) for g in destinations]
+        )
+
+    @staticmethod
+    def get_next_units_steps(amount: int, step: GridPosition):
+        destinations = Pathfinder.instance.group_of_waypoints(*step, amount)
+        return [d[0] for d in zip(destinations, range(amount))]
+
+    def update(self):
+        to_remove = []
+        for unit, steps in self.units_paths.items():
+            if steps:
+                self.find_next_path_for_unit(steps, to_remove, unit)
+            else:
+                to_remove.append(unit)
+        self.remove_finished_paths(to_remove)
+
+    @staticmethod
+    def find_next_path_for_unit(steps, to_remove, unit):
+        destination = steps[0]
+        if unit.current_node.grid != destination:
+            if not unit.path or unit.path[-1] != destination:
+                unit.move_to(destination)
+                to_remove.append(steps)
+
+    def remove_finished_paths(self, to_remove: List[Union[Unit, GridPosition]]):
+        for elem in to_remove:
+            if isinstance(elem, List):
+                elem.pop(0)
+            else:
+                elem.navigating_group = None
+                del self.units_paths[elem]
 
 
-class Pathfinder(Singleton):
+class Pathfinder(Singleton, EventsCreator):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
     """
@@ -385,10 +464,12 @@ class Pathfinder(Singleton):
         Pathfinder() is instantiated.
         :param map: Map -- actual instance of game Map loaded.
         """
+        EventsCreator.__init__(self)
         self.map = map
+        self.navigating_groups: List[NavigatingUnitsGroup] = []
         self.requests_for_paths: Deque[PathRequest] = deque()
-        self.pathfinding_calls = 0
-        self.pool = Pool()
+        self.path_requests_count = 0
+        self.paths_found = 0
         Pathfinder.instance = self
 
     def __bool__(self) -> bool:
@@ -400,9 +481,35 @@ class Pathfinder(Singleton):
     def __contains__(self, unit: Unit) -> bool:
         return any(request[0] == unit for request in self.requests_for_paths)
 
+    def navigate_units_to_destination(self, units, x: int, y: int):
+        self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
+
+    def update(self):
+        """
+        Each frame get first request from queue and try to find path for it,
+        if successful, return the path, else enqueue the request again.
+        """
+        self.update_navigating_groups()
+        if self.requests_for_paths:
+            unit, start, destination = self.requests_for_paths.pop()
+            if self.map.grid_to_node(destination).walkable:
+                if path := a_star(self.map.nodes, start, destination):
+                    self.paths_found += 1
+                    return unit.create_new_path(path)
+            self.request_path(unit, start, destination)
+
+    def update_navigating_groups(self):
+        for nav_group in self.navigating_groups[::-1]:
+            print(f'Updating NavGroup: {len(nav_group.units_paths)}')
+            if nav_group.units_paths:
+                nav_group.update()
+            else:
+                self.navigating_groups.remove(nav_group)
+
     def request_path(self, unit: Unit, start: GridPosition, destination: GridPosition):
         """Enqueue new path-request. It will be resolved when possible."""
         self.requests_for_paths.appendleft((unit, start, destination))
+        self.path_requests_count += 1
 
     def cancel_unit_path_requests(self, unit: Unit):
         for request in self.requests_for_paths.copy():
@@ -410,19 +517,20 @@ class Pathfinder(Singleton):
                 self.requests_for_paths.remove(request)
 
     def group_of_waypoints(self,
-                    x: int,
-                    y: int,
-                    required_waypoints: int) -> List[GridPosition]:
+                           x: int,
+                           y: int,
+                           required_waypoints: int) -> List[GridPosition]:
         """
         Find requested number of valid waypoints around requested position.
         """
-        node = self.map.position_to_node(x, y)
-        waypoints = {node.grid}
+        center = self.map.position_to_grid(x, y)
+        radius = 1
+        waypoints = []
         while len(waypoints) < required_waypoints:
-            if adjacent := node.walkable_adjacent:
-                waypoints.update(n.grid for n in node.walkable_adjacent)
-                node = random.choice(adjacent)
-        return [w for w in waypoints]
+            waypoints = calculate_circular_area(*center, radius)
+            waypoints = [w for w in waypoints if w in self.map.nodes]
+            radius += 1
+        return sorted(waypoints, key=lambda w: distance_2d(w, center))
 
     def get_closest_walkable_position(self,
                                       x: Number,
@@ -438,101 +546,11 @@ class Pathfinder(Singleton):
                     continue
             node = random.choice(adjacent)
 
-    @timer(level=2, global_profiling_level=PROFILING_LEVEL)
-    def find_path(self, start: GridPosition, end: GridPosition,
-                  pathable: bool = False) -> Union[MapPath, bool]:
-        """
-        Find shortest path from <start> to <end> position using A* algorithm.
-
-        :param start: GridPosition -- (int, int) path-start point.
-        :param end: GridPosition -- (int, int) path-destination point.
-        :param pathable: bool -- should pathfinder check only walkable tiles
-        (default) or all pathable map area? Use it to get into 'blocked'
-        areas, e.g. places enclosed by units.
-        :return: Union[MapPath, bool] -- list of points or False if no path
-        found
-        """
-        log(f'Searching for path from {start} to {end}...')
-        heuristic = self.heuristic
-
-        map_nodes = self.map.nodes
-        unexplored = PriorityQueue(start, heuristic(start, end) * 1.001)
-        explored = set()
-        previous: Dict[GridPosition, GridPosition] = {}
-
-        get_best_unexplored = unexplored.get
-        put_to_unexplored = unexplored.put
-
-        cost_so_far = defaultdict(lambda: math.inf)
-        cost_so_far[start] = 0
-
-        while unexplored:
-            if (current := get_best_unexplored()) == end:
-                return self.reconstruct_path(map_nodes, previous, current)
-            explored.add(current)
-            node = map_nodes[current]
-            walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
-            for adjacent in (a for a in walkable if a.grid not in explored):
-                if adjacent.grid in unexplored:
-                    continue
-                # TODO: implement Jump Point Search, for now, we resign from
-                #  using real terrain costs and calculate fast heuristic for
-                #  each waypoints pair, because it efficiently finds best
-                #  path, but it ignores tiles-moving-costs:
-                total = cost_so_far[current] + heuristic(adjacent.grid, current)
-                if total < cost_so_far[adjacent.grid]:
-                    previous[adjacent.grid] = current
-                    cost_so_far[adjacent.grid] = total
-                    priority = total + heuristic(adjacent.grid, end) * 1.001
-                    put_to_unexplored(adjacent.grid, priority)
-            explored.update(walkable)
-        # if path was not found searching by walkable tiles, we call second
-        # pass and search for pathable nodes this time
-        if not pathable:
-            return self.find_path(start, end, pathable=True)
-        return False  # no third pass, if there is no possible path!
-
-    @staticmethod
-    def heuristic(start, end):
-        return abs(end[0] - start[0]) + abs(end[1] - start[1])
-
-    @staticmethod
-    def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
-                         previous_nodes: Dict[GridPosition, GridPosition],
-                         current_node: GridPosition) -> MapPath:
-        path = [map_nodes[current_node]]
-        while current_node in previous_nodes.keys():
-            current_node = previous_nodes[current_node]
-            path.append(map_nodes[current_node])
-        return [node.position for node in path[::-1]]
-
-    def update(self):
-        """
-        Each frame get first request from queue and try to find path for it,
-        if successful, return the path, else enqueue the request again.
-        """
-        if self.requests_for_paths:
-            # find_path = Pathfinder.find_path
-            # count = min(cpu_count(), len(self.requests_for_paths))
-            # requests = [self.requests_for_paths.pop() for _ in range(count)]
-            # results = [self.pool.apply_async(find_path, args=r[1:]) for r in requests]
-            #
-            # for i, path in enumerate(results):
-            #     if p := path.get():
-            #         unit = requests[i][0]
-            #         unit.create_new_path(p)
-            #     else:
-            #         self.request_path(*requests[i])
-
-            unit, start, destination = self.requests_for_paths.pop()
-            if self.map.grid_to_node(destination).walkable:
-                if path := self.find_path(start, destination):
-                    return unit.create_new_path(path)
-            self.request_path(unit, start, destination)
-
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from players_and_factions.player import PlayerEntity
     from units.units import Unit
+    from map.pathfinding import a_star
     from buildings.buildings import Building
+

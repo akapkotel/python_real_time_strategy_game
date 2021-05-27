@@ -8,7 +8,10 @@ from collections import deque
 from typing import Deque, List, Dict, Optional, Set, Union, cast
 
 import PIL
-from arcade import SpriteList, Sprite, AnimatedTimeBasedSprite, load_textures
+from arcade import (
+    SpriteList, Sprite, AnimatedTimeBasedSprite, load_textures,
+    draw_circle_filled
+)
 from arcade.arcade_types import Point
 
 from effects.explosions import Explosion
@@ -18,6 +21,7 @@ from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
 from players_and_factions.player import Player, PlayerEntity
 from units.units_tasking import TasksExecutor, UnitTask
 from utils.enums import UnitWeight
+from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
 from utils.functions import (
     calculate_angle, distance_2d, get_path_to_file, log,
@@ -60,6 +64,7 @@ class Unit(PlayerEntity, TasksExecutor):
         self.current_speed = 0
 
         self.permanent_units_group: int = 0
+        self.navigating_group = None
 
         self.explosion_name = 'EXPLOSION'
         self.update_explosions_pool()
@@ -99,13 +104,6 @@ class Unit(PlayerEntity, TasksExecutor):
     def moving(self) -> float:
         return self.change_x or self.change_y
 
-    @property
-    def current_task(self) -> Optional[UnitTask]:
-        try:
-            return self.tasks[0]
-        except IndexError:
-            return None
-
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
@@ -128,7 +126,7 @@ class Unit(PlayerEntity, TasksExecutor):
             self.observed_nodes = observed = self.calculate_observed_area()
         self.game.fog_of_war.explore_map(n.grid for n in observed)
 
-    def update_blocked_map_nodes(self, new_current_node):
+    def update_blocked_map_nodes(self, new_current_node: MapNode):
         """
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
@@ -177,7 +175,7 @@ class Unit(PlayerEntity, TasksExecutor):
     def has_destination(self) -> bool:
         return self.path or self.awaited_path or self in Pathfinder.instance
 
-    def wait_for_free_path(self, path):
+    def wait_for_free_path(self, path: deque):
         """
         Waiting for free path is useful when next node is only temporarily
         blocked (blocking Unit is moving) and allows to avoid pathfinding
@@ -266,10 +264,12 @@ class Unit(PlayerEntity, TasksExecutor):
     def move_to(self, destination: GridPosition):
         self.cancel_path_requests()
         start = self.map.position_to_grid(*self.position)
-        Pathfinder.instance.request_path(self, start, destination)
+        self.game.pathfinder.request_path(self, start, destination)
 
     def create_new_path(self, new_path: MapPath):
-        self.path = deque(new_path[1:])
+        old_path = [self.path.popleft()] if self.path else []
+        self.path.clear()
+        self.path.extend(old_path + new_path[1:])
         self.awaited_path = None
         self.unschedule_earlier_move_orders()
 
@@ -345,7 +345,6 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def create_death_animation(self):
         self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
-        # self.game.create_effect(Explosion(*self.position, 'EXPLOSION'))
         self.game.window.sound_player.play_sound('explosion.wav')
 
     def save(self) -> Dict:
@@ -588,3 +587,30 @@ class Soldier(AnimatedTimeBasedSprite):
 
     def kill(self):
         pass
+
+
+class UnitsOrderedDestinations:
+    """
+    When Player sends hos Units somewhere on the map by mouse-clicking there,
+    this class stores all positions each Unit was assigned as it's final
+    destination by the Pathfinder. Game uses these positions to display on the
+    ordered destinations on the screen for the Player convenience.
+    """
+
+    def __init__(self):
+        self.destinations = []
+        self.time_left = []
+
+    def new_destinations(self, destinations):
+        self.destinations = destinations
+        self.time_left = [60 for d in destinations]
+
+    def on_update(self, delta_time):
+        self.time_left = [d - 1 for d in self.time_left]
+        for i, destination in enumerate(self.destinations[::]):
+            if self.time_left[i] == 0:
+                self.destinations.remove(destination)
+
+    def draw(self):
+        for destination in self.destinations:
+            draw_circle_filled(*destination, 5, GREEN, 6)

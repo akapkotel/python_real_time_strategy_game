@@ -50,7 +50,7 @@ class UnitsProducer:
     def _toggle_production(self):
         self.is_producing = not self.is_producing
 
-    def update_production(self):
+    def update_units_production(self):
         if self.is_producing:
             self.production_progress += self.production_per_frame
             if self.production_progress >= 100:
@@ -81,16 +81,12 @@ class ResourceProducer:
         self.reserves = 0.0
         self.stockpile = 0.0
         self.recipient: Optional[Player] = recipient
+        self.recipient.change_resource_yield_per_frame()
 
     def update_resource_production(self):
         self.reserves -= self.yield_per_frame
-        self.stockpile += self.yield_per_frame
-        if self.recipient is not None:
-            self.transfer_resource(self.recipient)
-
-    def transfer_resource(self, recipient: Player):
-        self.stockpile -= self.yield_per_frame
-        recipient.increase_resource_stock(self.resource, self.yield_per_frame)
+        if self.recipient is None:
+            self.stockpile += self.yield_per_frame
 
     def __getstate__(self) -> Dict:
         return {}
@@ -164,10 +160,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         if produced_units is not None:
             UnitsProducer.__init__(self, produced_units)
-
         elif produced_resource is not None:
             ResourceProducer.__init__(self, produced_resource, False, self.player)
-
         elif research_facility:
             ResearchFacility.__init__(self, self.player)
 
@@ -190,16 +184,16 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return self.center_x + offset_x, self.center_y + offset_y
 
     def block_map_nodes(self) -> List[MapNode]:
-        occupied_nodes = set()
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         max_x_grid = int(self.right // TILE_WIDTH)
         max_y_grid = int(self.top // TILE_HEIGHT)
-        for x in range(min_x_grid, max_x_grid + 1):
-            for y in range(min_y_grid, max_y_grid):
-                node = self.game.map.grid_to_node((x, y))
-                occupied_nodes.add(node)
-                self.block_map_node(node)
+        occupied_nodes = {
+            self.game.map.grid_to_node((x, y)) for x in
+            range(min_x_grid, max_x_grid + 1) for y in
+            range(min_y_grid, max_y_grid)
+        }
+        [self.block_map_node(node) for node in occupied_nodes]
         return list(occupied_nodes)
 
     @property
@@ -235,15 +229,18 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
-            if self.is_units_producer:
-                self.update_production()
-            elif self.is_resource_producer:
-                self.update_resource_production()
-            elif self.is_research_facility:
-                self.update_research()
+            self.update_production()
             self.update_observed_area()
         else:
             self.kill()
+
+    def update_production(self):
+        if self.is_units_producer:
+            self.update_units_production()
+        elif self.is_resource_producer:
+            self.update_resource_production()
+        elif self.is_research_facility:
+            self.update_research()
 
     def in_observed_area(self, other) -> bool:
         return self.occupied_sectors.isdisjoint(other.observed_nodes)

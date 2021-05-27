@@ -5,6 +5,7 @@ import random
 
 from abc import abstractmethod
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 from arcade import rand_in_circle, is_point_in_polygon
@@ -17,13 +18,20 @@ from map.map import MapNode, Sector, TILE_WIDTH
 from scenarios.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.functions import (
-    calculate_observable_area, distance_2d, is_visible, log
+    calculate_circular_area, distance_2d, is_visible, log
 )
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
+FUEL = 'fuel'
+FOOD = 'food'
+ENERGY = 'energy'
+STEEL = 'steel'
+ELECTRONICS = 'electronics'
+CONSCRIPTS = 'conscripts'
 
 
 def new_id(objects: Dict) -> int:
@@ -112,12 +120,27 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
 
 
 class ResourcesManager:
-    resources = 'fuel', 'food', 'energy', 'steel', 'electronics', 'conscripts'
+    resources_names = FUEL, FOOD, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 
     def __init__(self):
-        for resource in self.resources:
-            setattr(self, resource, 0)
-            setattr(self, f'{resource}_production_efficiency', 1)
+        for resource_name in self.resources_names:
+            setattr(self, resource_name, 0)
+            setattr(self, f"{resource_name}_yield_per_frame", 0.0)
+            setattr(self, f"{resource_name}_production_efficiency", 1.0)
+
+    def change_resource_yield_per_frame(self, resource: str, change: float):
+        old_yield = getattr(self, f"{resource}_yield_per_frame")
+        setattr(self, f"{resource}_yield_per_frame", old_yield + change)
+
+    def _update_resources_stock(self):
+        for resource_name in self.resources_names:
+            stock = getattr(self, resource_name)
+            change = getattr(self, f"{resource_name}_yield_per_frame")
+            setattr(self, resource_name, stock + change)
+
+    def consume_resource(self, resource_name: str, amount: float):
+        stock = getattr(self, resource_name)
+        setattr(self, resource_name, stock - amount)
 
 
 class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
@@ -186,6 +209,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         log(f'Updating player: {self}')
         self.known_enemies.clear()
         self.clear_mutually_detected_enemies()
+        self._update_resources_stock()
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
         self.known_enemies.update(enemies)
@@ -200,18 +224,11 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         return not self.units and not self.buildings
 
     def knows_all_required(self, required: Tuple[TechnologyId]):
-        for technology_id in required:
-            if technology_id not in self.known_technologies:
-                return False
-        return True
+        return all(technology_id in self.known_technologies for technology_id in required)
 
-    def update_known_technologies(self, technology: Technology):
-        self.known_technologies.add(technology.id)
-        technology.gain_technology_effects(researcher=self)
-
-    def increase_resource_stock(self, resource, yield_per_frame):
-        old_value = getattr(self, resource)
-        setattr(self, resource, old_value + yield_per_frame)
+    def update_known_technologies(self, new_technology: Technology):
+        self.known_technologies.add(new_technology.id)
+        new_technology.gain_technology_effects(researcher=self)
 
     def __getstate__(self) -> Dict:
         saved_player = self.__dict__.copy()
@@ -390,7 +407,7 @@ class PlayerEntity(GameObject):
 
     def calculate_observed_area(self) -> Set[MapNode]:
         position = self.map.position_to_grid(*self.position)
-        observed_area = calculate_observable_area(*position, 8)
+        observed_area = calculate_circular_area(*position, 8)
         observed_area = self.map.in_bounds(observed_area)
         return {self.map.nodes[id] for id in observed_area}
 
@@ -455,7 +472,7 @@ class PlayerEntity(GameObject):
             self.targeted_enemy = None
 
     def run_away(self, enemy: PlayerEntity):
-        pass
+        raise NotImplementedError
 
     def gain_experience(self, enemy: PlayerEntity):
         self.experience += 1  # TODO: get experience from configs
