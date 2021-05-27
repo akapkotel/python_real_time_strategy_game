@@ -11,7 +11,8 @@ from utils.functions import get_path_to_file
 
 path = get_path_to_file
 explosions = {
-    'EXPLOSION': load_spritesheet(path('explosion.png'), 96, 96, 21, 63),
+    "EXPLOSION": load_spritesheet(path('granade_blast.png'), 256, 256, 15, 75),
+    # 'EXPLOSION': load_spritesheet(path('explosion.png'), 96, 96, 21, 63),
     'SHOTBLAST': load_spritesheet(path('shot_blast.png'), 256, 256, 4, 16),
     'HITBLAST': load_spritesheet(path('hit_blast.png'), 256, 256, 8, 48),
     'SMALL_EXPLOSION_5': load_spritesheet(path('explosion_small_5.png'), 256, 256, 15, 60)
@@ -33,7 +34,10 @@ class ExplosionsPool(Singleton):
         }
 
     def get(self, explosion_name, x, y) -> Explosion:
-        explosion = self.explosions[explosion_name].popleft()
+        try:
+            explosion = self.explosions[explosion_name].popleft()
+        except IndexError:
+            explosion = Explosion(explosion_name, self)
         explosion.position = x, y
         return explosion
 

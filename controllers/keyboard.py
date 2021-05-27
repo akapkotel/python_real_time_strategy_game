@@ -24,6 +24,8 @@ class KeyboardHandler(ToggledElement):
         self.evaluate_pressed_key(symbol, modifiers)
 
     def on_key_release(self, symbol: int, modifiers: int):
+        if symbol == LCTRL:
+            self.window.game_view.pathfinder.finish_waypoints_queue()
         self.keys_pressed.discard(symbol)
 
     def evaluate_pressed_key(self, symbol: int, modifiers: int):

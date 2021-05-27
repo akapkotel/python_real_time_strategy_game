@@ -12,6 +12,8 @@ from players_and_factions.player import PlayerEntity
 from units.units import Unit
 from utils.functions import average_position_of_points_group, get_path_to_file
 
+HEALTH_BAR_WIDTH = 5
+
 selection_textures = load_textures(
     get_path_to_file('unit_selection_marker.png'),
     [(i * 60, 0, 60, 60) for i in range(10)]
@@ -48,20 +50,24 @@ class SelectionUnitMarket(SelectedEntityMarker):
         self.health = health = selected.health
         self.position = selected.position
 
+        # selection marker has 10 versions, blank + 9 different numbers to show
+        # which PermanentUnitsGroup an Unit belongs to:
         self.borders.texture = selection_textures[selected.permanent_units_group]
 
         self.healthbar = healthbar = SpriteSolidColor(
-            *self.health_to_color_and_width(max(health, 0)))
+            *self.health_to_color_and_size(max(health, 0)))
 
         self.sprites = sprites = [self.borders, healthbar]
         self.game.selection_markers_sprites.extend(sprites)
 
     @staticmethod
-    def health_to_color_and_width(health: float) -> Tuple[int, int, Color]:
-        width = int((60 / 100) * health)
+    def health_to_color_and_size(health: float) -> Tuple[int, int, Color]:
+        length = int(0.6 * health)
         if health > 66:
-            return width, 5, GREEN
-        return (width, 5, YELLOW) if health > 33 else (width, 5, RED)
+            return length, HEALTH_BAR_WIDTH, GREEN
+        elif health > 33:
+            return length, HEALTH_BAR_WIDTH, YELLOW
+        return length, HEALTH_BAR_WIDTH, RED
 
     def update(self):
         if self.selected.alive:
@@ -74,7 +80,7 @@ class SelectionUnitMarket(SelectedEntityMarker):
 
     def update_healthbar(self, x, y):
         if (health := self.selected.health) != self.health:
-            width, height, color = self.health_to_color_and_width(health)
+            width, height, color = self.health_to_color_and_size(health)
             if color != self.healthbar.color:
                 self.replace_healthbar_with_new_color(color, height, width)
             else:

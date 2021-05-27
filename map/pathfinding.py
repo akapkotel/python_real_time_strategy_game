@@ -14,7 +14,7 @@ from game import PROFILING_LEVEL
 from map.map import MapNode, MapPath
 
 
-@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=True)
+@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
 def a_star(map_nodes: Dict[GridPosition, MapNode],
            start: GridPosition,
            end: GridPosition,

@@ -333,15 +333,23 @@ class Unit(PlayerEntity, TasksExecutor):
 
     def kill(self):
         self.current_sector.units_and_buildings[self.player.id].discard(self)
+        self.set_permanent_units_group()
+        self.set_navigating_group(navigating_group=None)
         self.cancel_path_requests()
         self.clear_all_blocked_nodes()
         self.create_death_animation()
         super().kill()
 
+    def set_navigating_group(self, navigating_group):
+        try:
+            self.navigating_group.pop(self)
+        except (KeyError, AttributeError):
+            pass
+        self.navigating_group = navigating_group
+
     def clear_all_blocked_nodes(self):
         for node in (self.current_node, self.reserved_node):
-            if node is not None:
-                self.unblock_map_node(node)
+            self.unblock_map_node(node) if node is not None else ...
 
     def create_death_animation(self):
         self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
@@ -596,21 +604,22 @@ class UnitsOrderedDestinations:
     destination by the Pathfinder. Game uses these positions to display on the
     ordered destinations on the screen for the Player convenience.
     """
+    size = 5 / 60
 
     def __init__(self):
         self.destinations = []
-        self.time_left = []
+        self.time_left = 0
 
-    def new_destinations(self, destinations):
+    def new_destinations(self, destinations: List[Point]):
         self.destinations = destinations
-        self.time_left = [60 for d in destinations]
+        self.time_left = 60
 
     def on_update(self, delta_time):
-        self.time_left = [d - 1 for d in self.time_left]
-        for i, destination in enumerate(self.destinations[::]):
-            if self.time_left[i] == 0:
-                self.destinations.remove(destination)
+        if self.time_left > 0:
+            self.time_left -= 1
+        else:
+            self.destinations.clear()
 
     def draw(self):
-        for destination in self.destinations:
-            draw_circle_filled(*destination, 5, GREEN, 6)
+        for (x, y) in self.destinations:
+            draw_circle_filled(x, y, self.size * self.time_left, GREEN, 6)

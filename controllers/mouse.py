@@ -9,6 +9,7 @@ from arcade import (
     draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
     load_textures
 )
+from arcade.key import LCTRL
 
 from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
@@ -174,11 +175,11 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
             if self.mouse_drag_selection is None:
                 units = self.selected_units
                 pointed = self.pointed_unit or self.pointed_building
-                if units:
+                if pointed is not None:
+                    self.on_player_entity_clicked(pointed)
+                elif units:
                     self.on_click_with_selected_units(x, y, modifiers, units,
                                                       pointed)
-                elif pointed is not None:
-                    self.on_player_entity_clicked(pointed)
             else:
                 self.close_drag_selection()
 
@@ -215,17 +216,17 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.send_units_to_pointed_location(units, x, y)
 
     def on_click_with_selected_units(self, x, y, modifiers, units, pointed):
-        pointed: Union[PlayerEntity, None]
-        if pointed is not None:
-            self.on_player_entity_clicked(pointed)
-        elif self.game.map.position_to_node(x, y).pathable:
-            Pathfinder.instance.navigate_units_to_destination(units, x, y)
-            # self.send_units_to_pointed_location(units, x, y)
+        if self.game.map.position_to_node(x, y).pathable:
+            if LCTRL in self.game.window.pressed_keys:
+                self.game.pathfinder.enqueue_waypoint(units, x, y)
+            else:
+                self.send_units_to_pointed_location(units, x, y)
 
     def send_units_to_pointed_location(self, units, x, y):
-        waypoints = self.game.pathfinder.group_of_waypoints(x, y, len(units))
-        for i, unit in enumerate(units):
-            unit.move_to(waypoints[i])
+        self.game.pathfinder.navigate_units_to_destination(units, x, y)
+        # waypoints = self.game.pathfinder.group_of_waypoints(x, y, len(units))
+        # for i, unit in enumerate(units):
+        #     unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_units()
