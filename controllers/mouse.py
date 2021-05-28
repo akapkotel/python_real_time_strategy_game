@@ -224,7 +224,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
-        # waypoints = self.game.pathfinder.group_of_waypoints(x, y, len(units))
+        # waypoints = self.game.pathfinder.get_group_of_waypoints(x, y, len(units))
         # for i, unit in enumerate(units):
         #     unit.move_to(waypoints[i])
 

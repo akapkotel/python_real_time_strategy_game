@@ -104,6 +104,22 @@ class Unit(PlayerEntity, TasksExecutor):
     def moving(self) -> float:
         return self.change_x or self.change_y
 
+    def reached_destination(self, destination: Union[MapNode, GridPosition]) -> bool:
+        try:
+            return destination.grid == self.current_node.grid
+        except AttributeError:
+            return destination == self.current_node.grid
+
+    def nearby(self, position: Union[MapNode, GridPosition]) -> bool:
+        adjacent_grids = {n.grid for n in self.current_node.adjacent_nodes}
+        try:
+            return position.grid in adjacent_grids
+        except AttributeError:
+            return position in adjacent_grids
+
+    def heading_to(self, destination: Union[MapNode, GridPosition]):
+        return self.path and self.path[0] == self.map.grid_to_position(destination)
+
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
@@ -285,6 +301,7 @@ class Unit(PlayerEntity, TasksExecutor):
         self.game.pathfinder.cancel_unit_path_requests(self)
 
     def stop_completely(self):
+        self.set_navigating_group(navigating_group=None)
         self.cancel_path_requests()
         self.awaited_path = None
         self.path.clear()
@@ -334,17 +351,14 @@ class Unit(PlayerEntity, TasksExecutor):
     def kill(self):
         self.current_sector.units_and_buildings[self.player.id].discard(self)
         self.set_permanent_units_group()
-        self.set_navigating_group(navigating_group=None)
-        self.cancel_path_requests()
         self.clear_all_blocked_nodes()
         self.create_death_animation()
+        self.stop_completely()
         super().kill()
 
     def set_navigating_group(self, navigating_group):
-        try:
-            self.navigating_group.pop(self)
-        except (KeyError, AttributeError):
-            pass
+        if self.navigating_group is not None:
+            self.navigating_group.discard(self)
         self.navigating_group = navigating_group
 
     def clear_all_blocked_nodes(self):

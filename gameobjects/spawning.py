@@ -47,7 +47,7 @@ class ObjectsFactory(Singleton):
                     names: Sequence[str],
                     player: Player,
                     position: Point, **kwargs) -> List[GameObject]:
-        positions = self.pathfinder.group_of_waypoints(*position, len(names))
+        positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
         spawned = []
         for i, name in enumerate(names):
             position = self.pathfinder.map.grid_to_position(positions[i])

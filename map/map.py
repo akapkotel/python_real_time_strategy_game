@@ -38,7 +38,7 @@ OPTIMAL_PATH_LENGTH = 50
 
 # typing aliases:
 NormalizedPoint = Tuple[int, int]
-MapPath = List[NormalizedPoint]
+MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
@@ -62,8 +62,8 @@ class GridHandler:
     def grid_to_position(cls, grid: GridPosition) -> NormalizedPoint:
         """Return (x, y) position of the map-grid-normalised Node."""
         return (
-            grid[0] * TILE_WIDTH + TILE_WIDTH // 2,
-            grid[1] * TILE_HEIGHT + TILE_HEIGHT // 2
+            int(grid[0] * TILE_WIDTH + TILE_WIDTH // 2),
+            int(grid[1] * TILE_HEIGHT + TILE_HEIGHT // 2)
         )
 
     @classmethod
@@ -352,24 +352,35 @@ class WaypointsQueue:
     def __init__(self, units: List[Unit]):
         self.map = Map.instance
         self.units = units
-        self.waypoints = []
+        self.waypoints = {unit: [] for unit in units}
         self.active = False
 
     def add_waypoint(self, x: int, y: int):
         if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
             Pathfinder.instance.finish_waypoints_queue()
         else:
-            self.waypoints.append((x, y))
+            self.add_waypoints_for_each_unit(len(self.units), x, y)
+
+    def add_waypoints_for_each_unit(self, amount: int, x: int, y: int):
+        x, y = Map.normalize_position(x, y)
+        print(x, y)
+        waypoints = Pathfinder.instance.get_group_of_waypoints(amount, x, y)
+        for i, unit in enumerate(self.units):
+            self.waypoints[unit].append(waypoints[i])
 
     def update(self):
         # TODO: execution of the waypoints queue
-        pass
+        for unit, waypoints in self.waypoints.items():
+            if unit.reached_destination(waypoints[-1]):
+                waypoints.pop()
+            elif (not unit.has_destination) or unit.path[0] != waypoints[-1]:
+                print("ALARM")
+                unit.move_to(waypoints[-1])
 
     def start(self):
         self.active = True
-
-    def stop(self):
-        self.active = False
+        for unit, waypoints in self.waypoints.items():
+            waypoints.reverse()
 
 
 class NavigatingUnitsGroup:
@@ -389,14 +400,24 @@ class NavigatingUnitsGroup:
         self.add_visible_indicators_of_destinations(destinations)
         self.reverse_units_paths()
 
-    def reset_units_navigating_groups(self, units):
-        for unit in (u for u in units if u.navigating_group is not None):
+    def __str__(self) -> str:
+        return f"NavigatingUnitsGroup(units:{len(self.units_paths)})"
+
+    def reset_units_navigating_groups(self, units: List[Unit]):
+        for unit in units:
+            unit.stop_completely()
             unit.set_navigating_group(navigating_group=self)
+
+    def discard(self, unit: Unit):
+        try:
+            del self.units_paths[unit]
+        except KeyError:
+            pass
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
         start = units[0].current_node.grid
         path = a_star(self.map.nodes, start, self.destination, True)
-        destinations = self.get_next_units_steps(len(units), path[-1])
+        destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
             self.slice_paths(units, destinations, path)
         else:
@@ -404,24 +425,21 @@ class NavigatingUnitsGroup:
         return destinations
 
     def slice_paths(self, units, destinations, path):
-        path_steps = OPTIMAL_PATH_LENGTH // 2
-        amount = len(units)
-        for i in range(len(path) // path_steps):
-            step = path[i * path_steps]
-            units_steps = self.get_next_units_steps(amount, step)
-            for unit, grid in zip(units, units_steps):
-                self.units_paths[unit].append(grid)
-        for i, unit in enumerate(units):
-            self.units_paths[unit].append(destinations[units.index(unit)])
+        for i in range(len(path) // OPTIMAL_PATH_LENGTH):
+            step = path[i * OPTIMAL_PATH_LENGTH]
+            units_steps = Pathfinder.instance.get_group_of_waypoints(*step, len(units))
+            self.navigate_straightly_to_destination(units_steps, units)
+        self.navigate_straightly_to_destination(destinations, units)
 
     def navigate_straightly_to_destination(self, destinations, units):
-        self.units_paths = {
-            unit: [destination] for unit, destination in
-            zip(units, destinations)
-        }
+        for unit, grid in zip(units, destinations):
+            self.units_paths[unit].append(grid)
 
     def reverse_units_paths(self):
-        # to cheaply use pop() to remove reached waypoints from paths
+        """
+        Reverse waypoints list of each Unit, to allow consuming it from the
+        end using cheaply pop() method.
+        """
         for unit, steps in self.units_paths.items():
             steps.reverse()
 
@@ -431,33 +449,30 @@ class NavigatingUnitsGroup:
 
     @staticmethod
     def get_next_units_steps(amount: int, step: GridPosition):
-        destinations = Pathfinder.instance.group_of_waypoints(*step, amount)
+        destinations = Pathfinder.instance.get_group_of_waypoints(*step, amount)
         return [d[0] for d in zip(destinations, range(amount))]
 
     def update(self):
         to_remove = []
         for unit, steps in self.units_paths.items():
             if steps:
-                self.find_next_path_for_unit(steps, to_remove, unit)
+                self.find_next_path_for_unit(unit, steps)
             else:
                 to_remove.append(unit)
         self.remove_finished_paths(to_remove)
 
     @staticmethod
-    def find_next_path_for_unit(steps, to_remove, unit):
+    def find_next_path_for_unit(unit, steps):
         destination = steps[-1]
-        if unit.current_node.grid != destination:
-            if not unit.path or unit.path[-1] != destination:
-                unit.move_to(destination)
-                to_remove.append(steps)
+        if unit.reached_destination(destination) or unit.nearby(destination):
+            steps.pop()
+        elif not (unit.has_destination or unit.heading_to(destination)):
+            unit.move_to(destination)
 
-    def remove_finished_paths(self, to_remove: List[Union[Unit, GridPosition]]):
-        for elem in to_remove:
-            if isinstance(elem, List):
-                elem.pop()
-            else:
-                elem.set_navigating_group(navigating_group=None)
-                del self.units_paths[elem]
+    @staticmethod
+    def remove_finished_paths(finished_units: List[Unit]):
+        for unit in finished_units:
+            unit.set_navigating_group(navigating_group=None)
 
 
 class Pathfinder(Singleton, EventsCreator):
@@ -526,7 +541,8 @@ class Pathfinder(Singleton, EventsCreator):
             queue.update()
 
     def update_navigating_groups(self):
-        for nav_group in self.navigating_groups[::-1]:
+        print(f"Navigating groups: {len(self.navigating_groups)}")
+        for nav_group in self.navigating_groups:
             if nav_group.units_paths:
                 nav_group.update()
             else:
@@ -539,13 +555,13 @@ class Pathfinder(Singleton, EventsCreator):
 
     def cancel_unit_path_requests(self, unit: Unit):
         for request in self.requests_for_paths.copy():
-            if request[0] == unit:
+            if request[0] is unit:
                 self.requests_for_paths.remove(request)
 
-    def group_of_waypoints(self,
-                           x: int,
-                           y: int,
-                           required_waypoints: int) -> List[GridPosition]:
+    def get_group_of_waypoints(self,
+                               x: int,
+                               y: int,
+                               required_waypoints: int) -> List[GridPosition]:
         """
         Find requested number of valid waypoints around requested position.
         """
@@ -558,7 +574,9 @@ class Pathfinder(Singleton, EventsCreator):
             waypoints = [w for w in calculate_circular_area(*center, radius) if
                          w in nodes and nodes[w].walkable]
             radius += 1
-        return sorted(waypoints, key=lambda w: distance_2d(w, center))
+        # return sorted(waypoints, key=lambda w: distance_2d(w, center))
+        waypoints.sort(key=lambda w: distance_2d(w, center))
+        return [d[0] for d in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self,
                                       x: Number,
