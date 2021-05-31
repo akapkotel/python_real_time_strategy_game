@@ -22,7 +22,7 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from audio.sound import SoundPlayer
+from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
@@ -89,7 +89,7 @@ class Window(arcade.Window, EventsCreator):
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
-        self.sound_player = SoundPlayer()
+        self.sound_player = AudioPlayer()
 
         self.save_manger = SaveManager('saved_games', 'scenarios')
 

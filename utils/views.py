@@ -23,7 +23,7 @@ class LoadableWindowView(View):
         super().__init__()
         self.loading_progress = 0.0
         self.things_to_load = []
-        self.functions_to_call = []
+        self.after_load_functions = []
         self.updated: List[Updateable] = []
         self.drawn: List[Drawable] = []
         self.paused = False
@@ -99,18 +99,18 @@ class LoadableWindowView(View):
         setattr(self, loaded, value(*args, **kwargs) if callable(value) else value)
         self.loading_progress += progress
 
-    def call_function(self):
-        function = self.functions_to_call.pop(0)
-        function()
-
     @property
     def requires_loading(self):
         return len(self.things_to_load) > 0
 
     def after_loading(self):
-        for function in self.functions_to_call:
-            function()
+        self.call_after_load_functions()
         self.loading_progress = 1.01
+
+    def call_after_load_functions(self):
+        for function in self.after_load_functions:
+            function()
+        self.after_load_functions.clear()
 
     def on_draw(self):
         for obj in self.drawn:

@@ -122,7 +122,7 @@ class Map(GridHandler):
         self.generate_nodes()
         self.calculate_distances_between_nodes()
 
-        self.game.functions_to_call.append(self.plant_random_trees)
+        self.game.after_load_functions.append(self.plant_random_trees)
 
         Map.instance = self
 
