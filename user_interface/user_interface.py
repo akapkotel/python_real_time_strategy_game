@@ -131,7 +131,7 @@ class UiElementsBundle(OwnedObject):
 
 class UiBundlesHandler(ObjectsOwner):
     """
-    This class keeps track of currently loaded and displayed UiElements,
+    This class keeps track of currently is_loaded and displayed UiElements,
     allowing switching between different groups of buttons, checkboxes etc.
     and dynamically compose content of the screen eg. in game menu or player
     interface.

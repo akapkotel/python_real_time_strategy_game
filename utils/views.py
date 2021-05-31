@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-from typing import List, Set, Dict, Union, Optional
+import time
+
+from typing import List, Set, Dict, Union, Optional, Any, Callable
 from arcade import (
     Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
 )
 
 
-from utils.functions import get_attributes_with_attribute, log
+from utils.functions import get_attributes_with_attribute, log, logger
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.colors import WHITE, GREEN
 from utils.data_types import Viewport
@@ -15,24 +17,22 @@ from utils.data_types import Viewport
 Updateable = Drawable = Union[SpriteList, SelectiveSpriteList, Sprite]
 
 
-class WindowView(View):
+class LoadableWindowView(View):
 
-    def __init__(self, requires_loading: bool = False):
+    def __init__(self):
         super().__init__()
-        self.loaded = False
-        self._requires_loading = requires_loading
+        self.loading_progress = 0.0
+        self.things_to_load = []
+        self.functions_to_call = []
         self.updated: List[Updateable] = []
         self.drawn: List[Drawable] = []
+        self.paused = False
 
         # Since we can toggle views and some views has dynamic viewports and
         # other do not, we keep track of each View viewport to retrieve it
         # when we go back to the View from another, and each time we update
         # the viewport of the Window, we use current View viewport coordinates:
         self.viewport: Viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
-
-    @property
-    def requires_loading(self):
-        return self._requires_loading and not self.loaded
 
     @property
     def is_running(self):
@@ -65,23 +65,65 @@ class WindowView(View):
         self.updated = [u for u in updated if u not in ignore_update]
 
     def on_show_view(self):
-        log(f'Switched to WindowView: {self.__class__.__name__}')
+        log(f'Switched to View: {self.__class__.__name__}')
         self.window.updated = self.updated
         self.window.set_viewport(*self.viewport)
 
     def on_update(self, delta_time: float):
+        if not self.is_loaded:
+            return self.update_loading()
+        if not self.paused:
+            self.update_view(delta_time)
+
+    @property
+    def is_loaded(self):
+        return self.loading_progress >= 1.0
+
+    @logger(console=True)
+    def update_loading(self):
+        if self.things_to_load:
+            self.load(*self.things_to_load[0])
+            self.things_to_load.pop(0)
+        # elif self.functions_to_call:
+        #     self.call_function()
+        else:
+            self.after_loading()
+
+    def update_view(self, delta_time: float):
         for obj in self.updated:
             obj.on_update(delta_time)
+
+    @logger(console=True)
+    def load(self, loaded: str, value: Any, progress: float, *args, **kwargs):
+        args = [a() if callable(a) else a for a in args]
+        setattr(self, loaded, value(*args, **kwargs) if callable(value) else value)
+        self.loading_progress += progress
+
+    def call_function(self):
+        function = self.functions_to_call.pop(0)
+        function()
+
+    @property
+    def requires_loading(self):
+        return len(self.things_to_load) > 0
+
+    def after_loading(self):
+        for function in self.functions_to_call:
+            function()
+        self.loading_progress = 1.01
 
     def on_draw(self):
         for obj in self.drawn:
             obj.draw()
 
+    def toggle_pause(self):
+        self.paused = not self.paused
 
-class LoadingScreen(WindowView):
+
+class LoadingScreen(LoadableWindowView):
 
     def __init__(self,
-                 loaded_view: WindowView,
+                 loaded_view: Optional[LoadableWindowView] = None,
                  loading_text: str = 'Loading',
                  background_name: Optional[str] = None):
         super().__init__()
@@ -90,7 +132,7 @@ class LoadingScreen(WindowView):
         self.progress = 0
         self.progress_bar = self.create_progress_bar()
         self.loading_background = Sprite(background_name) if \
-            background_name else None
+            background_name is not None else None
         self.sprite_list.extend(
             [e for e in (self.progress_bar, self.loading_background) if e]
         )
@@ -111,7 +153,11 @@ class LoadingScreen(WindowView):
 
     def on_update(self, delta_time: float):
         super().on_update(delta_time)
-        self.update_progress(delta_time)
+        try:
+            self.update_progress(getattr(self.loaded_view, 'loading_progress'))
+            self.loaded_view.on_update(delta_time)
+        except AttributeError:
+            self.update_progress(delta_time)
         self.update_progress_bar()
 
     def on_draw(self):
@@ -122,16 +168,15 @@ class LoadingScreen(WindowView):
         text = ' '.join([self.loading_text, str(int(self.progress))])
         draw_text(text, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 10, WHITE, 20)
 
-    def update_progress(self, delta_time: float):
-        self.progress += 50 * delta_time
+    def update_progress(self, update: float):
+        self.progress += (25 * update)
         if self.progress >= 100:
-            self.loaded_view.loaded = True
             self.window.show_view(self.loaded_view)
 
     def update_progress_bar(self):
         progress = self.progress
         self.progress_bar.center_x = center = progress * (SCREEN_WIDTH / 200)
-        self.progress_bar.width = center * 2
+        self.progress_bar.width = 0.01 + center * 2
 
 
 if __name__:

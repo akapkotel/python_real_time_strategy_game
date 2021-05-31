@@ -1,4 +1,4 @@
-arcade==2.4.3
+arcade==2.5.7
 attrs==20.2.0
 cffi==1.14.3
 llvmlite==0.34.0

@@ -4,7 +4,7 @@ from math import inf
 from time import time as get_time
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
-from utils.functions import log
+from utils.functions import logger, log
 
 
 class ScheduledEvent:
@@ -41,6 +41,7 @@ class ScheduledEvent:
                 f'functions: {self.function.__name__}, args: {self.args}, '
                 f'kwargs: {self.kwargs}, time left: {self.delay_left}')
 
+    @logger()
     def execute(self):
         try:
             self.function(*self.args, **self.kwargs)
@@ -63,18 +64,18 @@ class EventsScheduler:
         self.execution_times: List[float] = []
         EventsScheduler.instance = self
 
+    @logger()
     def schedule(self, event: ScheduledEvent):
         self.scheduled_events.append(event)
         delay = event.delay_left or event.delay
         self.execution_times.append(get_time() + delay)
-        log(f'Scheduled event: {event}', True)
 
+    @logger()
     def unschedule(self, event: ScheduledEvent):
         try:
             index = self.scheduled_events.index(event)
             self.scheduled_events.pop(index)
             self.execution_times.pop(index)
-            log(f'Unscheduled event: {event}', True)
         except ValueError:
             pass
 
@@ -84,7 +85,6 @@ class EventsScheduler:
             if time >= self.execution_times[i]:
                 event.execute()
                 self.unschedule(event)
-                log(f'Executed event: {event}')
                 if event.repeat:
                     event.repeat -= 1
                     self.schedule(event)

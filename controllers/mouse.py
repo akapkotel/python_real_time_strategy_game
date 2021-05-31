@@ -81,8 +81,8 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.selected_building: Optional[Building] = None
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
         # that this unit is currently selected and will react for players's
-        # actions. Sprites are actually drawn_area and updated in Game class,
-        # but here we keep them cashed to easily manipulate them:
+        # actions. Sprites are actually drawn and updated in Game class, but
+        # here we keep them cashed to easily manipulate them:
         self.selection_markers: Set[SelectionUnitMarket] = set()
 
         self.attached_task: Optional[UnitTask] = None
@@ -100,13 +100,13 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
                  'move.png')
         self.textures.extend(
             [load_texture(get_path_to_file(name)) for name in names[1:]]
-        )  # without 'normal.png' since it is already loaded
+        )  # without 'normal.png' since it is already is_loaded
         self.create_cursor_animations_frames(names)
         self.set_texture(CURSOR_NORMAL_TEXTURE)
 
     def create_cursor_animations_frames(self, names: Tuple[str, ...]):
         """
-        For each loaded Texture we create a list of sub-textures which will
+        For each is_loaded Texture we create a list of sub-textures which will
         be used to build lists of AnimationKeyframes utilised in
         on_animation_update method.
         """
@@ -224,9 +224,6 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
-        # waypoints = self.game.pathfinder.get_group_of_waypoints(x, y, len(units))
-        # for i, unit in enumerate(units):
-        #     unit.move_to(waypoints[i])
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_units()
@@ -288,7 +285,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.create_selection_markers(new)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        print(f'Mouse scrolled x: {scroll_x}, y: {scroll_y}')
+        log(f'Mouse scrolled x: {scroll_x}, y: {scroll_y}')
         if self.pointed_scrollable is not None:
             self.pointed_scrollable.on_mouse_scroll(scroll_x, scroll_y)
 
@@ -350,7 +347,6 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
                 return pointed[0]
             s: UiElement
             for sprite in (s for s in pointed if s.active and not s.children):
-                print(sprite)
                 return sprite  # first pointed children
             else:
                 return pointed[0]  # return pointed Sprite if no children found

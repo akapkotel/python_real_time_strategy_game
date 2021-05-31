@@ -7,17 +7,17 @@ from arcade.key import *
 
 from units.unit_management import PermanentUnitsGroup
 from user_interface.user_interface import ToggledElement
-from utils.functions import log
+from utils.functions import log, logger
 
 
 class KeyboardHandler(ToggledElement):
     keys_pressed: Set[int] = set()
-    window: Optional[Window] = None
 
     def __init__(self, window: Window):
         super().__init__()
         self.window = window
 
+    @logger(console=True)
     def on_key_press(self, symbol: int, modifiers: int):
         self.keys_pressed.add(symbol)
         log(f'Pressed key: {symbol}, all pressed keys: {self.keys_pressed}')
@@ -42,5 +42,6 @@ class KeyboardHandler(ToggledElement):
         else:
             PermanentUnitsGroup.select_permanent_units_group(digit)
 
-    def key_to_letter(self, symbol: int) -> str:
+    @staticmethod
+    def key_to_letter(symbol: int) -> str:
         return chr(symbol)

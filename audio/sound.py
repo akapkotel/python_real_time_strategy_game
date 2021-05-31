@@ -3,15 +3,14 @@ from __future__ import annotations
 
 import pyglet
 
-from typing import Dict, Deque, Optional
+from typing import Dict, Optional
 from pyglet.media import Player
 from pyglet.media.codecs.base import Source, StaticSource
-from collections import deque
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type, log
 
-
+SOUNDS_DIRECTORY = 'resources/sounds'
 SOUNDS_EXTENSION = 'wav'
 
 load_source = pyglet.media.load
@@ -24,7 +23,7 @@ class SoundPlayer(Singleton):
     """
 
     def __init__(self,
-                 sounds_directory: str,
+                 sounds_directory: str = SOUNDS_DIRECTORY,
                  sound_on: bool = True,
                  music_on: bool = True,
                  sound_effects_on: bool = True):
@@ -37,15 +36,13 @@ class SoundPlayer(Singleton):
         self.sounds: Dict[str, Source] = self._preload_sounds(sounds_directory)
         log(f'Loaded {len(self.sounds)} sounds.', True)
 
-        self.queue: Deque[str] = deque()
-
-        self.played: Dict[str, Player] = {}
+        self.currently_played: Dict[str, Player] = {}
 
         self.current_music: Optional[str] = None
 
-        self._sound_on: bool = sound_on
-        self._music_on: bool = music_on
-        self._sound_effects_on: bool = sound_effects_on
+        self._sound_on = sound_on
+        self._music_on = music_on
+        self._sound_effects_on = sound_effects_on
 
         self.volume: float = 1.0
         self.music_volume: float = self.volume
@@ -80,7 +77,7 @@ class SoundPlayer(Singleton):
     @music_on.setter
     def music_on(self, value: bool):
         self._music_on = value
-        for name, player in self.played.items():
+        for name, player in self.currently_played.items():
             if name == self.current_music:
                 player.pause() if not value else player.play()
 
@@ -112,7 +109,8 @@ class SoundPlayer(Singleton):
     def stop_sound(self, name: str):
         """Stop playing single sound, useful to stop playing music themes."""
         try:
-            self.played[name].delete()
+            self.currently_played[name].delete()
+            del self.currently_played[name]
             if self.current_music == name:
                 self.current_music = None
         except KeyError:
@@ -121,18 +119,18 @@ class SoundPlayer(Singleton):
     def pause(self):
         """Pause playing all currently played sounds and music. Reversible."""
         self._sound_on = False
-        for player in self.played.values():
+        for player in self.currently_played.values():
             player.pause()
 
     def play(self):
         """Unpause playing all currently active sounds and music."""
         self._sound_on = True
-        for player in self.played.values():
+        for player in self.currently_played.values():
             player.play()
 
     def clear(self):
         """Stop and remove all sounds and music currently played."""
-        for player in self.played.values():
+        for player in self.currently_played.values():
             player.delete()
 
     def _play_sound(self, name: str, source: Source, loop: bool):
@@ -146,4 +144,4 @@ class SoundPlayer(Singleton):
         player.queue(source)
         player.play()
         player.loop = True
-        self.played[name] = player
+        self.currently_played[name] = player

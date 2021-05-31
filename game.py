@@ -17,13 +17,13 @@ from typing import (Any, Dict, List, Optional, Set, Union)
 import arcade
 from functools import partial
 from arcade import (
-    SpriteList, create_line, draw_circle_outline, draw_circle_filled,
-    draw_line, draw_rectangle_filled, draw_text
+    SpriteList, create_line, draw_circle_outline, draw_line,
+    draw_rectangle_filled, draw_text
 )
 from arcade.arcade_types import Color, Point
 
 from audio.sound import SoundPlayer
-from persistency.configs_handling import load_player_configs, read_csv_files
+from persistency.configs_handling import read_csv_files
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
     ScrollableContainer
@@ -32,14 +32,14 @@ from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
     clamp, get_path_to_file, get_screen_size, log, timer, to_rgba,
-    average_position_of_points_group
+    average_position_of_points_group, SEPARATOR
 )
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch
 )
 from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
-from utils.views import LoadingScreen, Updateable, WindowView
+from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 EDITOR = 'editor'
@@ -61,7 +61,7 @@ COLUMNS = 150
 
 GAME_SPEED = 1.0
 
-UPDATE_RATE = 1 / (30 * GAME_SPEED)
+UPDATE_RATE = 1 / (20 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = False
 DEBUG = False
@@ -89,7 +89,7 @@ class Window(arcade.Window, EventsCreator):
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
-        self.sound_player = SoundPlayer(sounds_directory='resources/sounds')
+        self.sound_player = SoundPlayer()
 
         self.save_manger = SaveManager('saved_games', 'scenarios')
 
@@ -150,7 +150,9 @@ class Window(arcade.Window, EventsCreator):
         self.game_view = None
         self.menu_view.toggle_game_related_buttons()
 
+    @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
+        log(f'Time: {delta_time}{SEPARATOR}', console=False)
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
@@ -205,7 +207,7 @@ class Window(arcade.Window, EventsCreator):
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
 
-    def show_view(self, new_view: WindowView):
+    def show_view(self, new_view: LoadableWindowView):
         if new_view.requires_loading:
             self.show_view(LoadingScreen(loaded_view=new_view))
         else:
@@ -268,46 +270,40 @@ class Window(arcade.Window, EventsCreator):
         super().close()
 
 
-class Game(WindowView, EventsCreator, UiBundlesHandler):
+class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
     def __init__(self):
-        WindowView.__init__(self, requires_loading=True)
+        LoadableWindowView.__init__(self)
         EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)
         self.assign_reference_to_self_for_all_classes()
 
         self.settings = self.window.settings  # shared with Window class
-        self.paused = False
         self.current_frame = 0
 
         # SpriteLists:
-        self.terrain_objects = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = SelectiveSpriteList()
+        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
         self.buildings = SelectiveSpriteList(is_static=True)
-        self.effects = SpriteList()
+        self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()
 
-        self.map = Map(COLUMNS, ROWS, TILE_WIDTH, TILE_HEIGHT)
-        self.pathfinder: Pathfinder = Pathfinder(map=self.map)
+        self.map: Optional[Map] = None
+        self.pathfinder: Optional[Pathfinder] = None
 
-        self.fog_of_war = FogOfWar()
-        # we put FoW before the interface to list of rendered layers to
-        # assure that FoW will not cover player interface:
-        self.drawn.insert(-2, self.fog_of_war)
+        self.fog_of_war: Optional[FogOfWar] = None
 
         # All GameObjects are initialized by the specialised factory:
-        self.spawner = ObjectsFactory(
-            pathfinder=self.pathfinder,
-            configs=self.window.configs
-        )
-        self.explosions_pool = ExplosionsPool()
+        self.spawner: Optional[ObjectsFactory] = None
+        self.explosions_pool: Optional[ExplosionsPool] = None
 
-        self.mini_map = MiniMap()
+        self.mini_map: Optional[MiniMap] = None
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -330,9 +326,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.current_mission: Optional[Mission] = None
 
         self.debugged = []
-        self.map_grid = self.create_map_debug_grid()
+        self.map_grid = None
 
-        self.test_methods()
+        self.things_to_load = [
+            ['map', Map, 0.35, COLUMNS, ROWS, TILE_WIDTH, TILE_HEIGHT],
+            ['pathfinder', Pathfinder, 0.05, lambda: self.map],
+            ['fog_of_war', FogOfWar, 0.25],
+            ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
+            ['explosions_pool', ExplosionsPool, 0.10],
+            ['mini_map', MiniMap, 0.10],
+            ['map_grid', self.create_map_debug_grid, 0.10]
+        ]
 
     def assign_reference_to_self_for_all_classes(self):
         name = self.__class__.__name__.lower()
@@ -439,17 +443,17 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_music('background_theme.wav')
         self.update_interface_content()
-        # TODO: remove this when testing is done:
-        position = average_position_of_points_group(
-            [u.position for u in self.local_human_player.units]
-        )
-        self.window.move_viewport_to_the_position(*position)
 
     def test_methods(self):
         self.test_scheduling_events()
         self.test_factions_and_players_creation()
         # self.test_buildings_spawning()
         self.test_units_spawning()
+
+        position = average_position_of_points_group(
+            [u.position for u in self.local_human_player.units]
+        )
+        self.window.move_viewport_to_the_position(*position)
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
@@ -530,7 +534,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             else:
                 self.units.append(registered)
         else:
-            self.terrain_objects.append(registered)
+            self.terrain_tiles.append(registered)
 
     def register_player_or_faction(self, registered: Union[Player, Faction]):
         if isinstance(registered, Player):
@@ -554,7 +558,7 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
             else:
                 self.units.remove(owned)
         else:
-            self.terrain_objects.remove(owned)
+            self.terrain_tiles.remove(owned)
 
     def unregister_player_or_faction(self, owned: Union[Player, Faction]):
         if isinstance(owned, Player):
@@ -568,16 +572,21 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
     def show_dialog(self, dialog_name: str):
         print(dialog_name)
 
-    @timer(level=1, global_profiling_level=PROFILING_LEVEL)
-    def on_update(self, delta_time: float):
-        if not self.paused:
-            self.debugged.clear()
-            super().on_update(delta_time)
-            self.update_local_drawn_units_and_buildings()
-            self.update_factions_and_players()
-            self.fog_of_war.update()
-            self.pathfinder.update()
-            self.mini_map.update()
+    def update_view(self, delta_time):
+        self.debugged.clear()
+        super().update_view(delta_time)
+        self.update_local_drawn_units_and_buildings()
+        self.update_factions_and_players()
+        self.fog_of_war.update()
+        self.pathfinder.update()
+        self.mini_map.update()
+
+    def after_loading(self):
+        self.test_methods()
+        # we put FoW before the interface to list of rendered layers to
+        # assure that FoW will not cover player interface:
+        self.drawn.insert(-2, self.fog_of_war)
+        super().after_loading()
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -661,8 +670,8 @@ class Game(WindowView, EventsCreator, UiBundlesHandler):
         draw_text(text, x, y, WHITE, 30, anchor_x='center', anchor_y='center')
 
     def toggle_pause(self):
-        self.paused = paused = not self.paused
-        self.window.toggle_mouse_and_keyboard(not paused, only_mouse=True)
+        super().toggle_pause()
+        self.window.toggle_mouse_and_keyboard(not self.paused, only_mouse=True)
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()

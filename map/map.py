@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import random
+import time
 
 from abc import ABC, abstractmethod
 from collections import deque
@@ -12,6 +13,7 @@ from arcade import Sprite, Texture, load_spritesheet
 from game import (
     Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
 )
+from gameobjects.gameobject import TerrainObject
 from utils.classes import Singleton
 from utils.data_types import (
     GridPosition, Number, PlayerId, SectorId, UnitId
@@ -19,7 +21,7 @@ from utils.data_types import (
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
 from utils.functions import (
-    get_path_to_file, calculate_circular_area, distance_2d, log, timer
+    get_path_to_file, calculate_circular_area, distance_2d, log, logger, timer
 )
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -35,6 +37,8 @@ ADJACENT_OFFSETS = [
     (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0), (+1, +1)
 ]
 OPTIMAL_PATH_LENGTH = 50
+
+random_value = random.random
 
 # typing aliases:
 NormalizedPoint = Tuple[int, int]
@@ -98,6 +102,7 @@ class Map(GridHandler):
     instance = None
 
     def __init__(self, columns: int, rows: int, grid_width: int, grid_height: int):
+        start_time = time.time()
         MapNode.map = Sector.map = self
         self.rows = rows
         self.columns = columns
@@ -117,7 +122,14 @@ class Map(GridHandler):
         self.generate_nodes()
         self.calculate_distances_between_nodes()
 
+        self.game.functions_to_call.append(self.plant_random_trees)
+
         Map.instance = self
+
+        log(f'Created map in: {time.time() - start_time}', console=True)
+
+    def __str__(self) -> str:
+        return f'Map(height: {self.height}, width: {self.width}, nodes: {len(self.nodes)})'
 
     def __len__(self) -> int:
         return len(self.nodes)
@@ -151,11 +163,11 @@ class Map(GridHandler):
         for x in range(self.columns // SECTOR_SIZE + 1):
             for y in range(self.rows // SECTOR_SIZE + 1):
                 self.sectors[(x, y)] = Sector((x, y))
-        log(f'Created {len(self.sectors)} sectors.', 1)
+        log(f'Created {len(self.sectors)} map sectors.')
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
+    @logger(console=True)
     def generate_nodes(self):
-        print(f'map rows: {self.rows}, columns: {self.columns}')
         for x in range(self.columns + 1):
             sector_x = x // SECTOR_SIZE
             for y in range(self.rows + 1):
@@ -163,12 +175,12 @@ class Map(GridHandler):
                 sector = self.sectors[sector_x, sector_y]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
                 self.create_map_sprite(*node.position)
-        log(f'Generated {len(self.nodes)} map nodes', 1)
+        log(f'Generated {len(self.nodes)} map nodes')
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
         sprite.texture = self.random_terrain_texture()
-        self.game.terrain_objects.append(sprite)
+        self.game.terrain_tiles.append(sprite)
 
     @staticmethod
     def random_terrain_texture() -> Texture:
@@ -185,6 +197,15 @@ class Map(GridHandler):
                 distance *= (node.terrain_cost + adjacent_node.terrain_cost)
                 node.costs[grid] = distance
         return distances
+
+    def plant_random_trees(self):
+        log(f'Planting trees...')
+        start = time.time()
+        self.game.static_objects.extend(
+            TerrainObject(f'tree_leaf_{random.choice((1, 2))}.png', 4, node.position) for
+            node in self.nodes.values() if random.random() > 0.95
+        )
+        print(f'...finished in {time.time() - start}')
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -352,34 +373,37 @@ class WaypointsQueue:
     def __init__(self, units: List[Unit]):
         self.map = Map.instance
         self.units = units
-        self.waypoints = {unit: [] for unit in units}
+        self.waypoints = []
+        self.units_waypoints = {unit: [] for unit in units}
         self.active = False
 
     def add_waypoint(self, x: int, y: int):
+        x, y = Map.normalize_position(x, y)
         if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
             Pathfinder.instance.finish_waypoints_queue()
         else:
+            self.waypoints.append((x, y))
             self.add_waypoints_for_each_unit(len(self.units), x, y)
 
     def add_waypoints_for_each_unit(self, amount: int, x: int, y: int):
-        x, y = Map.normalize_position(x, y)
-        print(x, y)
         waypoints = Pathfinder.instance.get_group_of_waypoints(amount, x, y)
         for i, unit in enumerate(self.units):
-            self.waypoints[unit].append(waypoints[i])
+            self.units_waypoints[unit].append(waypoints[i])
 
     def update(self):
         # TODO: execution of the waypoints queue
-        for unit, waypoints in self.waypoints.items():
-            if unit.reached_destination(waypoints[-1]):
+        for unit, waypoints in self.units_waypoints.items():
+            destination = waypoints[-1]
+            if unit.reached_destination(destination):
                 waypoints.pop()
-            elif (not unit.has_destination) or unit.path[0] != waypoints[-1]:
-                print("ALARM")
-                unit.move_to(waypoints[-1])
+            elif not (unit.has_destination or unit.heading_to(destination)):
+                unit.move_to(destination)
+            if not waypoints:
+                del self.units_waypoints[unit]
 
     def start(self):
         self.active = True
-        for unit, waypoints in self.waypoints.items():
+        for unit, waypoints in self.units_waypoints.items():
             waypoints.reverse()
 
 
@@ -486,7 +510,7 @@ class Pathfinder(Singleton, EventsCreator):
         This class is a Singleton, so there is only one instance of
         Pathfinder in the game, and it will be returned each time the
         Pathfinder() is instantiated.
-        :param map: Map -- actual instance of game Map loaded.
+        :param map: Map -- actual instance of game Map is_loaded.
         """
         EventsCreator.__init__(self)
         self.map = map
@@ -538,10 +562,12 @@ class Pathfinder(Singleton, EventsCreator):
 
     def update_waypoints_queues(self):
         for queue in (q for q in self.waypoints_queues if q.active):
-            queue.update()
+            if queue.units_waypoints:
+                queue.update()
+            else:
+                self.waypoints_queues.remove(queue)
 
     def update_navigating_groups(self):
-        print(f"Navigating groups: {len(self.navigating_groups)}")
         for nav_group in self.navigating_groups:
             if nav_group.units_paths:
                 nav_group.update()

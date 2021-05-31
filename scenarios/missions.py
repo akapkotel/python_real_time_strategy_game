@@ -48,7 +48,7 @@ class Event:
 class Mission:
     """
     This class contains all data required to load and play a single
-    scenario. Mission determines which Map will be loaded, what objectives
+    scenario. Mission determines which Map will be is_loaded, what objectives
     should Player achieve to win and what are his defeat's conditions. It
     can also determine some scripted events and AI-strategies.
     """

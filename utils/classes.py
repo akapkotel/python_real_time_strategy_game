@@ -46,14 +46,13 @@ class HashedList(list):
         except ValueError:
             pass
 
-    def pop(self, index=None):
+    def pop(self, index=-1):
         popped = super().pop(index)
         self.elements_ids.discard(popped.id)
         return popped
 
     def extend(self, iterable) -> None:
-        for i in iterable:
-            self.elements_ids.add(i.id)
+        self.elements_ids.update(i.id for i in iterable)
         super().extend(iterable)
 
     def insert(self, index, item) -> None:

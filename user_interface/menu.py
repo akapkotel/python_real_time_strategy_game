@@ -4,14 +4,12 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, Frame
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox
 )
-from utils.functions import get_path_to_file
-from utils.colors import BLACK
-from utils.views import WindowView
+from utils.views import LoadableWindowView
 
 
-class Menu(WindowView, UiBundlesHandler):
+class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):
         super().__init__()

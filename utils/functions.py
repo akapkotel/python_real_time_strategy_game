@@ -17,6 +17,9 @@ from shapely.geometry import LineString, Polygon
 from utils.data_types import Number, Point, Union
 from .colors import colors_names
 
+
+SEPARATOR = '-' * 20
+
 speedups.enable()
 
 logging.basicConfig(
@@ -34,6 +37,15 @@ def log(logged_message: str, console: Union[int, bool] = False):
         logging.warning(logged_message)
     else:
         logging.info(logged_message)
+
+
+def logger(console=False):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            log(f'Called function: {func.__name__}, args: {args}, kwargs: {kwargs}', console)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def timer(level=0, global_profiling_level=0, forced=False):
@@ -330,3 +342,28 @@ def make_texture(width: int, height: int, color: Color) -> Texture:
     img = PIL.Image.new("RGBA", (width, height), color)
     name = "{}:{}:{}:{}".format("texture_rect", width, height, color)
     return Texture(name, img)
+
+
+# def threaded(f, daemon=False):
+#     import Queue
+#
+#     def wrapped_f(q, *args, **kwargs):
+#         '''this function calls the decorated function and puts the
+#         result in a queue'''
+#         ret = f(*args, **kwargs)
+#         q.put(ret)
+#
+#     def wrap(*args, **kwargs):
+#         '''this is the function returned from the decorator. It fires off
+#         wrapped_f in a new thread and returns the thread object with
+#         the result queue attached'''
+#
+#         q = Queue.Queue()
+#
+#         t = threading.Thread(target=wrapped_f, args=(q,)+args, kwargs=kwargs)
+#         t.daemon = daemon
+#         t.start()
+#         t.result_queue = q
+#         return t
+#
+#     return wrap
