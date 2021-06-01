@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import random
 from typing import List, Optional, Set, Tuple, Type, Union
 
 from arcade import (
@@ -14,7 +14,8 @@ from arcade.key import LCTRL
 from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
-from map.map import Pathfinder
+from effects.sound import (UNITS_MOVE_ORDERS_CONFIRMATIONS,
+                           UNITS_SELECTION_CONFIRMATIONS)
 from gameobjects.gameobject import GameObject
 from utils.improved_spritelists import SelectiveSpriteList
 from players_and_factions.player import PlayerEntity
@@ -173,15 +174,16 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
     def on_left_button_release(self, x: float, y: float, modifiers: int):
         if not self.pointed_ui_element:
             if self.mouse_drag_selection is None:
-                units = self.selected_units
-                pointed = self.pointed_unit or self.pointed_building
-                if pointed is not None:
-                    self.on_player_entity_clicked(pointed)
-                elif units:
-                    self.on_click_with_selected_units(x, y, modifiers, units,
-                                                      pointed)
+                self.on_left_click_without_selection(modifiers, x, y)
             else:
                 self.close_drag_selection()
+
+    def on_left_click_without_selection(self, modifiers, x, y):
+        pointed = self.pointed_unit or self.pointed_building
+        if pointed is not None:
+            self.on_player_entity_clicked(pointed)
+        elif units := self.selected_units:
+            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
 
     def close_drag_selection(self):
         self.unselect_units()
@@ -215,12 +217,19 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         x, y = self.game.pathfinder.get_closest_walkable_position(cx, cy)
         self.send_units_to_pointed_location(units, x, y)
 
-    def on_click_with_selected_units(self, x, y, modifiers, units, pointed):
+    def on_terrain_click_with_units(self, x, y, modifiers, units, pointed):
         if self.game.map.position_to_node(x, y).pathable:
-            if LCTRL in self.game.window.pressed_keys:
-                self.game.pathfinder.enqueue_waypoint(units, x, y)
-            else:
-                self.send_units_to_pointed_location(units, x, y)
+            self.create_movement_order(units, x, y)
+        else:
+            x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
+            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
+
+    def create_movement_order(self, units, x, y):
+        if LCTRL in self.game.window.pressed_keys:
+            self.game.pathfinder.enqueue_waypoint(units, x, y)
+        else:
+            self.send_units_to_pointed_location(units, x, y)
+        self.window.sound_player.play_sound(random.choice(UNITS_MOVE_ORDERS_CONFIRMATIONS))
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
@@ -233,6 +242,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
         self.game.update_interface_content(context=units)
+        self.window.sound_player.play_sound(random.choice(UNITS_SELECTION_CONFIRMATIONS))
 
     def create_selection_markers(self, units):
         for unit in units:
@@ -374,11 +384,19 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
 
     def cursor_texture_with_units_selected(self):
         if entity := (self.pointed_unit or self.pointed_building):
-            if entity.selectable:
-                self.set_texture(CURSOR_SELECTION_TEXTURE)
-            elif entity.is_enemy(self.selected_units[0]):
-                self.set_texture(CURSOR_ATTACK_TEXTURE)
-        elif self.game.map.position_to_node(*self.position).walkable:
+            self.cursor_on_entity_with_selected_units(entity)
+        else:
+            self.cursor_on_terrain_with_selected_units()
+
+    def cursor_on_entity_with_selected_units(self, entity):
+        if entity.selectable:
+            self.set_texture(CURSOR_SELECTION_TEXTURE)
+        elif entity.is_enemy(self.selected_units[0]):
+            self.set_texture(CURSOR_ATTACK_TEXTURE)
+
+    def cursor_on_terrain_with_selected_units(self):
+        grid = self.game.map.position_to_grid(*self.position)
+        if self.game.map.nodes[grid].walkable or grid not in self.game.fog_of_war.explored:
             self.set_texture(CURSOR_MOVE_TEXTURE)
         else:
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)

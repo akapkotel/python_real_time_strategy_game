@@ -42,6 +42,7 @@ from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+BASIC_UI = 'basic_ui'
 EDITOR = 'editor'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
@@ -157,6 +158,7 @@ class Window(arcade.Window, EventsCreator):
         if (cursor := self.cursor).active:
             cursor.update()
         self.events_scheduler.update()
+        self.sound_player.on_update()
         super().on_update(delta_time)
 
     def on_draw(self):
@@ -349,7 +351,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
         right_ui_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         right_panel = UiElementsBundle(
-            name='basic_ui',
+            name=BASIC_UI,
             index=0,
             elements=[
                 right_ui_panel,
@@ -412,7 +414,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
         """
-        self._unload_all(exception='basic_ui')
+        self._unload_all(exception=BASIC_UI)
         if context:
             if isinstance(context, Building):
                 self.configure_building_interface(context)
@@ -441,7 +443,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def on_show_view(self):
         super().on_show_view()
         self.window.toggle_mouse_and_keyboard(True)
-        self.window.sound_player.play_music('background_theme.wav')
+        self.window.sound_player.play_playlist('game')
         self.update_interface_content()
 
     def test_methods(self):
