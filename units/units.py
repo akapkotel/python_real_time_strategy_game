@@ -30,7 +30,7 @@ from utils.functions import (
 from .weapons import Weapon
 
 
-class Unit(PlayerEntity, TasksExecutor):
+class Unit(PlayerEntity):
     """
     Unit is a PlayerEntity which can move on map.
     """
@@ -41,9 +41,8 @@ class Unit(PlayerEntity, TasksExecutor):
                  player: Player,
                  weight: UnitWeight,
                  position: Point,
-                 tasks_on_start: Optional[List[UnitTask]] = None):
-        PlayerEntity.__init__(self, unit_name, player, position)
-        TasksExecutor.__init__(self, tasks_on_start)
+                 id: Optional[int] = None):
+        PlayerEntity.__init__(self, unit_name, player, position, id=id)
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
@@ -123,7 +122,6 @@ class Unit(PlayerEntity, TasksExecutor):
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
-            self.evaluate_tasks()
 
             new_current_node = self.map.position_to_node(*self.position)
             if self in self.game.local_human_player.faction.units:
@@ -386,8 +384,8 @@ class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
 
     def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
-                 position: Point):
-        super().__init__(unit_name, player, weight, position)
+                 position: Point, id: int = None):
+        super().__init__(unit_name, player, weight, position, id)
         thread_texture = f'{self.object_name.rsplit("_", 1)[0]}_threads.png'
         self.thread_texture = get_path_to_file(thread_texture)
         self.threads_time = 0
@@ -464,8 +462,8 @@ class VehicleThreads(Sprite):
 class Tank(Vehicle):
 
     def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
-                 position: Point):
-        super().__init__(unit_name, player, weight, position)
+                 position: Point, id: int = None):
+        super().__init__(unit_name, player, weight, position, id)
         # combine texture from these two indexes:
         self.hull_texture_index = random.randint(0, 7)
         self.turret_texture_index = random.randint(0, 7)

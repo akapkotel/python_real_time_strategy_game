@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import time
-
-from typing import List, Set, Dict, Union, Optional, Any, Callable
+from typing import List, Set, Dict, Union, Optional, Any
 from arcade import (
     Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
 )
@@ -84,8 +82,6 @@ class LoadableWindowView(View):
         if self.things_to_load:
             self.load(*self.things_to_load[0])
             self.things_to_load.pop(0)
-        # elif self.functions_to_call:
-        #     self.call_function()
         else:
             self.after_loading()
 

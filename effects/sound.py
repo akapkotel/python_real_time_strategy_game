@@ -63,10 +63,9 @@ class AudioPlayer(Singleton):
 
     def _setup_playlists(self) -> Dict[str, List[str]]:
         playlists = defaultdict(list)
-        for sound_name in ( s for s in self.sounds.keys() if 'theme' in s):
+        for sound_name in (s for s in self.sounds.keys() if 'theme' in s):
             playlist_name = sound_name.partition('_')[0]
             playlists[playlist_name].append(sound_name)
-            log(f'Added {sound_name} to playlist: {playlist_name}', True)
         return playlists
 
     @property

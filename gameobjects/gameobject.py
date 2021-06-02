@@ -36,7 +36,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
 
         GameObject.total_objects_count += 1
         if id is None:
-            self.id = count = GameObject.total_objects_count
+            self.id = GameObject.total_objects_count
         else:
             self.id = id
 
@@ -48,7 +48,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
 
         self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
-        log(f'Spawned {self} at {self.position}, total objects: {count}')
+        log(f'Spawned {self} at {self.position}, total objects: {self.id}')
 
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'

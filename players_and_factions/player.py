@@ -115,6 +115,9 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         for player in self.players:
             player.update()
 
+    def __getstate__(self) -> Dict:
+        return {'id': self.id, 'name': self.name}
+
     def save(self) -> Dict:
         return {'id': self.id, 'name': self.name}
 

@@ -12,10 +12,11 @@ __credits__ = []
 
 import random
 
-from typing import (Any, Dict, List, Optional, Set, Union)
+from typing import (Any, Dict, List, Optional, Set, Union, Generator)
 
 import arcade
 from functools import partial
+from dataclasses import dataclass
 from arcade import (
     SpriteList, create_line, draw_circle_outline, draw_line,
     draw_rectangle_filled, draw_text
@@ -62,21 +63,22 @@ COLUMNS = 150
 
 GAME_SPEED = 1.0
 
-UPDATE_RATE = 1 / (20 * GAME_SPEED)
+UPDATE_RATE = 1 / (30 * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = False
 DEBUG = False
 
 
+@dataclass
 class Settings:
     """
     Just a simple data container for convenient storage and acces to bunch of
     minor variables, which would overcrowd Window __init__.
     """
-    debug = DEBUG
-    vehicles_threads = True
-    threads_fadeout = 2
-    shot_blasts = True
+    debug: bool
+    vehicles_threads: bool
+    threads_fadeout: int
+    shot_blasts: bool
 
 
 class Window(arcade.Window, EventsCreator):
@@ -86,7 +88,7 @@ class Window(arcade.Window, EventsCreator):
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
-        self.settings = Settings()  # shared with Game class
+        self.settings = Settings(False, True, 2, True)  # shared with Game
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
@@ -149,6 +151,7 @@ class Window(arcade.Window, EventsCreator):
 
     def quit_current_game(self):
         self.game_view = None
+        self.show_view(self.menu_view)
         self.menu_view.toggle_game_related_buttons()
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
@@ -198,13 +201,6 @@ class Window(arcade.Window, EventsCreator):
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
             self.keyboard.on_key_press(symbol, modifiers)
-
-            # TODO: remove after saving testing is done:
-            if self.is_game_running:
-                if symbol == arcade.key.S:
-                    self.save_game()
-                elif symbol == arcade.key.L:
-                    self.load_game()
 
     def on_key_release(self, symbol: int, modifiers: int):
         self.keyboard.on_key_release(symbol, modifiers)
@@ -262,9 +258,13 @@ class Window(arcade.Window, EventsCreator):
     def save_game(self):
         # TODO: save GameObject.total_objects_count (?)
         self.save_manger.save_game('save_01', self.game_view)
-        print(len(self.game_view.units))
 
     def load_game(self):
+        if self.game_view is not None:
+            self.game_view.unload()
+            self.quit_current_game()
+        self.game_view = Game(file_to_load_from='save_01')
+        GameObject.total_objects_count = 0
         self.save_manger.load_game('save_01', self.game_view)
 
     def close(self):
@@ -275,10 +275,11 @@ class Window(arcade.Window, EventsCreator):
 class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
-    def __init__(self):
+    def __init__(self, file_to_load_from=None):
         LoadableWindowView.__init__(self)
         EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)
+        self.file_to_load_from = file_to_load_from
         self.assign_reference_to_self_for_all_classes()
 
         self.settings = self.window.settings  # shared with Window class
@@ -303,6 +304,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         # All GameObjects are initialized by the specialised factory:
         self.spawner: Optional[ObjectsFactory] = None
+
         self.explosions_pool: Optional[ExplosionsPool] = None
 
         self.mini_map: Optional[MiniMap] = None
@@ -331,14 +333,15 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.map_grid = None
 
         self.things_to_load = [
-            ['map', Map, 0.35, COLUMNS, ROWS, TILE_WIDTH, TILE_HEIGHT],
+            ['map', Map, 0.35, {'rows': COLUMNS, 'columns': ROWS,
+             'grid_width': TILE_WIDTH,'grid_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.25],
             ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
             ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.10],
             ['map_grid', self.create_map_debug_grid, 0.10]
-        ]
+        ] if self.file_to_load_from is None else []
 
     def assign_reference_to_self_for_all_classes(self):
         name = self.__class__.__name__.lower()
@@ -447,11 +450,11 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.update_interface_content()
 
     def test_methods(self):
-        self.test_scheduling_events()
-        self.test_factions_and_players_creation()
-        # self.test_buildings_spawning()
-        self.test_units_spawning()
-
+        if self.file_to_load_from is None:
+            self.test_scheduling_events()
+            self.test_factions_and_players_creation()
+            # self.test_buildings_spawning()
+            self.test_units_spawning()
         position = average_position_of_points_group(
             [u.position for u in self.local_human_player.units]
         )
@@ -481,7 +484,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
               position: Point,
               id: Optional[int] = None) -> Optional[GameObject]:
         if (player := self.get_player_instance(player)) is not None:
-            return self.spawner.spawn(object_name, player, position, id)
+            return self.spawner.spawn(object_name, player, position, id=id)
         return None
 
     def get_player_instance(self, player: Union[Player, int]):
@@ -584,6 +587,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.mini_map.update()
 
     def after_loading(self):
+        self.window.show_view(self)
         self.test_methods()
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
@@ -702,6 +706,14 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def stop_all_units(self):
         for unit in self.window.cursor.selected_units:
             unit.stop_completely()
+
+    def unload(self):
+        for updated in (u for u in self.updated if isinstance(u, SpriteList)):
+            updated = None
+        self.local_human_player = None
+        self.local_drawn_units_and_buildings.clear()
+        self.factions.clear()
+        self.players.clear()
 
 
 if __name__ == '__main__':

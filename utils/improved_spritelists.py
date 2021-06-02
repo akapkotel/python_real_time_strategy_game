@@ -75,15 +75,16 @@ class SelectiveSpriteList(SpriteList):
 
     def append(self, sprite):
         sprite.selective_spritelist = self
-        self.registry[sprite.id] = sprite
-        super().append(sprite)
+        if sprite.id not in self.registry:
+            self.registry[sprite.id] = sprite
+            super().append(sprite)
 
     def remove(self, sprite):
         try:
             del self.registry[sprite.id]
+            super().remove(sprite)
         except KeyError:
             pass
-        super().remove(sprite)
 
     def extend(self, iterable):
         for sprite in iterable:
@@ -106,7 +107,7 @@ class SelectiveSpriteList(SpriteList):
     @staticmethod
     def start_drawing(sprite):
         try:
-            sprite.drawn_area = True
+            sprite.rendered = True
         except AttributeError:
             log(f'Tried to draw Sprite instance without "drawn_area" attribute')
 

@@ -68,10 +68,22 @@ class ObjectsFactory(Singleton):
         class_name = eval(self.configs[category][name]['class'])
         colorized_name = add_player_color_to_name(name, player.color)
         if 'id' in kwargs:
-            unit = class_name(colorized_name, player, UnitWeight.LIGHT, position, kwargs['id'])
+            unit = self._respawn_unit_from_id(class_name, colorized_name,
+                                              player, position, kwargs['id'])
         else:
             unit = class_name(colorized_name, player, UnitWeight.LIGHT, position)
         return self._configure_spawned_attributes(category, name, unit)
+
+    def _respawn_unit_from_id(self, class_name, colorized_name, player,
+                              position, id):
+        unit = class_name(
+            colorized_name,
+            player,
+            UnitWeight.LIGHT,
+            position,
+            id=id
+        )
+        return unit
 
     def _configure_spawned_attributes(self, category, name, spawned):
         config_data = self.configs[category][name]  # 'raw' not colorized name

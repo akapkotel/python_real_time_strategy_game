@@ -39,8 +39,7 @@ CURSOR_MOVE_TEXTURE = 4
 CURSOR_REPAIR_TEXTURE = 5
 
 
-class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
-                  EventsCreator):
+class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     """
     MouseCursor replaces system-cursor with it's own Sprite and process all
     mouse-related calls from arcade.Window to call proper methods and functions
@@ -60,7 +59,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.all_frames_lists: List[List[AnimationKeyframe]] = []
         self.load_textures()
 
-        # cache currently updated and drawn_area spritelists of the active View:
+        # cache currently updated and drawn spritelists of the active View:
         self._updated_spritelists: List[DrawnAndUpdated] = []
 
         self.mouse_dragging = False
@@ -81,7 +80,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.selected_units: HashedList[Unit] = HashedList()
         self.selected_building: Optional[Building] = None
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
-        # that this unit is currently selected and will react for players's
+        # that this unit is currently selected and will react for player's
         # actions. Sprites are actually drawn and updated in Game class, but
         # here we keep them cashed to easily manipulate them:
         self.selection_markers: Set[SelectionUnitMarket] = set()
@@ -187,7 +186,8 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
 
     def close_drag_selection(self):
         self.unselect_units()
-        self.select_units(*[u for u in self.mouse_drag_selection.units])
+        if units := [u for u in self.mouse_drag_selection.units]:
+            self.select_units(*units)
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
@@ -242,6 +242,7 @@ class MouseCursor(Singleton, AnimatedTimeBasedSprite, ToggledElement,
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
         self.game.update_interface_content(context=units)
+
         self.window.sound_player.play_sound(random.choice(UNITS_SELECTION_CONFIRMATIONS))
 
     def create_selection_markers(self, units):

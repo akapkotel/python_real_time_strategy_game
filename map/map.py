@@ -101,15 +101,20 @@ class Map(GridHandler):
     game: Optional[Game] = None
     instance = None
 
-    def __init__(self, columns: int, rows: int, grid_width: int, grid_height: int):
+    def __init__(self, map_settings: Dict):
         start_time = time.time()
-        MapNode.map = Sector.map = self
-        self.rows = rows
-        self.columns = columns
-        self.grid_width = grid_width
-        self.grid_height = grid_height
-        self.width = columns * grid_width
-        self.height = rows * grid_height
+        MapNode.map = Sector.map = Map.instance = self
+        self.rows = map_settings['rows']
+        self.columns = map_settings['columns']
+        self.grid_width = map_settings['grid_width']
+        self.grid_height = map_settings['grid_height']
+        self.width = self.columns * self.grid_width
+        self.height = self.rows * self.grid_height
+
+        try:
+            self.nodes_data = map_settings['nodes']
+        except KeyError:
+            self.nodes_data = {}
 
         # map is divided for sectors containing 10x10 Nodes each to split
         # space for smaller chunks in order to make enemies-detection
@@ -124,9 +129,16 @@ class Map(GridHandler):
 
         self.game.after_load_functions.append(self.plant_random_trees)
 
-        Map.instance = self
-
         log(f'Created map in: {time.time() - start_time}', console=True)
+
+    def save(self) -> Dict:
+        return {
+            'rows': self.rows,
+            'columns': self.columns,
+            'grid_width': self.grid_width,
+            'grid_height': self.grid_height,
+            'nodes_data': self.nodes_data
+        }
 
     def __str__(self) -> str:
         return f'Map(height: {self.height}, width: {self.width}, nodes: {len(self.nodes)})'
@@ -175,12 +187,30 @@ class Map(GridHandler):
                 sector = self.sectors[sector_x, sector_y]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
                 self.create_map_sprite(*node.position)
-        log(f'Generated {len(self.nodes)} map nodes')
+        log(f'Generated {len(self.nodes)} map nodes', console=True)
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
-        sprite.texture = self.random_terrain_texture()
+        try:
+            terrain_type, index, rotation = self.nodes_data[(x, y)]
+            t, i, r = self.set_terrain_texture(terrain_type, index, rotation)
+        except KeyError:
+            terrain_type = 'mud'
+            t, i, r = self.set_terrain_texture(terrain_type)
+            self.nodes_data[(x, y)] = terrain_type, i, r
+        sprite.texture = t
         self.game.terrain_tiles.append(sprite)
+
+    @staticmethod
+    def set_terrain_texture(terrain_type: str,
+                            index: int = None,
+                            rotation: int = None) -> Tuple[Texture, int, int]:
+        index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
+        texture = MAP_TEXTURES[terrain_type][index]
+
+        rotation = rotation or random.randint(0, 5)
+        texture.image.transpose(rotation)
+        return texture, index, rotation
 
     @staticmethod
     def random_terrain_texture() -> Texture:
@@ -198,14 +228,12 @@ class Map(GridHandler):
                 node.costs[grid] = distance
         return distances
 
+    @logger()
     def plant_random_trees(self):
-        log(f'Planting trees...')
-        start = time.time()
         self.game.static_objects.extend(
             TerrainObject(f'tree_leaf_{random.choice((1, 2))}.png', 4, node.position) for
             node in self.nodes.values() if random.random() > 0.95
         )
-        print(f'...finished in {time.time() - start}')
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -499,7 +527,7 @@ class NavigatingUnitsGroup:
             unit.set_navigating_group(navigating_group=None)
 
 
-class Pathfinder(Singleton, EventsCreator):
+class Pathfinder(EventsCreator):
     """
     A* algorithm implementation using PriorityQueue based on improved heapq.
     """
@@ -507,9 +535,6 @@ class Pathfinder(Singleton, EventsCreator):
 
     def __init__(self, map: Map):
         """
-        This class is a Singleton, so there is only one instance of
-        Pathfinder in the game, and it will be returned each time the
-        Pathfinder() is instantiated.
         :param map: Map -- actual instance of game Map is_loaded.
         """
         EventsCreator.__init__(self)

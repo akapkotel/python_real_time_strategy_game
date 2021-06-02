@@ -105,7 +105,11 @@ class MiniMap:
 
     def __getstate__(self) -> Dict:
         return {
+            'width': self.width,
+            'height': self.height,
+            'ratio': self.ratio,
             'position': self.position,
+            'viewport': self.viewport,
             'drawn_area': self.drawn_area,
             'drawn_entities': self.drawn_entities
         }

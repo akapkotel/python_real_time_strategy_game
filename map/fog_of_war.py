@@ -58,7 +58,7 @@ class FogOfWar:
                 sprite_lists[(row, col)] = SpriteList(is_static=True)
 
         get_tile_position = self.get_tile_position
-        for x, y in self.map_grids:
+        for x, y in self.unexplored:
             sprite_list = sprite_lists[(x // 50, y // 50)]
             sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
             self.grids_to_sprites[(x, y)] = sprite
