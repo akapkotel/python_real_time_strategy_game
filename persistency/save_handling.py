@@ -74,7 +74,8 @@ class SaveManager(Singleton):
             game.spawner = ObjectsFactory(game.pathfinder, game.window.configs)
             game.explosions_pool = ExplosionsPool()
             for f in file['factions']:
-                game.factions[f['id']] = Faction(f['id'], f['name'])
+                id, name, friends, enemies = f['id'], f['name'], f['friends'], f['enemies']
+                game.factions[f['id']] = Faction(id, name, friends, enemies)
             for i in file['players']:
                 game.players[i] = file['players'][i]
             game.local_human_player = game.players[file['local_human_player_id']]

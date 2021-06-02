@@ -50,15 +50,17 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
 
     def __init__(self,
                  id: Optional[FactionId] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 friends: Optional[Set[FactionId]] = None,
+                 enemies: Optional[Set[FactionId]] = None):
         EventsCreator.__init__(self)
         ObjectsOwner.__init__(self)
         OwnedObject.__init__(self)
         self.id = id or new_id(self.game.factions)
         self.name: str = name or f'Faction {self.id}'
 
-        self.friendly_factions: Set[FactionId] = set()
-        self.enemy_factions: Set[FactionId] = set()
+        self.friendly_factions: Set[FactionId] = friends or set()
+        self.enemy_factions: Set[FactionId] = enemies or set()
 
         self.players = set()
         self.leader: Optional[Player] = None
@@ -116,10 +118,20 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
             player.update()
 
     def __getstate__(self) -> Dict:
-        return {'id': self.id, 'name': self.name}
+        return {
+            'id': self.id,
+            'name': self.name,
+            'friends': self.friendly_factions,
+            'enemies': self.enemy_factions
+        }
 
     def save(self) -> Dict:
-        return {'id': self.id, 'name': self.name}
+        return {
+            'id': self.id,
+            'name': self.name,
+            'friends': self.friendly_factions,
+            'enemies': self.enemy_factions
+        }
 
 
 class ResourcesManager:

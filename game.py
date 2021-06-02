@@ -593,6 +593,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
+        print(self.players[4].units)
 
     def update_local_drawn_units_and_buildings(self):
         """
