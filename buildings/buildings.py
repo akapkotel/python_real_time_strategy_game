@@ -267,7 +267,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
         for sector in self.occupied_sectors:
-            sector.units_and_buildings[self.player.id].discard(self)
+            sector.discard_entity(self)
         super().kill()
 
     def save(self) -> Dict:

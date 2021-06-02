@@ -12,6 +12,10 @@ from game import (
 from utils.colors import WHITE, SAND
 from utils.data_types import GridPosition
 
+SECTOR_HEIGHT = SECTOR_SIZE * TILE_HEIGHT
+
+SECTOR_WIDTH = SECTOR_SIZE * TILE_WIDTH
+
 
 class MiniMap:
     game: Optional[Game] = None
@@ -19,23 +23,20 @@ class MiniMap:
     def __init__(self):
         self.width = MINIMAP_WIDTH
         self.height = MINIMAP_HEIGHT
-        self.position = (SCREEN_WIDTH - MINIMAP_WIDTH // 2, SCREEN_HEIGHT - MINIMAP_HEIGHT // 2)
-
-        if self.height < self.width:
-            self.ratio = self.height / self.game.map.height
-        else:
-            self.ratio = self.width / self.game.map.width
-
-        x, y = self.game.window.screen_center
-        self.viewport = [
-            self.position[0] - (self.width // 2) + x * self.ratio,
-            self.position[1] - (self.height // 2) + y * self.ratio,
-            (SCREEN_WIDTH - 400) * self.ratio,
-            SCREEN_HEIGHT * self.ratio
-        ]
-
+        self.position = (
+            SCREEN_WIDTH - MINIMAP_WIDTH // 2,
+            SCREEN_HEIGHT - MINIMAP_HEIGHT // 2
+        )
+        self.ratio = self.set_map_to_mini_map_ratio()
         self.drawn_area: Dict[GridPosition, List] = {}
         self.drawn_entities: List[List[float, float, Color, int]] = []
+        self.viewport = self.update_viewport()
+
+    def set_map_to_mini_map_ratio(self) -> float:
+        if self.height < self.width:
+            return self.height / self.game.map.height
+        else:
+            return self.width / self.game.map.width
 
     def update(self):
         self.update_drawn_units()
@@ -45,11 +46,11 @@ class MiniMap:
         _, right, _, top = self.game.viewport
         self.position = (right - 195, top - 95)
         self.update_drawn_areas_positions(dx, dy)
-        self.update_viewport()
+        self.viewport = self.update_viewport()
 
     def update_viewport(self):
         x, y = self.game.window.screen_center
-        self.viewport = [
+        return [
             self.position[0] - (self.width // 2) + x * self.ratio,
             self.position[1] - (self.height // 2) + y * self.ratio,
             (SCREEN_WIDTH - 400) * self.ratio,
@@ -57,27 +58,34 @@ class MiniMap:
         ]
 
     def update_drawn_units(self):
-        self.drawn_entities.clear()
+        # self.drawn_entities.clear()
         left = self.position[0] - self.width // 2
         bottom = self.position[1] - self.height // 2
-        for entity in self.game.local_drawn_units_and_buildings:
-            x = left + entity.center_x * self.ratio
-            y = bottom + entity.center_y * self.ratio
-            size = 4 if entity.is_building else 2
-            self.drawn_entities.append([x, y, entity.player.color, size])
+        self.drawn_entities = [
+            [left + (entity.center_x * self.ratio),
+             bottom + (entity.center_y * self.ratio),
+             entity.player.color, 4 if entity.is_building else 2]
+            for entity in self.game.local_drawn_units_and_buildings
+        ]
+
+        # for entity in self.game.local_drawn_units_and_buildings:
+        #     x = left + (entity.center_x * self.ratio)
+        #     y = bottom + (entity.center_y * self.ratio)
+        #     size = 4 if entity.is_building else 2
+        #     self.drawn_entities.append([x, y, entity.player.color, size])
 
     def update_revealed_areas(self):
         left = self.position[0] - self.width // 2
         bottom = self.position[1] - self.height // 2
         offset_x = 240 * self.ratio
         offset_y = 160 * self.ratio
-        width = SECTOR_SIZE * TILE_WIDTH * self.ratio
-        height = SECTOR_SIZE * TILE_HEIGHT * self.ratio
+        width = SECTOR_WIDTH * self.ratio
+        height = SECTOR_HEIGHT * self.ratio
         data = left, bottom, offset_x, offset_y, width, height
+        id = self.game.local_human_player.id
         for grid, sector in self.game.map.sectors.items():
-            if grid not in self.drawn_area:
-                if any(p for p in sector.units_and_buildings):
-                    self.reveal_minimap_area(grid, data)
+            if grid not in self.drawn_area and sector.get_entities(id):
+                self.reveal_minimap_area(grid, data)
 
     def update_drawn_areas_positions(self, dx, dy):
         for element in self.drawn_area.values():

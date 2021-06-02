@@ -226,12 +226,9 @@ class Unit(PlayerEntity):
     def update_current_sector(self):
         if (sector := self.current_node.sector) != self.current_sector:
             if (current_sector := self.current_sector) is not None:
-                current_sector.units_and_buildings[self.player.id].discard(self)
+                current_sector.discard_entity(self)
             self.current_sector = sector
-            try:
-                sector.units_and_buildings[self.player.id].add(self)
-            except KeyError:
-                sector.units_and_buildings[self.player.id] = {self, }
+            sector.add_entity(self)
 
     def update_pathfinding(self):
         if self.awaited_path is not None:
@@ -319,14 +316,12 @@ class Unit(PlayerEntity):
         return super().visible_for(other)
 
     def get_nearby_friends(self) -> Set[PlayerEntity]:
-        return {
-            u for u in self.current_sector.units_and_buildings[self.player.id]
-        }
+        return self.current_sector.get_entities(self.player.id)
 
     def set_permanent_units_group(self, index: int = 0):
-        if (group_index := self.permanent_units_group) and group_index != index:
+        if (cur_index := self.permanent_units_group) and cur_index != index:
             try:
-                self.game.permanent_units_groups[group_index].discard(self)
+                self.game.permanent_units_groups[cur_index].discard(self)
             except KeyError:
                 pass
         self.permanent_units_group = index
@@ -347,7 +342,7 @@ class Unit(PlayerEntity):
             self.move_to(self.map.position_to_grid(*position))
 
     def kill(self):
-        self.current_sector.units_and_buildings[self.player.id].discard(self)
+        self.current_sector.discard_entity(self)
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
         self.create_death_animation()

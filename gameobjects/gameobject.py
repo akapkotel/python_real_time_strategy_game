@@ -48,8 +48,6 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
 
         self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
-        log(f'Spawned {self} at {self.position}, total objects: {self.id}')
-
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
 

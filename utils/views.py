@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import List, Set, Dict, Union, Optional, Any
+from typing import List, Set, Dict, Union, Optional, Any, Generator
 from arcade import (
     Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
 )
@@ -20,6 +20,7 @@ class LoadableWindowView(View):
     def __init__(self):
         super().__init__()
         self.loading_progress = 0.0
+        self.loader: Optional[Generator] = None
         self.things_to_load = []
         self.after_load_functions = []
         self.updated: List[Updateable] = []
@@ -82,6 +83,8 @@ class LoadableWindowView(View):
         if self.things_to_load:
             self.load(*self.things_to_load[0])
             self.things_to_load.pop(0)
+        elif self.loader is not None:
+            self.load_from_loader()
         else:
             self.after_loading()
 
@@ -95,9 +98,18 @@ class LoadableWindowView(View):
         setattr(self, loaded, value(*args, **kwargs) if callable(value) else value)
         self.loading_progress += progress
 
+    @logger()
+    def load_from_loader(self):
+        try:
+            next(self.loader)
+            self.loading_progress += 0.083
+        except StopIteration:
+            self.loader = None
+            self.after_loading()
+
     @property
     def requires_loading(self):
-        return len(self.things_to_load) > 0
+        return len(self.things_to_load) > 0 or self.loader is not None
 
     def after_loading(self):
         self.call_after_load_functions()
@@ -150,7 +162,8 @@ class LoadingScreen(LoadableWindowView):
     def on_update(self, delta_time: float):
         super().on_update(delta_time)
         try:
-            self.update_progress(getattr(self.loaded_view, 'loading_progress'))
+            progress = getattr(self.loaded_view, 'loading_progress') * 15
+            self.update_progress(progress)
             self.loaded_view.on_update(delta_time)
         except AttributeError:
             self.update_progress(delta_time)
@@ -165,7 +178,7 @@ class LoadingScreen(LoadableWindowView):
         draw_text(text, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 10, WHITE, 20)
 
     def update_progress(self, update: float):
-        self.progress += (25 * update)
+        self.progress += update
         if self.progress >= 100:
             self.window.show_view(self.loaded_view)
 

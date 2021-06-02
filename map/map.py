@@ -273,6 +273,21 @@ class Sector(GridHandler, ABC):
         self.units_and_buildings: Dict[PlayerId, Set[PlayerEntity]] = {}
         self.map.sectors[grid] = self
 
+    def get_entities(self, player_id: PlayerId) -> Optional[Set[PlayerEntity]]:
+        return self.units_and_buildings.get(player_id)
+
+    def discard_entity(self, entity: PlayerEntity):
+        try:
+            self.units_and_buildings[entity.player.id].discard(entity)
+        except KeyError:
+            pass
+
+    def add_entity(self, entity: PlayerEntity):
+        try:
+            self.units_and_buildings[entity.player.id].add(entity)
+        except KeyError:
+            self.units_and_buildings[entity.player.id] = {entity}
+
     def adjacent_sectors(self) -> List[Sector]:
         raw_grids = self.adjacent_grids(*self.grid)
         return [self.map.sectors[g] for g in self.in_bounds(raw_grids)]

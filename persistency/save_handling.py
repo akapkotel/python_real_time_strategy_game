@@ -3,8 +3,10 @@
 import os
 import shelve
 
+from typing import Optional
+
 from utils.classes import Singleton
-from utils.functions import log, find_paths_to_all_files_of_type
+from utils.functions import log, logger, find_paths_to_all_files_of_type
 from utils.data_types import SavedGames
 from players_and_factions.player import Faction, Player
 from map.map import Map, Pathfinder
@@ -12,6 +14,8 @@ from user_interface.minimap import MiniMap
 from gameobjects.spawning import ObjectsFactory
 from effects.explosions import ExplosionsPool
 
+
+MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
 
@@ -22,6 +26,7 @@ class SaveManager(Singleton):
     predefined scenarios stored in the same file-format, but in ./scenarios
     direction.
     """
+    game: Optional['Game'] = None
 
     def __init__(self, saves_path: str, scenarios_path: str):
         self.scenarios_path = scenarios_path = os.path.abspath(scenarios_path)
@@ -49,10 +54,9 @@ class SaveManager(Singleton):
     def save_game(self, save_name: str, game: 'Game'):
         full_save_path = os.path.join(self.saves_path, save_name)
         with shelve.open(full_save_path + SAVE_EXTENSION) as file:
-            file['game_viewport'] = game.viewport
-            file['menu_viewport'] = game.window.menu_view.viewport
+            file['viewports'] = game.viewport, game.window.menu_view.viewport
             file['map'] = game.map.save()
-            file['mission'] = game.mission
+            file['missions'] = game.mission
             file['factions'] = [f.save() for f in game.factions.values()]
             file['players'] = game.players
             file['local_human_player_id'] = game.local_human_player.id
@@ -64,30 +68,74 @@ class SaveManager(Singleton):
         log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
 
     def load_game(self, save_name: str, game: 'Game'):
+        # self.game = game
         full_save_path = os.path.join(self.saves_path, save_name)
         with shelve.open(full_save_path + SAVE_EXTENSION) as file:
-            game.window.menu_view.viewport = file['menu_viewport']
-            game.viewport = file['game_viewport']
-            game.map = Map(map_settings=file['map'])
-            game.mission = file['mission']
-            game.pathfinder = Pathfinder(game.map)
-            game.spawner = ObjectsFactory(game.pathfinder, game.window.configs)
-            game.explosions_pool = ExplosionsPool()
-            for f in file['factions']:
-                id, name, friends, enemies = f['id'], f['name'], f['friends'], f['enemies']
-                game.factions[f['id']] = Faction(id, name, friends, enemies)
-            for i in file['players']:
-                game.players[i] = file['players'][i]
-            game.local_human_player = game.players[file['local_human_player_id']]
-            for u in file['units']:
-                game.spawn(u['object_name'], u['player'], u['position'], id=u['id'])
-            for b in file['buildings']:
-                game.spawn(b['object_name'], b['player'], b['position'], id=b['id'])
-            game.permanent_units_groups = file['permanent_units_groups']
-            game.fog_of_war = file['fog_of_war']
-            game.mini_map = MiniMap()
-        game.after_loading()
+            yield self.load_viewports(file['viewports'])
+            yield self.load_map(file['map'])
+            yield self.load_mission(file['missions'])
+            yield self.load_factions(file['factions'])
+            yield self.load_players(file['players'])
+            yield self.load_local_human_player(file)
+            yield self.load_entities(file['units'])
+            yield self.load_entities(file['buildings'])
+            yield self.load_permanent_groups(file['permanent_units_groups'])
+            yield self.load_fog_of_war(file['fog_of_war'])
+            yield self.load_mini_map()
         log(f'Game {save_name + SAVE_EXTENSION} loaded successfully!', True)
+        yield
+
+    @logger()
+    def load_mini_map(self):
+        self.game.mini_map = MiniMap()
+
+    @logger()
+    def load_fog_of_war(self, fog_of_war):
+        self.game.fog_of_war = fog_of_war
+
+    @logger()
+    def load_permanent_groups(self, groups):
+        self.game.permanent_units_groups = groups
+
+    @logger()
+    def load_local_human_player(self, file):
+        index = file['local_human_player_id']
+        self.game.local_human_player = self.game.players[index]
+
+    @logger()
+    def load_mission(self, missions):
+        self.game.mission = missions
+
+    @logger()
+    def load_map(self, map_file):
+        self.game.map = game_map = Map(map_settings=map_file)
+        self.game.pathfinder = pathfinder = Pathfinder(game_map)
+        configs = self.game.window.configs
+        self.game.spawner = ObjectsFactory(pathfinder, configs)
+        self.game.explosions_pool = ExplosionsPool()
+
+    @logger()
+    def load_viewports(self, viewports):
+        self.game.viewport = viewports[0]
+        self.game.window.menu_view.viewport = viewports[1]
+
+    @logger()
+    def load_entities(self, entities):
+        for e in entities:
+            self.game.spawn(
+                e['object_name'], e['player'], e['position'], id=e['id']
+            )
+
+    @logger()
+    def load_players(self, players):
+        self.game.players = {i: players[i] for i in players}
+
+    @logger()
+    def load_factions(self, factions):
+        for f in factions:
+            id, name, friends, enemies = f['id'], f['name'], f['friends'], f[
+                'enemies']
+            self.game.factions[f['id']] = Faction(id, name, friends, enemies)
 
     def delete_saved_game(self, save_name: str):
         try:

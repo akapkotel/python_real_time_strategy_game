@@ -150,6 +150,7 @@ class Window(arcade.Window, EventsCreator):
         self.show_view(self.game_view)
 
     def quit_current_game(self):
+        self.game_view.unload()
         self.game_view = None
         self.show_view(self.menu_view)
         self.menu_view.toggle_game_related_buttons()
@@ -207,7 +208,7 @@ class Window(arcade.Window, EventsCreator):
 
     def show_view(self, new_view: LoadableWindowView):
         if new_view.requires_loading:
-            self.show_view(LoadingScreen(loaded_view=new_view))
+            super().show_view(LoadingScreen(loaded_view=new_view))
         else:
             super().show_view(new_view)
 
@@ -256,16 +257,14 @@ class Window(arcade.Window, EventsCreator):
         return self.current_view.viewport
 
     def save_game(self):
-        # TODO: save GameObject.total_objects_count (?)
         self.save_manger.save_game('save_01', self.game_view)
 
     def load_game(self):
         if self.game_view is not None:
-            self.game_view.unload()
             self.quit_current_game()
-        self.game_view = Game(file_to_load_from='save_01')
-        GameObject.total_objects_count = 0
-        self.save_manger.load_game('save_01', self.game_view)
+        self.game_view = game = Game(file_to_load_from='save_01')
+        game.loader = self.save_manger.load_game('save_01', game)
+        self.show_view(game)
 
     def close(self):
         log(f'Terminating application...')
@@ -333,8 +332,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.map_grid = None
 
         self.things_to_load = [
-            ['map', Map, 0.35, {'rows': COLUMNS, 'columns': ROWS,
-             'grid_width': TILE_WIDTH,'grid_height': TILE_HEIGHT}],
+            ['map', Map, 0.35, {'rows': ROWS, 'columns': COLUMNS,
+             'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.25],
             ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
@@ -593,7 +592,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
-        print(self.players[4].units)
 
     def update_local_drawn_units_and_buildings(self):
         """
