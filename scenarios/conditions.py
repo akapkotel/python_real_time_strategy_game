@@ -27,6 +27,12 @@ class AddVictoryPoints(Consequence):
         self.mission.victory_points[self.player.id] += self.amount
 
 
+class RemoveVictoryPoints(AddVictoryPoints):
+
+    def execute(self):
+        self.mission.victory_points[self.player.id] -= self.amount
+
+
 class Condition:
     """
     Condition is a flag-class checked against, to evaluate if any of the

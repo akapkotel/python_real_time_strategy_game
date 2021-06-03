@@ -36,7 +36,7 @@ from utils.functions import (
     get_path_to_file, get_screen_size, to_rgba,
     SEPARATOR
 )
-from utils.logging import log, timer
+from utils.logging import log, logger, timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch
@@ -290,7 +290,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.generate_random_entities = self.loader is None
 
         self.settings = self.window.settings  # shared with Window class
-        self.timer = {'start': time.time(), 'f': 0, 's': 0, 'm': 0, 'h': 0}
+        self.timer = {'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0}
 
         # SpriteLists:
         self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
@@ -452,6 +452,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def on_show_view(self):
         super().on_show_view()
+        self.load_timer(self.timer)
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_playlist('game')
         self.update_interface_content()
@@ -585,7 +586,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         print(dialog_name)
 
     def update_view(self, delta_time):
-        self.update_timer(delta_time)
+        self.update_timer()
         self.debugged.clear()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
@@ -593,7 +594,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.fog_of_war.update()
         self.pathfinder.update()
         self.mini_map.update()
-        if self.mission is not None: self.mission.update()
+        if self.mission is not None:
+            self.mission.update()
 
     def after_loading(self):
         self.window.show_view(self)
@@ -603,15 +605,27 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
 
-    def update_timer(self, delta_time):
-        f = self.timer['f'] + 1
-        cur_time = time.time()
-        start_time = self.timer['start']
-        seconds = cur_time - start_time
-        s = int(seconds if seconds < 60 else seconds % 60)
-        m = int(seconds // 60)
-        h = int(m // 60)
-        self.timer = {'start': start_time, 'f': f, 's': s, 'm': m, 'h': h}
+    def update_timer(self):
+        seconds = time.time() - self.timer['start']
+        game_time = time.gmtime(seconds)
+        self.timer['f'] += 1
+        self.timer['s'] = game_time.tm_sec
+        self.timer['m'] = game_time.tm_min
+        self.timer['h'] = game_time.tm_hour
+
+    def save_timer(self):
+        """Before saving timer, recalculate total time game was played."""
+        self.timer['total'] = (time.time() - self.timer['start'])
+        return self.timer
+
+    @logger()
+    def load_timer(self, loaded_timer):
+        """
+        Subtract total time played from loading time to correctly reset timer
+        after loading game.
+        """
+        self.timer = loaded_timer
+        self.timer['start'] = time.time() - loaded_timer['total']
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -643,10 +657,10 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def draw_timer(self):
         _, r, b, _ = self.viewport
         x, y = r - 270, b + 800
-        _time = self.timer
+        t = self.timer
         f = format
-        formatted = f"Time: {f(_time['h'], '02')}:{f(_time['m'], '02')}:{f(_time['s'], '02')}"
-        draw_text(formatted, x, y, GREEN, 15)
+        formatted = f"{f(t['h'], '02')}:{f(t['m'], '02')}:{f(t['s'], '02')}"
+        draw_text(f"Time:{formatted}", x, y, GREEN, 15)
 
     @timer(level=3, global_profiling_level=PROFILING_LEVEL)
     def draw_debugging(self):
@@ -705,6 +719,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def toggle_pause(self):
         super().toggle_pause()
+        self.save_timer() if self.paused else self.load_timer(self.timer)
         self.window.toggle_mouse_and_keyboard(not self.paused, only_mouse=True)
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:

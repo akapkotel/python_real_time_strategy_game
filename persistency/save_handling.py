@@ -2,6 +2,7 @@
 
 import os
 import shelve
+import time
 
 from typing import Optional
 
@@ -55,7 +56,8 @@ class SaveManager(Singleton):
     def save_game(self, save_name: str, game: 'Game'):
         full_save_path = os.path.join(self.saves_path, save_name)
         with shelve.open(full_save_path + SAVE_EXTENSION) as file:
-            file['timer'] = self.game.timer
+            file['saved_date'] = time.localtime()
+            file['timer'] = self.game.save_timer()
             file['settings'] = self.game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
             file['map'] = game.map.save()
@@ -90,8 +92,8 @@ class SaveManager(Singleton):
         yield
 
     @logger()
-    def load_timer(self, timer):
-        self.game.timer = timer
+    def load_timer(self, loaded_timer):
+        self.game.timer = loaded_timer
 
     @logger()
     def load_settings(self, settings):
@@ -139,6 +141,9 @@ class SaveManager(Singleton):
     @logger()
     def load_permanent_groups(self, groups):
         self.game.permanent_units_groups = groups
+        for group_id, group in groups.items():
+            for unit in group:
+                unit.set_permanent_units_group(group_id)
 
     @logger()
     def load_fog_of_war(self, fog_of_war):

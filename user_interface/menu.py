@@ -9,6 +9,11 @@ from user_interface.user_interface import (
 from utils.views import LoadableWindowView
 
 
+MAIN_MENU = 'main menu'
+OPTIONS_SUBMENU = 'options'
+CREDITS_SUBMENU = 'credits'
+
+
 class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):
@@ -21,20 +26,20 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         window = self.window
         switch_menu = self.switch_to_bundle_of_name
         back_to_menu_button = Button('menu_button_back.png', SCREEN_X, 150,
-            functions=partial(switch_menu, 'main menu')
+            functions=partial(switch_menu, MAIN_MENU)
         )
 
         x, y = SCREEN_X, (i for i in range(150, SCREEN_HEIGHT, 125))
         main_menu = UiElementsBundle(
             index=0,
-            name='main menu',
+            name=MAIN_MENU,
             elements=[
                 Button('menu_button_exit.png', x, next(y),
                        functions=window.close),
                 Button('menu_button_credits.png', x, next(y),
-                       functions=partial(switch_menu, 'credits')),
+                       functions=partial(switch_menu, CREDITS_SUBMENU)),
                 Button('menu_button_options.png', x, next(y),
-                       functions=partial(switch_menu, 'options')),
+                       functions=partial(switch_menu, OPTIONS_SUBMENU)),
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=partial(switch_menu, 'saving menu')),
                 Button('menu_button_newgame.png', x, next(y),
@@ -52,7 +57,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         y = (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu = UiElementsBundle(
             index=1,
-            name='options',
+            name=OPTIONS_SUBMENU,
             elements=[
                 back_to_menu_button,
                 # set 'subgroup' index for each element to assign it to the
@@ -171,8 +176,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
     def on_show_view(self):
         super().on_show_view()
+        if (game :=self.window.game_view) is not None:
+            game.save_timer()
         self.window.toggle_mouse_and_keyboard(True)
-        self.switch_to_bundle_of_index(0)
+        self.switch_to_bundle_of_name(MAIN_MENU)
         self.toggle_game_related_buttons()
         self.window.sound_player.play_playlist('menu')
 
