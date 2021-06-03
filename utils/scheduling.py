@@ -4,7 +4,7 @@ from math import inf
 from time import time as get_time
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
-from utils.functions import logger, log
+from utils.logging import log, logger
 
 
 class ScheduledEvent:

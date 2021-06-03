@@ -27,7 +27,8 @@ from user_interface.user_interface import (
     UiSpriteList
 )
 from utils.classes import HashedList, Singleton
-from utils.functions import get_path_to_file, log
+from utils.functions import get_path_to_file
+from utils.logging import log
 
 DrawnAndUpdated = Union[SpriteList, SelectiveSpriteList, 'MouseCursor']
 

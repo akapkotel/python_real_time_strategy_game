@@ -24,9 +24,11 @@ from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
 from utils.functions import (
-    calculate_angle, distance_2d, get_path_to_file, log,
-    precalculate_8_angles, vector_2d
+    get_path_to_file
 )
+from utils.logging import log
+from utils.geometry import precalculate_8_angles, calculate_angle, distance_2d, \
+    vector_2d
 from .weapons import Weapon
 
 

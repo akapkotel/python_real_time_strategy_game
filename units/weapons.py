@@ -9,7 +9,7 @@ from typing import List
 from arcade.texture import Texture
 
 from effects.sound import SOUNDS_EXTENSION
-from utils.functions import move_along_vector
+from utils.geometry import move_along_vector
 from effects.explosions import Explosion
 from players_and_factions.player import PlayerEntity
 

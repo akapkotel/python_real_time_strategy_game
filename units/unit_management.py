@@ -10,7 +10,8 @@ from utils.colors import GREEN, RED, YELLOW
 from game import Game
 from players_and_factions.player import PlayerEntity
 from units.units import Unit
-from utils.functions import average_position_of_points_group, get_path_to_file
+from utils.functions import get_path_to_file
+from utils.geometry import average_position_of_points_group
 
 HEALTH_BAR_WIDTH = 5
 

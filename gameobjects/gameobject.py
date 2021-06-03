@@ -8,7 +8,8 @@ from arcade.arcade_types import Point
 
 from game import Game
 from utils.enums import Robustness, UnitWeight
-from utils.functions import get_path_to_file, log
+from utils.functions import get_path_to_file
+from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator
 from utils.ownership_relations import OwnedObject
@@ -52,13 +53,12 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         return f'GameObject: {self.object_name} id: {self.id}'
 
     def save(self) -> Dict:
-        saved_object = {
+        return {
             'id': self.id,
             'object_name': self.object_name,
-            'position': (self.center_x, self.center_y),
+            'position': self._position,  # (self.center_x, self.center_y)
             'scheduled_events': self.scheduled_events_to_shelve_data()
         }
-        return saved_object
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness

@@ -6,7 +6,8 @@ from arcade import (
 )
 
 
-from utils.functions import get_attributes_with_attribute, log, logger
+from utils.functions import get_attributes_with_attribute
+from utils.logging import log, logger
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.colors import WHITE, GREEN
 from utils.data_types import Viewport
@@ -17,10 +18,18 @@ Updateable = Drawable = Union[SpriteList, SelectiveSpriteList, Sprite]
 
 class LoadableWindowView(View):
 
-    def __init__(self):
+    def __init__(self, loader: Optional[Generator] = None):
+        """
+        This View subclass works with LoadingScreen class to allow displaying
+        the loading-progress bar and load content behind the scenes.
+
+        :param loader: Generator -- function yielding None but on each yield
+        calling another function to retrieve from save-file next chunk of data
+        assosiated with loaded Game instance. Use it only for loading Game!
+        """
         super().__init__()
         self.loading_progress = 0.0
-        self.loader: Optional[Generator] = None
+        self.loader = loader
         self.things_to_load = []
         self.after_load_functions = []
         self.updated: List[Updateable] = []
@@ -102,7 +111,7 @@ class LoadableWindowView(View):
     def load_from_loader(self):
         try:
             next(self.loader)
-            self.loading_progress += 0.083
+            self.loading_progress += 0.071428571
         except StopIteration:
             self.loader = None
             self.after_loading()

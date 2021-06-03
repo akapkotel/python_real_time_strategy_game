@@ -11,6 +11,7 @@ __status__ = "development"
 __credits__ = []
 
 import random
+import time
 
 from typing import (Any, Dict, List, Optional, Set, Union, Generator)
 
@@ -32,9 +33,11 @@ from user_interface.user_interface import (
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
-    clamp, get_path_to_file, get_screen_size, log, timer, to_rgba,
-    average_position_of_points_group, SEPARATOR
+    get_path_to_file, get_screen_size, to_rgba,
+    SEPARATOR
 )
+from utils.logging import log, timer
+from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch
 )
@@ -61,9 +64,10 @@ SECTOR_SIZE = 8
 ROWS = 100
 COLUMNS = 150
 
+FPS = 30
 GAME_SPEED = 1.0
 
-UPDATE_RATE = 1 / (30 * GAME_SPEED)
+UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = False
 DEBUG = False
@@ -75,10 +79,13 @@ class Settings:
     Just a simple data container for convenient storage and acces to bunch of
     minor variables, which would overcrowd Window __init__.
     """
-    debug: bool
-    vehicles_threads: bool
-    threads_fadeout: int
-    shot_blasts: bool
+    fps: int = FPS
+    full_screen: bool = FULL_SCREEN
+    debug: bool = DEBUG
+    vehicles_threads: bool = True
+    threads_fadeout: int = 2
+    shot_blasts: bool = True
+    game_speed: float = GAME_SPEED
 
 
 class Window(arcade.Window, EventsCreator):
@@ -88,7 +95,7 @@ class Window(arcade.Window, EventsCreator):
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
-        self.settings = Settings(False, True, 2, True)  # shared with Game
+        self.settings = Settings()  # shared with Game
 
         self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
@@ -146,7 +153,7 @@ class Window(arcade.Window, EventsCreator):
 
     def start_new_game(self):
         if self.game_view is None:
-            self.game_view = Game()
+            self.game_view = Game(loader=None)
         self.show_view(self.game_view)
 
     def quit_current_game(self):
@@ -262,8 +269,8 @@ class Window(arcade.Window, EventsCreator):
     def load_game(self):
         if self.game_view is not None:
             self.quit_current_game()
-        self.game_view = game = Game(file_to_load_from='save_01')
-        game.loader = self.save_manger.load_game('save_01', game)
+        loader = self.save_manger.load_game(save_name='save_01')
+        self.game_view = game = Game(loader=loader)
         self.show_view(game)
 
     def close(self):
@@ -274,15 +281,16 @@ class Window(arcade.Window, EventsCreator):
 class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     instance: Optional[Game] = None
 
-    def __init__(self, file_to_load_from=None):
-        LoadableWindowView.__init__(self)
+    def __init__(self, loader: Optional[Generator] = None):
+        LoadableWindowView.__init__(self, loader)
         EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)
-        self.file_to_load_from = file_to_load_from
         self.assign_reference_to_self_for_all_classes()
 
+        self.generate_random_entities = self.loader is None
+
         self.settings = self.window.settings  # shared with Window class
-        self.current_frame = 0
+        self.timer = {'start': time.time(), 'f': 0, 's': 0, 'm': 0, 'h': 0}
 
         # SpriteLists:
         self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
@@ -340,7 +348,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.10],
             ['map_grid', self.create_map_debug_grid, 0.10]
-        ] if self.file_to_load_from is None else []
+        ] if self.loader is None else []
 
     def assign_reference_to_self_for_all_classes(self):
         name = self.__class__.__name__.lower()
@@ -449,7 +457,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.update_interface_content()
 
     def test_methods(self):
-        if self.file_to_load_from is None:
+        if self.generate_random_entities:
             self.test_scheduling_events()
             self.test_factions_and_players_creation()
             # self.test_buildings_spawning()
@@ -577,6 +585,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         print(dialog_name)
 
     def update_view(self, delta_time):
+        self.update_timer(delta_time)
         self.debugged.clear()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
@@ -584,6 +593,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.fog_of_war.update()
         self.pathfinder.update()
         self.mini_map.update()
+        if self.mission is not None: self.mission.update()
 
     def after_loading(self):
         self.window.show_view(self)
@@ -592,6 +602,16 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
+
+    def update_timer(self, delta_time):
+        f = self.timer['f'] + 1
+        cur_time = time.time()
+        start_time = self.timer['start']
+        seconds = cur_time - start_time
+        s = int(seconds if seconds < 60 else seconds % 60)
+        m = int(seconds // 60)
+        h = int(m // 60)
+        self.timer = {'start': start_time, 'f': f, 's': s, 'm': m, 'h': h}
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -614,10 +634,19 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def on_draw(self):
         super().on_draw()
         self.mini_map.draw()
+        self.draw_timer()
         if self.settings.debug:
             self.draw_debugging()
         if self.paused:
             self.draw_paused_dialog()
+
+    def draw_timer(self):
+        _, r, b, _ = self.viewport
+        x, y = r - 270, b + 800
+        _time = self.timer
+        f = format
+        formatted = f"Time: {f(_time['h'], '02')}:{f(_time['m'], '02')}:{f(_time['s'], '02')}"
+        draw_text(formatted, x, y, GREEN, 15)
 
     @timer(level=3, global_profiling_level=PROFILING_LEVEL)
     def draw_debugging(self):

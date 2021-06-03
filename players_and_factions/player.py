@@ -5,21 +5,18 @@ import random
 
 from abc import abstractmethod
 from collections import defaultdict
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-from arcade import rand_in_circle, is_point_in_polygon
+from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
 from game import Game, UPDATE_RATE
-from effects.explosions import Explosion
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH
 from scenarios.research import Technology
 from utils.data_types import FactionId, TechnologyId
-from utils.functions import (
-    calculate_circular_area, distance_2d, is_visible, log
-)
+from utils.logging import log
+from utils.geometry import distance_2d, is_visible, calculate_circular_area
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 
@@ -142,6 +139,9 @@ class ResourcesManager:
             setattr(self, resource_name, 0)
             setattr(self, f"{resource_name}_yield_per_frame", 0.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
+
+    def has_resource(self, resource: str, amount: int = 1):
+        return getattr(self, resource, 0) >= amount
 
     def change_resource_yield_per_frame(self, resource: str, change: float):
         old_yield = getattr(self, f"{resource}_yield_per_frame")

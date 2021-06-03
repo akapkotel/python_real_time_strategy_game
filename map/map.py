@@ -21,8 +21,10 @@ from utils.data_types import (
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
 from utils.functions import (
-    get_path_to_file, calculate_circular_area, distance_2d, log, logger, timer
+    get_path_to_file
 )
+from utils.logging import log, logger, timer
+from utils.geometry import distance_2d, calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 

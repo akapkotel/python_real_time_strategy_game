@@ -14,7 +14,8 @@ from arcade.arcade_types import Color
 
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 
-from utils.functions import log, make_texture, get_path_to_file, to_texture_name
+from utils.functions import make_texture, get_path_to_file, to_texture_name
+from utils.logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 

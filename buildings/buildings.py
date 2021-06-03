@@ -10,7 +10,8 @@ from utils.data_types import GridPosition
 from scenarios.research import Technology
 from map.map import MapNode, Sector
 from players_and_factions.player import Player, PlayerEntity
-from utils.functions import is_visible, close_enough
+from utils.geometry import close_enough, is_visible
+
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 

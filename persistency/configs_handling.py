@@ -4,7 +4,8 @@ import csv
 
 from typing import Dict, Union, Tuple, List, Any
 
-from utils.functions import get_path_to_file, log
+from utils.functions import get_path_to_file
+from utils.logging import log
 
 
 def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:

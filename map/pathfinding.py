@@ -8,7 +8,7 @@ from collections import defaultdict
 from typing import Dict, Union
 
 from utils.data_types import GridPosition
-from utils.functions import log, timer
+from utils.logging import log, timer
 from utils.classes import PriorityQueue
 from game import PROFILING_LEVEL
 from map.map import MapNode, MapPath

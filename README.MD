@@ -72,6 +72,9 @@ To be done.
 28. Vehicles leave tires/tracks traces on the ground.
 29. When Vehicles are destroyed, they leave wrecks.
 30. Implemented pooling to boost Explosions efficiency.
+31. Implemented in-game timer displaying how much time passed since game started.
+32. Implemented new game-loading from file system. 
+33. Added playlists for background music tracks.
 
 #### TO BE DONE:
 #### Minor:
@@ -83,10 +86,10 @@ To be done.
    flocking maybe? How to make it working with pathfinding?
 4. Minimap and teleporting to the map-locations by clickling on the
    minimap.
-5. Units-radiochatter sounds. Battle sounds.
+5. Units-radiochatter sounds - DONE. Battle sounds.
 6. Skirmish mission customisation submenu (this is the only available
    game mode for now).
-7. Playlist for background music tracks.
+7. Playlist for background music tracks - DONE.
 8. Better Ai for Units autonomous behaviour.
 9. Flocking for Soldier class.
 10. Implement Jump Point Search to optimize A* performance.

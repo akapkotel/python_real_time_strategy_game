@@ -7,7 +7,7 @@ from arcade.key import *
 
 from units.unit_management import PermanentUnitsGroup
 from user_interface.user_interface import ToggledElement
-from utils.functions import log, logger
+from utils.logging import log, logger
 
 
 class KeyboardHandler(ToggledElement):
