@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from typing import Optional, Tuple, List, Set, Collection
+from typing import Optional, Tuple, List, Set, Union
+from collections import defaultdict
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
                     create_rectangle_filled)
@@ -15,7 +16,7 @@ from utils.data_types import GridPosition
 class MiniMap:
     game: Optional[Game] = None
 
-    def __init__(self, data: Collection):
+    def __init__(self, data: Union[List, Tuple]):
         self.loaded = len(data) > 4
         screen_size, minimap_size, tile_size, rows = data[:4]
 
@@ -114,7 +115,7 @@ class MiniMap:
         self.drawn_area.update(revealed_this_time)
         self.reveal_minimap_area(revealed_this_time)
 
-    def reveal_minimap_area(self, revealed_this_time):
+    def reveal_minimap_area(self, revealed_this_time: Set[GridPosition]):
         width, height = self.tile_size
         for (x, y) in revealed_this_time:
             shape = create_rectangle_filled(x * width, y * height, width, height, SAND)
@@ -138,5 +139,5 @@ class MiniMap:
             self.tile_size,
             self.rows,
             self.viewport,
-            self.drawn_area,
+            self.drawn_area
         ]

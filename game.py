@@ -13,7 +13,7 @@ __credits__ = []
 import random
 import time
 
-from typing import (Any, Dict, List, Optional, Set, Union, Generator)
+from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 
 import arcade
 from functools import partial
@@ -67,6 +67,8 @@ COLUMNS = 150
 FPS = 30
 GAME_SPEED = 1.0
 
+PLAYER_UNITS = 24
+
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 PYPROFILER = False
@@ -86,6 +88,7 @@ class Settings:
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
+    editor_mode: bool = True
 
 
 class Window(arcade.Window, EventsCreator):
@@ -109,7 +112,9 @@ class Window(arcade.Window, EventsCreator):
         self.configs = read_csv_files('resources/configs')
 
         # views:
-        self.menu_view = Menu()
+        self._current_view: Optional[LoadableWindowView] = None
+
+        self.menu_view: Menu = Menu()
         self.game_view: Optional[Game] = None
         # self.menu_view.create_submenus()
 
@@ -128,6 +133,10 @@ class Window(arcade.Window, EventsCreator):
     def screen_center(self) -> Point:
         left, _, bottom, _ = self.current_view.viewport
         return left + SCREEN_X, bottom + SCREEN_Y
+
+    @property
+    def current_view(self) -> LoadableWindowView:
+        return self._current_view
 
     @property
     def updated(self) -> List[Updateable]:
@@ -290,6 +299,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         self.settings = self.window.settings  # shared with Window class
         self.timer = {'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0}
+        self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
         self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
@@ -464,6 +474,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             self.test_factions_and_players_creation()
             # self.test_buildings_spawning()
             self.test_units_spawning()
+            self.test_missions()
         position = average_position_of_points_group(
             [u.position for u in self.local_human_player.units]
         )
@@ -517,11 +528,28 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
             node = random.choice(list(self.map.nodes.values()))
-            names = [unit_name] * 20
+            names = [unit_name] * (20 if player.id == 4 else PLAYER_UNITS)
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
         self.units.extend(spawned_units)
+
+    def test_missions(self):
+        self.current_mission = mission = Mission(1, 'Test Mission', 'Map 1')
+        mission.add()
+
+        map_revealed = MapRevealed(self.local_human_player).set_vp(1)
+        mission.new_condition(map_revealed, optional=True)
+
+        no_units = NoUnitsLeft(self.local_human_player).set_vp(-1)
+        mission.new_condition(no_units)
+
+        timer = TimePassed(self.local_human_player, 1).set_vp(1)
+        mission.new_condition(timer)
+
+        cpu_player = self.players[4]
+        cpu_no_units = NoUnitsLeft(cpu_player).set_vp(-1)
+        mission.new_condition(cpu_no_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
         configs: Dict[str, Any] = {}
@@ -595,8 +623,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.fog_of_war.update()
         self.pathfinder.update()
         self.mini_map.update()
-        if self.mission is not None:
-            self.mission.update()
+        if self.current_mission is not None:
+            self.current_mission.update()
 
     def after_loading(self):
         self.window.show_view(self)
@@ -652,8 +680,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.draw_timer()
         if self.settings.debug:
             self.draw_debugging()
-        if self.paused:
-            self.draw_paused_dialog()
+        if self.dialog is not None:
+            self.draw_dialog(*self.dialog)
 
     def draw_timer(self):
         _, r, b, _ = self.viewport
@@ -712,16 +740,22 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             for enemy in unit.known_enemies:
                 draw_line(*unit.position, *enemy.position, color=RED)
 
-    def draw_paused_dialog(self):
+    def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
-        draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, to_rgba(BLACK, 150))
-        text = 'GAME PAUSED'
-        draw_text(text, x, y, WHITE, 30, anchor_x='center', anchor_y='center')
+        draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, to_rgba(color, 150))
+        draw_text(text, x, y, txt_color, 30, anchor_x='center', anchor_y='center')
 
-    def toggle_pause(self):
+    def toggle_pause(self, dialog: str = 'GAME PAUSED', color: Color = BLACK):
         super().toggle_pause()
+        self.reset_dialog(*(dialog, color) if self.paused else (None, None))
         self.save_timer() if self.paused else self.load_timer(self.timer)
         self.window.toggle_mouse_and_keyboard(not self.paused, only_mouse=True)
+
+    def reset_dialog(self, text: str = None, color: Color = BLACK, txt_color: Color = WHITE):
+        if text is None:
+            self.dialog = None
+        else:
+            self.dialog = (text, txt_color, color)
 
     def create_map_debug_grid(self) -> arcade.ShapeElementList:
         grid = arcade.ShapeElementList()
@@ -776,6 +810,7 @@ if __name__ == '__main__':
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission
+    from scenarios.conditions import NoUnitsLeft, MapRevealed, TimePassed
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from persistency.save_handling import SaveManager

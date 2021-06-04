@@ -140,7 +140,7 @@ class Unit(PlayerEntity):
             observed = self.observed_nodes
         else:
             self.observed_nodes = observed = self.calculate_observed_area()
-        self.game.fog_of_war.explore_map(n.grid for n in observed)
+        self.game.fog_of_war.reveal_nodes(n.grid for n in observed)
 
     def update_blocked_map_nodes(self, new_current_node: MapNode):
         """

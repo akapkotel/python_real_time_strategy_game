@@ -221,7 +221,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def update_observed_area(self, *args, **kwargs):
         self.observed_nodes = nodes = self.calculate_observed_area()
-        self.game.fog_of_war.explore_map([n.grid for n in nodes])
+        self.game.fog_of_war.reveal_nodes([n.grid for n in nodes])
 
     @property
     def damaged(self) -> bool:

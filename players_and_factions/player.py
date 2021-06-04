@@ -16,6 +16,7 @@ from map.map import MapNode, Sector, TILE_WIDTH
 from scenarios.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
+from utils.functions import ignore_in_editor_mode
 from utils.geometry import distance_2d, is_visible, calculate_circular_area
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
@@ -376,6 +377,7 @@ class PlayerEntity(GameObject):
         self.update_fighting()
         super().on_update(delta_time)
 
+    @ignore_in_editor_mode
     def update_targeted_enemy(self):
         """
         Set the random or weakest of the enemies in range of this entity
@@ -390,6 +392,7 @@ class PlayerEntity(GameObject):
             else:
                 self.targeted_enemy = None
 
+    @ignore_in_editor_mode
     def update_fighting(self):
         if (enemy := self.targeted_enemy) is not None:
             self.fight_or_run_away(enemy)

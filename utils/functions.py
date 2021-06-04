@@ -2,7 +2,7 @@
 
 import logging
 import os
-from functools import lru_cache
+from functools import lru_cache, wraps
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 import PIL
@@ -149,3 +149,12 @@ def make_texture(width: int, height: int, color: Color) -> Texture:
     img = PIL.Image.new("RGBA", (width, height), color)
     name = "{}:{}:{}:{}".format("texture_rect", width, height, color)
     return Texture(name, img)
+
+
+def ignore_in_editor_mode(f):
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if self.game.settings.editor_mode:
+            return
+        return f(*args, **kwargs)
+    return wrapper

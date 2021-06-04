@@ -68,18 +68,20 @@ class FogOfWar:
             sprite_list.append(sprite)
         return sprite_lists
 
-    def explore_map(self, explored: Set[GridPosition]):
+    def reveal_nodes(self, revealed: Set[GridPosition]):
         """
         Call this method from each PlayerEntity, which is observing map,
         sending as param a set of GridPositions seen by the entity.
         """
-        self.visible.update(explored)
+        self.visible.update(revealed)
 
     def update(self):
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
         grids_to_sprites = self.grids_to_sprites
         revealed = visible.intersection(grids_to_sprites)
+        # since MiniMap also draws FoW, but the miniaturized version of, send
+        # set of GridPositions revealed this frame to the MiniMap instance:
         self.game.mini_map.visible = revealed
         for grid in revealed:
             sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
@@ -94,7 +96,7 @@ class FogOfWar:
             sprite_list = self.fog_sprite_lists[(grid_x // 50, grid_y // 50)]
             sprite_list.append(sprite)
         self.explored.update(visible)
-        self.unexplored -= visible
+        self.unexplored.difference_update(visible)
         visible.clear()
 
     @staticmethod

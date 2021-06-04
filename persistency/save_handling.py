@@ -61,7 +61,7 @@ class SaveManager(Singleton):
             file['settings'] = self.game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
             file['map'] = game.map.save()
-            file['missions'] = game.mission
+            file['missions'] = game.current_mission
             file['factions'] = [f.save() for f in game.factions.values()]
             file['players'] = game.players
             file['local_human_player_id'] = game.local_human_player.id
@@ -114,7 +114,7 @@ class SaveManager(Singleton):
 
     @logger()
     def load_mission(self, missions):
-        self.game.mission = missions
+        self.game.current_mission = missions
 
     @logger()
     def load_factions(self, factions):

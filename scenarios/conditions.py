@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
 from abc import abstractmethod
+from typing import Optional
 
-from players_and_factions.player import Player
+from players_and_factions.player import Player, Faction
+from utils.logging import log
 
 
 class Consequence:
@@ -17,7 +20,7 @@ class Consequence:
         raise NotImplementedError
 
 
-class AddVictoryPoints(Consequence):
+class ChangeVictoryPoints(Consequence):
 
     def __init__(self, amount: int = 1):
         super().__init__()
@@ -27,41 +30,56 @@ class AddVictoryPoints(Consequence):
         self.mission.victory_points[self.player.id] += self.amount
 
 
-class RemoveVictoryPoints(AddVictoryPoints):
-
-    def execute(self):
-        self.mission.victory_points[self.player.id] -= self.amount
-
-
 class Condition:
     """
     Condition is a flag-class checked against, to evaluate if any of the
     Players achieved his objectives.
     """
 
-    def __init__(self, mission, player: Player, consequence: Consequence):
+    def __init__(self, player: Player):
         self.name = self.__class__.__name__
         self.player = player
-        self.mission = mission
-        self.consequence = self._add_consequence(consequence)
+        self.mission: Optional[Mission] = None
+        self.victory_points = 0
+        self.consequences = []
 
-    def _add_consequence(self, consequence: Consequence) -> Consequence:
+    def __str__(self):
+        return f'{self.__class__.__name__} for player: {self.player}'
+
+    def set_vp(self, value: int) -> Condition:
+        self.victory_points = value
+        self.add_consequence(ChangeVictoryPoints(value))
+        return self
+
+    def consequences(self, *consequences: Consequence) -> Condition:
+        for consequence in consequences:
+            self.add_consequence(consequence)
+        return self
+
+    def bind_mission(self, mission: Mission):
+        self.mission = mission
+        for consequence in self.consequences:
+            consequence.mission = mission
+
+    def add_consequence(self, consequence: Consequence):
         consequence.player = self.player
         consequence.mission = self.mission
-        return consequence
+        self.consequences.append(consequence)
 
     @abstractmethod
     def is_met(self) -> bool:
         raise NotImplementedError
 
     def execute_consequences(self):
-        self.consequence.execute()
+        for consequence in self.consequences:
+            consequence.execute()
+            log(f'Condition {self} was met!', console=True)
 
 
 class TimePassed(Condition):
 
-    def __init__(self, mission, player: Player, required_time: int, consequence):
-        super().__init__(mission, player, consequence)
+    def __init__(self, player: Player, required_time: int):
+        super().__init__(player)
         self.required_time = required_time
 
     def is_met(self) -> bool:
@@ -74,14 +92,19 @@ class MapRevealed(Condition):
 
 
 class NoUnitsLeft(Condition):
+    """Beware that this Condition checks against Buildings also!"""
+
+    def __init__(self, player: Player):
+        super().__init__(player)
+
     def is_met(self) -> bool:
-        return len(self.player.units) == 0
+        return len(self.player.units) + len(self.player.buildings) == 0
 
 
 class HasUnitsOfType(Condition):
 
-    def __init__(self, mission, player: Player, consequence, unit_type, amount=0):
-        super().__init__(mission, player, consequence)
+    def __init__(self, player: Player, unit_type, amount=0):
+        super().__init__(player)
         self.unit_type = unit_type
         self.amount = amount
 
@@ -90,16 +113,16 @@ class HasUnitsOfType(Condition):
 
 
 class HasBuildingsOfType(HasUnitsOfType):
-    def __init__(self, mission, player: Player, consequence, building_type, amount=0):
-        super().__init__(mission, player, consequence, building_type, amount)
+    def __init__(self, player: Player, building_type, amount=0):
+        super().__init__(player, building_type, amount)
 
     def is_met(self) -> bool:
         return sum(1 for u in self.player.buildings if isinstance(u, self.unit_type)) > self.amount
 
 
 class ControlsBuilding(Condition):
-    def __init__(self, mission, player: Player, building_id: int, consequence):
-        super().__init__(mission, player, consequence)
+    def __init__(self, player: Player, building_id: int):
+        super().__init__(player)
         self.building_id = building_id
 
     def is_met(self) -> bool:
@@ -113,8 +136,8 @@ class ControlsArea(Condition):
 
 
 class HasTechnology(Condition):
-    def __init__(self, mission, player: Player, technology_id: int, consequence):
-        super().__init__(mission, player, consequence)
+    def __init__(self, mission, player: Player, technology_id: int):
+        super().__init__(player)
         self.technology_id = technology_id
 
     def is_met(self) -> bool:
@@ -123,8 +146,8 @@ class HasTechnology(Condition):
 
 class HasResource(Condition):
 
-    def __init__(self, mission, player: Player, resource: str, amount: int, consequence):
-        super().__init__(mission, player, consequence)
+    def __init__(self,player: Player, resource: str, amount: int):
+        super().__init__(player)
         self.resource = resource
         self.amount = amount
 
@@ -134,9 +157,13 @@ class HasResource(Condition):
 
 class MinimumVictoryPoints(Condition):
 
-    def __init__(self, mission, player: Player, required_vp: int, consequence):
-        super().__init__(mission, player, consequence)
+    def __init__(self, player: Player, required_vp: int):
+        super().__init__(player)
         self.required_vp = required_vp
 
     def is_met(self) -> bool:
         return self.mission.victory_points[self.player.id] >= self.required_vp
+
+
+if __name__ == '__main__':
+    from scenarios.missions import Mission
