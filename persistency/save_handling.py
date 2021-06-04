@@ -69,7 +69,7 @@ class SaveManager(Singleton):
             file['buildings'] = [building.save() for building in game.buildings]
             file['permanent_units_groups'] = game.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
-            file['mini_map'] = game.mini_map
+            file['mini_map'] = game.mini_map.save()
         log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
 
     def load_game(self, save_name: str):
@@ -87,7 +87,7 @@ class SaveManager(Singleton):
             yield self.load_entities(file['buildings'])
             yield self.load_permanent_groups(file['permanent_units_groups'])
             yield self.load_fog_of_war(file['fog_of_war'])
-            yield self.load_mini_map()
+            yield self.load_mini_map(file['mini_map'])
         log(f'Game {save_name + SAVE_EXTENSION} loaded successfully!', True)
         yield
 
@@ -150,8 +150,8 @@ class SaveManager(Singleton):
         self.game.fog_of_war = fog_of_war
 
     @logger()
-    def load_mini_map(self):
-        self.game.mini_map = MiniMap()
+    def load_mini_map(self, minimap):
+        self.game.mini_map = MiniMap(minimap)
 
     def delete_saved_game(self, save_name: str):
         try:

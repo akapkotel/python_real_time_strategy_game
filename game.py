@@ -55,8 +55,8 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
-MINIMAP_WIDTH = 388
-MINIMAP_HEIGHT = 196
+MINIMAP_WIDTH = 380
+MINIMAP_HEIGHT = 200
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
@@ -255,7 +255,6 @@ class Window(arcade.Window, EventsCreator):
         game_map = self.game_view.map
         new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
         new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
-        left, _, bottom, _ = self.current_view.viewport
         self.update_viewport_coordinates(new_bottom, new_left)
 
     def get_viewport(self) -> Viewport:
@@ -346,7 +345,9 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ['fog_of_war', FogOfWar, 0.25],
             ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
             ['explosions_pool', ExplosionsPool, 0.10],
-            ['mini_map', MiniMap, 0.10],
+            ['mini_map', MiniMap, 0.10, ((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                         (MINIMAP_WIDTH, MINIMAP_HEIGHT),
+                                         (TILE_WIDTH, TILE_HEIGHT), ROWS)],
             ['map_grid', self.create_map_debug_grid, 0.10]
         ] if self.loader is None else []
 

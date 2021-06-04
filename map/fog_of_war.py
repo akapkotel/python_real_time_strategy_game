@@ -26,6 +26,9 @@ class FogSprite(Sprite):
 
 
 class FogOfWar:
+    """
+    TODO: merge this class with MiniMap (they use same GridPosition set)
+    """
     game: Optional[Game] = None
 
     def __init__(self):
@@ -76,7 +79,9 @@ class FogOfWar:
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
         grids_to_sprites = self.grids_to_sprites
-        for grid in visible.intersection(grids_to_sprites):
+        revealed = visible.intersection(grids_to_sprites)
+        self.game.mini_map.visible = revealed
+        for grid in revealed:
             sprite_list = self.fog_sprite_lists[(grid[0] // 50, grid[1] // 50)]
             sprite_list.remove(grids_to_sprites[grid])
             del grids_to_sprites[grid]
@@ -89,6 +94,7 @@ class FogOfWar:
             sprite_list = self.fog_sprite_lists[(grid_x // 50, grid_y // 50)]
             sprite_list.append(sprite)
         self.explored.update(visible)
+        self.unexplored -= visible
         visible.clear()
 
     @staticmethod
