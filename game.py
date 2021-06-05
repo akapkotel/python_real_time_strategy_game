@@ -65,7 +65,7 @@ COLUMNS = 60
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 24
+PLAYER_UNITS = 1
 CPU_UNITS = 10
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
@@ -89,7 +89,7 @@ class Settings:
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
-    editor_mode: bool = True
+    editor_mode: bool = False
 
 
 class GameWindow(Window, EventsCreator):
@@ -172,7 +172,6 @@ class GameWindow(Window, EventsCreator):
 
     def quit_current_game(self):
         self.game_view.unload()
-        self.game_view = None
         self.show_view(self.menu_view)
         self.menu_view.toggle_game_related_buttons()
 
@@ -342,11 +341,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
-        # Player can create group of Units by CTRL + 0-9 keys, and then
-        # select those groups quickly with 0-9 keys, or even move screen tp
-        # the position of the group by pressing numeric key twice. See the
-        # PermanentUnitsGroup class in units_management.py
-        self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
+        self.units_manager: UnitsManager = self.window.cursor.units_manager
 
         self.current_mission: Optional[Mission] = None
 
@@ -367,9 +362,9 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         ] if self.loader is None else []
 
     def assign_reference_to_self_for_all_classes(self):
-        name = self.__class__.__name__.lower()
-        for _class in (c for c in globals().values() if hasattr(c, name)):
-            setattr(_class, name, self)
+        game = self.__class__.__name__.lower()
+        for _class in (c for c in globals().values() if hasattr(c, game)):
+            setattr(_class, game, self)
         Game.instance = self.window.cursor.game = self
 
     def create_interface(self) -> UiSpriteList:
@@ -547,14 +542,14 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         map_revealed = MapRevealed(self.local_human_player).set_vp(1)
         mission.new_condition(map_revealed, optional=True)
 
-        no_units = NoUnitsLeft(self.local_human_player).set_vp(-1)
+        no_units = NoUnitsLeft(self.local_human_player).consequences(Defeat())
         mission.new_condition(no_units)
 
         timer = TimePassed(self.local_human_player, 15).set_vp(1)
         mission.new_condition(timer)
 
         cpu_player = self.players[4]
-        cpu_no_units = NoUnitsLeft(cpu_player).set_vp(-1)
+        cpu_no_units = NoUnitsLeft(cpu_player).consequences(Victory())
         mission.new_condition(cpu_no_units)
 
     def load_player_configs(self) -> Dict[str, Any]:
@@ -716,7 +711,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             self.dialog = (text, txt_color, color)
 
     def stop_all_units(self):
-        for unit in self.window.cursor.selected_units:
+        for unit in self.units_manager.selected_units:
             unit.stop_completely()
 
     def unload(self):
@@ -725,12 +720,15 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
         self.players.clear()
+        self.window.game_view = None
 
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map.map import Map, Pathfinder
-    from units.unit_management import PermanentUnitsGroup, SelectedEntityMarker
+    from units.unit_management import (
+        PermanentUnitsGroup, SelectedEntityMarker, UnitsManager
+    )
     from effects.explosions import Explosion, ExplosionsPool
     from players_and_factions.player import (
         Faction, Player, CpuPlayer, PlayerEntity
@@ -743,7 +741,9 @@ if __name__ == '__main__':
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from scenarios.missions import Mission
-    from scenarios.conditions import NoUnitsLeft, MapRevealed, TimePassed
+    from scenarios.conditions import (
+        NoUnitsLeft, MapRevealed, TimePassed, Defeat, Victory
+    )
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-from typing import Optional, Set
+from typing import Set
 
 from arcade import Window
 from arcade.key import *
 
-from units.unit_management import PermanentUnitsGroup
 from user_interface.user_interface import ToggledElement
 from utils.logging import log, logger
 
@@ -45,14 +44,17 @@ class KeyboardHandler(ToggledElement):
             self.window.close()
         elif not self.window.game_view.is_running:
             self.window.close()
+        elif self.window.game_view.current_mission.ended:
+            self.window.quit_current_game()
         else:
             self.window.show_view(self.window.menu_view)
 
     def on_numeric_key_press(self, digit: int):
+        manager = self.window.cursor.units_manager
         if LCTRL in self.keys_pressed:
-            PermanentUnitsGroup.create_new_permanent_units_group(digit)
+            manager.create_new_permanent_units_group(digit)
         else:
-            PermanentUnitsGroup.select_permanent_units_group(digit)
+            manager.select_permanent_units_group(digit)
 
     @staticmethod
     def key_to_letter(symbol: int) -> str:

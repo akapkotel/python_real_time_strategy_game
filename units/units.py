@@ -322,7 +322,7 @@ class Unit(PlayerEntity):
     def set_permanent_units_group(self, index: int = 0):
         if (cur_index := self.permanent_units_group) and cur_index != index:
             try:
-                self.game.permanent_units_groups[cur_index].discard(self)
+                self.game.units_manager.permanent_units_groups[cur_index].discard(self)
             except KeyError:
                 pass
         self.permanent_units_group = index

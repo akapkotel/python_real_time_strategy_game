@@ -156,5 +156,5 @@ def ignore_in_editor_mode(f):
     def wrapper(self, *args, **kwargs):
         if self.game.settings.editor_mode:
             return
-        return f(*args, **kwargs)
+        return f(self, *args, **kwargs)
     return wrapper

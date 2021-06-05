@@ -67,7 +67,7 @@ class SaveManager(Singleton):
             file['local_human_player_id'] = game.local_human_player.id
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
-            file['permanent_units_groups'] = game.permanent_units_groups
+            file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
         log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
@@ -140,7 +140,7 @@ class SaveManager(Singleton):
 
     @logger()
     def load_permanent_groups(self, groups):
-        self.game.permanent_units_groups = groups
+        self.game.units_manager.permanent_units_groups = groups
         for group_id, group in groups.items():
             for unit in group:
                 unit.set_permanent_units_group(group_id)

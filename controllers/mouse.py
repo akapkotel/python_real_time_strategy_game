@@ -9,24 +9,21 @@ from arcade import (
     draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
     load_textures
 )
-from arcade.key import LCTRL
 
 from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
-from effects.sound import (UNITS_MOVE_ORDERS_CONFIRMATIONS,
-                           UNITS_SELECTION_CONFIRMATIONS)
 from gameobjects.gameobject import GameObject
 from utils.improved_spritelists import SelectiveSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
-from units.unit_management import SelectionUnitMarket
+from units.unit_management import UnitsManager
 from units.units import Unit
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
     UiSpriteList
 )
-from utils.classes import HashedList, Singleton
+
 from utils.functions import get_path_to_file
 from utils.logging import log
 
@@ -75,16 +72,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # selection:
         self.mouse_drag_selection: Optional[MouseDragSelection] = None
 
-        # after left button is released, Units from drag-selection are selected
-        # permanently, and will be cleared after new selection or deselecting
-        # them with right-button click:
-        self.selected_units: HashedList[Unit] = HashedList()
-        self.selected_building: Optional[Building] = None
-        # for each selected Unit create SelectedUnitMarker, a Sprite showing
-        # that this unit is currently selected and will react for player's
-        # actions. Sprites are actually drawn and updated in Game class, but
-        # here we keep them cashed to easily manipulate them:
-        self.selection_markers: Set[SelectionUnitMarket] = set()
+        self.units_manager = UnitsManager(cursor=self)
 
         self.forced_cursor: Optional[int] = None
 
@@ -172,104 +160,24 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_left_button_release(self, x: float, y: float, modifiers: int):
         if not self.pointed_ui_element:
             if self.mouse_drag_selection is None:
-                self.on_left_click_without_selection(modifiers, x, y)
+                self.units_manager.on_left_click_without_selection(modifiers, x, y)
             else:
                 self.close_drag_selection()
 
-    def on_left_click_without_selection(self, modifiers, x, y):
-        pointed = self.pointed_unit or self.pointed_building
-        if pointed is not None:
-            self.on_player_entity_clicked(pointed)
-        elif units := self.selected_units:
-            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
-
     def close_drag_selection(self):
-        self.unselect_units()
+        self.units_manager.unselect_units()
         if units := [u for u in self.mouse_drag_selection.units]:
-            self.select_units(*units)
+            self.units_manager.select_units(*units)
         self.mouse_drag_selection = None
 
     def on_right_button_release(self, x: float, y: float, modifiers: int):
         self.forced_cursor = None
         if self.mouse_dragging:
             self.mouse_dragging = False
-        elif self.selected_units:
-            self.unselect_units()
-        elif self.selected_building is not None:
-            self.selected_building = None
-
-    def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if clicked.selectable:
-            self.on_friendly_player_entity_clicked(clicked)
-        elif units := self.selected_units:
-            self.on_hostile_player_entity_clicked(clicked, units)
-
-    def on_friendly_player_entity_clicked(self, clicked: PlayerEntity):
-        clicked: Union[Unit, Building]
-        if not clicked.is_building:
-            self.on_unit_clicked(clicked)
-        else:
-            self.on_building_clicked(clicked)
-
-    def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
-        cx, cy = clicked.position
-        x, y = self.game.pathfinder.get_closest_walkable_position(cx, cy)
-        self.send_units_to_pointed_location(units, x, y)
-
-    def on_terrain_click_with_units(self, x, y, modifiers, units, pointed):
-        if self.game.map.position_to_node(x, y).pathable:
-            self.create_movement_order(units, x, y)
-        else:
-            x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
-            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
-
-    def create_movement_order(self, units, x, y):
-        if LCTRL in self.game.window.pressed_keys:
-            self.game.pathfinder.enqueue_waypoint(units, x, y)
-        else:
-            self.send_units_to_pointed_location(units, x, y)
-        self.window.sound_player.play_sound(random.choice(UNITS_MOVE_ORDERS_CONFIRMATIONS))
-
-    def send_units_to_pointed_location(self, units, x, y):
-        self.game.pathfinder.navigate_units_to_destination(units, x, y)
-
-    def on_unit_clicked(self, clicked_unit: Unit):
-        self.unselect_units()
-        self.select_units(clicked_unit)
-
-    def select_units(self, *units: Unit):
-        self.selected_units = HashedList(units)
-        self.create_selection_markers(units)
-        self.game.update_interface_content(context=units)
-
-        self.window.sound_player.play_sound(random.choice(UNITS_SELECTION_CONFIRMATIONS))
-
-    def create_selection_markers(self, units):
-        for unit in units:
-            marker = SelectionUnitMarket(selected=unit)
-            self.selection_markers.add(marker)
-
-    def remove_from_selection_markers(self, entity: PlayerEntity):
-        for marker in self.selection_markers:
-            if marker.selected is entity:
-                marker.kill()
-
-    def unselect_units(self):
-        self.selected_units.clear()
-        self.clear_selection_markers()
-        self.game.update_interface_content()
-
-    def clear_selection_markers(self,
-                                killed: Set[SelectionUnitMarket] = None):
-        killed = killed if killed is not None else self.selection_markers
-        for marker in killed:
-            marker.kill()
-        self.selection_markers.difference_update(killed)
-
-    def on_building_clicked(self, clicked_building: Building):
-        # TODO: resolving possible building-related tasks for units first
-        self.selected_building = clicked_building
-        self.game.update_interface_content(context=clicked_building)
+        elif self.units_manager.selected_units:
+            self.units_manager.unselect_units()
+        elif self.units_manager.selected_building is not None:
+            self.units_manager.selected_building = None
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -285,14 +193,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:
                 new, lost = self.mouse_drag_selection.update(x, y)
-                self.update_selection_markers_set(new, lost)
+                self.units_manager.update_selection_markers_set(new, lost)
             else:
                 self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
-
-    def update_selection_markers_set(self, new, lost):
-        discarded = {m for m in self.selection_markers if m.selected in lost}
-        self.clear_selection_markers(discarded)
-        self.create_selection_markers(new)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         log(f'Mouse scrolled x: {scroll_x}, y: {scroll_y}')
@@ -301,14 +204,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
-        self.update_selection_markers()
+        self.units_manager.update_selection_markers()
         self.update_cursor_pointed()
         self.update_cursor_texture()
         self.update_animation()
-
-    def update_selection_markers(self):
-        for marker in self.selection_markers:
-            marker.update()
 
     def update_animation(self, delta_time: float = UPDATE_RATE):
         """
@@ -376,7 +275,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 self.set_texture(CURSOR_NORMAL_TEXTURE)
             elif (forced := self.forced_cursor) is not None:
                 self.set_texture(forced)
-            elif self.selected_units:
+            elif self.units_manager.selected_units:
                 return self.cursor_texture_with_units_selected()
             elif entity := (self.pointed_unit or self.pointed_building):
                 return self.cursor_texture_on_pointing_at_entity(entity)
@@ -391,7 +290,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def cursor_on_entity_with_selected_units(self, entity):
         if entity.selectable:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
-        elif entity.is_enemy(self.selected_units[0]):
+        elif entity.is_enemy(self.units_manager.selected_units[0]):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
 
     def cursor_on_terrain_with_selected_units(self):
@@ -426,8 +325,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @property
     def pointed_building(self) -> Optional[Building]:
-        return o if isinstance(o := self.pointed_gameobject,
-                               Building) else None
+        return o if isinstance(o := self.pointed_gameobject, Building) else None
 
     def get_pointed_of_type(self, type_: Type) -> Optional[Type]:
         return o if isinstance(o := self.pointed_gameobject, type_) else None
@@ -441,7 +339,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def draw_selected_units_counter(self):
         x, y = self.position
-        draw_text(str(len(self.selected_units)), x, y - 50, GREEN)
+        draw_text(str(len(self.units_manager.selected_units)), x, y - 50, GREEN)
 
 
 class MouseDragSelection:

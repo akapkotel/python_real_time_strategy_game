@@ -35,6 +35,7 @@ class Mission:
         self.conditions: List[Condition] = []
         self.victory_points: Dict[int, int] = defaultdict(int)
         self.required_victory_points: Dict[int, int] = defaultdict(int)
+        self.ended = False
 
     @property
     def get_descriptor(self) -> MissionDescriptor:
@@ -53,7 +54,7 @@ class Mission:
     def new_condition(self, condition: Condition, optional=False):
         condition.bind_mission(self)
         self.conditions.append(condition)
-        if not optional and condition.victory_points:
+        if not optional and condition.victory_points > 0:
             points = condition.victory_points
             self.required_victory_points[condition.player.id] += points
 
@@ -74,16 +75,18 @@ class Mission:
             if points >= self.required_victory_points[index]:
                 return self.end_mission(winner=self.game.players[index])
 
-    def end_mission(self, winner: Player):
+    def end_mission(self, winner: Player = None):
+        self.ended = True
         player_won = winner is self.game.local_human_player
         if self.campaign is not None and player_won:
             self.update_campaign()
-        log(f'Player: {winner} has won!')
-        self.notify_player(player_won, winner.name)
+        self.notify_player(player_won)
 
-    def notify_player(self, player_won, winner_name):
-        color = CLEAR_GREEN if player_won else RED
-        self.game.toggle_pause(dialog=f'{winner_name} won!', color=color)
+    def notify_player(self, player_won):
+        if player_won:
+            self.game.toggle_pause(dialog='Victory!', color=CLEAR_GREEN)
+        else:
+            self.game.toggle_pause(dialog='You have been defeated!', color=RED)
 
     def update_campaign(self):
         # : campaing management after Mission end

@@ -20,7 +20,7 @@ class Consequence:
         raise NotImplementedError
 
 
-class ChangeVictoryPoints(Consequence):
+class AddVictoryPoints(Consequence):
 
     def __init__(self, amount: int = 1):
         super().__init__()
@@ -28,6 +28,28 @@ class ChangeVictoryPoints(Consequence):
 
     def execute(self):
         self.mission.victory_points[self.player.id] += self.amount
+        
+        
+class Defeat(Consequence):
+    
+    def execute(self):
+        self.mission.end_mission(winner=False)
+
+
+class Victory(Consequence):
+
+    def execute(self):
+        self.mission.end_mission(winner=self.mission.game.local_human_player)
+
+
+class NewCondition(Consequence):
+
+    def __init__(self, condition: Condition):
+        super().__init__()
+        self.next_condition = condition
+
+    def execute(self):
+        self.mission.add(condition=self.next_condition)
 
 
 class Condition:
@@ -41,14 +63,14 @@ class Condition:
         self.player = player
         self.mission: Optional[Mission] = None
         self.victory_points = 0
-        self.consequences = []
+        self._consequences = []
 
     def __str__(self):
         return f'{self.__class__.__name__} for player: {self.player}'
 
     def set_vp(self, value: int) -> Condition:
         self.victory_points = value
-        self.add_consequence(ChangeVictoryPoints(value))
+        self.add_consequence(AddVictoryPoints(value))
         return self
 
     def consequences(self, *consequences: Consequence) -> Condition:
@@ -58,20 +80,20 @@ class Condition:
 
     def bind_mission(self, mission: Mission):
         self.mission = mission
-        for consequence in self.consequences:
+        for consequence in self._consequences:
             consequence.mission = mission
 
     def add_consequence(self, consequence: Consequence):
         consequence.player = self.player
         consequence.mission = self.mission
-        self.consequences.append(consequence)
+        self._consequences.append(consequence)
 
     @abstractmethod
     def is_met(self) -> bool:
         raise NotImplementedError
 
     def execute_consequences(self):
-        for consequence in self.consequences:
+        for consequence in self._consequences:
             consequence.execute()
             log(f'Condition {self} was met!', console=True)
 
