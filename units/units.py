@@ -19,7 +19,6 @@ from buildings.buildings import Building
 from game import UPDATE_RATE
 from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
 from players_and_factions.player import Player, PlayerEntity
-from units.units_tasking import TasksExecutor, UnitTask
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent

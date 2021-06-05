@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from typing import Optional, Tuple, List, Set, Union
-from collections import defaultdict
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
                     create_rectangle_filled)
@@ -9,6 +8,7 @@ from arcade.arcade_types import Color
 
 from game import Game
 
+from utils.logging import timer
 from utils.colors import WHITE, SAND
 from utils.data_types import GridPosition
 
@@ -17,6 +17,15 @@ class MiniMap:
     game: Optional[Game] = None
 
     def __init__(self, data: Union[List, Tuple]):
+        """
+        This class displays a little map-representation in the user interface
+        to allow player to faster navigate on the map and know, where are his
+        units etc. Assign it to the mini_map attribute of the Game class.
+
+        :param data: List -- accepts a list of values, if Game is loaded from
+        file, eg. when player loads saved game, list contains 6 elements, or 4
+        otherwise.
+        """
         self.loaded = len(data) > 4
         screen_size, minimap_size, tile_size, rows = data[:4]
 

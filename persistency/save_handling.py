@@ -10,12 +10,12 @@ from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
 from utils.logging import log, logger
 from utils.data_types import SavedGames
-from players_and_factions.player import Faction, Player
+from players_and_factions.player import Faction
 from map.map import Map, Pathfinder
 from user_interface.minimap import MiniMap
 from gameobjects.spawning import ObjectsFactory
 from effects.explosions import ExplosionsPool
-
+# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
@@ -170,4 +170,5 @@ class SaveManager(Singleton):
             log(f'{str(e)}', console=True)
 
 
+# these imports are placed here to avoid circular-imports issue:
 from game import Game

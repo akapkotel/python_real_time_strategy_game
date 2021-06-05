@@ -15,12 +15,10 @@ import time
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 
-import arcade
 from functools import partial
 from dataclasses import dataclass
 from arcade import (
-    SpriteList, create_line, draw_circle_outline, draw_line,
-    draw_rectangle_filled, draw_text
+    SpriteList, Window, draw_rectangle_filled, draw_text, run
 )
 from arcade.arcade_types import Color, Point
 
@@ -61,13 +59,14 @@ MINIMAP_HEIGHT = 200
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 100
-COLUMNS = 150
+ROWS = 40
+COLUMNS = 60
 
 FPS = 30
 GAME_SPEED = 1.0
 
 PLAYER_UNITS = 24
+CPU_UNITS = 10
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -84,6 +83,8 @@ class Settings:
     fps: int = FPS
     full_screen: bool = FULL_SCREEN
     debug: bool = DEBUG
+    debug_mouse: bool = False
+    debug_map: bool = False
     vehicles_threads: bool = True
     threads_fadeout: int = 2
     shot_blasts: bool = True
@@ -91,10 +92,14 @@ class Settings:
     editor_mode: bool = True
 
 
-class Window(arcade.Window, EventsCreator):
+class GameWindow(Window, EventsCreator):
+    """
+    This class represents the whole window-application which allows player to
+    manage his saved games, start new games, change settings etc.
+    """
 
     def __init__(self, width: int, height: int, update_rate: float):
-        arcade.Window.__init__(self, width, height, update_rate=update_rate)
+        Window.__init__(self, width, height, update_rate=update_rate)
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
@@ -287,6 +292,7 @@ class Window(arcade.Window, EventsCreator):
 
 
 class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
+    """This is an actual Game-instance, created when player starts the game."""
     instance: Optional[Game] = None
 
     def __init__(self, loader: Optional[Generator] = None):
@@ -342,12 +348,11 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
-        self.mission: Optional[Mission] = None
         self.current_mission: Optional[Mission] = None
 
-        self.debugged = []
-        self.map_grid = None
+        self.debugger: Optional[GameDebugger] = None
 
+        # list used only when Game is randomly-generated:
         self.things_to_load = [
             ['map', Map, 0.35, {'rows': ROWS, 'columns': COLUMNS,
              'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
@@ -358,7 +363,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ['mini_map', MiniMap, 0.10, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), ROWS)],
-            ['map_grid', self.create_map_debug_grid, 0.10]
+            ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
 
     def assign_reference_to_self_for_all_classes(self):
@@ -528,7 +533,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         unit_name = 'tank_medium.png'
         for player in (self.players.values()):
             node = random.choice(list(self.map.nodes.values()))
-            names = [unit_name] * (20 if player.id == 4 else PLAYER_UNITS)
+            amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
+            names = [unit_name] * amount
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
@@ -544,7 +550,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         no_units = NoUnitsLeft(self.local_human_player).set_vp(-1)
         mission.new_condition(no_units)
 
-        timer = TimePassed(self.local_human_player, 1).set_vp(1)
+        timer = TimePassed(self.local_human_player, 15).set_vp(1)
         mission.new_condition(timer)
 
         cpu_player = self.players[4]
@@ -616,7 +622,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def update_view(self, delta_time):
         self.update_timer()
-        self.debugged.clear()
+        if self.debugger is not None:
+            self.debugger.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players()
@@ -678,8 +685,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         super().on_draw()
         self.mini_map.draw()
         self.draw_timer()
-        if self.settings.debug:
-            self.draw_debugging()
+        if self.debugger is not None:
+            self.debugger.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
 
@@ -690,55 +697,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         f = format
         formatted = f"{f(t['h'], '02')}:{f(t['m'], '02')}:{f(t['s'], '02')}"
         draw_text(f"Time:{formatted}", x, y, GREEN, 15)
-
-    @timer(level=3, global_profiling_level=PROFILING_LEVEL)
-    def draw_debugging(self):
-        if self.map_grid is None:
-            self.map_grid = self.create_map_debug_grid()
-        self.draw_debugged_map_grid()
-        self.draw_debugged_mouse_pointed_nodes()
-        self.draw_debugged()
-
-    def draw_debugged_map_grid(self):
-        self.map_grid.draw()
-
-    def draw_debugged_mouse_pointed_nodes(self):
-        position = self.map.normalize_position(*self.window.cursor.position)
-        node = self.map.position_to_node(*position)
-
-        draw_circle_outline(node.x, node.y, 10, RED, 2)
-
-        for adj in node.adjacent_nodes + [node]:
-            color = to_rgba(WHITE, 25) if adj.walkable else to_rgba(RED, 25)
-            draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH, TILE_HEIGHT, color)
-            draw_circle_outline(*adj.position, 5, color=WHITE, border_width=1)
-
-    def draw_debugged(self):
-        self.draw_debug_paths()
-        self.draw_debug_lines_of_sight()
-        self.draw_debug_units()
-
-    def draw_debug_units(self):
-        unit: Unit
-        for unit in self.units:
-            x, y = unit.position
-            draw_text(str(unit.id), x, y + 40, color=GREEN)
-            if (target := unit.targeted_enemy) is not None:
-                draw_text(str(target.id), x, y - 40, color=RED)
-
-    def draw_debug_paths(self):
-        for path in (u.path for u in self.local_human_player.units if u.path):
-            for i, point in enumerate(path):
-                try:
-                    end = path[i + 1]
-                    draw_line(*point, *end, color=GREEN, line_width=1)
-                except IndexError:
-                    pass
-
-    def draw_debug_lines_of_sight(self):
-        for unit in (u for u in self.local_human_player.units if u.known_enemies):
-            for enemy in unit.known_enemies:
-                draw_line(*unit.position, *enemy.position, color=RED)
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
@@ -757,37 +715,12 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         else:
             self.dialog = (text, txt_color, color)
 
-    def create_map_debug_grid(self) -> arcade.ShapeElementList:
-        grid = arcade.ShapeElementList()
-        h_offset = TILE_HEIGHT // 2
-        w_offset = TILE_WIDTH // 2
-        # horizontal lines:
-        for i in range(self.map.rows):
-            y = i * TILE_HEIGHT
-            h_line = create_line(0, y, self.map.width, y, BLACK)
-            grid.append(h_line)
-
-            y = i * TILE_HEIGHT + h_offset
-            h2_line = create_line(w_offset, y, self.map.width, y, WHITE)
-            grid.append(h2_line)
-        # vertical lines:
-        for j in range(self.map.columns * 2):
-            x = j * TILE_WIDTH
-            v_line = create_line(x, 0, x, self.map.height, BLACK)
-            grid.append(v_line)
-
-            x = j * TILE_WIDTH + w_offset
-            v2_line = create_line(x, h_offset, x, self.map.height, WHITE)
-            grid.append(v2_line)
-        return grid
-
     def stop_all_units(self):
         for unit in self.window.cursor.selected_units:
             unit.stop_completely()
 
     def unload(self):
-        for updated in (u for u in self.updated if isinstance(u, SpriteList)):
-            updated = None
+        self.updated.clear()
         self.local_human_player = None
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
@@ -813,14 +746,15 @@ if __name__ == '__main__':
     from scenarios.conditions import NoUnitsLeft, MapRevealed, TimePassed
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
+    from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager
 
     if __status__ == 'development' and PYPROFILER:
         from pyprofiler import start_profile, end_profile
         with start_profile() as profiler:
-            window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
-            arcade.run()
+            window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+            run()
         end_profile(profiler, 35, True)
     else:
-        window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
-        arcade.run()
+        window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+        run()

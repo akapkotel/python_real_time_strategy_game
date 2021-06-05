@@ -21,7 +21,7 @@ from utils.improved_spritelists import SelectiveSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
 from units.unit_management import SelectionUnitMarket
-from units.units import Unit, UnitTask
+from units.units import Unit
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
     UiSpriteList
@@ -85,8 +85,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # actions. Sprites are actually drawn and updated in Game class, but
         # here we keep them cashed to easily manipulate them:
         self.selection_markers: Set[SelectionUnitMarket] = set()
-
-        self.attached_task: Optional[UnitTask] = None
 
         self.forced_cursor: Optional[int] = None
 
