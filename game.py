@@ -53,14 +53,14 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
-MINIMAP_WIDTH = 380
-MINIMAP_HEIGHT = 200
+MINIMAP_WIDTH = 388
+MINIMAP_HEIGHT = 197
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 40
-COLUMNS = 60
+ROWS = 50
+COLUMNS = 50
 
 FPS = 30
 GAME_SPEED = 1.0
@@ -83,13 +83,13 @@ class Settings:
     fps: int = FPS
     full_screen: bool = FULL_SCREEN
     debug: bool = DEBUG
-    debug_mouse: bool = False
+    debug_mouse: bool = True
     debug_map: bool = False
     vehicles_threads: bool = True
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
-    editor_mode: bool = False
+    editor_mode: bool = True
 
 
 class GameWindow(Window, EventsCreator):
@@ -248,7 +248,8 @@ class GameWindow(Window, EventsCreator):
         """
         game_map = self.game_view.map
         left, right, bottom, top = self.get_viewport()
-        new_left = clamp(left - dx, game_map.width - SCREEN_WIDTH, 0)
+        offset = SCREEN_WIDTH - 400
+        new_left = clamp(left - dx, game_map.width - offset, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
         self.update_viewport_coordinates(new_bottom, new_left)
 
@@ -526,8 +527,10 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def test_units_spawning(self):
         spawned_units = []
         unit_name = 'tank_medium.png'
+        walkable = [w for w in list(self.map.nodes.values()) if w.walkable]
         for player in (self.players.values()):
-            node = random.choice(list(self.map.nodes.values()))
+            node = random.choice(walkable)
+            walkable.pop(walkable.index(node))
             amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
             names = [unit_name] * amount
             spawned_units.extend(
@@ -536,7 +539,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.units.extend(spawned_units)
 
     def test_missions(self):
-        self.current_mission = mission = Mission(1, 'Test Mission', 'Map 1')
+        self.current_mission = mission = Mission('Test Mission', 'Map 1')
         mission.add()
 
         map_revealed = MapRevealed(self.local_human_player).set_vp(1)
@@ -545,21 +548,15 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         no_units = NoUnitsLeft(self.local_human_player).consequences(Defeat())
         mission.new_condition(no_units)
 
-        timer = TimePassed(self.local_human_player, 15).set_vp(1)
-        mission.new_condition(timer)
+        mission_timer = TimePassed(self.local_human_player, 10).set_vp(1)
+        mission.new_condition(mission_timer)
 
         cpu_player = self.players[4]
         cpu_no_units = NoUnitsLeft(cpu_player).consequences(Victory())
         mission.new_condition(cpu_no_units)
 
-    def load_player_configs(self) -> Dict[str, Any]:
-        configs: Dict[str, Any] = {}
-        # TODO
-        return configs
-
-    @staticmethod
-    def next_free_player_color() -> Color:
-        return 0, 0, 0
+        campaign = Campaign(missions=['First mission', 'Second', 'Last mission'])
+        print(campaign.missions)
 
     def register(self, acquired: OwnedObject):
         acquired: Union[Player, Faction, PlayerEntity, UiElementsBundle]
@@ -611,9 +608,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def get_notified(self, *args, **kwargs):
         pass
-
-    def show_dialog(self, dialog_name: str):
-        print(dialog_name)
 
     def update_view(self, delta_time):
         self.update_timer()
@@ -723,6 +717,19 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.window.game_view = None
 
 
+def run_profiled_game():
+    from pyprofiler import start_profile, end_profile
+    with start_profile() as profiler:
+        GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+        run()
+    end_profile(profiler, 35, True)
+
+
+def run_game():
+    GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+    run()
+
+
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     from map.map import Map, Pathfinder
@@ -740,7 +747,7 @@ if __name__ == '__main__':
     from gameobjects.spawning import ObjectsFactory
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
-    from scenarios.missions import Mission
+    from scenarios.missions import Mission, Campaign
     from scenarios.conditions import (
         NoUnitsLeft, MapRevealed, TimePassed, Defeat, Victory
     )
@@ -750,11 +757,6 @@ if __name__ == '__main__':
     from persistency.save_handling import SaveManager
 
     if __status__ == 'development' and PYPROFILER:
-        from pyprofiler import start_profile, end_profile
-        with start_profile() as profiler:
-            window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
-            run()
-        end_profile(profiler, 35, True)
+        run_profiled_game()
     else:
-        window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
-        run()
+        run_game()

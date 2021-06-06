@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from utils.colors import CLEAR_GREEN, RED
 
-from typing import List, Dict
+from typing import List, Tuple, Dict
 from collections import namedtuple, defaultdict
 
 from utils.logging import log
@@ -26,8 +26,8 @@ class Mission:
     """
     game = None
 
-    def __init__(self, id: int, name: str, map_name: str, campaign: str = None):
-        self.id = id
+    def __init__(self, name: str, map_name: str, campaign: Campaign = None, index: int = 0):
+        self.index = index  # index in campaign missions dict
         self.campaign = campaign
         self.name = name
         self.description = ''
@@ -36,6 +36,14 @@ class Mission:
         self.victory_points: Dict[int, int] = defaultdict(int)
         self.required_victory_points: Dict[int, int] = defaultdict(int)
         self.ended = False
+        self.winner = None
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def __getstate__(self) -> Dict:
+        state = self.__dict__.copy()
+        return state
 
     @property
     def get_descriptor(self) -> MissionDescriptor:
@@ -75,19 +83,38 @@ class Mission:
             if points >= self.required_victory_points[index]:
                 return self.end_mission(winner=self.game.players[index])
 
-    def end_mission(self, winner: Player = None):
+    def end_mission(self, winner: Player):
         self.ended = True
-        player_won = winner is self.game.local_human_player
-        if self.campaign is not None and player_won:
-            self.update_campaign()
-        self.notify_player(player_won)
+        self.winner = winner
+        self.notify_player(winner is self.game.local_human_player)
 
-    def notify_player(self, player_won):
+    def notify_player(self, player_won: bool):
         if player_won:
             self.game.toggle_pause(dialog='Victory!', color=CLEAR_GREEN)
         else:
             self.game.toggle_pause(dialog='You have been defeated!', color=RED)
 
-    def update_campaign(self):
-        # : campaing management after Mission end
-        ...
+    def quit_mission(self):
+        if self.campaign is not None and self.winner is self.game.local_human_player:
+            self.campaign.update(finished_mission=self)
+        self.game.window.quit_current_game()
+
+
+class Campaign:
+
+    def __init__(self, missions: List[str]):
+        self.name = None
+        self.missions: Dict[int, List] = {  # [str: name, bool: if unblocked]
+            i: [mission_name, not i] for i, mission_name in enumerate(missions)
+        }
+
+    def update(self, finished_mission: Mission):
+        try:  # unblock next mission of campaign:
+            self.missions[finished_mission.index + 1][1] = True
+        except (KeyError, IndexError):
+            pass
+
+
+class CampaignManager:
+    # TODO
+    pass

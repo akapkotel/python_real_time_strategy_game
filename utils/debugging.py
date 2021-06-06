@@ -39,7 +39,9 @@ class GameDebugger:
         if self.debug_map and self.map_grid is None:
             self.map_grid = self.create_map_debug_grid()
         if self.debug_mouse:
-            self.log = f'Mouse at: {self.game.window.cursor.position}'
+            position = self.game.window.cursor.position
+            grid = self.game.map.position_to_grid(*position)
+            self.log = f'Mouse at: {position}, node: {grid}'
 
     def draw(self):
         if self.debug_map:

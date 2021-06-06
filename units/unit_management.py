@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import random
 from typing import Optional, Sequence, Set, Tuple, Dict, Iterator, Union
 
 from arcade import Sprite, SpriteSolidColor, load_textures
@@ -9,8 +8,9 @@ from arcade.arcade_types import Color, Point
 from arcade.key import LCTRL
 
 from buildings.buildings import Building
-from effects.sound import UNITS_SELECTION_CONFIRMATIONS, \
-    UNITS_MOVE_ORDERS_CONFIRMATIONS
+from effects.sound import (
+    UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
+)
 from utils.classes import HashedList
 from utils.colors import GREEN, RED, YELLOW
 from game import Game
@@ -201,7 +201,7 @@ class UnitsManager:
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)
-        self.window.sound_player.play_sound(random.choice(UNITS_MOVE_ORDERS_CONFIRMATIONS))
+        self.window.sound_player.play_random(UNITS_MOVE_ORDERS_CONFIRMATIONS)
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
@@ -242,7 +242,7 @@ class UnitsManager:
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
         self.game.update_interface_content(context=units)
-        self.window.sound_player.play_sound(random.choice(UNITS_SELECTION_CONFIRMATIONS))
+        self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
 
     def create_selection_markers(self, units):
         for unit in units:

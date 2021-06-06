@@ -8,9 +8,12 @@ from arcade.arcade_types import Color
 
 from game import Game
 
-from utils.logging import timer
-from utils.colors import WHITE, SAND
+from utils.colors import WHITE, SAND, RED
 from utils.data_types import GridPosition
+
+
+MARGIN_TOP = 5  # since our mini-map area is distanced little from screen edges
+MARGIN_RIGHT = 5
 
 
 class MiniMap:
@@ -29,34 +32,46 @@ class MiniMap:
         self.loaded = len(data) > 4
         screen_size, minimap_size, tile_size, rows = data[:4]
 
-        self.screen_size: Tuple[int, int] = screen_size
-        self.width: int = minimap_size[0]
-        self.height: int = minimap_size[1]
+        self.screen_width: int = screen_size[0]
+        self.screen_height: int = screen_size[1]
+        self.max_width: int = minimap_size[0]
+        self.max_height: int = minimap_size[1]
         self.rows: int = rows
 
-        self.position = (
-            screen_size[0] - (self.width // 2),
-            screen_size[1] - (self.height // 2)
-        )
-
         self.ratio = ratio = self.set_map_to_mini_map_ratio()
+        self.width = self.game.map.width * ratio
+        self.height = self.game.map.height * ratio
+
+        self.position = self.get_position()
 
         self.tile_size = tile_size if self.loaded else (tile_size[0] * ratio, tile_size[1] * ratio)
 
         self.revealed_count = 0
-        # cache visible to save
+
+        # cache visible map area for saving it:
         self.drawn_area: Set[GridPosition] = set()
 
         self.drawn_entities: List[List[float, float, Color, int]] = []
 
-        self.shapes_lists = self.create_shapes_lists()
-
         self.viewport = self.update_viewport()
+
+        self.shapes_lists = self.create_shapes_lists()
 
         self.visible = set()
 
         if self.loaded:
             self.reveal_minimap_area(data[-1])
+
+    def set_map_to_mini_map_ratio(self) -> float:
+        """
+        To make sure that mini-map would fit into the interface slot, calculate
+        a common ratio used to translate both map dimensions from world to
+        mini-map and pick ratio for smaller world-map dimension.
+        """
+        if self.game.map.width < self.game.map.height:
+            return self.max_width / self.game.map.width
+        else:
+            return self.max_height / self.game.map.height
 
     def create_shapes_lists(self):
         """
@@ -70,14 +85,8 @@ class MiniMap:
             row: ShapeElementList() for row in range(self.rows)
         }
         dx, dy = self.minimap_left_and_bottom
-        self.move_shapes_lists(dx + 5, dy + 65)
+        self.move_shapes_lists(dx + 11, dy + 60)
         return self.shapes_lists
-
-    def set_map_to_mini_map_ratio(self) -> float:
-        if self.height < self.width:
-            return self.height / self.game.map.height
-        else:
-            return self.width / self.game.map.width
 
     def update(self):
         self.update_drawn_units()
@@ -86,9 +95,13 @@ class MiniMap:
 
     def update_position(self, dx, dy):
         self.move_shapes_lists(dx, dy)
-        _, right, _, top = self.game.viewport
-        self.position = (right - 195, top - 95)
+        self.position = self.get_position()
         self.viewport = self.update_viewport()
+
+    def get_position(self):
+        _, right, _, top = self.game.viewport
+        return (right - self.max_width // 2 - MARGIN_RIGHT,
+               top - self.max_height // 2 - MARGIN_TOP)
 
     def move_shapes_lists(self, dx, dy):
         shapes_list: ShapeElementList
@@ -97,15 +110,16 @@ class MiniMap:
 
     def update_viewport(self):
         x, y = self.game.window.screen_center
+        left, bottom = self.minimap_left_and_bottom
         return [
-            self.position[0] - (self.width // 2) + (x * self.ratio),
-            self.position[1] - (self.height // 2) + (y * self.ratio),
-            (self.screen_size[0] - 400) * self.ratio,
-            self.screen_size[1] * self.ratio
+            left + ((x - 200) * self.ratio),
+            bottom + (y * self.ratio),
+            (self.screen_width - 400) * self.ratio,
+            self.screen_height * self.ratio
         ]
 
     def update_drawn_units(self):
-        left, bottom = self.cached_left_and_bottom = self.minimap_left_and_bottom
+        left, bottom = self.minimap_left_and_bottom
         self.drawn_entities = [
             [left + (entity.center_x * self.ratio),
              bottom + (entity.center_y * self.ratio),
@@ -140,10 +154,11 @@ class MiniMap:
             draw_point(*entity)
         # draw current viewport position on the game map:
         draw_rectangle_outline(*self.viewport, color=WHITE)
+        draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
 
     def save(self):
         return [
-            self.screen_size,
+            (self.screen_width, self.screen_height),
             (self.width, self.height),
             self.tile_size,
             self.rows,

@@ -40,12 +40,11 @@ class KeyboardHandler(ToggledElement):
             self.on_numeric_key_press(int(digit))
 
     def on_escape_pressed(self):
-        if self.window.game_view is None:
+        game = self.window.game_view
+        if game is None or not game.is_running:
             self.window.close()
-        elif not self.window.game_view.is_running:
-            self.window.close()
-        elif self.window.game_view.current_mission.ended:
-            self.window.quit_current_game()
+        elif game.current_mission.ended:
+            game.current_mission.quit_mission()
         else:
             self.window.show_view(self.window.menu_view)
 

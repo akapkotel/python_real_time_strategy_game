@@ -190,7 +190,7 @@ class Unit(PlayerEntity):
     def has_destination(self) -> bool:
         return self.path or self.awaited_path or self in Pathfinder.instance
 
-    def wait_for_free_path(self, path: deque):
+    def wait_for_free_path(self, path: Union[deque, MapPath]):
         """
         Waiting for free path is useful when next node is only temporarily
         blocked (blocking Unit is moving) and allows to avoid pathfinding
@@ -220,7 +220,7 @@ class Unit(PlayerEntity):
     def find_free_tile_to_unblock_way(self, path) -> bool:
         if adjacent := self.current_node.walkable_adjacent:
             free_tile = random.choice(adjacent)
-            self.move_to(self.map.position_to_grid(*free_tile.position))
+            self.move_to(free_tile.grid)
             return True
         return False
 
@@ -243,7 +243,8 @@ class Unit(PlayerEntity):
         self.path_wait_counter -= 1
         if not self.path_wait_counter:
             path = self.awaited_path
-            if self.map.position_to_node(*path[0]).walkable or len(path) < 20:
+            node = self.map.position_to_node(*path[0])
+            if node.walkable or len(path) < 20:
                 self.restart_path(path)
             else:
                 self.wait_for_free_path(path)
@@ -311,7 +312,7 @@ class Unit(PlayerEntity):
 
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
-        if self.player is self.game.local_human_player and not other.is_building:
+        if self.player is self.game.local_human_player and not other.is_unit:
             if other.current_node not in self.observed_nodes:
                 return False
         return super().visible_for(other)

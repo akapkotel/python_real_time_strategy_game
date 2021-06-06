@@ -295,7 +295,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def cursor_on_terrain_with_selected_units(self):
         grid = self.game.map.position_to_grid(*self.position)
-        if self.game.map.nodes[grid].walkable or grid not in self.game.fog_of_war.explored:
+        if self.game.map.walkable(grid) or grid in self.game.fog_of_war.unexplored:
             self.set_texture(CURSOR_MOVE_TEXTURE)
         else:
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)

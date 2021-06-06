@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import random
 from typing import Dict, List, Optional
 from collections import defaultdict
 
@@ -130,6 +131,10 @@ class AudioPlayer(Singleton):
         if self.current_music is not None:
             self._stop_music_track()
         self._play_music_track(name, loop, volume)
+
+    def play_random(self, sounds_list: List[str], volume: Optional[float] = None):
+        """Play sound randomly chosen from list of sounds names."""
+        self.play_sound(random.choice(sounds_list), volume)
 
     def _stop_music_track(self):
         try:

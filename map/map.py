@@ -156,6 +156,12 @@ class Map(GridHandler):
     def on_map_area(self, x: Number, y: Number) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
 
+    def walkable(self, grid) -> bool:
+        try:
+            return self.nodes[grid].walkable
+        except KeyError:
+            return False
+
     def walkable_adjacent(self, x, y) -> List[MapNode]:
         return [n for n in self.adjacent_nodes(x, y) if n.walkable]
 
@@ -171,22 +177,24 @@ class Map(GridHandler):
         return self.grid_to_node(self.position_to_grid(x, y))
 
     def grid_to_node(self, grid: GridPosition) -> MapNode:
-        return self.nodes[grid]
+        return self.nodes.get(grid)
 
     def generate_sectors(self):
-        for x in range(self.columns // SECTOR_SIZE + 1):
-            for y in range(self.rows // SECTOR_SIZE + 1):
-                self.sectors[(x, y)] = Sector((x, y))
+        for x in range(self.columns):
+            sector_x = x // SECTOR_SIZE
+            for y in range(self.rows):
+                sector_y = y // SECTOR_SIZE
+                self.sectors[(sector_x, sector_y)] = Sector((sector_x, sector_y))
         log(f'Created {len(self.sectors)} map sectors.')
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     @logger(console=True)
     def generate_nodes(self):
-        for x in range(self.columns + 1):
+        for x in range(self.columns):
             sector_x = x // SECTOR_SIZE
-            for y in range(self.rows + 1):
+            for y in range(self.rows):
                 sector_y = y // SECTOR_SIZE
-                sector = self.sectors[sector_x, sector_y]
+                sector = self.sectors[(sector_x, sector_y)]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
                 self.create_map_sprite(*node.position)
         log(f'Generated {len(self.nodes)} map nodes', console=True)
@@ -297,7 +305,7 @@ class Sector(GridHandler, ABC):
     def in_bounds(self, grids: List[GridPosition]):
         # TODO: fix setting correct bounds for sectors
         c, r = self.map.columns // SECTOR_SIZE, self.map.rows // SECTOR_SIZE
-        return [p for p in grids if 0 <= p[0] < c and 0 <= p[1] < r]
+        return [p for p in grids if 0 <= p[0] < c + 1 and 0 <= p[1] < r + 1]
 
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         return [(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS]

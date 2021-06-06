@@ -61,7 +61,7 @@ class SaveManager(Singleton):
             file['settings'] = self.game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
             file['map'] = game.map.save()
-            file['missions'] = game.current_mission
+            file['mission'] = game.current_mission
             file['factions'] = [f.save() for f in game.factions.values()]
             file['players'] = game.players
             file['local_human_player_id'] = game.local_human_player.id
@@ -79,12 +79,12 @@ class SaveManager(Singleton):
             yield self.load_settings(file['settings'])
             yield self.load_viewports(file['viewports'])
             yield self.load_map(file['map'])
-            yield self.load_mission(file['missions'])
             yield self.load_factions(file['factions'])
             yield self.load_players(file['players'])
             yield self.load_local_human_player(file['local_human_player_id'])
             yield self.load_entities(file['units'])
             yield self.load_entities(file['buildings'])
+            yield self.load_mission(file['mission'])
             yield self.load_permanent_groups(file['permanent_units_groups'])
             yield self.load_fog_of_war(file['fog_of_war'])
             yield self.load_mini_map(file['mini_map'])

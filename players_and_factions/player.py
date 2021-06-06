@@ -175,7 +175,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.id = id or new_id(self.game.players)
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
-        self.color = color or self.game.next_free_player_color()
+        self.color = color
 
         self.known_technologies: Set[int] = set()
         self.current_research: Dict[int, float] = defaultdict()
@@ -316,6 +316,7 @@ class PlayerEntity(GameObject):
 
         # this is checked so frequent that it is worth caching it:
         self.is_building = isinstance(self, Building)
+        self.is_unit = not self.is_building
         self.is_infantry = isinstance(self, Infantry)
 
         self._max_health = 100

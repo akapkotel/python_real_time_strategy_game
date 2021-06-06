@@ -31,12 +31,22 @@ class AddVictoryPoints(Consequence):
         
         
 class Defeat(Consequence):
+    """
+    Set it as a consequence of a Condition to trigger player defeat.
+    """
+
+    def __init__(self, player: Player = None):
+        super().__init__()
+        self.player = player
     
     def execute(self):
-        self.mission.end_mission(winner=False)
+        self.mission.end_mission(winner=self.player)
 
 
 class Victory(Consequence):
+    """
+    Set it as a consequence of a Condition to trigger HUMAN-PLAYER victory.
+    """
 
     def execute(self):
         self.mission.end_mission(winner=self.mission.game.local_human_player)
@@ -55,7 +65,7 @@ class NewCondition(Consequence):
 class Condition:
     """
     Condition is a flag-class checked against, to evaluate if any of the
-    Players achieved his objectives.
+    Players achieved his objectives. You can use them as events also.
     """
 
     def __init__(self, player: Player):
@@ -84,7 +94,8 @@ class Condition:
             consequence.mission = mission
 
     def add_consequence(self, consequence: Consequence):
-        consequence.player = self.player
+        if consequence.player is None:
+            consequence.player = self.player
         consequence.mission = self.mission
         self._consequences.append(consequence)
 
@@ -114,12 +125,21 @@ class MapRevealed(Condition):
 
 
 class NoUnitsLeft(Condition):
-    """Beware that this Condition checks against Buildings also!"""
+    """Beware that this Condition checks bot against Units and Buildings!"""
 
-    def __init__(self, player: Player):
+    def __init__(self, player: Player = None, faction: Faction = None):
+        """
+        :param player: Player
+        :param faction: Faction -- set this Condition to the CPU-controlled
+        Faction to track if all CPU-players were eliminated by the human with
+        just one Condition.
+        """
         super().__init__(player)
+        self.faction = faction
 
     def is_met(self) -> bool:
+        if self.faction is not None:
+            return len(self.faction.units) + len(self.faction.buildings) == 0
         return len(self.player.units) + len(self.player.buildings) == 0
 
 
@@ -168,7 +188,7 @@ class HasTechnology(Condition):
 
 class HasResource(Condition):
 
-    def __init__(self,player: Player, resource: str, amount: int):
+    def __init__(self, player: Player, resource: str, amount: int):
         super().__init__(player)
         self.resource = resource
         self.amount = amount
