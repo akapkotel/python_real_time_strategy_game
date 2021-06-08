@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import logging
 import os
-from functools import lru_cache, wraps
+from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 import PIL
@@ -151,10 +150,17 @@ def make_texture(width: int, height: int, color: Color) -> Texture:
     return Texture(name, img)
 
 
-def ignore_in_editor_mode(f):
-    @wraps(f)
+def ignore_in_editor_mode(func):
     def wrapper(self, *args, **kwargs):
         if self.game.settings.editor_mode:
             return
-        return f(self, *args, **kwargs)
+        return func(self, *args, **kwargs)
+    return wrapper
+
+
+def ignore_in_menu(func):
+    def wrapper(self, *args, **kwargs):
+        if not self.window.is_game_running:
+            return
+        return func(self, *args, **kwargs)
     return wrapper

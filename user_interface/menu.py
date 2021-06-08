@@ -80,16 +80,12 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         options_menu.extend(
             [
                 Checkbox('menu_checkbox.png', x, next(y),
-                    'Sound:', 20, ticked=window.sound_player.sound_on,
-                    variable=(window.sound_player, 'sound_on'), subgroup=2
-                ),
-                Checkbox('menu_checkbox.png', x, next(y),
-                    'Music:', 20, ticked=window.sound_player.sound_on,
+                    'Music:', 20, ticked=window.sound_player.music_on,
                     variable=(window.sound_player, 'music_on'), subgroup=2
                 ),
                 Checkbox('menu_checkbox.png', x, next(y),
-                    'Sound effects:', 20, ticked=window.sound_player.sound_on,
-                    variable=(window.sound_player, '_sound_effects_on'),
+                    'Sound effects:', 20, ticked=window.sound_player.sound_effects_on,
+                    variable=(window.sound_player, 'sound_effects_on'),
                     subgroup=2
                 )
             ]

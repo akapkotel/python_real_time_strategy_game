@@ -57,7 +57,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
             'id': self.id,
             'object_name': self.object_name,
             'position': self._position,  # (self.center_x, self.center_y)
-            'scheduled_events': self.scheduled_events_to_shelve_data()
+            'scheduled_events': self.shelve_scheduled_events()
         }
 
     def destructible(self, weight: UnitWeight = 0) -> bool:

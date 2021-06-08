@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import random
 from typing import List, Optional, Set, Tuple, Type, Union
 
 from arcade import (
@@ -24,8 +23,8 @@ from user_interface.user_interface import (
     UiSpriteList
 )
 
-from utils.functions import get_path_to_file
-from utils.logging import log
+from utils.functions import get_path_to_file, ignore_in_menu
+from utils.logging import log, logger
 
 DrawnAndUpdated = Union[SpriteList, SelectiveSpriteList, 'MouseCursor']
 
@@ -128,6 +127,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
 
+    @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_click(x, y, modifiers)
@@ -135,18 +135,30 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_click(x, y, modifiers)
         elif button is MOUSE_BUTTON_MIDDLE:
             self.on_middle_button_click(x, y, modifiers)
-        else:
-            log(f'Unassigned mouse-button clicked: {button}')
 
+    @logger()
     def on_left_button_click(self, x: float, y: float, modifiers: int):
-        log(f'Left-clicked at x:{x}, y: {y}')
-        if (ui_elem := self.pointed_ui_element) is not None and ui_elem.active:
-            ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
+        if (ui_elem := self.pointed_ui_element) is not None:
+            if ui_elem.active:
+                ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
+            else:
+                left, _, bottom, _ = self.game.viewport
+                self.evaluate_mini_map_click(x + left, y + bottom)
 
+    @ignore_in_menu
+    def evaluate_mini_map_click(self, x, y):
+        if (position := self.game.mini_map.cursor_inside(x, y)) is not None:
+            if units := self.units_manager.selected_units:
+                self.units_manager.on_terrain_click_with_units(*position, None, units)
+            else:
+                self.window.move_viewport_to_the_position(*position)
+
+    @logger()
     def on_right_button_click(self, x: float, y: float, modifiers: int):
         log(f'Right-clicked at x:{x}, y: {y}')
         # TODO: clearing selections, context menu?
 
+    @logger()
     def on_middle_button_click(self, x: float, y: float, modifiers: int):
         log(f'Middle-clicked at x:{x}, y: {y}')
 
@@ -158,11 +170,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
-        if not self.pointed_ui_element:
-            if self.mouse_drag_selection is None:
+        if self.mouse_drag_selection is None:
+            if self.pointed_ui_element is None:
                 self.units_manager.on_left_click_without_selection(modifiers, x, y)
-            else:
-                self.close_drag_selection()
+        else:
+            self.close_drag_selection()
 
     def close_drag_selection(self):
         self.units_manager.unselect_units()
@@ -176,12 +188,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.mouse_dragging = False
         elif self.units_manager.selected_units:
             self.units_manager.unselect_units()
-        elif self.units_manager.selected_building is not None:
+        else:
             self.units_manager.selected_building = None
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
-        if self.is_game_loaded_and_running:
+        if self.window.is_game_running:
             if buttons == MOUSE_BUTTON_LEFT:
                 self.on_left_button_drag(dx, dy, x, y)
             elif buttons == MOUSE_BUTTON_RIGHT:
@@ -192,13 +204,16 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.game.map.on_map_area(x, y):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:
-                new, lost = self.mouse_drag_selection.update(x, y)
-                self.units_manager.update_selection_markers_set(new, lost)
+                self.update_drag_selection(x, y)
             else:
                 self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
 
+    def update_drag_selection(self, x, y):
+        if self.pointed_ui_element is None:
+            new, lost = self.mouse_drag_selection.update(x, y)
+            self.units_manager.update_selection_markers_set(new, lost)
+
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        log(f'Mouse scrolled x: {scroll_x}, y: {scroll_y}')
         if self.pointed_scrollable is not None:
             self.pointed_scrollable.on_mouse_scroll(scroll_x, scroll_y)
 
@@ -270,7 +285,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.pointed_ui_element = pointed
 
     def update_cursor_texture(self):
-        if self.is_game_loaded_and_running:
+        if self.window.is_game_running:
             if self.pointed_ui_element:
                 self.set_texture(CURSOR_NORMAL_TEXTURE)
             elif (forced := self.forced_cursor) is not None:
@@ -334,12 +349,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
         super().draw()
-        if self.is_game_loaded_and_running and self.game.settings.debug:
-            self.draw_selected_units_counter()
-
-    def draw_selected_units_counter(self):
-        x, y = self.position
-        draw_text(str(len(self.units_manager.selected_units)), x, y - 50, GREEN)
 
 
 class MouseDragSelection:

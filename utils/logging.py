@@ -44,8 +44,7 @@ def timer(level=0, global_profiling_level=0, forced=False):
                     execution_time = perf_counter() - start_time
 
                     fps = 1 / execution_time
-                    fr = f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}"
-                    log(fr, console=True)
+                    log(f"{func.__name__} finished in {execution_time:.4f} secs. FPS:{fps}", console=True)
                     return result
                 except Exception as e:
                     log(str(e), console=True)

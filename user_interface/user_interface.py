@@ -619,6 +619,7 @@ class Checkbox(UiElement):
             self.toggle_variable()
 
     def toggle_variable(self):
+        print(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
         setattr(self.variable[0], self.variable[1], self.ticked)
 
     def draw(self):

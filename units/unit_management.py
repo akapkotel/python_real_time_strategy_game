@@ -16,7 +16,7 @@ from utils.colors import GREEN, RED, YELLOW
 from game import Game
 from players_and_factions.player import PlayerEntity
 from units.units import Unit
-from utils.functions import get_path_to_file
+from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
 
 HEALTH_BAR_WIDTH = 5
@@ -182,19 +182,21 @@ class UnitsManager:
         # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
+    @ignore_in_menu
     def on_left_click_without_selection(self, modifiers, x, y):
         pointed = self.cursor.pointed_unit or self.cursor.pointed_building
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
         elif units := self.selected_units:
-            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
+            self.on_terrain_click_with_units(x, y, modifiers, units)
 
-    def on_terrain_click_with_units(self, x, y, modifiers, units, pointed):
-        if self.game.map.position_to_node(x, y).pathable:
+    @ignore_in_menu
+    def on_terrain_click_with_units(self, x, y, modifiers, units):
+        if self.game.map.position_to_node(x, y).walkable:
             self.create_movement_order(units, x, y)
         else:
             x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
-            self.on_terrain_click_with_units(x, y, modifiers, units, pointed)
+            self.on_terrain_click_with_units(x, y, modifiers, units)
 
     def create_movement_order(self, units, x, y):
         if LCTRL in self.game.window.pressed_keys:
@@ -214,10 +216,10 @@ class UnitsManager:
 
     def on_friendly_player_entity_clicked(self, clicked: PlayerEntity):
         clicked: Union[Unit, Building]
-        if not clicked.is_building:
-            self.on_unit_clicked(clicked)
-        else:
+        if clicked.is_building:
             self.on_building_clicked(clicked)
+        else:
+            self.on_unit_clicked(clicked)
 
     def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
         cx, cy = clicked.position
@@ -238,6 +240,7 @@ class UnitsManager:
         self.clear_selection_markers(discarded)
         self.create_selection_markers(new)
 
+    @ignore_in_menu
     def select_units(self, *units: Unit):
         self.selected_units = HashedList(units)
         self.create_selection_markers(units)
@@ -254,6 +257,7 @@ class UnitsManager:
             if marker.selected is entity:
                 marker.kill()
 
+    @ignore_in_menu
     def unselect_units(self):
         self.selected_units.clear()
         self.clear_selection_markers()
@@ -277,6 +281,7 @@ class UnitsManager:
         self.unselect_units()
         self.select_units(*units)
 
+    @ignore_in_menu
     def select_permanent_units_group(self, group_id: int):
         try:
             group = self.permanent_units_groups[group_id]

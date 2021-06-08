@@ -4,7 +4,7 @@ from __future__ import annotations
 __title__ = 'RaTS: Real (almost) Time Strategy'
 __author__ = 'Rafał "Akapkotel" Trąbski'
 __license__ = "Share Alike Attribution-NonCommercial-ShareAlike 4.0"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __maintainer__ = "Rafał Trąbski"
 __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
@@ -65,8 +65,8 @@ COLUMNS = 50
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 1
-CPU_UNITS = 10
+PLAYER_UNITS = 10
+CPU_UNITS = 3
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -104,8 +104,6 @@ class GameWindow(Window, EventsCreator):
         self.set_caption(__title__)
 
         self.settings = Settings()  # shared with Game
-
-        self.events_scheduler = EventsScheduler(update_rate=update_rate)
 
         self.sound_player = AudioPlayer()
 
@@ -163,7 +161,7 @@ class GameWindow(Window, EventsCreator):
 
     @property
     def is_game_running(self) -> bool:
-        return self.game_view is not None and self.current_view == self.game_view
+        return self.current_view == self.game_view
 
     def start_new_game(self):
         if self.game_view is None:
@@ -181,7 +179,6 @@ class GameWindow(Window, EventsCreator):
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
-        self.events_scheduler.update()
         self.sound_player.on_update()
         super().on_update(delta_time)
 
@@ -318,6 +315,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_interface()
         self.set_updated_and_drawn_lists()
+
+        self.events_scheduler = EventsScheduler()
 
         self.map: Optional[Map] = None
         self.pathfinder: Optional[Pathfinder] = None
@@ -476,10 +475,11 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             # self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
-        position = average_position_of_points_group(
-            [u.position for u in self.local_human_player.units]
-        )
-        self.window.move_viewport_to_the_position(*position)
+            position = average_position_of_points_group(
+                [u.position for u in self.local_human_player.units]
+            )
+            self.window.move_viewport_to_the_position(*position)
+        self.window.move_viewport_to_the_position(*self.window.screen_center)
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
@@ -540,23 +540,19 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def test_missions(self):
         self.current_mission = mission = Mission('Test Mission', 'Map 1')
-        mission.add()
 
-        map_revealed = MapRevealed(self.local_human_player).set_vp(1)
-        mission.new_condition(map_revealed, optional=True)
-
-        no_units = NoUnitsLeft(self.local_human_player).consequences(Defeat())
-        mission.new_condition(no_units)
-
-        mission_timer = TimePassed(self.local_human_player, 10).set_vp(1)
-        mission.new_condition(mission_timer)
+        human = self.local_human_player
+        map_revealed = MapRevealed(human).set_vp(1)
+        no_units = NoUnitsLeft(human).triggers(Defeat())
+        mission_timer = TimePassed(human, 10).set_vp(1).triggers(Victory())
+        unit_type = HasUnitsOfType(human, 'tank_medium.png').set_vp(1)
 
         cpu_player = self.players[4]
-        cpu_no_units = NoUnitsLeft(cpu_player).consequences(Victory())
-        mission.new_condition(cpu_no_units)
+        cpu_no_units = NoUnitsLeft(cpu_player).triggers(Defeat())
 
-        campaign = Campaign(missions=['First mission', 'Second', 'Last mission'])
-        print(campaign.missions)
+        mission.add_players(players=[human, cpu_player])
+        conditions = [unit_type, mission_timer, no_units, cpu_no_units, map_revealed]
+        mission.add_conditions(conditions=conditions, optional=True)
 
     def register(self, acquired: OwnedObject):
         acquired: Union[Player, Faction, PlayerEntity, UiElementsBundle]
@@ -611,6 +607,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def update_view(self, delta_time):
         self.update_timer()
+        self.events_scheduler.update()
         if self.debugger is not None:
             self.debugger.update()
         super().update_view(delta_time)
@@ -711,6 +708,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def unload(self):
         self.updated.clear()
         self.local_human_player = None
+        self.units_manager.unselect_units()
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
         self.players.clear()
@@ -747,10 +745,11 @@ if __name__ == '__main__':
     from gameobjects.spawning import ObjectsFactory
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
-    from scenarios.missions import Mission, Campaign
-    from scenarios.conditions import (
-        NoUnitsLeft, MapRevealed, TimePassed, Defeat, Victory
+    from missions.missions import Mission, Campaign
+    from missions.conditions import (
+        NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
+    from missions.consequences import Defeat, Victory
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

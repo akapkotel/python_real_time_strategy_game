@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
 
 from utils.classes import Singleton
@@ -15,6 +15,7 @@ from pyglet.media import Player
 
 SOUNDS_DIRECTORY = 'resources/sounds'
 SOUNDS_EXTENSION = 'wav'
+MUSIC_TRACK_SUFFIX = 'theme'
 UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
 UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(5)]
 
@@ -33,7 +34,6 @@ class AudioPlayer(Singleton):
         :param sounds_directory: str -- name of the directory without path
         :param sound_on: bool -- if sounds should be played or not
         """
-        self._sound_on = sound_on
         self._music_on = music_on
         self._sound_effects_on = sound_effects_on
 
@@ -45,6 +45,9 @@ class AudioPlayer(Singleton):
         self.currently_played: List[Player] = []
         self.current_music: Optional[Player] = None
         log(f'Loaded {len(self.sounds)} sounds.', console=True)
+
+        self.paused_track_name: Optional[str] = None
+        self.paused_track_time: Optional[float] = None
 
         self.playlists: Dict[str, List[str]] = self._setup_playlists()
         self.current_playlist: Optional[List[str]] = None
@@ -65,18 +68,14 @@ class AudioPlayer(Singleton):
 
     def _setup_playlists(self) -> Dict[str, List[str]]:
         playlists = defaultdict(list)
-        for sound_name in (s for s in self.sounds.keys() if 'theme' in s):
+        for sound_name in (s for s in self.sounds.keys() if self.is_music(s)):
             playlist_name = sound_name.partition('_')[0]
             playlists[playlist_name].append(sound_name)
         return playlists
 
-    @property
-    def sound_on(self) -> bool:
-        return self._sound_on
-
-    @sound_on.setter
-    def sound_on(self, value: bool):
-        self.play() if value else self.pause()
+    @staticmethod
+    def is_music(sound_name: str) -> bool:
+        return MUSIC_TRACK_SUFFIX in sound_name
 
     @property
     def music_on(self) -> bool:
@@ -85,7 +84,22 @@ class AudioPlayer(Singleton):
     @music_on.setter
     def music_on(self, value: bool):
         self._music_on = value
-        self.play() if value else self.pause()
+        if value and self.paused_track_name is not None:
+            self._play_paused_music_track()
+        else:
+            self._pause_current_music_track()
+
+    def _play_paused_music_track(self):
+        self.play_music(self.paused_track_name, False)
+        self.current_music.seek(self.paused_track_time)
+
+    def _pause_current_music_track(self):
+        self.paused_track_time = self.current_music.time
+        self.paused_track_name = self._current_track_name()
+        self.current_music.pause()
+
+    def _current_track_name(self) -> str:
+        return self.current_playlist[self.playlist_index]
 
     @property
     def sound_effects_on(self):
@@ -118,9 +132,7 @@ class AudioPlayer(Singleton):
         """Play a single sound. Use this for sound effects."""
         if name not in self.sounds:
             log(f'Sound: {name} not found!', console=True)
-        if not self._sound_on:
-            return
-        elif 'theme' in name and not self._music_on:
+        if self.is_music(name) and not self._music_on:
             return
         elif not self._sound_effects_on:
             return
@@ -130,7 +142,8 @@ class AudioPlayer(Singleton):
         """Use this for background sound-themes."""
         if self.current_music is not None:
             self._stop_music_track()
-        self._play_music_track(name, loop, volume)
+        if self._music_on:
+            self._play_music_track(name, loop, volume)
 
     def play_random(self, sounds_list: List[str], volume: Optional[float] = None):
         """Play sound randomly chosen from list of sounds names."""
@@ -158,14 +171,12 @@ class AudioPlayer(Singleton):
 
     def play(self):
         """Plays all the sounds."""
-        if self.current_music is not None:
-            self.current_music.play()
+        self.music_on = True
         for player in self.currently_played:
             player.play()
 
     def pause(self):
         """Pauses playing all the sounds."""
-        if self.current_music is not None:
-            self.current_music.pause()
+        self.music_on = False
         for player in self.currently_played:
             player.pause()

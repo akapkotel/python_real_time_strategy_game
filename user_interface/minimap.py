@@ -44,23 +44,19 @@ class MiniMap:
 
         self.position = self.get_position()
 
-        self.tile_size = tile_size if self.loaded else (tile_size[0] * ratio, tile_size[1] * ratio)
-
-        self.revealed_count = 0
-
-        # cache visible map area for saving it:
-        self.drawn_area: Set[GridPosition] = set()
-
-        self.drawn_entities: List[List[float, float, Color, int]] = []
+        self.tile_size = tile_size if self.loaded else (tile_size[0] * ratio,
+                                                        tile_size[1] * ratio)
 
         self.viewport = self.update_viewport()
 
+        # cache visible map area for saving it:
+        self.drawn_area: Set[GridPosition] = set()
+        self.drawn_entities: List[List[float, float, Color, int]] = []
         self.shapes_lists = self.create_shapes_lists()
 
         self.visible = set()
-
-        if self.loaded:
-            self.reveal_minimap_area(data[-1])
+        self.revealed_count = 0
+        self.reveal_minimap_area(self.game.fog_of_war.explored)
 
     def set_map_to_mini_map_ratio(self) -> float:
         """
@@ -84,8 +80,9 @@ class MiniMap:
         self.shapes_lists = {
             row: ShapeElementList() for row in range(self.rows)
         }
-        dx, dy = self.minimap_left_and_bottom
-        self.move_shapes_lists(dx + 11, dy + 60)
+        # dx, dy = self.minimap_left_and_bottom
+        # self.move_shapes_lists(dx + 11, dy + 60)
+        self.move_shapes_lists(1585, 939)
         return self.shapes_lists
 
     def update(self):
@@ -93,17 +90,17 @@ class MiniMap:
         self.update_revealed_areas()
         self.visible.clear()
 
-    def update_position(self, dx, dy):
+    def update_position(self, dx: float, dy: float):
         self.move_shapes_lists(dx, dy)
         self.position = self.get_position()
         self.viewport = self.update_viewport()
 
     def get_position(self):
         _, right, _, top = self.game.viewport
-        return (right - self.max_width // 2 - MARGIN_RIGHT,
-               top - self.max_height // 2 - MARGIN_TOP)
+        return (right - (self.max_width // 2) - MARGIN_RIGHT,
+                top - (self.max_height // 2) - MARGIN_TOP)
 
-    def move_shapes_lists(self, dx, dy):
+    def move_shapes_lists(self, dx: float, dy: float):
         shapes_list: ShapeElementList
         for shapes_list in self.shapes_lists.values():
             shapes_list.move(dx, dy)
@@ -156,10 +153,19 @@ class MiniMap:
         draw_rectangle_outline(*self.viewport, color=WHITE)
         draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
 
+    def cursor_inside(self, x: float, y: float) -> Optional[Tuple[int, int]]:
+        """
+        Check if mouse cursor points at the MiniMap area, if so, return the
+        pointed position translated from minimap's to world dimensions.
+        """
+        left, bottom = self.minimap_left_and_bottom
+        if left < x < left + self.width and bottom < y < bottom + self.height:
+            return (x - left) // self.ratio, (y - bottom) // self.ratio
+
     def save(self):
         return [
             (self.screen_width, self.screen_height),
-            (self.width, self.height),
+            (self.max_width, self.max_height),
             self.tile_size,
             self.rows,
             self.viewport,

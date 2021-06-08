@@ -7,7 +7,7 @@ from typing import Deque, List, Optional, Set, Tuple, Type, Dict
 from arcade.arcade_types import Point
 
 from utils.data_types import GridPosition
-from scenarios.research import Technology
+from missions.research import Technology
 from map.map import MapNode, Sector
 from players_and_factions.player import Player, PlayerEntity
 from utils.geometry import close_enough, is_visible

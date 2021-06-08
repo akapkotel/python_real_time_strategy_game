@@ -48,6 +48,12 @@ class ScheduledEvent:
         except Exception as e:
             log(f'{self} failed to execute with exception: {str(e)}')
 
+    def shelve(self):
+        raise NotImplementedError
+
+    def unshelve(self):
+        raise NotImplementedError
+
 
 class EventsScheduler:
     """
@@ -58,22 +64,23 @@ class EventsScheduler:
     """
     instance = None
 
-    def __init__(self, update_rate: float):
-        self.update_rate = update_rate
+    def __init__(self):
+        self.schedulers: List[EventsCreator] = []
         self.scheduled_events: List[ScheduledEvent] = []
         self.execution_times: List[float] = []
         EventsScheduler.instance = self
 
     @logger()
     def schedule(self, event: ScheduledEvent):
+        self.schedulers.append(event.creator)
         self.scheduled_events.append(event)
         delay = event.delay_left or event.delay
         self.execution_times.append(get_time() + delay)
 
     @logger()
-    def unschedule(self, event: ScheduledEvent):
+    def unschedule(self, index: int):
         try:
-            index = self.scheduled_events.index(event)
+            self.schedulers.pop(index)
             self.scheduled_events.pop(index)
             self.execution_times.pop(index)
         except ValueError:
@@ -84,7 +91,7 @@ class EventsScheduler:
         for i, event in enumerate(self.scheduled_events):
             if time >= self.execution_times[i]:
                 event.execute()
-                self.unschedule(event)
+                self.unschedule(i)
                 if event.repeat:
                     event.repeat -= 1
                     self.schedule(event)
@@ -92,6 +99,12 @@ class EventsScheduler:
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         index = self.scheduled_events.index(event)
         return self.execution_times[index] - get_time()
+
+    def shelve_scheduled_events(self):
+        raise NotImplementedError
+
+    def unshelve_scheduled_events(self):
+        raise NotImplementedError
 
 
 class EventsCreator:
@@ -118,7 +131,7 @@ class EventsCreator:
     def remove_event_from_scheduled_list(self, event: ScheduledEvent):
         self.scheduled_events.remove(event)
 
-    def scheduled_events_to_shelve_data(self) -> List[Dict]:
+    def shelve_scheduled_events(self) -> List[Dict]:
         """
         Call it in __getstate__ method to save self.scheduled_events of an
          object.
@@ -134,7 +147,7 @@ class EventsCreator:
              'repeat': event.repeat} for event in self.scheduled_events
         ]
 
-    def shelve_data_to_scheduled_events(self, shelve_data: List[Dict]) -> List[ScheduledEvent]:
+    def unshelve_scheduled_events(self, shelve_data: List[Dict]) -> List[ScheduledEvent]:
         # call it in __setstate__ method
         return [
             ScheduledEvent(

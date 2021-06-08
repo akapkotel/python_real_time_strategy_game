@@ -13,7 +13,7 @@ from arcade.arcade_types import Color, Point
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH
-from scenarios.research import Technology
+from missions.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
 from utils.functions import ignore_in_editor_mode
@@ -222,7 +222,6 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
             self.faction.start_war_with(other.faction)
 
     def update(self):
-        log(f'Updating player: {self}')
         self.known_enemies.clear()
         self.clear_mutually_detected_enemies()
         self._update_resources_stock()
@@ -245,6 +244,9 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     def update_known_technologies(self, new_technology: Technology):
         self.known_technologies.add(new_technology.id)
         new_technology.gain_technology_effects(researcher=self)
+
+    def kill(self):
+        self.unregister_from_all_owners()
 
     def __getstate__(self) -> Dict:
         saved_player = self.__dict__.copy()

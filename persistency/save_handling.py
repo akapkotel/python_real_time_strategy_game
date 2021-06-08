@@ -4,7 +4,7 @@ import os
 import shelve
 import time
 
-from typing import Optional
+from typing import Optional, Generator
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
@@ -53,41 +53,54 @@ class SaveManager(Singleton):
             name: os.path.join(path, name) for name, path in names_to_paths.items()
         }
 
-    def save_game(self, save_name: str, game: 'Game'):
+    def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
         full_save_path = os.path.join(self.saves_path, save_name)
-        with shelve.open(full_save_path + SAVE_EXTENSION) as file:
+        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+        with shelve.open(full_save_path + extension) as file:
             file['saved_date'] = time.localtime()
-            file['timer'] = self.game.save_timer()
-            file['settings'] = self.game.settings
+            file['timer'] = game.save_timer()
+            file['settings'] = game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
             file['map'] = game.map.save()
-            file['mission'] = game.current_mission
             file['factions'] = [f.save() for f in game.factions.values()]
             file['players'] = game.players
-            file['local_human_player_id'] = game.local_human_player.id
+            file['local_human_player'] = game.local_human_player.id
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
+            file['mission'] = game.current_mission
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
         log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
 
-    def load_game(self, save_name: str):
+    def load_scenario(self, scenario_name: str) -> Generator:
+        return self.load_game(scenario_name, scenario=True)
+
+    def load_game(self, save_name: str, scenario: bool = False):
         full_save_path = os.path.join(self.saves_path, save_name)
-        with shelve.open(full_save_path + SAVE_EXTENSION) as file:
-            yield self.load_timer(file['timer'])
-            yield self.load_settings(file['settings'])
-            yield self.load_viewports(file['viewports'])
-            yield self.load_map(file['map'])
-            yield self.load_factions(file['factions'])
-            yield self.load_players(file['players'])
-            yield self.load_local_human_player(file['local_human_player_id'])
-            yield self.load_entities(file['units'])
-            yield self.load_entities(file['buildings'])
-            yield self.load_mission(file['mission'])
-            yield self.load_permanent_groups(file['permanent_units_groups'])
-            yield self.load_fog_of_war(file['fog_of_war'])
-            yield self.load_mini_map(file['mini_map'])
+        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+        with shelve.open(full_save_path + extension) as file:
+            for name in ('timer', 'settings', 'viewports', 'map', 'factions',
+                         'players', 'local_human_player', 'units', 'buildings',
+                         'mission', 'permanent_units_groups', 'fog_of_war',
+                         'mini_map'):
+                print(f'Loading: {name}...')
+                yield eval(f"self.load_{name}(file['{name}'])")
+
+
+            # yield self.load_timer(file['timer'])
+            # yield self.load_settings(file['settings'])
+            # yield self.load_viewports(file['viewports'])
+            # yield self.load_map(file['map'])
+            # yield self.load_factions(file['factions'])
+            # yield self.load_players(file['players'])
+            # yield self.load_local_human_player(file['local_human_player'])
+            # yield self.load_entities(file['units'])
+            # yield self.load_entities(file['buildings'])
+            # yield self.load_mission(file['mission'])
+            # yield self.load_permanent_groups(file['permanent_units_groups'])
+            # yield self.load_fog_of_war(file['fog_of_war'])
+            # yield self.load_mini_map(file['mini_map'])
         log(f'Game {save_name + SAVE_EXTENSION} loaded successfully!', True)
         yield
 
@@ -113,10 +126,6 @@ class SaveManager(Singleton):
         self.game.explosions_pool = ExplosionsPool()
 
     @logger()
-    def load_mission(self, missions):
-        self.game.current_mission = missions
-
-    @logger()
     def load_factions(self, factions):
         for f in factions:
             id, name, f, e = f['id'], f['name'], f['friends'], f['enemies']
@@ -130,6 +139,12 @@ class SaveManager(Singleton):
     def load_local_human_player(self, index):
         self.game.local_human_player = self.game.players[index]
 
+    def load_units(self, units):
+        return self.load_entities(units)
+
+    def load_buildings(self, buildings):
+        return self.load_entities(buildings)
+
     @logger()
     def load_entities(self, entities):
         """Respawn Units and Buildings."""
@@ -139,7 +154,12 @@ class SaveManager(Singleton):
             )
 
     @logger()
-    def load_permanent_groups(self, groups):
+    def load_mission(self, mission):
+        self.game.current_mission = mission
+        print([c.player.units for c in mission.conditions])
+
+    @logger()
+    def load_permanent_units_groups(self, groups):
         self.game.units_manager.permanent_units_groups = groups
         for group_id, group in groups.items():
             for unit in group:
