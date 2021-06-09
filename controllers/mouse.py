@@ -155,12 +155,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @logger()
     def on_right_button_click(self, x: float, y: float, modifiers: int):
-        log(f'Right-clicked at x:{x}, y: {y}')
-        # TODO: clearing selections, context menu?
+        pass
 
     @logger()
     def on_middle_button_click(self, x: float, y: float, modifiers: int):
-        log(f'Middle-clicked at x:{x}, y: {y}')
+        pass
 
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
@@ -182,6 +181,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.units_manager.select_units(*units)
         self.mouse_drag_selection = None
 
+    @ignore_in_menu
     def on_right_button_release(self, x: float, y: float, modifiers: int):
         self.forced_cursor = None
         if self.mouse_dragging:
@@ -197,8 +197,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             if buttons == MOUSE_BUTTON_LEFT:
                 self.on_left_button_drag(dx, dy, x, y)
             elif buttons == MOUSE_BUTTON_RIGHT:
-                self.mouse_dragging = True
-                self.game.window.change_viewport(dx, dy)
+                self.move_viewport_with_mouse_drag(dx, dy)
+
+    @ignore_in_menu
+    def move_viewport_with_mouse_drag(self, dx, dy):
+        self.mouse_dragging = True
+        self.window.change_viewport(dx, dy)
 
     def on_left_button_drag(self, dx, dy, x, y):
         if self.game.map.on_map_area(x, y):
@@ -272,8 +276,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             s: UiElement
             for sprite in (s for s in pointed if s.active and not s.children):
                 return sprite  # first pointed children
-            else:
-                return pointed[0]  # return pointed Sprite if no children found
+            return pointed[0]  # return pointed Sprite if no children found
 
     def update_mouse_pointed_ui_element(self,
                                         pointed: Optional[CursorInteractive]):

@@ -8,6 +8,9 @@ from user_interface.user_interface import (
 )
 from utils.views import LoadableWindowView
 
+LOADING_MENU = 'saving menu'
+
+CONFIRMATON_DIALOG = 'Confirmaton dialog'
 
 MAIN_MENU = 'main menu'
 OPTIONS_SUBMENU = 'options'
@@ -41,7 +44,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_options.png', x, next(y),
                        functions=partial(switch_menu, OPTIONS_SUBMENU)),
                 Button('menu_button_loadgame.png', x, next(y),
-                       functions=partial(switch_menu, 'saving menu')),
+                       functions=partial(switch_menu, LOADING_MENU)),
                 Button('menu_button_newgame.png', x, next(y),
                        functions=partial(switch_menu, 'new game menu')),
                 Button('menu_button_continue.png', x, next(y),
@@ -107,13 +110,20 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         options_menu.extend((sound_tab, graphics_tab, game_tab))
         sound_tab.on_mouse_press(1)
 
+        x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
         saving_menu = UiElementsBundle(
             index=2,
-            name='saving menu',
+            name=LOADING_MENU,
             elements=[
                 back_to_menu_button,
+                # left column - ui-buttons:
+                Button('menu_button_loadgame.png', x, next(y),
+                       functions=window.load_game),
+                Button('menu_button_exit.png', x, next(y),
+                       functions=window.delete_saved_game),
             ],
-            register_to=self
+            register_to=self,
+            on_load=window.update_saved_games_list
         )
 
         x, y = SCREEN_WIDTH // 4, SCREEN_Y
@@ -166,6 +176,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name='multiplayer menu',
             elements=[
                 back_to_menu_button,
+            ],
+            register_to=self
+        )
+
+        confirmation_dialog = UiElementsBundle(
+            index=8,
+            name=CONFIRMATON_DIALOG,
+            elements=[
+                Button('menu_button_play.png', SCREEN_X // 2, 300,
+                       functions=partial(self.switch_to_bundle_of_index, index=2)),
+                Button('menu_button_play.png', SCREEN_X * 1.5, 300,
+                       functions=partial(self.switch_to_bundle_of_index, index=2)),
             ],
             register_to=self
         )

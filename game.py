@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-__title__ = 'RaTS: Real (almost) Time Strategy'
+__title__ = 'Python Real Time Strategy Game'
 __author__ = 'Rafał "Akapkotel" Trąbski'
 __license__ = "Share Alike Attribution-NonCommercial-ShareAlike 4.0"
 __version__ = "0.0.4"
@@ -53,14 +53,15 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
+UI_WIDTH = 400
 MINIMAP_WIDTH = 388
 MINIMAP_HEIGHT = 197
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 50
-COLUMNS = 50
+ROWS = 100
+COLUMNS = 125
 
 FPS = 30
 GAME_SPEED = 1.0
@@ -90,6 +91,7 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = True
+    selected_save: str = None
 
 
 class GameWindow(Window, EventsCreator):
@@ -107,7 +109,7 @@ class GameWindow(Window, EventsCreator):
 
         self.sound_player = AudioPlayer()
 
-        self.save_manger = SaveManager('saved_games', 'scenarios')
+        self.save_manager = SaveManager('saved_games', 'scenarios')
 
         self._updated: List[Updateable] = []
 
@@ -119,7 +121,6 @@ class GameWindow(Window, EventsCreator):
 
         self.menu_view: Menu = Menu()
         self.game_view: Optional[Game] = None
-        # self.menu_view.create_submenus()
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
@@ -179,6 +180,8 @@ class GameWindow(Window, EventsCreator):
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
             cursor.update()
+        if (keyboard := self.keyboard).active:
+            keyboard.key_map_scroll()
         self.sound_player.on_update()
         super().on_update(delta_time)
 
@@ -245,12 +248,12 @@ class GameWindow(Window, EventsCreator):
         """
         game_map = self.game_view.map
         left, right, bottom, top = self.get_viewport()
-        offset = SCREEN_WIDTH - 400
+        offset = SCREEN_WIDTH - UI_WIDTH
         new_left = clamp(left - dx, game_map.width - offset, 0)
         new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
-        self.update_viewport_coordinates(new_bottom, new_left)
+        self._update_viewport_coordinates(new_left, new_bottom)
 
-    def update_viewport_coordinates(self, new_bottom, new_left):
+    def _update_viewport_coordinates(self, new_left, new_bottom):
         new_right = new_left + SCREEN_WIDTH
         new_top = new_bottom + SCREEN_HEIGHT
         self.current_view.viewport = new_left, new_right, new_bottom, new_top
@@ -264,24 +267,49 @@ class GameWindow(Window, EventsCreator):
         position of selected permanent group of Units with numeric keys.
         """
         game_map = self.game_view.map
-        new_left = clamp(x - SCREEN_X, game_map.width - SCREEN_WIDTH, 0)
+        offset = SCREEN_WIDTH - UI_WIDTH
+        new_left = clamp(x - SCREEN_X, game_map.width - offset, 0)
         new_bottom = clamp(y - SCREEN_Y, game_map.height - SCREEN_HEIGHT, 0)
-        self.update_viewport_coordinates(new_bottom, new_left)
+        self._update_viewport_coordinates(new_left, new_bottom)
 
     def get_viewport(self) -> Viewport:
         # We cache viewport coordinates each time they are changed,
         # so no need for redundant call to the Window method
         return self.current_view.viewport
 
-    def save_game(self):
-        self.save_manger.save_game('save_01', self.game_view)
+    def update_saved_games_list(self):
+        """"""
+        loading_menu = self.menu_view.ui_elements_bundles[LOADING_MENU]
+        loading_menu.remove_subgroup(4)
+        x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 100))
+        loading_menu.extend(
+            Button('menu_button_blank.png', x, next(y), file,
+                   functions=partial(self.select_save, file),
+                   subgroup=4) for file in self.save_manager.saved_games
+        )
+
+    def select_save(self, save_name: str):
+        """Set saved game file name as currently selected to load or delete."""
+        self.settings.selected_save = save_name
+
+    def save_game(self, player_confirmed=False):
+        self.save_manager.save_game('save_01', self.game_view)
 
     def load_game(self):
         if self.game_view is not None:
             self.quit_current_game()
-        loader = self.save_manger.load_game(save_name='save_01')
-        self.game_view = game = Game(loader=loader)
-        self.show_view(game)
+        if (selected_save := self.settings.selected_save) is not None:
+            loader = self.save_manager.load_game(save_name=selected_save)
+            self.game_view = game = Game(loader=loader)
+            self.show_view(game)
+
+    @logger()
+    def delete_saved_game(self, player_confirmed=False):
+        if not player_confirmed:
+            self.menu_view.switch_to_bundle_of_name(CONFIRMATON_DIALOG)
+            # TODO: display pop-up with confirmation dialog for player
+        else:
+            self.save_manager.delete_saved_game(self.settings.selected_save)
 
     def close(self):
         log(f'Terminating application...')
@@ -750,7 +778,7 @@ if __name__ == '__main__':
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
     from missions.consequences import Defeat, Victory
-    from user_interface.menu import Menu
+    from user_interface.menu import Menu, CONFIRMATON_DIALOG, LOADING_MENU
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager

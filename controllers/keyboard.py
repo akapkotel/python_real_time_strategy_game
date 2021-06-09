@@ -6,6 +6,7 @@ from arcade import Window
 from arcade.key import *
 
 from user_interface.user_interface import ToggledElement
+from utils.functions import ignore_in_menu
 from utils.logging import log, logger
 
 
@@ -58,3 +59,11 @@ class KeyboardHandler(ToggledElement):
     @staticmethod
     def key_to_letter(symbol: int) -> str:
         return chr(symbol)
+
+    @ignore_in_menu
+    def key_map_scroll(self):
+        keys = self.keys_pressed
+        dx = (RIGHT in keys or D in keys) - (LEFT in keys or A in keys)
+        dy = (UP in keys or W in keys) - (DOWN in keys or S in keys)
+        if dx != 0 or dy != 0:
+            self.window.change_viewport(- dx * 50, - dy * 50)

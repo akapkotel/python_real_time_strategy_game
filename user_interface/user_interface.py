@@ -61,6 +61,7 @@ class UiElementsBundle(OwnedObject):
     elements: List[UiElement]
     register_to: ObjectsOwner
     _owners = None
+    on_load: Optional[Callable] = lambda: None
 
     def __post_init__(self):
         self.register_to_objectsowners(self.register_to)
@@ -101,6 +102,13 @@ class UiElementsBundle(OwnedObject):
     def deactivate_element(self, name: str):
         if (element := self._find_by_name(name)) is not None:
             element.deactivate()
+
+    def remove_subgroup(self, subgroup: int):
+        for element in self.elements[::]:
+            if element.subgroup == subgroup:
+                element.hide()
+                element.deactivate()
+                self.elements.remove(element)
 
     def switch_to_subgroup(self, subgroup: int):
         for element in self.elements:
@@ -166,6 +174,17 @@ class UiBundlesHandler(ObjectsOwner):
     def get_notified(self, *args, **kwargs):
         pass
 
+    # def switch_to_bundle(self,
+    #                      bundle: UiElementsBundle = None,
+    #                      name: str = None,
+    #                      index: int = None):
+    #     if bundle is not None:
+    #         return self._switch_to_bundle(bundle)
+    #     elif name in self.ui_elements_bundles:
+    #         return self._switch_to_bundle(self.ui_elements_bundles[name])
+    #     elif index is not None:
+    #         return self.switch_to_bundle_of_index(index)
+
     def switch_to_bundle_of_index(self, index: int = 0):
         for bundle in self.ui_elements_bundles.values():
             if bundle.index == index:
@@ -223,6 +242,8 @@ class UiBundlesHandler(ObjectsOwner):
             return
 
     def _load_bundle(self, bundle: UiElementsBundle):
+        print('LOADING BUNDLE!', bundle.name)
+        bundle.on_load()
         self.active_bundles.add(bundle.index)
         self.ui_elements_spritelist.extend(bundle.elements)
         self.bind_ui_elements_with_ui_spritelist(bundle.elements)
@@ -426,6 +447,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
         self.bundle = None
         self.subgroup = subgroup
         self.ui_spritelist = None
+        self.attached_data = None
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)

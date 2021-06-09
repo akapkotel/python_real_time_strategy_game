@@ -19,7 +19,7 @@ MARGIN_RIGHT = 5
 class MiniMap:
     game: Optional[Game] = None
 
-    def __init__(self, data: Union[List, Tuple]):
+    def __init__(self, data: Union[List, Tuple], loaded=False):
         """
         This class displays a little map-representation in the user interface
         to allow player to faster navigate on the map and know, where are his
@@ -29,7 +29,7 @@ class MiniMap:
         file, eg. when player loads saved game, list contains 6 elements, or 4
         otherwise.
         """
-        self.loaded = len(data) > 4
+        self.loaded = loaded
         screen_size, minimap_size, tile_size, rows = data[:4]
 
         self.screen_width: int = screen_size[0]
@@ -64,10 +64,8 @@ class MiniMap:
         a common ratio used to translate both map dimensions from world to
         mini-map and pick ratio for smaller world-map dimension.
         """
-        if self.game.map.width < self.game.map.height:
-            return self.max_width / self.game.map.width
-        else:
-            return self.max_height / self.game.map.height
+        return min(self.max_height / self.game.map.height,
+                   self.max_width / self.game.map.width)
 
     def create_shapes_lists(self):
         """
@@ -80,9 +78,12 @@ class MiniMap:
         self.shapes_lists = {
             row: ShapeElementList() for row in range(self.rows)
         }
-        # dx, dy = self.minimap_left_and_bottom
-        # self.move_shapes_lists(dx + 11, dy + 60)
-        self.move_shapes_lists(1585, 939)
+        if self.loaded:
+            r, t = self.screen_width - MARGIN_RIGHT, self.screen_height - MARGIN_TOP
+            dx, dy = r - self.max_width // 2 - self.width // 2, t - self.max_height
+        else:
+            dx, dy = self.minimap_left_and_bottom
+        self.move_shapes_lists(dx + 9, dy + 60)
         return self.shapes_lists
 
     def update(self):
@@ -97,8 +98,8 @@ class MiniMap:
 
     def get_position(self):
         _, right, _, top = self.game.viewport
-        return (right - (self.max_width // 2) - MARGIN_RIGHT,
-                top - (self.max_height // 2) - MARGIN_TOP)
+        right, top = right - MARGIN_RIGHT, top - MARGIN_TOP
+        return right - self.max_width // 2, top - self.max_height // 2
 
     def move_shapes_lists(self, dx: float, dy: float):
         shapes_list: ShapeElementList
@@ -112,7 +113,7 @@ class MiniMap:
             left + ((x - 200) * self.ratio),
             bottom + (y * self.ratio),
             (self.screen_width - 400) * self.ratio,
-            self.screen_height * self.ratio
+            self.screen_height * self.ratio,
         ]
 
     def update_drawn_units(self):
@@ -136,9 +137,9 @@ class MiniMap:
         self.reveal_minimap_area(revealed_this_time)
 
     def reveal_minimap_area(self, revealed_this_time: Set[GridPosition]):
-        width, height = self.tile_size
+        w, h = self.tile_size
         for (x, y) in revealed_this_time:
-            shape = create_rectangle_filled(x * width, y * height, width, height, SAND)
+            shape = create_rectangle_filled(x * w, y * h, w, h, SAND)
             # MapNode y determines which ShapeElementList it should belong to:
             self.shapes_lists[y].append(shape)
         self.revealed_count += len(revealed_this_time)
@@ -168,6 +169,4 @@ class MiniMap:
             (self.max_width, self.max_height),
             self.tile_size,
             self.rows,
-            self.viewport,
-            self.drawn_area
         ]

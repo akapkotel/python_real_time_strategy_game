@@ -54,9 +54,10 @@ class SaveManager(Singleton):
         }
 
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
-        full_save_path = os.path.join(self.saves_path, save_name)
         extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
-        with shelve.open(full_save_path + extension) as file:
+        full_save_path = os.path.join(self.saves_path, save_name + extension)
+        self.delete_saved_game(save_name)  # to avoid 'adding' to existing file
+        with shelve.open(full_save_path) as file:
             file['saved_date'] = time.localtime()
             file['timer'] = game.save_timer()
             file['settings'] = game.settings
@@ -77,31 +78,18 @@ class SaveManager(Singleton):
         return self.load_game(scenario_name, scenario=True)
 
     def load_game(self, save_name: str, scenario: bool = False):
-        full_save_path = os.path.join(self.saves_path, save_name)
-        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
-        with shelve.open(full_save_path + extension) as file:
+        save_name = self.add_extension_if_required(save_name, scenario)
+        print(save_name)
+        directory = self.scenarios_path if scenario else self.saves_path
+        full_save_path = os.path.join(directory, save_name)
+        with shelve.open(full_save_path) as file:
             for name in ('timer', 'settings', 'viewports', 'map', 'factions',
                          'players', 'local_human_player', 'units', 'buildings',
                          'mission', 'permanent_units_groups', 'fog_of_war',
                          'mini_map'):
-                print(f'Loading: {name}...')
+                log(f'Loading: {name}...', console=True)
                 yield eval(f"self.load_{name}(file['{name}'])")
-
-
-            # yield self.load_timer(file['timer'])
-            # yield self.load_settings(file['settings'])
-            # yield self.load_viewports(file['viewports'])
-            # yield self.load_map(file['map'])
-            # yield self.load_factions(file['factions'])
-            # yield self.load_players(file['players'])
-            # yield self.load_local_human_player(file['local_human_player'])
-            # yield self.load_entities(file['units'])
-            # yield self.load_entities(file['buildings'])
-            # yield self.load_mission(file['mission'])
-            # yield self.load_permanent_groups(file['permanent_units_groups'])
-            # yield self.load_fog_of_war(file['fog_of_war'])
-            # yield self.load_mini_map(file['mini_map'])
-        log(f'Game {save_name + SAVE_EXTENSION} loaded successfully!', True)
+        log(f'Game {save_name} loaded successfully!', True)
         yield
 
     @logger()
@@ -171,23 +159,31 @@ class SaveManager(Singleton):
 
     @logger()
     def load_mini_map(self, minimap):
-        self.game.mini_map = MiniMap(minimap)
+        self.game.mini_map = MiniMap(minimap, loaded=True)
 
     def delete_saved_game(self, save_name: str):
+        print(self.saved_games)
         try:
             os.remove(self.saved_games[save_name])
             del self.saved_games[save_name]
-        except FileNotFoundError:
-            pass
+        except Exception as e:
+            log(f'{str(e)}', console=True)
 
     def rename_saved_game(self, old_name: str, new_name: str):
         try:
-            new = os.path.join(self.saves_path, new_name) + SAVE_EXTENSION
+            new = os.path.join(self.saves_path, new_name)
             os.rename(self.saved_games[old_name], new)
             self.saved_games[new_name] = new
             del self.saved_games[old_name]
         except Exception as e:
             log(f'{str(e)}', console=True)
+
+    @staticmethod
+    def add_extension_if_required(save_name: str, scenario: bool):
+        if not (SCENARIO_EXTENSION in save_name or SAVE_EXTENSION in save_name):
+            extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+            return save_name + extension
+        return save_name
 
 
 # these imports are placed here to avoid circular-imports issue:

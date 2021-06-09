@@ -6,7 +6,7 @@ import time
 
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Deque, Dict, List, Optional, Set, Tuple, Union
+from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator
 
 from arcade import Sprite, Texture, load_spritesheet
 
@@ -302,10 +302,9 @@ class Sector(GridHandler, ABC):
         raw_grids = self.adjacent_grids(*self.grid)
         return [self.map.sectors[g] for g in self.in_bounds(raw_grids)]
 
-    def in_bounds(self, grids: List[GridPosition]):
-        # TODO: fix setting correct bounds for sectors
+    def in_bounds(self, grids: List[GridPosition]) -> Generator[GridPosition]:
         c, r = self.map.columns // SECTOR_SIZE, self.map.rows // SECTOR_SIZE
-        return [p for p in grids if 0 <= p[0] < c + 1 and 0 <= p[1] < r + 1]
+        return (p for p in grids if 0 <= p[0] < c and 0 <= p[1] < r)
 
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         return [(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS]
