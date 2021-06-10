@@ -157,7 +157,6 @@ class SaveManager(Singleton):
     @logger()
     def load_mission(self, mission):
         self.game.current_mission = mission
-        print([c.player.units for c in mission.conditions])
 
     @logger()
     def load_permanent_units_groups(self, groups):
@@ -175,7 +174,6 @@ class SaveManager(Singleton):
         self.game.mini_map = MiniMap(minimap, loaded=True)
 
     def delete_saved_game(self, save_name: str):
-        print(self.saved_games)
         try:
             os.remove(self.saved_games[save_name])
             del self.saved_games[save_name]

@@ -77,6 +77,14 @@ def object_name_to_filename(object_name: str) -> str:
     return '.'.join((object_name, '.png'))
 
 
+def all_files_of_type_named(extension, base_directory, named):
+    return {
+        name: path for name, path
+        in find_paths_to_all_files_of_type(extension, base_directory).items()
+        if named in name
+    }
+
+
 def find_paths_to_all_files_of_type(extension: str,
                                     base_directory: str) -> Dict[str, str]:
     """

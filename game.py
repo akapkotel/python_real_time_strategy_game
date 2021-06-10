@@ -91,7 +91,6 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
-    selected_save: str = None
 
 
 class GameWindow(Window, EventsCreator):
@@ -181,7 +180,7 @@ class GameWindow(Window, EventsCreator):
         if (cursor := self.cursor).active:
             cursor.update()
         if (keyboard := self.keyboard).active:
-            keyboard.key_map_scroll()
+            keyboard.update()
         self.sound_player.on_update()
         super().on_update(delta_time)
 
@@ -221,10 +220,10 @@ class GameWindow(Window, EventsCreator):
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
-            self.keyboard.on_key_press(symbol, modifiers)
+            self.keyboard.on_key_press(symbol)
 
     def on_key_release(self, symbol: int, modifiers: int):
-        self.keyboard.on_key_release(symbol, modifiers)
+        self.keyboard.on_key_release(symbol)
 
     def show_view(self, new_view: LoadableWindowView):
         if new_view.requires_loading:
@@ -288,13 +287,6 @@ class GameWindow(Window, EventsCreator):
             for file in self.save_manager.saved_games
         )
 
-    def select_save(self, save_name: str):
-        """Set saved game file name as currently selected to load or delete."""
-        if self.settings.selected_save is not save_name:
-            self.settings.selected_save = save_name
-        else:
-            self.settings.selected_save = None
-
     def open_saving_menu(self):
         self.show_view(self.menu_view)
         self.menu_view.switch_to_bundle(name='saving_menu')
@@ -314,10 +306,16 @@ class GameWindow(Window, EventsCreator):
 
     @logger()
     def delete_saved_game(self, player_confirmed=False):
+        saves = self.menu_view.selectable_groups['saves']
+        if saves.currently_selected is None:
+            return
         if not player_confirmed:
-            self.menu_view.switch_to_bundle_of_name(CONFIRMATON_DIALOG)
+            this = self.delete_saved_game
+            self.menu_view.confirmation_dialog(
+                x=SCREEN_X, y=SCREEN_Y, yes=partial(this, True), no=this,
+                after=LOADING_MENU
+            )
         else:
-            saves = self.menu_view.selectable_groups['saves']
             self.save_manager.delete_saved_game(saves.currently_selected.name)
 
     def close(self):
@@ -793,7 +791,8 @@ if __name__ == '__main__':
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
     from missions.consequences import Defeat, Victory
-    from user_interface.menu import Menu, CONFIRMATON_DIALOG, LOADING_MENU
+    from user_interface.user_interface import CONFIRMATON_DIALOG
+    from user_interface.menu import Menu, LOADING_MENU
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager

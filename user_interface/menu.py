@@ -12,8 +12,6 @@ from utils.views import LoadableWindowView
 LOADING_MENU = 'saving menu'
 SAVING_MENU = 'saving_menu'
 
-CONFIRMATON_DIALOG = 'Confirmaton dialog'
-
 MAIN_MENU = 'main menu'
 OPTIONS_SUBMENU = 'options'
 CREDITS_SUBMENU = 'credits'
@@ -197,22 +195,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
-        confirmation_dialog = UiElementsBundle(
-            index=8,
-            name=CONFIRMATON_DIALOG,
-            elements=[
-                UiTextLabel(SCREEN_X, SCREEN_Y * 1.5, 'Are you sure?', 20),
-                Button('menu_button_play.png', SCREEN_X // 2, SCREEN_Y,
-                       functions=partial(self.switch_to_bundle, index=2)),
-                Button('menu_button_play.png', SCREEN_X * 1.5, SCREEN_Y,
-                       functions=partial(self.switch_to_bundle, index=2)),
-            ],
-            register_to=self
-        )
-
     def on_show_view(self):
         super().on_show_view()
-        if (game :=self.window.game_view) is not None:
+        if (game := self.window.game_view) is not None:
             game.save_timer()
         self.window.toggle_mouse_and_keyboard(True)
         self.switch_to_bundle_of_name(MAIN_MENU)
@@ -222,14 +207,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
     def toggle_game_related_buttons(self):
         bundle = self.ui_elements_bundles['main menu']
         buttons = ('continue button', 'quit game button')
-        if self.window.game_view is not None:
-            for button in buttons:
-                bundle.show_element(button)
-                bundle.activate_element(button)
-        else:
-            for button in buttons:
-                bundle.hide_element(button)
-                bundle.deactivate_element(button)
+        for button in buttons:
+            bundle.toggle_element(button, self.window.game_view is not None)
 
 
 if __name__:

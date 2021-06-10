@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from functools import partial
+
 import PIL
 
 from dataclasses import dataclass
@@ -18,6 +20,9 @@ from utils.functions import make_texture, get_path_to_file, to_texture_name
 from utils.logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
+
+
+CONFIRMATON_DIALOG = 'Confirmaton dialog'
 
 
 class UiSpriteList(SpriteList):
@@ -95,6 +100,10 @@ class UiElementsBundle(OwnedObject):
     def __getitem__(self, name: str):
         return self._find_by_name(name)
 
+    def toggle_element(self, name: str, state: bool):
+        if (element := self._find_by_name(name)) is not None:
+            element.toggle(state)
+
     def show_element(self, name: str):
         if (element := self._find_by_name(name)) is not None:
             element.show()
@@ -128,10 +137,8 @@ class UiElementsBundle(OwnedObject):
                 element.deactivate()
 
     def _find_by_name(self, name: str) -> Optional[UiElement]:
-        try:
-            return next(e for e in self.elements if e.name == name)
-        except StopIteration:
-            return
+        for element in (e for e in self.elements if e.name == name):
+            return element
 
     def get_elements_of_type(self, class_name: Type[UiElement]) -> List:
         return [e for e in self.elements if isinstance(e, class_name)]
@@ -171,6 +178,37 @@ class UiBundlesHandler(ObjectsOwner):
         # selectable groups allow to group together a bunch of same-context
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
+
+    def confirmation_dialog(self, x, y, yes: Callable, no: Callable, after: str):
+        """
+        Generates new UiELementsBundle representing simple 'confirm' ot 'cancel'
+        dialog displayed for the player, and then executes callback assigned to
+        the the choice made.
+
+        :param x: x position of the dialog-center
+        :param y: y position of the dialog-center
+        :param yes: Callable -- function executed if player confirms action
+        :param no: Callable -- function to be executed if player cancels action
+        :param after: str -- name of UiElementsBundle to go, after
+        """
+        close_dialog = partial(self.close_confirmation_dialog, after)
+        self.switch_to_bundle(UiElementsBundle(
+            index=8,
+            name=CONFIRMATON_DIALOG,
+            elements=[
+                UiTextLabel(x, y * 1.5, 'Are you sure?', 20),
+                Button('menu_button_confirm.png', x // 2, y,
+                       functions=(yes, close_dialog)),
+                Button('menu_button_cancel.png', x * 1.5, y,
+                       functions=(no, close_dialog))
+            ],
+            register_to=self
+        ))
+        # self._switch_to_bundle(confirmation_dialog)
+
+    def close_confirmation_dialog(self, after: str):
+        self.switch_to_bundle_of_name(name=after)
+        self.unregister(self.ui_elements_bundles[CONFIRMATON_DIALOG])
 
     def register(self, acquired: OwnedObject):
         acquired: UiElementsBundle
@@ -414,6 +452,9 @@ class ToggledElement:
     @visible.setter
     def visible(self, value: bool):
         self._visible = value
+
+    def toggle(self, state: bool):
+        self._active = self._visible = state
 
     def activate(self):
         self._active = True
@@ -758,12 +799,7 @@ class ScrollableContainer(UiElement):
 
     def add_child(self, child: Hierarchical):
         self.scrollable.add(child)
-
-    def put_child_before_self(self, child):
-        if child in self.bundle.elements:
-            self.bundle.elements.remove(child)
-        index = self.bundle.elements.index(self)
-        self.bundle.elements.insert(index, child)
+        super().add_child(child)
 
     def _func_on_mouse_enter(self, cursor):
         super()._func_on_mouse_enter(cursor)

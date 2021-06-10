@@ -22,7 +22,7 @@ from utils.data_types import (
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
 from utils.functions import (
-    get_path_to_file
+    get_path_to_file, all_files_of_type_named
 )
 from utils.logging import log, logger, timer
 from utils.geometry import distance_2d, calculate_circular_area
@@ -255,7 +255,8 @@ class Map(GridHandler):
                 node.tree = tree_type
 
     def generate_random_trees(self) -> Dict[GridPosition, int]:
-        return {grid: random.choice((1, 2)) for grid in self.nodes.keys()
+        trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
+        return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
                 if random.random() > 0.95}
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
