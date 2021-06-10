@@ -32,9 +32,7 @@ class KeyboardHandler(ToggledElement):
         if symbol == P and self.window.game_view is not None:
             self.window.game_view.toggle_pause()
         elif symbol == S and self.window.is_game_running:
-            self.window.save_game()
-        elif symbol == L:
-            self.window.load_game()
+            self.window.open_saving_menu()
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif (digit := chr(symbol)).isdigit():

@@ -6,6 +6,7 @@ import time
 
 from abc import ABC, abstractmethod
 from collections import deque
+from functools import partial
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator
 
 from arcade import Sprite, Texture, load_spritesheet
@@ -129,7 +130,11 @@ class Map(GridHandler):
         self.generate_nodes()
         self.calculate_distances_between_nodes()
 
-        self.game.after_load_functions.append(self.plant_random_trees)
+        try:
+            trees = map_settings['trees']
+            self.game.after_load_functions.append(partial(self.plant_trees, trees))
+        except KeyError:
+            self.game.after_load_functions.append(self.plant_trees)
 
         log(f'Created map in: {time.time() - start_time}', console=True)
 
@@ -139,7 +144,8 @@ class Map(GridHandler):
             'columns': self.columns,
             'grid_width': self.grid_width,
             'grid_height': self.grid_height,
-            'nodes_data': self.nodes_data
+            'nodes_data': self.nodes_data,
+            'trees': {g: n.tree for (g, n) in self.nodes.items() if n.tree is not None}
         }
 
     def __str__(self) -> str:
@@ -239,11 +245,18 @@ class Map(GridHandler):
         return distances
 
     @logger()
-    def plant_random_trees(self):
-        self.game.static_objects.extend(
-            TerrainObject(f'tree_leaf_{random.choice((1, 2))}.png', 4, node.position) for
-            node in self.nodes.values() if random.random() > 0.95
-        )
+    def plant_trees(self, trees: Optional[Dict[GridPosition, int]] = None):
+        if trees is None:
+            trees = self.generate_random_trees()
+        for node in self.nodes.values():
+            if (tree_type := trees.get(node.grid)) is not None:
+                tree = TerrainObject(f'tree_leaf_{tree_type}.png', 4, node.position)
+                self.game.static_objects.append(tree)
+                node.tree = tree_type
+
+    def generate_random_trees(self) -> Dict[GridPosition, int]:
+        return {grid: random.choice((1, 2)) for grid in self.nodes.keys()
+                if random.random() > 0.95}
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -340,6 +353,7 @@ class MapNode(GridHandler, ABC):
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
 
+        self.tree: Optional[int] = None
         self.terrain_cost: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:

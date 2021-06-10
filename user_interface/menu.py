@@ -4,11 +4,13 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, UiTextLabel,
+    SelectableGroup
 )
 from utils.views import LoadableWindowView
 
 LOADING_MENU = 'saving menu'
+SAVING_MENU = 'saving_menu'
 
 CONFIRMATON_DIALOG = 'Confirmaton dialog'
 
@@ -111,7 +113,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         sound_tab.on_mouse_press(1)
 
         x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
-        saving_menu = UiElementsBundle(
+
+        loading_menu = UiElementsBundle(
             index=2,
             name=LOADING_MENU,
             elements=[
@@ -121,6 +124,20 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        functions=window.load_game),
                 Button('menu_button_exit.png', x, next(y),
                        functions=window.delete_saved_game),
+            ],
+            register_to=self,
+            on_load=window.update_saved_games_list
+        )
+
+        y = (i for i in range(300, SCREEN_HEIGHT, 125))
+        saving_menu = UiElementsBundle(
+            index=2,
+            name=SAVING_MENU,
+            elements=[
+                back_to_menu_button,
+                # left column - ui-buttons:
+                Button('menu_button_savegame.png', x, next(y),
+                       functions=window.save_game),
             ],
             register_to=self,
             on_load=window.update_saved_games_list
@@ -184,10 +201,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             index=8,
             name=CONFIRMATON_DIALOG,
             elements=[
-                Button('menu_button_play.png', SCREEN_X // 2, 300,
-                       functions=partial(self.switch_to_bundle_of_index, index=2)),
-                Button('menu_button_play.png', SCREEN_X * 1.5, 300,
-                       functions=partial(self.switch_to_bundle_of_index, index=2)),
+                UiTextLabel(SCREEN_X, SCREEN_Y * 1.5, 'Are you sure?', 20),
+                Button('menu_button_play.png', SCREEN_X // 2, SCREEN_Y,
+                       functions=partial(self.switch_to_bundle, index=2)),
+                Button('menu_button_play.png', SCREEN_X * 1.5, SCREEN_Y,
+                       functions=partial(self.switch_to_bundle, index=2)),
             ],
             register_to=self
         )

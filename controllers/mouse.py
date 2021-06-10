@@ -142,11 +142,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             if ui_elem.active:
                 ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
             else:
-                left, _, bottom, _ = self.game.viewport
-                self.evaluate_mini_map_click(x + left, y + bottom)
+                self.evaluate_mini_map_click(x, y)
 
     @ignore_in_menu
-    def evaluate_mini_map_click(self, x, y):
+    def evaluate_mini_map_click(self, x: float, y: float):
+        left, _, bottom, _ = self.game.viewport
+        x, y = x + left, y + bottom
         if (position := self.game.mini_map.cursor_inside(x, y)) is not None:
             if units := self.units_manager.selected_units:
                 self.units_manager.on_terrain_click_with_units(*position, None, units)

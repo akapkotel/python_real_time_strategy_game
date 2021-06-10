@@ -19,6 +19,9 @@ _game.py_ script in your IDE (e.g. PyCharm) or in terminal.
 
 #### PLAYING:
 To be done.
+![Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/screenshots/menu.png)
+![Game Mode Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/screenshots/game_mode_menu.png)
+![Game](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/screenshots/game.png)
 
 ### WHAT IS DONE:
 1. Window and Views as different 'states' of the game.
@@ -75,6 +78,10 @@ To be done.
 31. Implemented in-game timer displaying how much time passed since game started.
 32. Implemented new game-loading from file system. 
 33. Added playlists for background music tracks.
+10.06.2021:
+34. Improved mini-map: better resolution, no more ugly big rectangles!
+35. Trees are now saved!
+36. Loading menu with auto-updating list of existing save-files.
 
 #### TO BE DONE:
 #### Minor:
@@ -94,7 +101,7 @@ To be done.
 9. Flocking for Soldier class.
 10. Implement Jump Point Search to optimize A* performance.
 11. Less cpu-heavy VehicleThreads.
-12. Nicer MiniMap without ugly rectangles representing discovered area.
+12. Nicer MiniMap without ugly rectangles representing discovered area - DONE.
 
 #### Major:
 1. User-interface. (currently being developed)

@@ -31,23 +31,26 @@ class SaveManager(Singleton):
     game: Optional['Game'] = None
 
     def __init__(self, saves_path: str, scenarios_path: str):
-        self.scenarios_path = scenarios_path = os.path.abspath(scenarios_path)
-        self.saves_path = saves_path = os.path.abspath(saves_path)
+        self.scenarios_path = os.path.abspath(scenarios_path)
+        self.saves_path = os.path.abspath(saves_path)
 
-        self.scenarios = self.find_all_scenarios(SCENARIO_EXTENSION, scenarios_path)
-        self.saved_games = self.find_all_game_saves(SAVE_EXTENSION, saves_path)
+        self.scenarios: SavedGames = {}
+        self.saved_games: SavedGames = {}
 
+        self.update_scenarios()
+        self.update_saves()
+
+        log(f'Found {len(self.scenarios)} scenarios in {self.saves_path}.')
         log(f'Found {len(self.saved_games)} saved games in {self.saves_path}.')
 
-    @staticmethod
-    def find_all_scenarios(extension: str, path: str) -> SavedGames:
-        names_to_paths = find_paths_to_all_files_of_type(extension, path)
-        return {
-            name: os.path.join(path, name) for name, path in names_to_paths.items()
-        }
+    def update_scenarios(self):
+        self.scenarios = self.find_all_files(SCENARIO_EXTENSION, self.scenarios_path)
+
+    def update_saves(self):
+        self.saved_games = self.find_all_files(SAVE_EXTENSION, self.saves_path)
 
     @staticmethod
-    def find_all_game_saves(extension: str, path: str) -> SavedGames:
+    def find_all_files(extension: str, path: str) -> SavedGames:
         names_to_paths = find_paths_to_all_files_of_type(extension, path)
         return {
             name: os.path.join(path, name) for name, path in names_to_paths.items()
@@ -72,16 +75,26 @@ class SaveManager(Singleton):
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
+        self.update_saves()
         log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
 
-    def load_scenario(self, scenario_name: str) -> Generator:
-        return self.load_game(scenario_name, scenario=True)
+    def get_full_path_to_file_with_extension(self, save_name: str) -> str:
+        """
+        Since we do not know if player want's to load his own saved game or to
+        start a new game from a predefined .scn file, we determine it checking
+        the file name provided to us and adding proper path and extension.
+        """
+        if SAVE_EXTENSION in save_name:
+            return os.path.join(self.saves_path, save_name)
+        elif SCENARIO_EXTENSION in save_name:
+            return os.path.join(self.scenarios_path, save_name)
+        elif (full_name := save_name + SCENARIO_EXTENSION) in self.scenarios:
+            return os.path.join(self.saves_path, full_name)
+        else:
+            return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
 
-    def load_game(self, save_name: str, scenario: bool = False):
-        save_name = self.add_extension_if_required(save_name, scenario)
-        print(save_name)
-        directory = self.scenarios_path if scenario else self.saves_path
-        full_save_path = os.path.join(directory, save_name)
+    def load_game(self, save_name: str):
+        full_save_path = self.get_full_path_to_file_with_extension(save_name)
         with shelve.open(full_save_path) as file:
             for name in ('timer', 'settings', 'viewports', 'map', 'factions',
                          'players', 'local_human_player', 'units', 'buildings',
@@ -177,13 +190,6 @@ class SaveManager(Singleton):
             del self.saved_games[old_name]
         except Exception as e:
             log(f'{str(e)}', console=True)
-
-    @staticmethod
-    def add_extension_if_required(save_name: str, scenario: bool):
-        if not (SCENARIO_EXTENSION in save_name or SAVE_EXTENSION in save_name):
-            extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
-            return save_name + extension
-        return save_name
 
 
 # these imports are placed here to avoid circular-imports issue:

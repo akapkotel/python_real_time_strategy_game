@@ -30,6 +30,14 @@ class UiSpriteList(SpriteList):
                  is_static=False):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
 
+    def append(self, item):
+        if hasattr(item, 'visible') and hasattr(item, 'active'):
+            super().append(item)
+
+    def extend(self, items: Union[list, 'SpriteList']):
+        for item in (i for i in items if hasattr(i, 'visible') and hasattr(i, 'active')):
+            super().append(item)
+
     def clear(self):
         for i in range(len(self)):
             self.pop()
@@ -160,6 +168,9 @@ class UiBundlesHandler(ObjectsOwner):
         self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
         # set used to quickly check if a bundle is displayed or not:
         self.active_bundles: Set[int] = set()
+        # selectable groups allow to group together a bunch of same-context
+        # UiElements and provide a convenient way to communicate between them:
+        self.selectable_groups: Dict[str, SelectableGroup] = {}
 
     def register(self, acquired: OwnedObject):
         acquired: UiElementsBundle
@@ -174,16 +185,16 @@ class UiBundlesHandler(ObjectsOwner):
     def get_notified(self, *args, **kwargs):
         pass
 
-    # def switch_to_bundle(self,
-    #                      bundle: UiElementsBundle = None,
-    #                      name: str = None,
-    #                      index: int = None):
-    #     if bundle is not None:
-    #         return self._switch_to_bundle(bundle)
-    #     elif name in self.ui_elements_bundles:
-    #         return self._switch_to_bundle(self.ui_elements_bundles[name])
-    #     elif index is not None:
-    #         return self.switch_to_bundle_of_index(index)
+    def switch_to_bundle(self,
+                         bundle: UiElementsBundle = None,
+                         name: str = None,
+                         index: int = None):
+        if bundle is not None:
+            return self._switch_to_bundle(bundle)
+        elif name in self.ui_elements_bundles:
+            return self._switch_to_bundle(self.ui_elements_bundles[name])
+        elif index is not None:
+            return self.switch_to_bundle_of_index(index)
 
     def switch_to_bundle_of_index(self, index: int = 0):
         for bundle in self.ui_elements_bundles.values():
@@ -242,7 +253,7 @@ class UiBundlesHandler(ObjectsOwner):
             return
 
     def _load_bundle(self, bundle: UiElementsBundle):
-        print('LOADING BUNDLE!', bundle.name)
+        log(f'LOADING BUNDLE: {bundle.name}')
         bundle.on_load()
         self.active_bundles.add(bundle.index)
         self.ui_elements_spritelist.extend(bundle.elements)
@@ -395,7 +406,6 @@ class ToggledElement:
     @active.setter
     def active(self, value: bool):
         self._active = value
-        log(f'{self.__class__.__name__} state = {value}')
 
     @property
     def visible(self):
@@ -418,7 +428,44 @@ class ToggledElement:
         self._visible = False
 
 
-class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
+class Selectable:
+    def __init__(self, selectable_group: Optional[SelectableGroup] = None):
+        self.selectable_group = selectable_group
+        self.selected = False
+        if selectable_group is not None:
+            selectable_group.bind_selectable(self)
+            self.functions.append(self.toggle_selection)
+
+    def toggle_selection(self):
+        self.select() if not self.selected else self.unselect()
+
+    def select(self):
+        self.selected = True
+        self.selectable_group.select(self)
+
+    def unselect(self):
+        self.selected = False
+
+
+class SelectableGroup:
+    def __init__(self):
+        self.selectable_elements: List[Selectable] = []
+
+    @property
+    def currently_selected(self) -> Optional[Selectable]:
+        for element in (s for s in self.selectable_elements if s.selected):
+            return element
+
+    def bind_selectable(self, selectable: Selectable):
+        self.selectable_elements.append(selectable)
+        selectable.selectable_group = self
+
+    def select(self, selected: Selectable):
+        for element in (e for e in self.selectable_elements if e is not selected):
+            element.unselect()
+
+
+class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectable):
     """
     Basic class for all user-interface and menu objects, like buttons,
     scrollbars, mouse-cursors etc.
@@ -437,17 +484,18 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
                  name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
-                 can_be_dragged: bool = False, subgroup: Optional[int] = None):
+                 can_be_dragged: bool = False, subgroup: Optional[int] = None,
+                 selectable_group: Optional[SelectableGroup] = None):
         full_texture_name = get_path_to_file(to_texture_name(texture_name))
         super().__init__(full_texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
         OwnedObject.__init__(self, owners=True)
+        Selectable.__init__(self, selectable_group=selectable_group)
         self.name = name
         self.bundle = None
         self.subgroup = subgroup
         self.ui_spritelist = None
-        self.attached_data = None
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
@@ -471,7 +519,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject):
 
     def draw(self):
         super().draw()
-        if self._active and self.pointed:
+        if self._active and (self.pointed or self.selected):
             self.draw_highlight_around_element()
 
     def draw_highlight_around_element(self):
@@ -520,10 +568,11 @@ class Button(UiElement):
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
-                 subgroup: Optional[int] = None
-                 ):
+                 subgroup: Optional[int] = None,
+                 selectable_group: Optional[SelectableGroup] = None):
         super().__init__('', x, y, name, active, visible, parent,
-                         functions, subgroup=subgroup)
+                         functions, subgroup=subgroup,
+                         selectable_group=selectable_group)
         # we load 2 textures for button: normal and for 'highlighted' button:
         full_texture_name = get_path_to_file(texture_name)
         image = PIL.Image.open(full_texture_name)
@@ -538,6 +587,19 @@ class Button(UiElement):
         super().draw()
         if not self._active:
             draw_rectangle_filled(*self.position, self.width, self.height, FOG)
+
+
+class GenericTextButton(Button):
+
+    def __init__(self, texture_name: str, x: int, y: int, name: str, functions,
+                 subgroup, selectable_group: Optional[SelectableGroup] = None):
+        super().__init__(texture_name, x, y, name, functions=functions, subgroup=subgroup,
+                         selectable_group=selectable_group)
+
+    def draw(self):
+        super().draw()
+        x, y = self.position
+        draw_text(self.name, x, y, BLACK, 15, anchor_x='center', anchor_y='center')
 
 
 class Tab(Button):
@@ -594,7 +656,8 @@ class Checkbox(UiElement):
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  functions: Optional[Callable] = None,
                  ticked: bool = False, variable: Tuple[object, str] = None,
-                 subgroup: Optional[int] = None):
+                 subgroup: Optional[int] = None,
+                 selectable_group: Optional[SelectableGroup] = None):
         """
 
         :param texture_name:
@@ -613,7 +676,8 @@ class Checkbox(UiElement):
         attribute, e.g. (self, 'name_of_my_attribute').
         """
         super().__init__(texture_name, x, y, name, active, visible,
-                         parent, functions, subgroup=subgroup)
+                         parent, functions, subgroup=subgroup,
+                         selectable_group=selectable_group)
         self.ticked = ticked
         self.variable = variable
         full_texture_name = get_path_to_file(texture_name)

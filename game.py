@@ -26,7 +26,7 @@ from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
-    ScrollableContainer
+    ScrollableContainer, GenericTextButton, SelectableGroup
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -90,7 +90,7 @@ class Settings:
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
-    editor_mode: bool = True
+    editor_mode: bool = False
     selected_save: str = None
 
 
@@ -278,28 +278,37 @@ class GameWindow(Window, EventsCreator):
         return self.current_view.viewport
 
     def update_saved_games_list(self):
-        """"""
         loading_menu = self.menu_view.ui_elements_bundles[LOADING_MENU]
         loading_menu.remove_subgroup(4)
-        x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 100))
+        x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
+        self.menu_view.selectable_groups['saves'] = group = SelectableGroup()
         loading_menu.extend(
-            Button('menu_button_blank.png', x, next(y), file,
-                   functions=partial(self.select_save, file),
-                   subgroup=4) for file in self.save_manager.saved_games
+            GenericTextButton('blank_file_button.png', x, next(y), file,
+                              None, subgroup=4, selectable_group=group)
+            for file in self.save_manager.saved_games
         )
 
     def select_save(self, save_name: str):
         """Set saved game file name as currently selected to load or delete."""
-        self.settings.selected_save = save_name
+        if self.settings.selected_save is not save_name:
+            self.settings.selected_save = save_name
+        else:
+            self.settings.selected_save = None
+
+    def open_saving_menu(self):
+        self.show_view(self.menu_view)
+        self.menu_view.switch_to_bundle(name='saving_menu')
 
     def save_game(self, player_confirmed=False):
-        self.save_manager.save_game('save_01', self.game_view)
+        save_name = f'saved_game({time.asctime()})'
+        self.save_manager.save_game(save_name, self.game_view)
 
     def load_game(self):
         if self.game_view is not None:
             self.quit_current_game()
-        if (selected_save := self.settings.selected_save) is not None:
-            loader = self.save_manager.load_game(save_name=selected_save)
+        saves = self.menu_view.selectable_groups['saves']
+        if (selected_save := saves.currently_selected) is not None:
+            loader = self.save_manager.load_game(save_name=selected_save.name)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
 
@@ -307,9 +316,9 @@ class GameWindow(Window, EventsCreator):
     def delete_saved_game(self, player_confirmed=False):
         if not player_confirmed:
             self.menu_view.switch_to_bundle_of_name(CONFIRMATON_DIALOG)
-            # TODO: display pop-up with confirmation dialog for player
         else:
-            self.save_manager.delete_saved_game(self.settings.selected_save)
+            saves = self.menu_view.selectable_groups['saves']
+            self.save_manager.delete_saved_game(saves.currently_selected.name)
 
     def close(self):
         log(f'Terminating application...')
@@ -329,7 +338,9 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.generate_random_entities = self.loader is None
 
         self.settings = self.window.settings  # shared with Window class
-        self.timer = {'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0}
+        self.timer = {
+            'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0
+        }
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
@@ -404,11 +415,14 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             index=0,
             elements=[
                 right_ui_panel,
-                Button('game_button_menu.png', ui_x, 100,
+                Button('game_button_menu.png', ui_x + 100, 120,
                        functions=partial(
                            self.window.show_view, self.window.menu_view),
                        parent=right_ui_panel),
-                Button('game_button_pause.png', ui_x - 100, 100,
+                Button('game_button_save.png', ui_x, 120,
+                       functions=self.window.open_saving_menu,
+                       parent=right_ui_panel),
+                Button('game_button_pause.png', ui_x - 100, 120,
                        functions=partial(self.toggle_pause),
                        parent=right_ui_panel)
             ],
@@ -434,21 +448,22 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             register_to=self
         )
 
-        editor_panel = UiElementsBundle(
-            name=EDITOR,
-            index=3,
-            elements=[
-                ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
-                                    'scrollable'),
-            ],
-            register_to=self,
-        )
-        editor_panel.extend(
-            [
-                Button('small_button_none.png', ui_x, 100 * i,
-                       parent=editor_panel.elements[0]) for i in range(5)
-            ]
-        )
+        if self.settings.editor_mode:
+            editor_panel = UiElementsBundle(
+                name=EDITOR,
+                index=3,
+                elements=[
+                    ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
+                                        'scrollable'),
+                ],
+                register_to=self,
+            )
+            editor_panel.extend(
+                [
+                    Button('small_button_none.png', ui_x, 100 * i,
+                           parent=editor_panel.elements[0]) for i in range(5)
+                ]
+            )
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, right, top):
@@ -589,7 +604,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         elif isinstance(acquired, (Player, Faction)):
             self.register_player_or_faction(acquired)
         else:
-            super().register(acquired)
+            super().register(acquired)  # Game inherits from UiBundlesHandler
 
     def register_gameobject(self, registered: GameObject):
         if isinstance(registered, PlayerEntity):
