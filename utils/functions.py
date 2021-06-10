@@ -172,3 +172,11 @@ def ignore_in_menu(func):
             return
         return func(self, *args, **kwargs)
     return wrapper
+
+
+def ignore_in_game(func):
+    def wrapper(self, *args, **kwargs):
+        if self.window.is_game_running:
+            return
+        return func(self, *args, **kwargs)
+    return wrapper

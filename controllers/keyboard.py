@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from typing import Set
+from typing import Set, Optional
 
 from arcade import Window
 from arcade.key import *
 
-from user_interface.user_interface import ToggledElement
-from utils.functions import ignore_in_menu
+from user_interface.user_interface import ToggledElement, TextInputField
+from utils.functions import ignore_in_menu, ignore_in_game
 from utils.logging import log, logger
 
 
@@ -16,15 +16,15 @@ class KeyboardHandler(ToggledElement):
     def __init__(self, window: Window):
         super().__init__()
         self.window = window
+        self.keyboard_input_consumer: Optional[TextInputField] = None
 
-    @logger(console=True)
     def on_key_press(self, symbol: int):
         self.keys_pressed.add(symbol)
-        log(f'Pressed key: {symbol}, all pressed keys: {self.keys_pressed}')
+        log(f'Pressed key: {symbol}, translated to: {chr(symbol)} all pressed keys: {self.keys_pressed}', True)
         self.evaluate_pressed_key(symbol)
 
     def on_key_release(self, symbol: int):
-        if symbol == LCTRL:
+        if symbol == LCTRL and self.window.is_game_running:
             self.window.game_view.pathfinder.finish_waypoints_queue()
         self.keys_pressed.discard(symbol)
 
@@ -59,6 +59,7 @@ class KeyboardHandler(ToggledElement):
     def update(self):
         if self.keys_pressed:
             self.keyboard_map_scroll()
+            self.handle_key_input_consumers()
 
     @ignore_in_menu
     def keyboard_map_scroll(self):
@@ -67,3 +68,8 @@ class KeyboardHandler(ToggledElement):
         dy = (UP in keys or W in keys) - (DOWN in keys or S in keys)
         if dx != 0 or dy != 0:
             self.window.change_viewport(- dx * 50, - dy * 50)
+
+    @ignore_in_game
+    def handle_key_input_consumers(self):
+        if self.keyboard_input_consumer is not None:
+            self.keyboard_input_consumer.extend(self.keys_pressed)

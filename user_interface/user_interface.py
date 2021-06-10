@@ -828,8 +828,14 @@ class ListBox(UiElement):
     ...
 
 
-class TextInputField(UiElement):
-    ...
+class TextInputField(UiElement, list):
+
+    def __init__(self, texture_name: str, x: int, y: int):
+        super().__init__(texture_name, x, y)
+        # store single inputs in list to easily manipulate them:
+
+    def get_text(self) -> str:
+        return ''.join(self)
 
 
 class ScrollBar(UiElement):
