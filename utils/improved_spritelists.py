@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from arcade import SpriteList, Sprite
 
@@ -135,3 +135,36 @@ class SelectiveSpriteList(SpriteList):
         """Safe clearing of the whole SpriteList using reversed order."""
         for _ in range(len(self)):
             self.pop()
+
+
+class UiSpriteList(SpriteList):
+    """
+    Wrapper for spritelists containing UiElements for quick identifying the
+    spritelists which should be collided with the MouseCursor.
+    """
+
+    def __init__(self, use_spatial_hash=False, spatial_hash_cell_size=128,
+                 is_static=False):
+        super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
+
+    def append(self, item):
+        if hasattr(item, 'visible') and hasattr(item, 'active'):
+            super().append(item)
+
+    def extend(self, items: Union[list, 'SpriteList']):
+        for item in (i for i in items if hasattr(i, 'visible') and hasattr(i, 'active')):
+            super().append(item)
+
+    def clear(self):
+        for i in range(len(self)):
+            self.pop()
+
+    def draw(self, **kwargs):
+        # noinspection PyUnresolvedReferences
+        for ui_element in (u for u in self if u.visible):
+            ui_element.draw()
+
+    def on_update(self, delta_time: float = 1/60):
+        # noinspection PyUnresolvedReferences
+        for ui_element in (u for u in self if u.active):
+            ui_element.on_update()

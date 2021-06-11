@@ -9,10 +9,10 @@ from user_interface.user_interface import (
 )
 from utils.views import LoadableWindowView
 
-LOADING_MENU = 'saving menu'
+LOADING_MENU = 'loading menu'
 SAVING_MENU = 'saving_menu'
-
 MAIN_MENU = 'main menu'
+
 OPTIONS_SUBMENU = 'options'
 CREDITS_SUBMENU = 'credits'
 
@@ -120,7 +120,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 # left column - ui-buttons:
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=window.load_game),
-                Button('menu_button_exit.png', x, next(y),
+                Button('menu_button_deletesave.png', x, next(y),
                        functions=window.delete_saved_game),
             ],
             register_to=self,

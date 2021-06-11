@@ -13,14 +13,14 @@ from buildings.buildings import Building
 from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject
-from utils.improved_spritelists import SelectiveSpriteList
+from utils.improved_spritelists import SelectiveSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
 from units.unit_management import UnitsManager
 from units.units import Unit
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
-    UiSpriteList, TextInputField
+    TextInputField
 )
 
 from utils.functions import get_path_to_file, ignore_in_menu
@@ -142,11 +142,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @logger()
     def on_left_button_click(self, x: float, y: float, modifiers: int):
         if (ui_elem := self.pointed_ui_element) is not None:
-            if ui_elem.active:
-                ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
+            ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
+            self.evaluate_mini_map_click(x, y)
         if self.bound_text_input_field not in (ui_elem, None):
             self.unbind_text_input_field()
-        self.evaluate_mini_map_click(x, y)
 
     @ignore_in_menu
     def evaluate_mini_map_click(self, x: float, y: float):

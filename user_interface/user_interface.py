@@ -9,11 +9,12 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 
 from arcade import (
-    Sprite, SpriteList, load_texture, draw_rectangle_outline, draw_text,
+    Sprite, load_texture, draw_rectangle_outline, draw_text,
     draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision
 )
 from arcade.arcade_types import Color
 
+from utils.improved_spritelists import UiSpriteList
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 
 from utils.functions import make_texture, get_path_to_file, to_texture_name
@@ -25,37 +26,27 @@ from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 CONFIRMATON_DIALOG = 'Confirmaton dialog'
 
 
-class UiSpriteList(SpriteList):
+def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
     """
-    Wrapper for spritelists containing UiElements for quick identifying the
-    spritelists which should be collided with the MouseCursor.
+    Use this function to decorate method you want, to be preceded by display of
+    simple confirm-or-cancel dialog for the player. The dialog would be shown
+    first, and after player clicks 'confirm' decorated method would be called.
+    If player clicks 'cancel', method would be ignored and a UiElementsBundle
+    of name provided in after_switch_to_bundle param is loaded.
+
+    :param position: Tuple[x, y] -- position on which dialog will be centered
+    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be
+    displayed after player makes choice.
+    :return: Callable
     """
-
-    def __init__(self, use_spatial_hash=False, spatial_hash_cell_size=128,
-                 is_static=False):
-        super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
-
-    def append(self, item):
-        if hasattr(item, 'visible') and hasattr(item, 'active'):
-            super().append(item)
-
-    def extend(self, items: Union[list, 'SpriteList']):
-        for item in (i for i in items if hasattr(i, 'visible') and hasattr(i, 'active')):
-            super().append(item)
-
-    def clear(self):
-        for i in range(len(self)):
-            self.pop()
-
-    def draw(self, **kwargs):
-        # noinspection PyUnresolvedReferences
-        for ui_element in (u for u in self if u.visible):
-            ui_element.draw()
-
-    def on_update(self, delta_time: float = 1/60):
-        # noinspection PyUnresolvedReferences
-        for ui_element in (u for u in self if u.active):
-            ui_element.on_update()
+    def decorator(func):
+        def wrapper(self):
+            function_on_yes = partial(func, self)
+            return self.menu_view.open_confirmation_dialog(
+                position, after_switch_to_bundle, function_on_yes
+            )
+        return wrapper
+    return decorator
 
 
 @dataclass
@@ -179,20 +170,11 @@ class UiBundlesHandler(ObjectsOwner):
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
 
-    def show_confirmation_dialog(self,
-                                 x, y, yes: Callable, no: Callable,
-                                 after_switch_to_bundle: str):
-        """
-        Generates new UiELementsBundle representing simple 'confirm' ot 'cancel'
-        dialog displayed for the player, and then executes callback assigned to
-        the the choice made.
-
-        :param x: x position of the dialog-center
-        :param y: y position of the dialog-center
-        :param yes: Callable -- function executed if player confirms action
-        :param no: Callable -- function to be executed if player cancels action
-        :param after_switch_to_bundle: str -- name of UiElementsBundle to go
-        """
+    def open_confirmation_dialog(self,
+                                 position: Tuple,
+                                 after_switch_to_bundle: str,
+                                 function_if_yes: Callable):
+        x, y = position
         close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
         self.switch_to_bundle(UiElementsBundle(
             index=8,
@@ -200,9 +182,9 @@ class UiBundlesHandler(ObjectsOwner):
             elements=[
                 UiTextLabel(x, y * 1.5, 'Are you sure?', 20),
                 Button('menu_button_confirm.png', x // 2, y,
-                       functions=(yes, close_dialog)),
+                       functions=(function_if_yes, close_dialog)),
                 Button('menu_button_cancel.png', x * 1.5, y,
-                       functions=(no, close_dialog))
+                       functions=(close_dialog, ))
             ],
             register_to=self
         ))

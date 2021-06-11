@@ -26,9 +26,7 @@ from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
-    Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
-    ScrollableContainer, GenericTextButton, SelectableGroup,
-    EditorPlaceableObject
+    Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton, SelectableGroup, ask_player_for_confirmation
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -39,7 +37,7 @@ from utils.functions import (
 from utils.logging import log, logger, timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
-    SelectiveSpriteList, SpriteListWithSwitch
+    SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList
 )
 from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
@@ -49,6 +47,7 @@ from utils.views import LoadingScreen, LoadableWindowView, Updateable
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
+MAIN_MENU = 'main menu'
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -169,6 +168,7 @@ class GameWindow(Window, EventsCreator):
             self.game_view = Game(loader=None)
         self.show_view(self.game_view)
 
+    @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def quit_current_game(self):
         self.game_view.unload()
         self.show_view(self.menu_view)
@@ -305,22 +305,13 @@ class GameWindow(Window, EventsCreator):
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
 
-    @logger()
-    def delete_saved_game(self, player_confirmed=False):
+    @ask_player_for_confirmation(SCREEN_CENTER, 'loading menu')
+    def delete_saved_game(self):
         saves = self.menu_view.selectable_groups['saves']
         if saves.currently_selected is not None:
-            if not player_confirmed:
-                self.ask_player_for_confirmation()
-            else:
-                self.save_manager.delete_saved_game(saves.currently_selected.name)
+            self.save_manager.delete_saved_game(saves.currently_selected.name)
 
-    def ask_player_for_confirmation(self):
-        this = self.delete_saved_game
-        self.menu_view.show_confirmation_dialog(
-            x=SCREEN_X, y=SCREEN_Y, yes=partial(this, True), no=lambda: None,
-            after_switch_to_bundle=LOADING_MENU
-        )
-
+    @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
         log(f'Terminating application...')
         super().close()
@@ -781,7 +772,6 @@ if __name__ == '__main__':
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
     from missions.consequences import Defeat, Victory
-    from user_interface.user_interface import CONFIRMATON_DIALOG
     from user_interface.menu import Menu, LOADING_MENU
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
