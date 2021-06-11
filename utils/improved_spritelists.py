@@ -93,37 +93,37 @@ class SelectiveSpriteList(SpriteList):
     @staticmethod
     def start_updating(sprite):
         try:
-            sprite.updated = True
+            sprite.is_updated = True
         except AttributeError:
             log(f'Tried to draw Sprite instance without "updated" attribute')
 
     @staticmethod
     def stop_updating(sprite):
         try:
-            sprite.updated = False
+            sprite.is_updated = False
         except AttributeError:
             log(f'Tried stop drawing Sprite instance without "updated" attribute')
 
     @staticmethod
     def start_drawing(sprite):
         try:
-            sprite.rendered = True
+            sprite.is_rendered = True
         except AttributeError:
             log(f'Tried to draw Sprite instance without "drawn_area" attribute')
 
     @staticmethod
     def stop_drawing(sprite):
         try:
-            sprite.rendered = False
+            sprite.is_rendered = False
         except AttributeError:
             log(f'Tried stop drawing Sprite instance without "drawn_area" attribute')
 
     def on_update(self, delta_time: float = 1/60):
-        for sprite in (s for s in self if s.updated):
+        for sprite in (s for s in self if s.is_updated):
             sprite.on_update(delta_time)
 
     def draw(self):
-        for sprite in (s for s in self if s.rendered):
+        for sprite in (s for s in self if s.is_rendered):
             sprite.draw()
 
     def pop(self, index: int = -1) -> Sprite:

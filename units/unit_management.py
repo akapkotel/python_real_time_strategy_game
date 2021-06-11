@@ -261,7 +261,7 @@ class UnitsManager:
     def unselect_units(self):
         self.selected_units.clear()
         self.clear_selection_markers()
-        self.game.update_interface_content()
+        self.game.update_interface_content(context=None)
 
     def clear_selection_markers(self,
                                 killed: Set[SelectionUnitMarket] = None):
@@ -286,7 +286,7 @@ class UnitsManager:
         try:
             group = self.permanent_units_groups[group_id]
             selected = self.selected_units
-            if selected and all(u in group for u in selected):
+            if selected and set(selected) == group.units:
                 self.window.move_viewport_to_the_position(*group.position)
             else:
                 self.unselect_units()

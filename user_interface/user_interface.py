@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 
 from arcade import (
     Sprite, SpriteList, load_texture, draw_rectangle_outline, draw_text,
-    draw_rectangle_filled
+    draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision
 )
 from arcade.arcade_types import Color
 
@@ -179,7 +179,9 @@ class UiBundlesHandler(ObjectsOwner):
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
 
-    def confirmation_dialog(self, x, y, yes: Callable, no: Callable, after: str):
+    def show_confirmation_dialog(self,
+                                 x, y, yes: Callable, no: Callable,
+                                 after_switch_to_bundle: str):
         """
         Generates new UiELementsBundle representing simple 'confirm' ot 'cancel'
         dialog displayed for the player, and then executes callback assigned to
@@ -189,9 +191,9 @@ class UiBundlesHandler(ObjectsOwner):
         :param y: y position of the dialog-center
         :param yes: Callable -- function executed if player confirms action
         :param no: Callable -- function to be executed if player cancels action
-        :param after: str -- name of UiElementsBundle to go, after
+        :param after_switch_to_bundle: str -- name of UiElementsBundle to go
         """
-        close_dialog = partial(self.close_confirmation_dialog, after)
+        close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
         self.switch_to_bundle(UiElementsBundle(
             index=8,
             name=CONFIRMATON_DIALOG,
@@ -204,10 +206,9 @@ class UiBundlesHandler(ObjectsOwner):
             ],
             register_to=self
         ))
-        # self._switch_to_bundle(confirmation_dialog)
 
-    def close_confirmation_dialog(self, after: str):
-        self.switch_to_bundle_of_name(name=after)
+    def close_confirmation_dialog(self, after_switch_to_bundle: str):
+        self.switch_to_bundle_of_name(name=after_switch_to_bundle)
         self.unregister(self.ui_elements_bundles[CONFIRMATON_DIALOG])
 
     def register(self, acquired: OwnedObject):
@@ -303,11 +304,16 @@ class UiBundlesHandler(ObjectsOwner):
             if element.bundle == bundle:
                 self.ui_elements_spritelist.remove(element)
 
-    def _unload_all(self, exception: Optional[str] = None):
+    def _unload_all(self,
+                    exception: Optional[str] = None,
+                    exceptions: Optional[List[str]] = None):
         self.active_bundles.clear()
         self.ui_elements_spritelist.clear()
         if exception is not None:
             self.load_bundle(name=exception)
+        elif exceptions is not None:
+            for exception in exceptions:
+                self.load_bundle(exception)
 
     def update_not_displayed_bundles_positions(self, dx, dy):
         for bundle in self.ui_elements_bundles.values():
@@ -538,6 +544,18 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectab
         self.subgroup = subgroup
         self.ui_spritelist = None
 
+    def this_or_child(self, cursor) -> UiElement:
+        """
+        If UiElement has children UiElements, first iterate through them, to
+        check if any child is pointed by cursor instead, otherwise, this
+        UiElement is pointed.
+        """
+        if self.children:
+            for child in self.children:
+                if check_for_collision(cursor, child):
+                    return child
+        return self
+
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
         if (sound := self.sound_on_mouse_click) is not None and self._active:
@@ -584,7 +602,7 @@ class Frame(UiElement):
                  height: int,
                  name: Optional[str] = None,
                  color: Optional[Color] = None,
-                 active: bool = False,
+                 active: bool = True,
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None,
                  subgroup: Optional[int] = None
@@ -809,6 +827,9 @@ class ScrollableContainer(UiElement):
         super()._func_on_mouse_exit()
         self.cursor.pointed_scrollable = None
 
+    def is_cursor_pointed(self, cursor_x: float, cursor_y: float) -> bool:
+        return self.left < cursor_x < self.right and self.bottom < cursor_y < self.top
+
     def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
         if self.scrollable:
             for child in self.scrollable:
@@ -816,12 +837,26 @@ class ScrollableContainer(UiElement):
                 self._manage_child_visibility(child)
 
     def _manage_child_visibility(self, child):
-        if child.top >= self.top or child.bottom <= self.bottom:
-            child.deactivate()
-            child.hide()
-        else:
-            child.activate()
-            child.show()
+        child.toggle(self.top > child.top and self.bottom < child.bottom)
+
+
+class EditorPlaceableObject(Button):
+    """
+    Used to pick objects from ScenarioEditor panel in the UI in ditor mode and
+    place them on the map.
+    """
+
+    def __init__(self, gameobject_name: str, x: int, y: int, parent):
+        super().__init__('small_button_none.png', x, y, parent=parent)
+        self.gameobject_name = get_path_to_file(gameobject_name)
+        print(self.gameobject_name)
+        w, h = self.width, self.height
+        self.gameobject_texture = load_texture(self.gameobject_name, 0, 0, w, h)
+
+    def draw(self):
+        super().draw()
+        x, y = self.position
+        draw_scaled_texture_rectangle(x, y, self.gameobject_texture)
 
 
 class ListBox(UiElement):
@@ -829,16 +864,48 @@ class ListBox(UiElement):
 
 
 class TextInputField(UiElement, list):
+    """
+    TODO:
+    """
 
-    def __init__(self, texture_name: str, x: int, y: int):
+    def __init__(self, texture_name: str, x: int, y: int, name: str,
+                 keyboard_handler: KeyboardHandler):
         super().__init__(texture_name, x, y)
-        # store single inputs in list to easily manipulate them:
+        self.keyboard_handler = keyboard_handler
+
+    def on_mouse_press(self, button: int):
+        super().on_mouse_press(button)
+        self.bind_to_mouse_and_keyboard_handlers()
+
+    def bind_to_mouse_and_keyboard_handlers(self):
+        self.cursor.bind_text_input_field(self)
+        self.keyboard_handler.bind_keyboard_input_consumer(self)
+
+    def unbind_keyboard_handler(self):
+        self.keyboard_handler.unbind_keyboard_input_consumer()
+
+    def append(self, symbol: int):
+        if (key := chr(symbol)).isprintable():
+            super().append(key)
 
     def get_text(self) -> str:
         return ''.join(self)
+
+    def draw(self):
+        super().draw()
+        if len(self) > 0:
+            self.draw_inner_text()
+
+    def draw_inner_text(self):
+        x, y = self.position
+        draw_text(self.get_text(), x, y, WHITE, anchor_x='center', anchor_y='center')
 
 
 class ScrollBar(UiElement):
     sound_on_mouse_enter = None
     sound_on_mouse_click = None
     ...
+
+
+# To avoid circular imports
+from controllers.keyboard import KeyboardHandler

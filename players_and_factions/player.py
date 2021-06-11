@@ -403,7 +403,7 @@ class PlayerEntity(GameObject):
             self.move_towards_enemies_nearby(enemies)
 
     def draw(self):
-        if self.rendered:
+        if self.is_rendered:
             super().draw()
 
     @property
@@ -412,9 +412,9 @@ class PlayerEntity(GameObject):
 
     def update_visibility(self):
         if self in self.game.local_drawn_units_and_buildings:
-            if not self.rendered:
+            if not self.is_rendered:
                 self.start_drawing()
-        elif self.rendered:
+        elif self.is_rendered:
             self.stop_drawing()
 
     @abstractmethod

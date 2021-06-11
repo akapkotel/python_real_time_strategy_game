@@ -410,7 +410,7 @@ class Vehicle(Unit):
         self.fuel -= self.fuel_consumption
 
     def leave_threads(self):
-        if self.rendered:
+        if self.is_rendered:
             if self.threads_time > 4:
                 self.threads_time = 0
                 self.game.vehicles_threads.append(

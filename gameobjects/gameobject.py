@@ -44,8 +44,8 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         self._robustness = robustness  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile
 
-        self.updated = True
-        self.rendered = True
+        self.is_updated = True
+        self.is_rendered = True
 
         self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
@@ -73,16 +73,16 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         super().update_animation(delta_time)
 
     def start_drawing(self):
-        self.rendered = True
+        self.is_rendered = True
 
     def stop_drawing(self):
-        self.rendered = False
+        self.is_rendered = False
 
     def start_updating(self):
-        self.updated = True
+        self.is_updated = True
 
     def stop_updating(self):
-        self.updated = False
+        self.is_updated = False
 
     def kill(self):
         log(f'Removing GameObject: {self.object_name}')

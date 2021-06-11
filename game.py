@@ -24,9 +24,11 @@ from arcade.arcade_types import Color, Point
 
 from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
+from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, UiSpriteList,
-    ScrollableContainer, GenericTextButton, SelectableGroup
+    ScrollableContainer, GenericTextButton, SelectableGroup,
+    EditorPlaceableObject
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -45,7 +47,6 @@ from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 BASIC_UI = 'basic_ui'
-EDITOR = 'editor'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
 
@@ -90,7 +91,7 @@ class Settings:
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
-    editor_mode: bool = False
+    editor_mode: bool = True
 
 
 class GameWindow(Window, EventsCreator):
@@ -307,16 +308,18 @@ class GameWindow(Window, EventsCreator):
     @logger()
     def delete_saved_game(self, player_confirmed=False):
         saves = self.menu_view.selectable_groups['saves']
-        if saves.currently_selected is None:
-            return
-        if not player_confirmed:
-            this = self.delete_saved_game
-            self.menu_view.confirmation_dialog(
-                x=SCREEN_X, y=SCREEN_Y, yes=partial(this, True), no=this,
-                after=LOADING_MENU
-            )
-        else:
-            self.save_manager.delete_saved_game(saves.currently_selected.name)
+        if saves.currently_selected is not None:
+            if not player_confirmed:
+                self.ask_player_for_confirmation()
+            else:
+                self.save_manager.delete_saved_game(saves.currently_selected.name)
+
+    def ask_player_for_confirmation(self):
+        this = self.delete_saved_game
+        self.menu_view.show_confirmation_dialog(
+            x=SCREEN_X, y=SCREEN_Y, yes=partial(this, True), no=lambda: None,
+            after_switch_to_bundle=LOADING_MENU
+        )
 
     def close(self):
         log(f'Terminating application...')
@@ -360,6 +363,10 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         self.fog_of_war: Optional[FogOfWar] = None
 
+        if self.settings.editor_mode:
+            self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
+        else:
+            self.scenario_editor = None
         # All GameObjects are initialized by the specialised factory:
         self.spawner: Optional[ObjectsFactory] = None
 
@@ -389,10 +396,10 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ['map', Map, 0.35, {'rows': ROWS, 'columns': COLUMNS,
              'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
-            ['fog_of_war', FogOfWar, 0.25],
+            ['fog_of_war', FogOfWar, 0.15],
             ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
             ['explosions_pool', ExplosionsPool, 0.10],
-            ['mini_map', MiniMap, 0.10, ((SCREEN_WIDTH, SCREEN_HEIGHT),
+            ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), ROWS)],
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
@@ -407,24 +414,25 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def create_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_ui_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         right_panel = UiElementsBundle(
             name=BASIC_UI,
             index=0,
             elements=[
-                right_ui_panel,
-                Button('game_button_menu.png', ui_x + 100, 120,
-                       functions=partial(
-                           self.window.show_view, self.window.menu_view),
-                       parent=right_ui_panel),
-                Button('game_button_save.png', ui_x, 120,
-                       functions=self.window.open_saving_menu,
-                       parent=right_ui_panel),
-                Button('game_button_pause.png', ui_x - 100, 120,
-                       functions=partial(self.toggle_pause),
-                       parent=right_ui_panel)
+                Frame('ui_right_panel.png', ui_x, ui_y, *ui_size),
             ],
             register_to=self
+        )
+        right_panel.extend(
+            (Button('game_button_menu.png', ui_x + 100, 120,
+                   functions=partial(
+                       self.window.show_view, self.window.menu_view),
+                   parent=right_panel.elements[0]),
+            Button('game_button_save.png', ui_x, 120,
+                   functions=self.window.open_saving_menu,
+                   parent=right_panel.elements[0]),
+            Button('game_button_pause.png', ui_x - 100, 120,
+                   functions=partial(self.toggle_pause),
+                   parent=right_panel.elements[0]))
         )
         units_panel = UiElementsBundle(
             name=UNITS_PANEL,
@@ -437,7 +445,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ],
             register_to=self
         )
-        biuilding_panel = UiElementsBundle(
+        building_panel = UiElementsBundle(
             name=BUILDINGS_PANEL,
             index=2,
             elements=[
@@ -445,23 +453,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ],
             register_to=self
         )
-
-        if self.settings.editor_mode:
-            editor_panel = UiElementsBundle(
-                name=EDITOR,
-                index=3,
-                elements=[
-                    ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
-                                        'scrollable'),
-                ],
-                register_to=self,
-            )
-            editor_panel.extend(
-                [
-                    Button('small_button_none.png', ui_x, 100 * i,
-                           parent=editor_panel.elements[0]) for i in range(5)
-                ]
-            )
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
 
     def update_interface_position(self, right, top):
@@ -476,7 +467,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
         """
-        self._unload_all(exception=BASIC_UI)
+        self._unload_all(exceptions=[BASIC_UI, EDITOR])
         if context:
             if isinstance(context, Building):
                 self.configure_building_interface(context)
@@ -484,11 +475,10 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
                 self.configure_units_interface(context)
 
     def configure_building_interface(self, context: Building):
-        self.load_bundle(name=('%s' % BUILDINGS_PANEL))
+        self.load_bundle(name=BUILDINGS_PANEL)
 
     def configure_units_interface(self, context: List[Unit]):
-        self.load_bundle(name=('%s' % UNITS_PANEL))
-        self.load_bundle(name=EDITOR)
+        self.load_bundle(name=UNITS_PANEL)
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """

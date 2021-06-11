@@ -20,7 +20,7 @@ from units.unit_management import UnitsManager
 from units.units import Unit
 from user_interface.user_interface import (
     CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
-    UiSpriteList
+    UiSpriteList, TextInputField
 )
 
 from utils.functions import get_path_to_file, ignore_in_menu
@@ -61,10 +61,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         self.mouse_dragging = False
 
+        self.placed_gameobject: Optional[GameObject] = None
+
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
         self.pointed_gameobject: Optional[GameObject] = None
         self.pointed_scrollable: Optional[ScrollableContainer] = None
+        self.bound_text_input_field: Optional[TextInputField] = None
 
         # player can select Units by dragging mouse cursor with left-button
         # pressed: all Units inside selection-rectangle will be added to the
@@ -141,8 +144,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if (ui_elem := self.pointed_ui_element) is not None:
             if ui_elem.active:
                 ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
-            else:
-                self.evaluate_mini_map_click(x, y)
+        if self.bound_text_input_field not in (ui_elem, None):
+            self.unbind_text_input_field()
+        self.evaluate_mini_map_click(x, y)
 
     @ignore_in_menu
     def evaluate_mini_map_click(self, x: float, y: float):
@@ -245,7 +249,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         """
         pointed = self.get_pointed_sprite(*self.position)
         if isinstance(pointed, PlayerEntity):
-            self.pointed_gameobject = pointed if pointed.rendered else None
+            self.pointed_gameobject = pointed if pointed.is_rendered else None
             self.update_mouse_pointed_ui_element(None)
         else:
             self.pointed_gameobject = None
@@ -266,27 +270,34 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 return
         return pointed_sprite
 
-    @staticmethod
-    def cursor_points(spritelist: SpriteList, x, y) -> Optional[Sprite]:
-        # Since our Sprites can have 'children' e.g. Buttons, which should
-        # be first to interact with cursor, we discard all parents and seek
-        # for first child, which is pointed instead:
+    def cursor_points(self, spritelist: SpriteList, x, y) -> Optional[Sprite]:
         if pointed := get_sprites_at_point((x, y), spritelist):
             if not isinstance(spritelist, UiSpriteList):
                 return pointed[0]
             s: UiElement
-            for sprite in (s for s in pointed if s.active and not s.children):
-                return sprite  # first pointed children
-            return pointed[0]  # return pointed Sprite if no children found
+            try:
+                return [s.this_or_child(self) for s in pointed if s.active][-1]
+            except IndexError:
+                return
 
     def update_mouse_pointed_ui_element(self,
                                         pointed: Optional[CursorInteractive]):
         if pointed != self.pointed_ui_element:
-            if hasattr(self.pointed_ui_element, 'on_mouse_exit'):
-                self.pointed_ui_element.on_mouse_exit()
-            if hasattr(pointed, 'on_mouse_enter'):
-                pointed.on_mouse_enter(cursor=self)
+            self.exit_current_pointed_element()
+            self.enter_new_pointed_element(pointed)
         self.pointed_ui_element = pointed
+
+    def exit_current_pointed_element(self):
+        try:
+            self.pointed_ui_element.on_mouse_exit()
+        except AttributeError:
+            pass
+
+    def enter_new_pointed_element(self, pointed):
+        try:
+            pointed.on_mouse_enter(cursor=self)
+        except AttributeError:
+            pass
 
     def update_cursor_texture(self):
         if self.window.is_game_running:
@@ -348,6 +359,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def get_pointed_of_type(self, type_: Type) -> Optional[Type]:
         return o if isinstance(o := self.pointed_gameobject, type_) else None
+
+    def bind_text_input_field(self, field: TextInputField):
+        self.bound_text_input_field = field
+
+    def unbind_text_input_field(self):
+        self.bound_text_input_field.unbind_keyboard_handler()
+        self.bound_text_input_field = None
 
     def draw(self):
         if (selection := self.mouse_drag_selection) is not None:

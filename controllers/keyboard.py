@@ -19,8 +19,8 @@ class KeyboardHandler(ToggledElement):
         self.keyboard_input_consumer: Optional[TextInputField] = None
 
     def on_key_press(self, symbol: int):
+        log(f'Pressed key: {symbol} other pressed keys: {self.keys_pressed}')
         self.keys_pressed.add(symbol)
-        log(f'Pressed key: {symbol}, translated to: {chr(symbol)} all pressed keys: {self.keys_pressed}', True)
         self.evaluate_pressed_key(symbol)
 
     def on_key_release(self, symbol: int):
@@ -73,3 +73,9 @@ class KeyboardHandler(ToggledElement):
     def handle_key_input_consumers(self):
         if self.keyboard_input_consumer is not None:
             self.keyboard_input_consumer.extend(self.keys_pressed)
+
+    def bind_keyboard_input_consumer(self, consumer: TextInputField):
+        self.keyboard_input_consumer = consumer
+
+    def unbind_keyboard_input_consumer(self):
+        self.keyboard_input_consumer = None
