@@ -47,7 +47,8 @@ def get_attributes_with_attribute(instance: object, name: str,
     """
     attributes = instance.__dict__.values()
     return [
-        attr for attr in attributes if hasattr(attr, name) and not isinstance(attr, ignore)
+        attr for attr in attributes if
+        hasattr(attr, name) and not isinstance(attr, ignore)
     ]
 
 
@@ -160,8 +161,12 @@ def make_texture(width: int, height: int, color: Color) -> Texture:
 
 def ignore_in_editor_mode(func):
     def wrapper(self, *args, **kwargs):
-        if self.game.settings.editor_mode:
-            return
+        try:
+            if self.settings.editor_mode:
+                return
+        except AttributeError:
+            if self.game.settings.editor_mode:
+                return
         return func(self, *args, **kwargs)
     return wrapper
 
@@ -171,6 +176,7 @@ def ignore_in_menu(func):
         if not self.window.is_game_running:
             return
         return func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -179,4 +185,12 @@ def ignore_in_game(func):
         if self.window.is_game_running:
             return
         return func(self, *args, **kwargs)
+
     return wrapper
+
+
+def new_id(objects: Dict) -> int:
+    if objects:
+        return max(objects.keys()) << 1
+    else:
+        return 2

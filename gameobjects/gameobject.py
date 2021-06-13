@@ -6,7 +6,6 @@ from typing import Optional, Dict
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
-from game import Game
 from utils.enums import Robustness, UnitWeight
 from utils.functions import get_path_to_file
 from utils.logging import log
@@ -20,7 +19,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     GameObject represents all in-game objects, like units, buildings,
     terrain props, trees etc.
     """
-    game: Optional[Game] = None
+    game = None
     total_objects_count = 0
 
     def __init__(self,

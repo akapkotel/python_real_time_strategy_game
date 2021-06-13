@@ -26,13 +26,14 @@ from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
-    Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton, SelectableGroup, ask_player_for_confirmation
+    Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
+    SelectableGroup, ask_player_for_confirmation
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
-    get_path_to_file, get_screen_size, to_rgba,
-    SEPARATOR
+    get_path_to_file, get_screen_size, to_rgba, SEPARATOR,
+    ignore_in_editor_mode
 )
 from utils.logging import log, logger, timer
 from utils.geometry import clamp, average_position_of_points_group
@@ -42,6 +43,7 @@ from utils.improved_spritelists import (
 from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
+
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 BASIC_UI = 'basic_ui'
@@ -60,8 +62,8 @@ MINIMAP_HEIGHT = 197
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 100
-COLUMNS = 125
+ROWS = 50
+COLUMNS = 50
 
 FPS = 30
 GAME_SPEED = 1.0
@@ -90,7 +92,7 @@ class Settings:
     threads_fadeout: int = 2
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
-    editor_mode: bool = True
+    editor_mode: bool = False
 
 
 class GameWindow(Window, EventsCreator):
@@ -153,7 +155,7 @@ class GameWindow(Window, EventsCreator):
         except AttributeError:
             pass  # MouseCursor is not initialised yet
 
-    def toggle_fullscreen(self):
+    def toggle_full_screen(self):
         self.set_fullscreen(not self.fullscreen)
         if not self.fullscreen:
             self.set_size(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1)
@@ -227,10 +229,11 @@ class GameWindow(Window, EventsCreator):
         self.keyboard.on_key_release(symbol)
 
     def show_view(self, new_view: LoadableWindowView):
-        if new_view.requires_loading:
-            super().show_view(LoadingScreen(loaded_view=new_view))
-        else:
-            super().show_view(new_view)
+        if self.current_view is not new_view:
+            if new_view.requires_loading:
+                super().show_view(LoadingScreen(loaded_view=new_view))
+            else:
+                super().show_view(new_view)
 
     def toggle_mouse_and_keyboard(self, value: bool, only_mouse=False):
         try:
@@ -292,7 +295,7 @@ class GameWindow(Window, EventsCreator):
         self.show_view(self.menu_view)
         self.menu_view.switch_to_bundle(name='saving_menu')
 
-    def save_game(self, player_confirmed=False):
+    def save_game(self):
         save_name = f'saved_game({time.asctime()})'
         self.save_manager.save_game(save_name, self.game_view)
 
@@ -313,7 +316,7 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
-        log(f'Terminating application...')
+        log('Terminating application...')
         super().close()
 
 
@@ -329,6 +332,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         self.generate_random_entities = self.loader is None
 
+        self.configs = self.window.configs
         self.settings = self.window.settings  # shared with Window class
         self.timer = {
             'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0
@@ -354,12 +358,13 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         self.fog_of_war: Optional[FogOfWar] = None
 
-        if self.settings.editor_mode:
-            self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
-        else:
-            self.scenario_editor = None
+        # if self.settings.editor_mode:
+        #     self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
+        # else:
+        self.scenario_editor = None
+
         # All GameObjects are initialized by the specialised factory:
-        self.spawner: Optional[ObjectsFactory] = None
+        self.spawner: Optional[GameObjectsSpawner] = None
 
         self.explosions_pool: Optional[ExplosionsPool] = None
 
@@ -388,7 +393,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
              'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.15],
-            ['spawner', ObjectsFactory, 0.05, lambda: self.pathfinder, lambda: self.window.configs],
+            ['spawner', GameObjectsSpawner, 0.05],
             ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
@@ -415,9 +420,9 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         )
         right_panel.extend(
             (Button('game_button_menu.png', ui_x + 100, 120,
-                   functions=partial(
-                       self.window.show_view, self.window.menu_view),
-                   parent=right_panel.elements[0]),
+                    functions=partial(self.window.show_view,
+                                      self.window.menu_view),
+                    parent=right_panel.elements[0]),
             Button('game_button_save.png', ui_x, 120,
                    functions=self.window.open_saving_menu,
                    parent=right_panel.elements[0]),
@@ -450,7 +455,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         diff_x = right - self.interface[0].right
         diff_y = top - self.interface[0].top
         self.interface.move(diff_x, diff_y)
-        self.update_not_displayed_bundles_positions(-diff_x, -diff_y)
+        self.update_not_displayed_bundles_positions(diff_x, diff_y)
         self.mini_map.update_position(diff_x, diff_y)
 
     def update_interface_content(self, context=None):
@@ -468,6 +473,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def configure_building_interface(self, context: Building):
         self.load_bundle(name=BUILDINGS_PANEL)
 
+    @ignore_in_editor_mode
     def configure_units_interface(self, context: List[Unit]):
         self.load_bundle(name=UNITS_PANEL)
 
@@ -497,11 +503,14 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             # self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
+            if self.settings.editor_mode:
+                self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )
             self.window.move_viewport_to_the_position(*position)
-        self.window.move_viewport_to_the_position(*self.window.screen_center)
+        self.update_interface_position(self.viewport[1], self.viewport[-1])
+        # self.window.move_viewport_to_the_position(*self.window.screen_center)
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
@@ -532,10 +541,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def get_player_instance(self, player: Union[Player, int]):
         if isinstance(player, int):
-            try:
-                return self.players[player]
-            except KeyError:
-                return None
+            return self.players.get(player, None)
         return player
 
     def spawn_group(self,
@@ -576,14 +582,18 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         conditions = [unit_type, mission_timer, no_units, cpu_no_units, map_revealed]
         mission.add_conditions(conditions=conditions, optional=True)
 
-    def register(self, acquired: OwnedObject):
-        acquired: Union[Player, Faction, PlayerEntity, UiElementsBundle]
-        if isinstance(acquired, GameObject):
-            self.register_gameobject(acquired)
-        elif isinstance(acquired, (Player, Faction)):
-            self.register_player_or_faction(acquired)
+    def register(self, registered):
+        registered: Union[Player, Faction, GameObject, UiElementsBundle]
+        # using isinstance since functools.singledispatchmetod breaks, because
+        # of the end-file imports used to avoid circular-imports problem, it is
+        # not elegant way, but removing all type-hints to get rid of imports is
+        # much worse TODO: find another way
+        if isinstance(registered, GameObject):
+            self.register_gameobject(registered)
+        elif isinstance(registered, (Player, Faction)):
+            self.register_player_or_faction(registered)
         else:
-            super().register(acquired)  # Game inherits from UiBundlesHandler
+            super().register(registered)  # Game inherits from UiBundlesHandler
 
     def register_gameobject(self, registered: GameObject):
         if isinstance(registered, PlayerEntity):
@@ -764,7 +774,7 @@ if __name__ == '__main__':
     from controllers.mouse import MouseCursor
     from units.units import Unit, UnitsOrderedDestinations
     from gameobjects.gameobject import GameObject
-    from gameobjects.spawning import ObjectsFactory
+    from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
     from missions.missions import Mission, Campaign

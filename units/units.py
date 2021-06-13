@@ -25,9 +25,8 @@ from utils.scheduling import ScheduledEvent
 from utils.functions import (
     get_path_to_file
 )
-from utils.logging import log
-from utils.geometry import precalculate_8_angles, calculate_angle, distance_2d, \
-    vector_2d
+from utils.geometry import precalculate_possible_sprites_angles, calculate_angle, distance_2d, \
+    vector_2d, ROTATION_STEP, ROTATIONS
 from .weapons import Weapon
 
 
@@ -35,7 +34,8 @@ class Unit(PlayerEntity):
     """
     Unit is a PlayerEntity which can move on map.
     """
-    angles = precalculate_8_angles()
+    angles = precalculate_possible_sprites_angles()
+    print(angles)
 
     def __init__(self,
                  unit_name: str,
@@ -44,6 +44,10 @@ class Unit(PlayerEntity):
                  position: Point,
                  id: Optional[int] = None):
         PlayerEntity.__init__(self, unit_name, player, position, id=id)
+        # Since we do not rotate actual Sprite, but change it's texture to show
+        # the correctly rotated Units on the screen, use 'virtual' rotation to
+        # keep track of the Unit rotation angle without rotating actual Sprite:
+        self.virtual_angle = 0
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
@@ -67,7 +71,7 @@ class Unit(PlayerEntity):
         self.navigating_group = None
 
         self.explosion_name = 'EXPLOSION'
-        self.update_explosions_pool()
+        # self.update_explosions_pool()
 
     def update_explosions_pool(self):
         """
@@ -259,18 +263,46 @@ class Unit(PlayerEntity):
 
     def follow_path(self):
         destination = self.path[0]
+
+        angle_to_target = int(calculate_angle(*self.position, *destination))
+        if self.virtual_angle != angle_to_target:
+            self.stop()
+            return self.rotate_towards_target(angle_to_target)
+
         speed = self.current_speed
         if (distance_left := distance_2d(self.position, destination)) <= speed:
             self.move_to_next_waypoint()
         else:
             self.move_to_current_waypoint(destination, distance_left)
 
+    def rotate_towards_target(self, angle_to_target):
+        """
+        Virtually Rotate Unit sprite before it starts movement toward it's
+        current destination. We do not rotate actual Sprite, but change the
+        current sprite-sheet index to display correct image of unit rotated \
+        the correct direction.
+        """
+        self.calculate_unit_virtual_angle(angle_to_target)
+        self.set_rotated_texture()
+
+    def calculate_unit_virtual_angle(self, angle_to_target):
+        difference = abs(self.virtual_angle - angle_to_target)
+        rotation = min(difference, 3)
+        if difference < 180:
+            direction = 1 if self.virtual_angle < angle_to_target else -1
+        else:
+            direction = -1 if self.virtual_angle < angle_to_target else 1
+        self.virtual_angle = (self.virtual_angle + (rotation * direction)) % 360
+
+    def set_rotated_texture(self):
+        self.angle_to_texture(self.virtual_angle)
+
     def move_to_next_waypoint(self):
         self.path.popleft()
 
     def move_to_current_waypoint(self, destination, distance_left):
         angle = calculate_angle(*self.position, *destination)
-        self.angle_to_texture(angle)
+        # self.angle_to_texture(angle)
         self.current_speed = speed = min(distance_left, self.max_speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
 
@@ -289,10 +321,6 @@ class Unit(PlayerEntity):
     def unschedule_earlier_move_orders(self):
         for event in (e for e in self.scheduled_events if e.function == self.move_to):
             self.unschedule_event(event)
-
-    def debug_found_path(self, path: MapPath, destination: GridPosition):
-        self.game.debugged.append([PATH, path])
-        log(f'{self} found path to {destination}, path: {path}')
 
     def cancel_path_requests(self):
         self.game.pathfinder.cancel_unit_path_requests(self)
@@ -462,8 +490,9 @@ class Tank(Vehicle):
                  position: Point, id: int = None):
         super().__init__(unit_name, player, weight, position, id)
         # combine texture from these two indexes:
-        self.hull_texture_index = random.randint(0, 7)
-        self.turret_texture_index = random.randint(0, 7)
+        self.hull_texture_index = random.randint(0, ROTATIONS - 1)
+        self.turret_texture_index = random.randint(0, ROTATIONS - 1)
+        self.fake_angle = ROTATION_STEP * self.hull_texture_index
 
         self._load_textures_and_reset_hitbox(unit_name)
         self.turret_aim_target = None
@@ -485,6 +514,13 @@ class Tank(Vehicle):
         ]
         self.set_texture(self.hull_texture_index)
         self.set_hit_box(self.texture.hit_box_points)
+
+    def set_rotated_texture(self):
+        if (enemy := self.turret_aim_target) is not None:
+            turret_angle = calculate_angle(*self.position, *enemy.position)
+            self.angle_to_texture(self.virtual_angle, turret_angle)
+        else:
+            self.angle_to_texture(self.virtual_angle)
 
     def angle_to_texture(self,
                          hull_angle: float = None,
@@ -534,8 +570,6 @@ class Tank(Vehicle):
 
     def fight_or_run_away(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
-        angle = calculate_angle(*self.position, *enemy.position)
-        self.angle_to_texture(turret_angle=angle)
         super().fight_or_run_away(enemy)
 
     def spawn_wreck(self):

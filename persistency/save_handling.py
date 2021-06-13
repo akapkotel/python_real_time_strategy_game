@@ -4,7 +4,7 @@ import os
 import shelve
 import time
 
-from typing import Optional, Generator
+from typing import Optional
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
@@ -13,7 +13,7 @@ from utils.data_types import SavedGames
 from players_and_factions.player import Faction
 from map.map import Map, Pathfinder
 from user_interface.minimap import MiniMap
-from gameobjects.spawning import ObjectsFactory
+from gameobjects.spawning import GameObjectsSpawner
 from effects.explosions import ExplosionsPool
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -121,10 +121,7 @@ class SaveManager(Singleton):
     @logger()
     def load_map(self, map_file):
         self.game.map = game_map = Map(map_settings=map_file)
-        self.game.pathfinder = pathfinder = Pathfinder(game_map)
-        configs = self.game.window.configs
-        self.game.spawner = ObjectsFactory(pathfinder, configs)
-        self.game.explosions_pool = ExplosionsPool()
+        self.game.pathfinder = Pathfinder(game_map)
 
     @logger()
     def load_factions(self, factions):
@@ -149,6 +146,9 @@ class SaveManager(Singleton):
     @logger()
     def load_entities(self, entities):
         """Respawn Units and Buildings."""
+        if self.game.spawner is None:
+            self.game.spawner = GameObjectsSpawner()
+            self.game.explosions_pool = ExplosionsPool()
         for e in entities:
             self.game.spawn(
                 e['object_name'], e['player'], e['position'], id=e['id']

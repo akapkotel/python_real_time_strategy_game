@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import random
-import time
 
 from abc import ABC, abstractmethod
 from collections import deque
@@ -15,7 +14,6 @@ from game import (
     Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
 )
 from gameobjects.gameobject import TerrainObject
-from utils.classes import Singleton
 from utils.data_types import (
     GridPosition, Number, PlayerId, SectorId, UnitId
 )
@@ -98,14 +96,10 @@ class GridHandler:
 
 
 class Map(GridHandler):
-    """
-
-    """
-    game: Optional[Game] = None
+    game = None
     instance = None
 
     def __init__(self, map_settings: Dict):
-        start_time = time.time()
         MapNode.map = Sector.map = Map.instance = self
         self.rows = map_settings['rows']
         self.columns = map_settings['columns']
@@ -136,7 +130,7 @@ class Map(GridHandler):
         except KeyError:
             self.game.after_load_functions.append(self.plant_trees)
 
-        log(f'Created map in: {time.time() - start_time}', console=True)
+        log('Map was initialized successfully...', console=True)
 
     def save(self) -> Dict:
         return {
@@ -191,7 +185,7 @@ class Map(GridHandler):
             for y in range(self.rows):
                 sector_y = y // SECTOR_SIZE
                 self.sectors[(sector_x, sector_y)] = Sector((sector_x, sector_y))
-        log(f'Created {len(self.sectors)} map sectors.')
+        log(f'Created {len(self.sectors)} map sectors.', console=True)
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     @logger(console=True)
@@ -203,7 +197,7 @@ class Map(GridHandler):
                 sector = self.sectors[(sector_x, sector_y)]
                 self.nodes[(x, y)] = node = MapNode(x, y, sector)
                 self.create_map_sprite(*node.position)
-        log(f'Generated {len(self.nodes)} map nodes', console=True)
+        log(f'Generated {len(self.nodes)} map nodes.', console=True)
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)

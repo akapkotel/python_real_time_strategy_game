@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from functools import lru_cache
-from math import atan2, degrees, hypot, radians, sin, cos, inf as INFINITY
+from math import atan2, degrees, hypot, radians, sin, cos, inf
 from typing import Optional, Sequence
 
 from numba import njit
@@ -10,17 +10,24 @@ from shapely.geometry import LineString, Polygon
 from utils.data_types import Point, Number
 
 
-def precalculate_8_angles():
+ROTATIONS = 8  # how many directions our Sprites can rotate toward
+CIRCLE_SLICE = 360 / ROTATIONS  # angular width of a single rotation step
+ROTATION_STEP = CIRCLE_SLICE / 2  # center of each rotation step
+
+
+def precalculate_possible_sprites_angles(rotations=ROTATIONS,
+                                         circle_slice=CIRCLE_SLICE,
+                                         rotation_step=ROTATION_STEP):
     """
     Build dict of int angles. We chop 360 degrees circle by 8 slices
     each of 45 degrees. First slice has it's center at 0/360 degrees,
     second slice has it's center at 22.5 degrees etc. This dict allows
-    for fast replacing angle of range 0-359 to one of 24 pre-calculated
+    for fast replacing angle of range 0-359 to one of 8 pre-calculated
     angles.
     """
     return {
-        i: j if j < 8 else 0 for j in range(0, 9) for i in range(361)
-        if (j * 45) - i < 22.5
+        i: j if j < rotations else 0 for j in range(0, rotations + 1)
+        for i in range(361) if (j * circle_slice) - i < rotation_step
     }
 
 
@@ -102,7 +109,7 @@ def move_along_vector(start: Point,
 def is_visible(position_a: Point,
                position_b: Point,
                obstacles: Sequence,
-               max_distance: float = INFINITY) -> bool:
+               max_distance: float = inf) -> bool:
     """
     Check if position_a is 'visible' from position_b and vice-versa. 'Visible'
     means, that you can connect both points with straight line without

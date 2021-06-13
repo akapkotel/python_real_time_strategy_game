@@ -26,22 +26,29 @@ from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 CONFIRMATON_DIALOG = 'Confirmaton dialog'
 
 
-def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
+def ask_player_for_confirmation(
+        position: Tuple,
+        after_switch_to_bundle: str):
     """
     Use this function to decorate method you want, to be preceded by display of
     simple confirm-or-cancel dialog for the player. The dialog would be shown
     first, and after player clicks 'confirm' decorated method would be called.
     If player clicks 'cancel', method would be ignored and a UiElementsBundle
-    of name provided in after_switch_to_bundle param is loaded.
+    of name provided in after_switch_to_bundle param is loaded.\n
+    To IGNORE this prompt, pass special argument ignore_confirmation=True to
+    the called decorated method - it will be digested by the internal wrapper,
+    and will cause aborting of the dialog procedure, and decorated method is
+    going to be executed instead.
 
     :param position: Tuple[x, y] -- position on which dialog will be centered
-    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be
-    displayed after player makes choice.
+    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be displayed after player makes choice.
     :return: Callable
     """
-    def decorator(func):
-        def wrapper(self):
-            function_on_yes = partial(func, self)
+    def decorator(function):
+        def wrapper(self, ignore_confirmation=False):
+            if ignore_confirmation:
+                return function(self)
+            function_on_yes = partial(function, self)
             return self.menu_view.open_confirmation_dialog(
                 position, after_switch_to_bundle, function_on_yes
             )
@@ -52,13 +59,13 @@ def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
 @dataclass
 class UiElementsBundle(OwnedObject):
     """
-    A bundle of UiElement objects kept together to easy swithc between Menu
-    submenus.
+    A bundle of UiElement objects kept together to easy switch between Menu
+    submenus and dynamically change UI content.
 
     Initialize with params:\n
     index: int \n
     name: str \n
-    elements: List[UiElement]
+    elements: Optional[List[UiElement]]
     """
     index: int
     name: str
@@ -66,6 +73,7 @@ class UiElementsBundle(OwnedObject):
     register_to: ObjectsOwner
     _owners = None
     on_load: Optional[Callable] = lambda: None
+    displayed_in_manager: Optional[UiBundlesHandler] = None
 
     def __post_init__(self):
         self.register_to_objectsowners(self.register_to)
@@ -82,11 +90,15 @@ class UiElementsBundle(OwnedObject):
     def add(self, element: UiElement):
         self.elements.append(element)
         element.bundle = self
+        if self.displayed_in_manager is not None:
+            self.displayed_in_manager.append(element)
 
     def remove(self, name: str):
         if (element := self._find_by_name(name)) is not None:
             self._remove(element)
             element.bundle = None
+            if self.displayed_in_manager is not None:
+                self.displayed_in_manager.remove(element)
 
     def __getitem__(self, name: str):
         return self._find_by_name(name)
@@ -140,8 +152,7 @@ class UiElementsBundle(OwnedObject):
 
     def update_elements_positions(self, dx, dy):
         for element in self.elements:
-            element.center_x -= dx
-            element.center_y -= dy
+            element.update_position(dx, dy)
 
 
 class UiBundlesHandler(ObjectsOwner):
@@ -276,15 +287,23 @@ class UiBundlesHandler(ObjectsOwner):
     def _load_bundle(self, bundle: UiElementsBundle):
         log(f'LOADING BUNDLE: {bundle.name}')
         bundle.on_load()
+        bundle.displayed_in_manager = self
         self.active_bundles.add(bundle.index)
         self.ui_elements_spritelist.extend(bundle.elements)
         self.bind_ui_elements_with_ui_spritelist(bundle.elements)
+
+    def append(self, element: UiElement):
+        self.ui_elements_spritelist.append(element)
 
     def _unload_bundle(self, bundle: UiElementsBundle):
         self.active_bundles.discard(bundle.index)
         for element in self.ui_elements_spritelist[::-1]:
             if element.bundle == bundle:
-                self.ui_elements_spritelist.remove(element)
+                bundle.displayed_in_manager = None
+                self.remove(element)
+
+    def remove(self, element: UiElement):
+        self.ui_elements_spritelist.remove(element)
 
     def _unload_all(self,
                     exception: Optional[str] = None,
@@ -537,6 +556,10 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectab
                 if check_for_collision(cursor, child):
                     return child
         return self
+
+    def update_position(self, dx, dy):
+        self.center_x += dx
+        self.center_y += dy
 
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
@@ -792,13 +815,17 @@ class ScrollableContainer(UiElement):
                  name: Optional[str] = None, active: bool = True,
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
-                 can_be_dragged: bool = False, subgroup: Optional[int] = None):
+                 can_be_dragged: bool = False, subgroup: Optional[int] = None,
+                 max_scroll_x=None, min_scroll_x=None, max_scroll_y=None,
+                 min_scroll_y=None):
         super().__init__(texture_name, x, y, name, active, visible, parent,
                          functions, can_be_dragged, subgroup)
-        self.scrollable = set()
+        self.max_scroll_x = max_scroll_x or self.right
+        self.min_scroll_x = min_scroll_x or self.left
+        self.max_scroll_y = max_scroll_y or self.top
+        self.min_scroll_y = min_scroll_y or self.bottom
 
     def add_child(self, child: Hierarchical):
-        self.scrollable.add(child)
         super().add_child(child)
 
     def _func_on_mouse_enter(self, cursor):
@@ -809,14 +836,14 @@ class ScrollableContainer(UiElement):
         super()._func_on_mouse_exit()
         self.cursor.pointed_scrollable = None
 
-    def is_cursor_pointed(self, cursor_x: float, cursor_y: float) -> bool:
-        return self.left < cursor_x < self.right and self.bottom < cursor_y < self.top
-
     def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
-        if self.scrollable:
-            for child in self.scrollable:
-                child.center_y -= scroll_y * 15
-                self._manage_child_visibility(child)
+        for child in self._children:
+            child.center_y -= scroll_y * 15
+            self._manage_child_visibility(child)
+
+    def draw(self):
+        super().draw()
+        draw_rectangle_outline(*self.position, self.width, self.height, WHITE)
 
     def _manage_child_visibility(self, child):
         child.toggle(self.top > child.top and self.bottom < child.bottom)

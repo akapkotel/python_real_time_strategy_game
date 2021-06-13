@@ -108,7 +108,8 @@ class Mission:
     def quit_mission(self):
         if self.campaign is not None and self.winner is self.game.local_human_player:
             self.campaign.update(finished_mission=self)
-        self.game.window.quit_current_game()
+        self.game.window.show_view(self.game.window.menu_view)
+        self.game.window.quit_current_game(ignore_confirmation=True)
 
 
 class Campaign:

@@ -16,7 +16,7 @@ from map.map import MapNode, Sector, TILE_WIDTH
 from missions.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
-from utils.functions import ignore_in_editor_mode
+from utils.functions import ignore_in_editor_mode, new_id
 from utils.geometry import distance_2d, is_visible, calculate_circular_area
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
@@ -30,13 +30,6 @@ ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
-
-
-def new_id(objects: Dict) -> int:
-    if objects:
-        return max(objects.keys()) << 1
-    else:
-        return 2
 
 
 class Faction(EventsCreator, ObjectsOwner, OwnedObject):

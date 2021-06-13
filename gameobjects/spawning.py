@@ -17,31 +17,29 @@ from utils.functions import (
     add_player_color_to_name, get_path_to_file, to_texture_name,
     decolorized_name
 )
+from utils.logging import log
 from .gameobject import GameObject, TerrainObject
 
 
-class ObjectsFactory(Singleton):
+class GameObjectsSpawner(Singleton):
+    game = None  # assigned by the Game instance automatically
 
-    def __init__(self,
-                 pathfinder,
-                 configs: Dict[str, Dict[str, Dict[str, Any]]]):
+    def __init__(self):
         """
         :param configs: Dict -- data read from the CSV files in configs dir.
         """
-        self.pathfinder = pathfinder
-        self.configs = configs
+        self.pathfinder = self.game.pathfinder
+        self.configs: Dict[str, Dict[str, Dict[str, Any]]] = self.game.configs
+        log(f'ObjectsFactory was initialized successfully...', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
         name = to_texture_name(decolorized_name(name))
         if player is None:
-            obj = self._spawn_terrain_object(name, position, *args, **kwargs)
-        if name in self.configs['buildings']:
-            obj = self._spawn_building(name, player, position, **kwargs)
+            return self._spawn_terrain_object(name, position, *args, **kwargs)
+        elif name in self.configs['buildings']:
+            return self._spawn_building(name, player, position, **kwargs)
         elif name in self.configs['units']:
-            obj = self._spawn_unit(name, player, position, **kwargs)
-        if 'id' in kwargs:
-            obj.id = kwargs['id']
-        return obj
+            return self._spawn_unit(name, player, position, **kwargs)
 
     def spawn_group(self,
                     names: Sequence[str],
@@ -99,11 +97,12 @@ class ObjectsFactory(Singleton):
         category = 'terrain'
         return GameObject(name, position=position)
 
-    def _spawn_wreck(self, name, position, texture_index) -> GameObject:
+    @staticmethod
+    def _spawn_wreck(name, position, texture_index) -> GameObject:
         wreck = TerrainObject(name, Robustness.INDESTRUCTIBLE, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
-        if isinstance(texture_index, Tuple):
+        if isinstance(texture_index, Tuple):  # for tanks with turrets
             i, j = texture_index
             wreck.texture = load_texture(texture_name, j * (width // 8),
                                          i * (height // 8), width // 8,
@@ -113,10 +112,3 @@ class ObjectsFactory(Singleton):
                                          texture_index * (width // 8),
                                          0, width // 8, height)
         return wreck
-
-    @staticmethod
-    def despawn(game_object: GameObject):
-        try:
-            game_object.kill()
-        except AttributeError:
-            pass

@@ -108,7 +108,8 @@ class ResearchFacility:
             self.researched_technology = technology
 
     def update_research(self):
-        technology = self.researched_technology
+        if technology := self.researched_technology is None:
+            return
         progress = self.funding / technology.difficulty if self.funding else 0
         tech_id = technology.id
         total_progress = self.owner.current_research.get(tech_id, 0) + progress

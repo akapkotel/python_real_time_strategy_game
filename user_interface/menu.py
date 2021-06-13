@@ -4,8 +4,7 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, UiTextLabel,
-    SelectableGroup
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox
 )
 from utils.views import LoadableWindowView
 
@@ -74,7 +73,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                          subgroup=1),
                 Checkbox('menu_checkbox.png', x, next(y), 'Full screen:',
                          20, ticked=window.fullscreen,
-                         functions=window.toggle_fullscreen, subgroup=1),
+                         functions=window.toggle_full_screen, subgroup=1),
             ],
             register_to=self
         )
