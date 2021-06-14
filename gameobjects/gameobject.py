@@ -6,6 +6,7 @@ from typing import Optional, Dict
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
+from utils.data_types import GridPosition
 from utils.enums import Robustness, UnitWeight
 from utils.functions import get_path_to_file
 from utils.logging import log
@@ -94,10 +95,23 @@ class TerrainObject(GameObject):
 
     def __init__(self, filename: str, robustness: Robustness, position: Point):
         super().__init__(filename, robustness, position)
-        node = self.game.map.position_to_node(*self.position)
-        node.set_pathable(False)
+        self.map_node = self.game.map.position_to_node(*self.position)
+        self.map_node.pathable = False
 
     def kill(self):
-        node = self.game.map.position_to_node(*self.position)
-        node.set_pathable(True)
+        self.map_node.pathable = True
         super().kill()
+
+
+class PlaceableGameobject:
+    """
+    Used be ScenarioEditor and MouseCursor classes to attach a GameObject to
+    the cursor allowing user to move it around the map and spawn it wherever he
+    wants with a mouse-click.
+    """
+
+    def __init__(self, gameobject_name: str):
+        self.gameobject_name = gameobject_name
+
+    def emplace(self, position: GridPosition):
+        raise NotImplementedError

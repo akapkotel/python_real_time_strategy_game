@@ -8,7 +8,7 @@ from arcade.arcade_types import Point
 
 from utils.data_types import GridPosition
 from missions.research import Technology
-from map.map import MapNode, Sector
+from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import Player, PlayerEntity
 from utils.geometry import close_enough, is_visible
 
@@ -180,7 +180,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         Buildings positions must be adjusted accordingly to their texture
         width and height so they occupy minimum MapNodes.
         """
-        self.position = self.game.map.normalize_position(*self.position)
+        self.position = normalize_position(*self.position)
         offset_x = 0 if (self.width // TILE_WIDTH) % 3 == 0 else TILE_WIDTH // 2
         offset_y = 0 if (self.height // TILE_HEIGHT) % 3 == 0 else TILE_HEIGHT // 2
         return self.center_x + offset_x, self.center_y + offset_y
@@ -244,6 +244,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         elif self.is_research_facility:
             self.update_research()
 
+    def update_fighting(self):
+        # TODO: buildings with machine-guns and personnel fighting back
+        pass
+
     def in_observed_area(self, other) -> bool:
         return self.occupied_sectors.isdisjoint(other.observed_nodes)
 
@@ -264,6 +268,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         for sector in self.occupied_sectors:
             sectors.update(sector.adjacent_sectors())
         return list(sectors)
+
+    def on_being_hit(self, damage: float) -> bool:
+        damage *= self.game.settings.buildings_damage_factor
+        return super().on_being_hit(damage)
 
     def kill(self):
         for node in self.occupied_nodes:

@@ -16,17 +16,19 @@ from arcade.arcade_types import Point
 
 from effects.explosions import Explosion
 from buildings.buildings import Building
-from game import UPDATE_RATE
-from map.map import GridPosition, MapNode, MapPath, PATH, Pathfinder, Sector
+from map.map import (
+    GridPosition, MapNode, MapPath, Pathfinder, Sector, normalize_position,
+    position_to_map_grid
+)
 from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
-from utils.functions import (
-    get_path_to_file
-)
-from utils.geometry import precalculate_possible_sprites_angles, calculate_angle, distance_2d, \
+from utils.functions import get_path_to_file
+from utils.geometry import (
+    precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
+)
 from .weapons import Weapon
 
 
@@ -35,7 +37,6 @@ class Unit(PlayerEntity):
     Unit is a PlayerEntity which can move on map.
     """
     angles = precalculate_possible_sprites_angles()
-    print(angles)
 
     def __init__(self,
                  unit_name: str,
@@ -53,10 +54,10 @@ class Unit(PlayerEntity):
         self.visibility_radius = 100
 
         # pathfinding and map-related:
-        self.position = self.map.normalize_position(*self.position)
+        self.position = normalize_position(*self.position)
         self.reserved_node = None
-        self.current_node = node = self.map.position_to_node(*self.position)
-        self.block_map_node(node)
+        self.current_node = self.map.position_to_node(*self.position)
+        self.block_map_node(self.current_node)
         self.current_sector: Optional[Sector] = None
         self.update_current_sector()
 
@@ -66,6 +67,7 @@ class Unit(PlayerEntity):
 
         self.max_speed = 0
         self.current_speed = 0
+        self.rotation_speed = 0
 
         self.permanent_units_group: int = 0
         self.navigating_group = None
@@ -122,7 +124,7 @@ class Unit(PlayerEntity):
             return position in adjacent_grids
 
     def heading_to(self, destination: Union[MapNode, GridPosition]):
-        return self.path and self.path[0] == self.map.grid_to_position(destination)
+        return self.path and self.path[0] == self.map.map_grid_to_position(destination)
 
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
@@ -201,7 +203,7 @@ class Unit(PlayerEntity):
         the path with A* algorthm. Instead, Unit 'shelves' currently found
         path and after 1 second 'unshelves' it in countdown_waiting method.
         """
-        self.path_wait_counter = 1 // UPDATE_RATE
+        self.path_wait_counter = self.game.timer['s'] + 1
         self.awaited_path = path.copy()
         self.path.clear()
         self.stop()
@@ -218,7 +220,7 @@ class Unit(PlayerEntity):
         if blocker.find_free_tile_to_unblock_way(self.path):
             self.wait_for_free_path(self.path)
         else:
-            destination = self.map.position_to_grid(*self.path[-1])
+            destination = self.map.position_to_map_grid(*self.path[-1])
             self.move_to(destination)
 
     def find_free_tile_to_unblock_way(self, path) -> bool:
@@ -233,7 +235,7 @@ class Unit(PlayerEntity):
             if (current_sector := self.current_sector) is not None:
                 current_sector.discard_entity(self)
             self.current_sector = sector
-            sector.add_entity(self)
+            sector.add_player_entity(self)
 
     def update_pathfinding(self):
         if self.awaited_path is not None:
@@ -244,8 +246,7 @@ class Unit(PlayerEntity):
             self.stop()
 
     def countdown_waiting(self):
-        self.path_wait_counter -= 1
-        if not self.path_wait_counter:
+        if self.game.timer['s'] == self.path_wait_counter:
             path = self.awaited_path
             node = self.map.position_to_node(*path[0])
             if node.walkable or len(path) < 20:
@@ -258,7 +259,7 @@ class Unit(PlayerEntity):
             self.path = deque(path)
         else:
             destination_position = path[-1]
-            self.move_to(self.map.position_to_grid(*destination_position))
+            self.move_to(position_to_map_grid(*destination_position))
         self.awaited_path = None
 
     def follow_path(self):
@@ -287,7 +288,7 @@ class Unit(PlayerEntity):
 
     def calculate_unit_virtual_angle(self, angle_to_target):
         difference = abs(self.virtual_angle - angle_to_target)
-        rotation = min(difference, 3)
+        rotation = min(difference, self.rotation_speed)
         if difference < 180:
             direction = 1 if self.virtual_angle < angle_to_target else -1
         else:
@@ -308,7 +309,7 @@ class Unit(PlayerEntity):
 
     def move_to(self, destination: GridPosition):
         self.cancel_path_requests()
-        start = self.map.position_to_grid(*self.position)
+        start = position_to_map_grid(*self.position)
         self.game.pathfinder.request_path(self, start, destination)
 
     def create_new_path(self, new_path: MapPath):
@@ -369,7 +370,7 @@ class Unit(PlayerEntity):
             enemy_to_attack = random.choice([e for e in known_enemies])
             position = self.game.pathfinder.get_closest_walkable_position(
                 *enemy_to_attack.position)
-            self.move_to(self.map.position_to_grid(*position))
+            self.move_to(position_to_map_grid(*position))
 
     def kill(self):
         self.current_sector.discard_entity(self)
@@ -517,10 +518,13 @@ class Tank(Vehicle):
 
     def set_rotated_texture(self):
         if (enemy := self.turret_aim_target) is not None:
-            turret_angle = calculate_angle(*self.position, *enemy.position)
-            self.angle_to_texture(self.virtual_angle, turret_angle)
+            self.set_hull_and_turret_texture(enemy)
         else:
             self.angle_to_texture(self.virtual_angle)
+
+    def set_hull_and_turret_texture(self, enemy):
+        turret_angle = calculate_angle(*self.position, *enemy.position)
+        self.angle_to_texture(self.virtual_angle, turret_angle)
 
     def angle_to_texture(self,
                          hull_angle: float = None,
@@ -568,9 +572,10 @@ class Tank(Vehicle):
                                *self.position),
             )
 
-    def fight_or_run_away(self, enemy: PlayerEntity):
+    def engage_enemy(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
-        super().fight_or_run_away(enemy)
+        self.set_hull_and_turret_texture(enemy)
+        super().engage_enemy(enemy)
 
     def spawn_wreck(self):
         wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'

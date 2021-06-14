@@ -10,9 +10,10 @@ from arcade import (
 )
 
 from buildings.buildings import Building
+from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
-from gameobjects.gameobject import GameObject
+from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import SelectiveSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
@@ -61,7 +62,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         self.mouse_dragging = False
 
-        self.placed_gameobject: Optional[GameObject] = None
+        self.placeable_gameobject: Optional[PlaceableGameobject] = None
 
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
@@ -133,14 +134,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
-            self.on_left_button_click(x, y, modifiers)
+            self.on_left_button_press(x, y, modifiers)
         elif button is MOUSE_BUTTON_RIGHT:
-            self.on_right_button_click(x, y, modifiers)
+            self.on_right_button_press(x, y, modifiers)
         elif button is MOUSE_BUTTON_MIDDLE:
-            self.on_middle_button_click(x, y, modifiers)
+            self.on_middle_button_press(x, y, modifiers)
 
     @logger()
-    def on_left_button_click(self, x: float, y: float, modifiers: int):
+    def on_left_button_press(self, x: float, y: float, modifiers: int):
         if (ui_elem := self.pointed_ui_element) is not None:
             ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
             self.evaluate_mini_map_click(x, y)
@@ -158,11 +159,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 self.window.move_viewport_to_the_position(*position)
 
     @logger()
-    def on_right_button_click(self, x: float, y: float, modifiers: int):
-        pass
+    def on_right_button_press(self, x: float, y: float, modifiers: int):
+        self.placeable_gameobject = None
 
     @logger()
-    def on_middle_button_click(self, x: float, y: float, modifiers: int):
+    def on_middle_button_press(self, x: float, y: float, modifiers: int):
         pass
 
     def on_mouse_release(self, x: float, y: float, button: int,
@@ -180,7 +181,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.close_drag_selection()
 
     def close_drag_selection(self):
-        self.units_manager.unselect_units()
+        self.units_manager.unselect_all_selected()
         if units := [u for u in self.mouse_drag_selection.units]:
             self.units_manager.select_units(*units)
         self.mouse_drag_selection = None
@@ -190,8 +191,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.forced_cursor = None
         if self.mouse_dragging:
             self.mouse_dragging = False
-        elif self.units_manager.selected_units:
-            self.units_manager.unselect_units()
+        elif self.units_manager.units_or_building_selected:
+            self.units_manager.unselect_all_selected()
         else:
             self.units_manager.selected_building = None
 
@@ -323,7 +324,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
 
     def cursor_on_terrain_with_selected_units(self):
-        grid = self.game.map.position_to_grid(*self.position)
+        grid = position_to_map_grid(*self.position)
         if self.game.map.walkable(grid) or grid in self.game.fog_of_war.unexplored:
             self.set_texture(CURSOR_MOVE_TEXTURE)
         else:

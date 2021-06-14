@@ -12,7 +12,7 @@ from arcade.arcade_types import Color, Point
 
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, Robustness
-from map.map import MapNode, Sector, TILE_WIDTH
+from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
@@ -420,7 +420,7 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def calculate_observed_area(self) -> Set[MapNode]:
-        position = self.map.position_to_grid(*self.position)
+        position = position_to_map_grid(*self.position)
         observed_area = calculate_circular_area(*position, 8)
         observed_area = self.map.in_bounds(observed_area)
         return {self.map.nodes[id] for id in observed_area}

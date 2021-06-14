@@ -1,2 +1,2 @@
-object_name,class,max_speed,fuel_consumption,weapons_names,armour
-tank_medium.png,Tank,2,0.003,('medium_tank_gun'),1.75
+object_name,class,max_speed,rotation_speed,fuel_consumption,weapons_names,armour
+tank_medium.png,Tank,2,4,0.003,('medium_tank_gun'),1.75

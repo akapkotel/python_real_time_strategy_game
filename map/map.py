@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import random
 
-from abc import ABC, abstractmethod
 from collections import deque
 from functools import partial
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator
@@ -47,55 +46,35 @@ MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 
 
-class GridHandler:
-
-    @abstractmethod
-    def position_to_node(self, x: Number, y: Number) -> MapNode:
-        raise NotImplementedError
-
-    @classmethod
-    def position_to_grid(cls, x: Number, y: Number) -> GridPosition:
-        """Return map-grid-normalised position."""
-        return x // TILE_WIDTH, y // TILE_HEIGHT
-
-    @classmethod
-    def normalize_position(cls, x: Number, y: Number) -> NormalizedPoint:
-        grid = cls.position_to_grid(x, y)
-        return cls.grid_to_position(grid)
-
-    @classmethod
-    def grid_to_position(cls, grid: GridPosition) -> NormalizedPoint:
-        """Return (x, y) position of the map-grid-normalised Node."""
-        return (
-            int(grid[0] * TILE_WIDTH + TILE_WIDTH // 2),
-            int(grid[1] * TILE_HEIGHT + TILE_HEIGHT // 2)
-        )
-
-    @classmethod
-    def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
-        """Return list of map-normalised grid-positions adjacent to (x, y)."""
-        grid = cls.position_to_grid(x, y)
-        return [(grid[0] + p[0], grid[1] + p[1]) for p in ADJACENT_OFFSETS]
-
-    @abstractmethod
-    def in_bounds(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    def adjacent_nodes(self, *args, **kwargs) -> List[MapNode]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def walkable_adjacent(self, *args, **kwargs) -> List[MapNode]:
-        """Useful for pathfinding."""
-        raise NotImplementedError
-
-    @classmethod
-    def diagonal(cls, first_id: GridPosition, second_id: GridPosition) -> bool:
-        return first_id[0] != second_id[0] and first_id[1] != second_id[1]
+def position_to_map_grid(x: Number, y: Number) -> GridPosition:
+    """Return map-grid-normalised position."""
+    return x // TILE_WIDTH, y // TILE_HEIGHT
 
 
-class Map(GridHandler):
+def normalize_position(x: Number, y: Number) -> NormalizedPoint:
+    grid = position_to_map_grid(x, y)
+    return map_grid_to_position(grid)
+
+
+def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
+    """Return (x, y) position of the map-grid-normalised Node."""
+    return (
+        int(grid[0] * TILE_WIDTH + TILE_WIDTH // 2),
+        int(grid[1] * TILE_HEIGHT + TILE_HEIGHT // 2)
+    )
+
+
+def adjacent_map_grids(x: Number, y: Number) -> List[GridPosition]:
+    """Return list of map-normalised grid-positions adjacent to (x, y)."""
+    grid = position_to_map_grid(x, y)
+    return [(grid[0] + p[0], grid[1] + p[1]) for p in ADJACENT_OFFSETS]
+
+
+def diagonal(first_id: GridPosition, second_id: GridPosition) -> bool:
+    return first_id[0] != second_id[0] and first_id[1] != second_id[1]
+
+
+class Map:
     game = None
     instance = None
 
@@ -170,11 +149,11 @@ class Map(GridHandler):
 
     def adjacent_nodes(self, x: Number, y: Number) -> List[MapNode]:
         return [
-            self.nodes[adj] for adj in self.in_bounds(self.adjacent_grids(x, y))
+            self.nodes[adj] for adj in self.in_bounds(adjacent_map_grids(x, y))
         ]
 
     def position_to_node(self, x: Number, y: Number) -> MapNode:
-        return self.grid_to_node(self.position_to_grid(x, y))
+        return self.grid_to_node(position_to_map_grid(x, y))
 
     def grid_to_node(self, grid: GridPosition) -> MapNode:
         return self.nodes.get(grid)
@@ -231,9 +210,9 @@ class Map(GridHandler):
     def calculate_distances_between_nodes(self):
         distances: Dict[(GridPosition, GridPosition), float] = {}
         for node in self.nodes.values():
-            for grid in self.in_bounds(self.adjacent_grids(*node.position)):
+            for grid in self.in_bounds(adjacent_map_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
-                distance = DIAGONAL if self.diagonal(node.grid, grid) else 1
+                distance = DIAGONAL if diagonal(node.grid, grid) else 1
                 distance *= (node.terrain_cost + adjacent_node.terrain_cost)
                 node.costs[grid] = distance
         return distances
@@ -271,7 +250,7 @@ class Map(GridHandler):
             return node
 
 
-class Sector(GridHandler, ABC):
+class Sector:
     """
     Map is divided for sectors containing 10x10 Nodes each to split space for
     smaller chunks in order to make enemies-detection faster: since each Unit
@@ -283,9 +262,6 @@ class Sector(GridHandler, ABC):
     def __init__(self, grid: SectorId):
         """
         Each MapSector is a 10x10 square containing 100 MapNodes.
-
-        :param id: SectorId is a Tuple[int, int] which are boundaries of
-        this Sector: first column and first row of MapNodes, this Sector owns
         """
         self.grid = grid
         self.units_and_buildings: Dict[PlayerId, Set[PlayerEntity]] = {}
@@ -300,7 +276,7 @@ class Sector(GridHandler, ABC):
         except KeyError:
             pass
 
-    def add_entity(self, entity: PlayerEntity):
+    def add_player_entity(self, entity: PlayerEntity):
         try:
             self.units_and_buildings[entity.player.id].add(entity)
         except KeyError:
@@ -328,7 +304,7 @@ class Sector(GridHandler, ABC):
         self.map = Sector.map
 
 
-class MapNode(GridHandler, ABC):
+class MapNode:
     """
     Class representing a single point on Map which can be Units pathfinding
     destination and is associated with graphic-map-tiles displayed on the
@@ -339,7 +315,7 @@ class MapNode(GridHandler, ABC):
     def __init__(self, x, y, sector):
         self.grid = x, y
         self.sector = sector
-        self.position = self.x, self.y = self.grid_to_position(self.grid)
+        self.position = self.x, self.y = map_grid_to_position(self.grid)
         self.costs: Dict[GridPosition, float] = {}
 
         self._allowed_for_pathfinding = True
@@ -359,14 +335,6 @@ class MapNode(GridHandler, ABC):
 
     def diagonal_to_other(self, other: GridPosition):
         return self.grid[0] != other[0] and self.grid[1] != other[1]
-
-    @property
-    def obstacle_id(self) -> UnitId:
-        return self._terrain_object_id
-
-    @obstacle_id.setter
-    def obstacle_id(self, value: Optional[int]):
-        self._terrain_object_id = value
 
     @property
     def unit(self) -> Optional[Unit]:
@@ -397,7 +365,8 @@ class MapNode(GridHandler, ABC):
         """Call it to find if this node is available for pathfinding at all."""
         return self._allowed_for_pathfinding and self._building is None
 
-    def set_pathable(self, value: bool):
+    @pathable.setter
+    def pathable(self, value: bool):
         self._allowed_for_pathfinding = value
 
     @property
@@ -439,7 +408,7 @@ class WaypointsQueue:
         self.active = False
 
     def add_waypoint(self, x: int, y: int):
-        x, y = Map.normalize_position(x, y)
+        x, y = normalize_position(x, y)
         if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
             Pathfinder.instance.finish_waypoints_queue()
         else:
@@ -478,7 +447,7 @@ class NavigatingUnitsGroup:
 
     def __init__(self, units: List[Unit], x: Number, y: Number):
         self.map = Map.instance
-        self.destination = Map.position_to_grid(x, y)
+        self.destination = position_to_map_grid(x, y)
         self.units_paths = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
@@ -529,7 +498,7 @@ class NavigatingUnitsGroup:
             steps.reverse()
 
     def add_visible_indicators_of_destinations(self, destinations):
-        positions = [self.map.grid_to_position(g) for g in destinations]
+        positions = [map_grid_to_position(g) for g in destinations]
         self.map.game.units_ordered_destinations.new_destinations(positions)
 
     @staticmethod
@@ -649,7 +618,7 @@ class Pathfinder(EventsCreator):
         """
         Find requested number of valid waypoints around requested position.
         """
-        center = self.map.position_to_grid(x, y)
+        center = position_to_map_grid(x, y)
         if required_waypoints == 1: return [center, ]
         radius = 1
         waypoints = []

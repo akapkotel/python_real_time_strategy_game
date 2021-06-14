@@ -8,7 +8,11 @@ __version__ = "0.0.4"
 __maintainer__ = "Rafał Trąbski"
 __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
-__credits__ = []
+__credits__ = {'Coding': __author__,
+               'Graphics': __author__,
+               'Testing': [__author__],
+               'Music': [],
+               'Sounds': []}
 
 import random
 import time
@@ -93,6 +97,7 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
+    buildings_damage_factor: float = 0.1
 
 
 class GameWindow(Window, EventsCreator):
@@ -410,26 +415,26 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def create_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
-        right_panel = UiElementsBundle(
+        frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
+        options_panel = UiElementsBundle(
             name=BASIC_UI,
             index=0,
             elements=[
-                Frame('ui_right_panel.png', ui_x, ui_y, *ui_size),
+                frame,
+                Button('game_button_menu.png', ui_x + 100, 120,
+                        functions=partial(self.window.show_view,
+                                          self.window.menu_view),
+                        parent=frame),
+                 Button('game_button_save.png', ui_x, 120,
+                        functions=self.window.open_saving_menu,
+                        parent=frame),
+                 Button('game_button_pause.png', ui_x - 100, 120,
+                        functions=partial(self.toggle_pause),
+                        parent=frame)
             ],
             register_to=self
         )
-        right_panel.extend(
-            (Button('game_button_menu.png', ui_x + 100, 120,
-                    functions=partial(self.window.show_view,
-                                      self.window.menu_view),
-                    parent=right_panel.elements[0]),
-            Button('game_button_save.png', ui_x, 120,
-                   functions=self.window.open_saving_menu,
-                   parent=right_panel.elements[0]),
-            Button('game_button_pause.png', ui_x - 100, 120,
-                   functions=partial(self.toggle_pause),
-                   parent=right_panel.elements[0]))
-        )
+
         units_panel = UiElementsBundle(
             name=UNITS_PANEL,
             index=1,
@@ -441,7 +446,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             ],
             register_to=self
         )
-        building_panel = UiElementsBundle(
+
+        buildings_panel = UiElementsBundle(
             name=BUILDINGS_PANEL,
             index=2,
             elements=[
@@ -496,11 +502,11 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.window.sound_player.play_playlist('game')
         self.update_interface_content()
 
-    def test_methods(self):
+    def generate_random_map_objects(self):
         if self.generate_random_entities:
             self.test_scheduling_events()
             self.test_factions_and_players_creation()
-            # self.test_buildings_spawning()
+            self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
             if self.settings.editor_mode:
@@ -510,7 +516,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             )
             self.window.move_viewport_to_the_position(*position)
         self.update_interface_position(self.viewport[1], self.viewport[-1])
-        # self.window.move_viewport_to_the_position(*self.window.screen_center)
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
@@ -653,7 +658,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
     def after_loading(self):
         self.window.show_view(self)
-        self.test_methods()
+        self.generate_random_map_objects()
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
@@ -740,7 +745,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
     def unload(self):
         self.updated.clear()
         self.local_human_player = None
-        self.units_manager.unselect_units()
+        self.units_manager.unselect_all_selected()
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
         self.players.clear()

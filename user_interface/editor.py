@@ -1,8 +1,13 @@
 #!/usr/bin/env python
+from functools import partial
 from typing import List, Tuple
 
+from arcade import Color
+
+from gameobjects.gameobject import PlaceableGameobject
 from user_interface.user_interface import (
-    UiElementsBundle, Button, ScrollableContainer, EditorPlaceableObject
+    UiElementsBundle, Button, ScrollableContainer, EditorPlaceableObject,
+    SelectableGroup
 )
 from utils.colors import RED, GREEN, YELLOW, BLUE, colors_names
 from utils.data_types import GridPosition
@@ -39,11 +44,24 @@ class ScenarioEditor:
 
     def create_colors_buttons(self):
         ui_x, ui_y = self.position
-        self.ui_elements.extend(
-            Button('small_button_none.png', (ui_x - 100) + 60 * i, ui_y)
-            for i, (color_name, color) in
-            enumerate(self.available_colors.items())
-        )
+        buttton_name = 'small_button_none.png'
+        self.game.selectable_groups['colors'] = group = SelectableGroup()
+        for i, (color_name, color) in enumerate(self.available_colors.items()):
+            self.ui_elements.add(
+                Button(buttton_name,
+                       (ui_x - 100) + 60 * i,
+                       ui_y * 1.5,
+                       color_name,
+                       functions=partial(
+                           self.toggle_edited_color, color_name, color),
+                       color=color,
+                       selectable_group=group)
+            )
+
+    def toggle_edited_color(self, color_name: str, color: Color):
+        self.current_color = color
+        for element in (e for e in self.ui_elements if hasattr(e, 'gameobject_name')):
+            element.toggle(color_name in element.gameobject_name)
 
     def find_all_gameobjects(self) -> List[str]:
         gameobjects = []
@@ -70,9 +88,15 @@ class ScenarioEditor:
         )
         editor_ui_elements.extend(
             [
-                EditorPlaceableObject(object_name, ui_x, 100 * i,
-                       parent=editor_ui_elements.elements[0])
-                for i, object_name in enumerate(self.find_all_gameobjects())
+                EditorPlaceableObject(
+                    object_name, ui_x, 100 * i,
+                    parent=editor_ui_elements.elements[0],
+                    functions=partial(self.attach_gameobject_to_cursor, object_name)
+                ) for i, object_name in enumerate(self.find_all_gameobjects())
             ]
         )
         return editor_ui_elements
+
+    def attach_gameobject_to_cursor(self, gameobject_name: str):
+        placeable = PlaceableGameobject(gameobject_name)
+        self.game.window.cursor.placeable_gameobject = placeable

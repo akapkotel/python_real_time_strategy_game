@@ -100,8 +100,8 @@ class UiElementsBundle(OwnedObject):
             if self.displayed_in_manager is not None:
                 self.displayed_in_manager.remove(element)
 
-    def __getitem__(self, name: str):
-        return self._find_by_name(name)
+    def __iter__(self):
+        return self.elements.__iter__()
 
     def toggle_element(self, name: str, state: bool):
         if (element := self._find_by_name(name)) is not None:
@@ -572,8 +572,6 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectab
             cursor.window.sound_player.play_sound(sound)
 
     def _func_on_mouse_enter(self, cursor):
-        if isinstance(self._parent, ScrollableContainer):
-            self.cursor.pointed_scrollable = self._parent
         if self._active:
             self.set_texture(-1)
 
@@ -633,7 +631,8 @@ class Button(UiElement):
                  parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  subgroup: Optional[int] = None,
-                 selectable_group: Optional[SelectableGroup] = None):
+                 selectable_group: Optional[SelectableGroup] = None,
+                 color: Optional[Color] = None):
         super().__init__('', x, y, name, active, visible, parent,
                          functions, subgroup=subgroup,
                          selectable_group=selectable_group)
@@ -646,9 +645,13 @@ class Button(UiElement):
             load_texture(full_texture_name, width, 0, width, height)
         ]
         self.set_texture(0)
+        self.button_color = color
 
     def draw(self):
         super().draw()
+        if self.button_color is not None:
+            width, height = self.width * 0.8, self.height * 0.8
+            draw_rectangle_filled(*self.position, width, height, self.button_color)
         if not self._active:
             draw_rectangle_filled(*self.position, self.width, self.height, FOG)
 
@@ -824,9 +827,11 @@ class ScrollableContainer(UiElement):
         self.min_scroll_x = min_scroll_x or self.left
         self.max_scroll_y = max_scroll_y or self.top
         self.min_scroll_y = min_scroll_y or self.bottom
+        self.invisible_children = []
 
-    def add_child(self, child: Hierarchical):
+    def add_child(self, child: UiElement):
         super().add_child(child)
+        self._manage_child_visibility(child)
 
     def _func_on_mouse_enter(self, cursor):
         super()._func_on_mouse_enter(cursor)
@@ -845,8 +850,14 @@ class ScrollableContainer(UiElement):
         super().draw()
         draw_rectangle_outline(*self.position, self.width, self.height, WHITE)
 
+    def inside_scrollable_area(self, child) -> bool:
+        return self.top > child.top and self.bottom < child.bottom
+
     def _manage_child_visibility(self, child):
-        child.toggle(self.top > child.top and self.bottom < child.bottom)
+        try:
+            child.toggle(self.top > child.top and self.bottom < child.bottom)
+        except ValueError:
+            child.toggle(False)
 
 
 class EditorPlaceableObject(Button):
@@ -855,10 +866,9 @@ class EditorPlaceableObject(Button):
     place them on the map.
     """
 
-    def __init__(self, gameobject_name: str, x: int, y: int, parent):
-        super().__init__('small_button_none.png', x, y, parent=parent)
+    def __init__(self, gameobject_name: str, x: int, y: int, parent, functions=None):
+        super().__init__('small_button_none.png', x, y, parent=parent, functions=functions)
         self.gameobject_name = get_path_to_file(gameobject_name)
-        print(self.gameobject_name)
         w, h = self.width, self.height
         self.gameobject_texture = load_texture(self.gameobject_name, 0, 0, w, h)
 

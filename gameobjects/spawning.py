@@ -9,6 +9,7 @@ from arcade import load_texture
 from arcade.arcade_types import Point
 
 from buildings.buildings import Building
+from map.map import map_grid_to_position
 from players_and_factions.player import Player
 from units.units import Unit, Vehicle, Tank
 from utils.classes import Singleton
@@ -48,7 +49,7 @@ class GameObjectsSpawner(Singleton):
         positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
         spawned = []
         for i, name in enumerate(names):
-            position = self.pathfinder.map.grid_to_position(positions[i])
+            position = map_grid_to_position(positions[i])
             spawned.append(self.spawn(name, player, position))
         return spawned
 
