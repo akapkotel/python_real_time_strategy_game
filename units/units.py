@@ -2,16 +2,14 @@
 from __future__ import annotations
 
 import random
+import time
 
 from abc import abstractmethod
 from collections import deque
 from typing import Deque, List, Dict, Optional, Set, Union, cast
 
 import PIL
-from arcade import (
-    SpriteList, Sprite, AnimatedTimeBasedSprite, load_textures,
-    draw_circle_filled
-)
+from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
 from effects.explosions import Explosion
@@ -24,12 +22,14 @@ from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
-from utils.functions import get_path_to_file
+from utils.functions import get_path_to_file, decolorised_name
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
 )
 from .weapons import Weapon
+
+IDLE = 'IDLE'
 
 
 class Unit(PlayerEntity):
@@ -48,7 +48,8 @@ class Unit(PlayerEntity):
         # Since we do not rotate actual Sprite, but change it's texture to show
         # the correctly rotated Units on the screen, use 'virtual' rotation to
         # keep track of the Unit rotation angle without rotating actual Sprite:
-        self.virtual_angle = 0
+        self.facing_direction = random.randint(0, ROTATIONS - 1)
+        self.virtual_angle = int(ROTATION_STEP * self.facing_direction) % 360
 
         self.weight: UnitWeight = weight
         self.visibility_radius = 100
@@ -71,6 +72,11 @@ class Unit(PlayerEntity):
 
         self.permanent_units_group: int = 0
         self.navigating_group = None
+
+        self._weapons.extend(
+            Weapon(name=name, owner=self) for name in
+            self.game.configs['units'][self.name]['weapons_names']
+        )
 
         self.explosion_name = 'EXPLOSION'
         # self.update_explosions_pool()
@@ -100,8 +106,6 @@ class Unit(PlayerEntity):
         Our units can face only 8 possible angles, which are precalculated
         for each one of 360 possible integer angles for fast lookup in existing
         angles-dict.
-        TODO: change it to matrix 8x8 textures - 1 row for each hull angle
-         and 1 column for each turret angle.
         """
         index = self.angles[int(angle_to_target)]
         self.set_texture(index)
@@ -119,9 +123,9 @@ class Unit(PlayerEntity):
     def nearby(self, position: Union[MapNode, GridPosition]) -> bool:
         adjacent_grids = {n.grid for n in self.current_node.adjacent_nodes}
         try:
-            return position.grid in adjacent_grids
-        except AttributeError:
             return position in adjacent_grids
+        except KeyError:
+            return position.grid in adjacent_grids
 
     def heading_to(self, destination: Union[MapNode, GridPosition]):
         return self.path and self.path[0] == self.map.map_grid_to_position(destination)
@@ -129,11 +133,8 @@ class Unit(PlayerEntity):
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
             super().on_update(delta_time)
-
             new_current_node = self.map.position_to_node(*self.position)
-            if self in self.game.local_human_player.faction.units:
-                self.update_observed_area(new_current_node)
-
+            self.update_observed_area(new_current_node)
             self.update_blocked_map_nodes(new_current_node)
             self.update_current_sector()
             self.update_pathfinding()
@@ -145,7 +146,13 @@ class Unit(PlayerEntity):
             observed = self.observed_nodes
         else:
             self.observed_nodes = observed = self.calculate_observed_area()
-        self.game.fog_of_war.reveal_nodes(n.grid for n in observed)
+            self.fire_covered = self.update_fire_covered_area(observed)
+        if self.should_reveal_map:
+            self.game.fog_of_war.reveal_nodes(n.grid for n in observed)
+
+    def update_fire_covered_area(self, observed):
+        x, y = self.current_node.grid
+        return {n for n in observed if abs(n.grid[0] - x) + abs(n.grid[1] - y) < 10}
 
     def update_blocked_map_nodes(self, new_current_node: MapNode):
         """
@@ -203,7 +210,7 @@ class Unit(PlayerEntity):
         the path with A* algorthm. Instead, Unit 'shelves' currently found
         path and after 1 second 'unshelves' it in countdown_waiting method.
         """
-        self.path_wait_counter = self.game.timer['s'] + 1
+        self.path_wait_counter = time.time() + 1
         self.awaited_path = path.copy()
         self.path.clear()
         self.stop()
@@ -246,7 +253,7 @@ class Unit(PlayerEntity):
             self.stop()
 
     def countdown_waiting(self):
-        if self.game.timer['s'] == self.path_wait_counter:
+        if time.time() >= self.path_wait_counter:
             path = self.awaited_path
             node = self.map.position_to_node(*path[0])
             if node.walkable or len(path) < 20:
@@ -336,9 +343,6 @@ class Unit(PlayerEntity):
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
-    def in_observed_area(self, other: PlayerEntity) -> bool:
-        return self.current_node in other.observed_nodes
-
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
         if self.player is self.game.local_human_player and not other.is_unit:
@@ -390,8 +394,9 @@ class Unit(PlayerEntity):
             self.unblock_map_node(node) if node is not None else ...
 
     def create_death_animation(self):
-        self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
-        self.game.window.sound_player.play_sound('explosion.wav')
+        if not self.is_infantry:  # particular Soldiers dying instead
+            self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
+            self.game.window.sound_player.play_sound('explosion.wav')
 
     def save(self) -> Dict:
         saved_unit = super().save()
@@ -409,9 +414,11 @@ class Unit(PlayerEntity):
 class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
 
-    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
                  position: Point, id: int = None):
-        super().__init__(unit_name, player, weight, position, id)
+        super().__init__(texture_name, player, weight, position, id)
+        self.virtual_angle = int(ROTATION_STEP * self.cur_texture_index) % 360
+
         thread_texture = f'{self.object_name.rsplit("_", 1)[0]}_threads.png'
         self.thread_texture = get_path_to_file(thread_texture)
         self.threads_time = 0
@@ -439,16 +446,13 @@ class Vehicle(Unit):
         self.fuel -= self.fuel_consumption
 
     def leave_threads(self):
-        if self.is_rendered:
-            if self.threads_time > 4:
-                self.threads_time = 0
-                self.game.vehicles_threads.append(
-                    VehicleThreads(self.thread_texture,
-                                   self.cur_texture_index,
-                                   *self.position),
-                )
-            else:
-                self.threads_time += 1
+        if self.is_rendered and (time := self.game.timer['s'] - self.threads_time) >= 4:
+            self.threads_time = time
+            self.game.vehicles_threads.append(
+                VehicleThreads(self.thread_texture,
+                               self.cur_texture_index,
+                               *self.position),
+            )
 
     def kill(self):
         self.spawn_wreck()
@@ -471,7 +475,7 @@ class Vehicle(Unit):
 class VehicleThreads(Sprite):
 
     def __init__(self, texture, index, x, y):
-        super().__init__(texture, center_x=x, center_y=y)
+        super().__init__(texture, center_x=x, center_y=y, hit_box_algorithm='None')
         self.textures = load_textures(
             texture, [(i * 29, 0, 29, 28) for i in range(8)]
         )
@@ -480,25 +484,22 @@ class VehicleThreads(Sprite):
     def on_update(self, delta_time: float = 1 / 60):
         # threads slowly disappearing through time
         if self.alpha > 1:
-            self.alpha -= 2
+            self.alpha -= 1
         else:
             self.kill()
 
 
 class Tank(Vehicle):
 
-    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
+    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
                  position: Point, id: int = None):
-        super().__init__(unit_name, player, weight, position, id)
-        # combine texture from these two indexes:
-        self.hull_texture_index = random.randint(0, ROTATIONS - 1)
-        self.turret_texture_index = random.randint(0, ROTATIONS - 1)
-        self.fake_angle = ROTATION_STEP * self.hull_texture_index
+        super().__init__(texture_name, player, weight, position, id)
+        # combine facing_direction with turret to obtain proper texture:
+        self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
 
-        self._load_textures_and_reset_hitbox(unit_name)
+        self._load_textures_and_reset_hitbox(texture_name)
         self.turret_aim_target = None
-        self._weapons.append(Weapon(name='tank_light_gun', owner=self))
-        self.barrel_end = self.turret_texture_index
+        self.barrel_end = self.turret_facing_direction
 
         self.threads_time = 0
 
@@ -513,7 +514,7 @@ class Tank(Vehicle):
         self.textures = [load_textures(get_path_to_file(unit_name),
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
-        self.set_texture(self.hull_texture_index)
+        self.set_texture(self.facing_direction)
         self.set_hit_box(self.texture.hit_box_points)
 
     def set_rotated_texture(self):
@@ -530,14 +531,14 @@ class Tank(Vehicle):
                          hull_angle: float = None,
                          turret_angle: float = None):
         if hull_angle is not None:
-            self.hull_texture_index = self.angles[int(hull_angle)]
+            self.facing_direction = self.angles[int(hull_angle)]
         # for Tank we need to set it's turret direction too:
         if turret_angle is None:
-            self.turret_texture_index = self.hull_texture_index
+            self.turret_facing_direction = self.facing_direction
         else:
-            self.turret_texture_index = self.angles[int(turret_angle)]
-        self.barrel_end = self.turret_texture_index
-        self.set_texture(self.hull_texture_index)
+            self.turret_facing_direction = self.angles[int(turret_angle)]
+        self.barrel_end = self.turret_facing_direction
+        self.set_texture(self.facing_direction)
 
     def set_texture(self, hull_texture_index: int):
         """
@@ -545,7 +546,7 @@ class Tank(Vehicle):
         first for the hull (which list of textures to use) and second for
         turret for actual texture to be chosen from the list.
         """
-        texture = self.textures[hull_texture_index][self.turret_texture_index]
+        texture = self.textures[hull_texture_index][self.turret_facing_direction]
         if texture == self._texture:
             return
 
@@ -568,7 +569,7 @@ class Tank(Vehicle):
             self.threads_time = 0
             self.game.vehicles_threads.append(
                 VehicleThreads(self.thread_texture,
-                               self.hull_texture_index,
+                               self.facing_direction,
                                *self.position),
             )
 
@@ -581,67 +582,70 @@ class Tank(Vehicle):
         wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'
         wreck = self.game.spawner.spawn(
             wreck_name, None, self.position,
-            (self.hull_texture_index, self.turret_texture_index)
+            (self.facing_direction, self.turret_facing_direction)
         )
         self.configure_wreck(wreck)
 
 
-class Infantry(Unit):
-
-    def __init__(self, unit_name: str, player: Player, weight: UnitWeight,
-                 position: Point):
-        super().__init__(unit_name, player, weight, position)
-
-        self.max_soldiers = 4
-        self.soldiers: SpriteList[Soldier] = SpriteList()
-        self.soldiers.extend([Soldier() for _ in range(self.max_soldiers)])
-
-    def _load_textures_and_reset_hitbox(self, unit_name: str):
-        pass
-
-    @property
-    def needs_reinforcements(self) -> bool:
-        return len(self.soldiers) < self.max_soldiers
-
-    def __len__(self):
-        return len(self.soldiers)
-
-    @property
-    def damaged(self) -> bool:
-        return cast(int, self._health) < 25 * len(self.soldiers)
-
-    def on_update(self, delta_time: float = 1/60):
-        super().update()
-        self.soldiers.on_update(delta_time)
-        self.restore_soldiers_health()
-
-    def restore_soldiers_health(self):
-        soldier: Soldier
-        for soldier in self.soldiers:
-            self._health += soldier.restore_health()
-
-    def on_being_hit(self, damage: float) -> bool:
-        hit_soldier = random.choice(self.soldiers)
-        hit_soldier.on_being_hit(damage)
-        return len(self.soldiers) > 0
-
-
-class Soldier(AnimatedTimeBasedSprite):
-    _max_health = 25
+class Soldier(Unit):
+    _max_health = 100
     health = _max_health
     health_restoration = 0.003
     weapon: Weapon = None
 
-    def on_being_hit(self, damage: float) -> bool:
-        pass
+    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
+                 position: Point, id: Optional[int] = None):
+        super().__init__(texture_name, player, weight, position, id)
+        texture_name = get_path_to_file(texture_name)
+        sprite_sheet = PIL.Image.open(texture_name)
+        width, height = sprite_sheet.size[0] // 8, sprite_sheet.size[1]
+        idle_textures = load_textures(
+            texture_name, [(i * width, 0, width, height) for i in range(8)]
+        )
 
-    def restore_health(self) -> float:
+        self.all_textures: Dict[str, List[Texture]] = {
+            IDLE: idle_textures
+        }
+
+        self.last_step = 0
+        self.face_direction = 0
+        self.pose = IDLE
+        self.switch_pose(IDLE)
+
+    def on_update(self, delta_time=1/60):
+        if self.alive:
+            self.update_animation(delta_time)
+            super().on_update(delta_time)
+        else:
+            self.kill()
+
+    def switch_pose(self, pose_name: str):
+        self.pose = pose_name
+        self.textures = self.all_textures[pose_name]
+
+    def update_animation(self, delta_time: float = 1/60):
+        self.last_step += delta_time
+        if self.last_step > 0.3:
+            self.last_step = 0
+            if self.cur_texture_index < len(self.textures) - 1:
+                self.cur_texture_index += 1
+            else:
+                self.cur_texture_index = 0
+            self.set_texture(self.cur_texture_index)
+
+    def on_being_damaged(self, damage: float):
+        self.health -= damage * self.game.settings.infantry_damage_factor
+
+    def restore_health(self):
         wounds = round(self._max_health - self.health, 3)
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
-        return health_gained
 
     def kill(self):
+        self.create_death_animation()
+        super().kill()
+
+    def create_death_animation(self):
         pass
 
 

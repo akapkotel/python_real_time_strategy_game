@@ -248,9 +248,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         # TODO: buildings with machine-guns and personnel fighting back
         pass
 
-    def in_observed_area(self, other) -> bool:
-        return self.occupied_sectors.isdisjoint(other.observed_nodes)
-
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
         if close_enough(self.position, other.position, self.detection_radius):
@@ -269,9 +266,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             sectors.update(sector.adjacent_sectors())
         return list(sectors)
 
-    def on_being_hit(self, damage: float) -> bool:
+    def on_being_damaged(self, damage: float) -> bool:
         damage *= self.game.settings.buildings_damage_factor
-        return super().on_being_hit(damage)
+        return super().on_being_damaged(damage)
 
     def kill(self):
         for node in self.occupied_nodes:

@@ -8,6 +8,7 @@ from arcade import (
 )
 
 from game import TILE_HEIGHT, TILE_WIDTH
+from map.map import normalize_position, position_to_map_grid
 from utils.colors import RED, GREEN, WHITE, BLACK
 from utils.functions import to_rgba
 from utils.logging import log
@@ -40,7 +41,7 @@ class GameDebugger:
             self.map_grid = self.create_map_debug_grid()
         if self.debug_mouse:
             position = self.game.window.cursor.position
-            grid = self.game.map.position_to_map_grid(*position)
+            grid = position_to_map_grid(*position)
             self.log = f'Mouse at: {position}, node: {grid}'
 
     def draw(self):
@@ -79,7 +80,7 @@ class GameDebugger:
         self.map_grid.draw()
 
     def draw_debugged_mouse_pointed_nodes(self):
-        position = self.game.map.normalize_position(*self.game.window.cursor.position)
+        position = normalize_position(*self.game.window.cursor.position)
         node = self.game.map.position_to_node(*position)
 
         draw_circle_outline(node.x, node.y, 10, RED, 2)

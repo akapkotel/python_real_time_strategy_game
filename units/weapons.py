@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import random
-from time import time as get_time
+import time
+
+from random import gauss
 
 from typing import List
 
@@ -25,35 +26,31 @@ class Weapon:
         self.penetration: float = 2.0
         self.accuracy: float = 75.0
         self.range: float = 200.0
-        self.rate_of_fire: float = 2.0  # seconds
-        self.last_firing_time = 0
+        self.rate_of_fire: float = 4  # 4 seconds
+        self.next_firing_time = 0
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
         self.explosion_name = 'SHOTBLAST'
         self.owner.game.explosions_pool.add(self.explosion_name, 75)
+        for attr_name, value in self.owner.game.configs['weapons'][name].items():
+            setattr(self, attr_name, value)
 
-    def reload(self) -> bool:
-        if (now := get_time()) >= self.last_firing_time + self.rate_of_fire:
-            self.last_firing_time = now
-            return True
-        return False
+    def reloaded(self) -> bool:
+        return time.time() >= self.next_firing_time
 
-    def shoot(self, target: PlayerEntity) -> bool:
+    def shoot(self, target: PlayerEntity):
+        self.next_firing_time = time.time() + self.rate_of_fire
         self.create_shot_audio_visual_effects()
         hit_chance = self.calculate_hit_chance(target)
-        if not random.gauss(hit_chance, hit_chance // 10) < hit_chance:
-            return False
-        return target.on_being_hit(random.gauss(self.damage, self.damage // 4))
+        if gauss(hit_chance, hit_chance / 5) < hit_chance and self.can_penetrate(target):
+            target.on_being_damaged(damage=self.damage)
 
     def calculate_hit_chance(self, target):
-        cover = target.cover
         experience = self.owner.experience // 20
-        movement = 25 if self.owner.moving else 0
-        target_movement = 15 if target.moving else 0
-        hit_chance = sum(
-            (self.accuracy, experience, -movement, -target_movement, -cover)
-        )
-        return hit_chance
+        cover = -target.cover
+        movement = -25 if self.owner.moving else 0
+        target_movement = -15 if target.moving else 0
+        return self.accuracy + experience + movement + target_movement + cover
 
     def create_shot_audio_visual_effects(self):
         self.owner.game.window.sound_player.play_sound(self.shot_sound)
@@ -62,10 +59,10 @@ class Weapon:
         blast_position = move_along_vector((x, y), 35, angle=barrel_angle)
         self.owner.game.create_effect(Explosion, 'SHOTBLAST', *blast_position)
 
-    def effective_against(self, enemy: PlayerEntity) -> bool:
+    def can_penetrate(self, enemy: PlayerEntity) -> bool:
         """
         Units and Buildings can have armour, so they can be invulnerable to
-        attack. Tanks have problem to hit
+        attack.
 
         :param enemy: PlayerEntity
         :return: bool -- if this Weapon can damage targeted enemy

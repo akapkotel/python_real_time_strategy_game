@@ -16,8 +16,12 @@ from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
-from utils.functions import ignore_in_editor_mode, new_id
-from utils.geometry import distance_2d, is_visible, calculate_circular_area
+from utils.functions import (
+    ignore_in_editor_mode, new_id, add_player_color_to_name, decolorised_name
+)
+from utils.geometry import (
+    distance_2d, is_visible, calculate_circular_area
+)
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
 
@@ -173,9 +177,6 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.known_technologies: Set[int] = set()
         self.current_research: Dict[int, float] = defaultdict()
 
-        self.technology_required: Optional[int] = None
-        self.resources_required: Optional[Tuple[str]] = None
-
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
 
@@ -224,7 +225,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.faction.known_enemies.update(enemies)
 
     def clear_mutually_detected_enemies(self):
-        for entity in self.units.union(self.buildings):
+        for entity in self.units | self.buildings:
             entity.mutually_detected_enemies.clear()
 
     @property
@@ -284,13 +285,15 @@ class PlayerEntity(GameObject):
     production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
 
     def __init__(self,
-                 entity_name: str,
+                 texture_name: str,
                  player: Player,
                  position: Point,
                  robustness: Robustness = 0,
                  id: Optional[int] = None):
-        GameObject.__init__(self, entity_name, robustness, position, id)
+        GameObject.__init__(self, texture_name, robustness, position, id)
         self.map = self.game.map
+
+        self.name = decolorised_name(texture_name)
 
         self.player: Player = player
         self.faction: Faction = self.player.faction
@@ -312,7 +315,7 @@ class PlayerEntity(GameObject):
         # this is checked so frequent that it is worth caching it:
         self.is_building = isinstance(self, Building)
         self.is_unit = not self.is_building
-        self.is_infantry = isinstance(self, Infantry)
+        self.is_infantry = isinstance(self, Soldier)
 
         self._max_health = 100
         self._health = self._max_health
@@ -321,7 +324,15 @@ class PlayerEntity(GameObject):
 
         self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
         self.attack_radius = TILE_WIDTH * 5
+
+        # area inside which all map-nodes are visible for this entity:
         self.observed_nodes: Set[MapNode] = set()
+        # area inside which every enemy unit could by attacked:
+        self.fire_covered: Set[MapNode] = set()
+
+        # flag used to avoid enemy units revealing map for human player, only
+        # player's units and his allies units reveal map for him:
+        self.should_reveal_map = self.faction is self.game.local_human_player.faction
 
         self._weapons: List[Weapon] = []
         # use this number to animate shot blast from weapon:
@@ -329,6 +340,7 @@ class PlayerEntity(GameObject):
         self._ammunition = 100
 
         self.experience = 0
+        self.kill_experience = 0
 
         self.register_to_objectsowners(self.game, self.player)
 
@@ -423,7 +435,7 @@ class PlayerEntity(GameObject):
         position = position_to_map_grid(*self.position)
         observed_area = calculate_circular_area(*position, 8)
         observed_area = self.map.in_bounds(observed_area)
-        return {self.map.nodes[id] for id in observed_area}
+        return {self.map[id] for id in observed_area}
 
     def update_nearby_friends(self):
         self.nearby_friends = self.get_nearby_friends()
@@ -459,13 +471,15 @@ class PlayerEntity(GameObject):
             for player_id, entities in sector.units_and_buildings.items():
                 if self.game.players[player_id].is_enemy(self.player):
                     enemies.update(entities)
-        return {e for e in enemies if e.in_observed_area(self)}
+        return {e for e in enemies if self.in_observed_area(e)}
 
-    @abstractmethod
-    def in_observed_area(self, other) -> bool:
-        raise NotImplementedError
+    def in_observed_area(self, other: Union[Unit, Building]) -> bool:
+        try:
+            return other.current_node in self.observed_nodes
+        except AttributeError:
+            return len(self.observed_nodes.intersection(other.occupied_nodes)) > 0
 
-    def in_range(self, other: PlayerEntity) -> bool:
+    def in_range(self, other: Union[Unit, Building]) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
     @property
@@ -477,19 +491,22 @@ class PlayerEntity(GameObject):
 
     def engage_enemy(self, enemy: PlayerEntity):
         if enemy.alive:
-            for weapon in self._weapons:
-                if weapon.effective_against(enemy) and weapon.reload():
-                    if was_enemy_killed := weapon.shoot(enemy):
-                        self.gain_experience(enemy)
-                        self.targeted_enemy = None
+            self.attack(enemy)
         else:
+            self.targeted_enemy = None
+
+    def attack(self, enemy):
+        for weapon in (w for w in self._weapons if w.reloaded()):
+            weapon.shoot(enemy)
+        self.check_if_enemy_destroyed(enemy)
+
+    def check_if_enemy_destroyed(self, enemy: PlayerEntity):
+        if not enemy.alive:
+            self.experience += enemy.kill_experience
             self.targeted_enemy = None
 
     def run_away(self, enemy: PlayerEntity):
         raise NotImplementedError
-
-    def gain_experience(self, enemy: PlayerEntity):
-        self.experience += 1  # TODO: get experience from configs
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
@@ -513,21 +530,22 @@ class PlayerEntity(GameObject):
     def get_nearby_friends(self) -> Set[PlayerEntity]:
         raise NotImplementedError
 
-    def on_being_hit(self, damage: float) -> bool:
+    def on_being_damaged(self, damage: float):
         """
         :param damage: float
         :return: bool -- if hit entity was destroyed/kiled or not,
         it is propagated to the damage-dealer.
         """
         self.create_hit_audio_visual_effects()
-        self._health -= damage
-        return self._health <= 0
+        self._health -= max(random.gauss(damage, damage // 4) - self.armour, 0)
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)
         # self.game.create_effect(Explosion(*position, 'HITBLAST'))
 
     def kill(self):
+        if self.player is self.game.local_human_player:
+            self.game.units_manager.on_human_entity_being_killed(entity=self)
         if self.selection_marker is not None:
             self.selection_marker.kill()
         super().kill()
@@ -551,7 +569,7 @@ class PlayerEntity(GameObject):
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from units.weapons import Weapon
-    from units.units import Unit, Infantry
+    from units.units import Unit, Soldier
     from buildings.buildings import Building
     from units.unit_management import SelectedEntityMarker
 

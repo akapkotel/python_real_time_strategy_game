@@ -75,10 +75,12 @@ def remove_path_from_name(filename):
 
 
 def object_name_to_filename(object_name: str) -> str:
-    return '.'.join((object_name, '.png'))
+    return '.'.join((object_name, 'png'))
 
 
-def all_files_of_type_named(extension, base_directory, named):
+def all_files_of_type_named(extension: str,
+                            base_directory: str,
+                            named: str) -> Dict[str, str]:
     return {
         name: path for name, path
         in find_paths_to_all_files_of_type(extension, base_directory).items()
@@ -100,22 +102,20 @@ def find_paths_to_all_files_of_type(extension: str,
 
 
 def add_player_color_to_name(name: str, color: Color) -> str:
-    splitted = name.split('.')
+    split = name.split('.')
     color = colors_names[color]
-    return f'{splitted[0]}_{color}.{splitted[1]}'
+    return ''.join((split[0], '_', color, '.', split[1]))
 
 
-def decolorized_name(name: str) -> str:
-    for color in ('red', 'green', 'blue', 'yellow'):
+def decolorised_name(name: str) -> str:
+    for color in ('_red', '_green', '_blue', '_yellow'):
         if color in name:
-            return name.rsplit('_', 1)[0]
+            return name.replace(color, '')  # name.rsplit('_', 1)[0]
     return name
 
 
-def to_texture_name(name: str) -> str:
-    if '.png' not in name:
-        return name + '.png'
-    return name
+def name_to_texture_name(name: str) -> str:
+    return name + '.png' if '.png' not in name else name
 
 
 def get_enemies(war: int) -> Tuple[int, int]:

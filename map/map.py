@@ -5,17 +5,14 @@ import random
 
 from collections import deque
 from functools import partial
-from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator
+from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator, \
+    Collection
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from game import (
-    Game, PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
-)
+from game import PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
 from gameobjects.gameobject import TerrainObject
-from utils.data_types import (
-    GridPosition, Number, PlayerId, SectorId, UnitId
-)
+from utils.data_types import GridPosition, Number, SectorId
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
 from utils.functions import (
@@ -74,6 +71,23 @@ def diagonal(first_id: GridPosition, second_id: GridPosition) -> bool:
     return first_id[0] != second_id[0] and first_id[1] != second_id[1]
 
 
+def random_terrain_texture() -> Texture:
+    texture = random.choice(MAP_TEXTURES['mud'])
+    texture.image.transpose(random.randint(0, 5))
+    return texture
+
+
+def set_terrain_texture(terrain_type: str,
+                        index: int = None,
+                        rotation: int = None) -> Tuple[Texture, int, int]:
+    index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
+    texture = MAP_TEXTURES[terrain_type][index]
+
+    rotation = rotation or random.randint(0, 5)
+    texture.image.transpose(rotation)
+    return texture, index, rotation
+
+
 class Map:
     game = None
     instance = None
@@ -127,10 +141,11 @@ class Map:
     def __len__(self) -> int:
         return len(self.nodes)
 
-    def in_bounds(self, grids) -> List[GridPosition]:
-        return [
-            p for p in grids if 0 <= p[0] < self.columns and 0 <= p[1] < self.rows
-        ]
+    def __getitem__(self, item):
+        return self.nodes[item]
+
+    def in_bounds(self, grid: Collection[GridPosition]) -> List[GridPosition]:
+        return [g for g in grid if g in self.nodes]
 
     def on_map_area(self, x: Number, y: Number) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -182,30 +197,13 @@ class Map:
         sprite = Sprite(center_x=x, center_y=y)
         try:
             terrain_type, index, rotation = self.nodes_data[(x, y)]
-            t, i, r = self.set_terrain_texture(terrain_type, index, rotation)
+            t, i, r = set_terrain_texture(terrain_type, index, rotation)
         except KeyError:
             terrain_type = 'mud'
-            t, i, r = self.set_terrain_texture(terrain_type)
+            t, i, r = set_terrain_texture(terrain_type)
             self.nodes_data[(x, y)] = terrain_type, i, r
         sprite.texture = t
         self.game.terrain_tiles.append(sprite)
-
-    @staticmethod
-    def set_terrain_texture(terrain_type: str,
-                            index: int = None,
-                            rotation: int = None) -> Tuple[Texture, int, int]:
-        index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
-        texture = MAP_TEXTURES[terrain_type][index]
-
-        rotation = rotation or random.randint(0, 5)
-        texture.image.transpose(rotation)
-        return texture, index, rotation
-
-    @staticmethod
-    def random_terrain_texture() -> Texture:
-        texture = random.choice(MAP_TEXTURES['mud'])
-        texture.image.transpose(random.randint(0, 5))
-        return texture
 
     def calculate_distances_between_nodes(self):
         distances: Dict[(GridPosition, GridPosition), float] = {}
@@ -264,10 +262,10 @@ class Sector:
         Each MapSector is a 10x10 square containing 100 MapNodes.
         """
         self.grid = grid
-        self.units_and_buildings: Dict[PlayerId, Set[PlayerEntity]] = {}
+        self.units_and_buildings: Dict[int, Set[PlayerEntity]] = {}
         self.map.sectors[grid] = self
 
-    def get_entities(self, player_id: PlayerId) -> Optional[Set[PlayerEntity]]:
+    def get_entities(self, player_id: int) -> Optional[Set[PlayerEntity]]:
         return self.units_and_buildings.get(player_id)
 
     def discard_entity(self, entity: PlayerEntity):
@@ -288,7 +286,7 @@ class Sector:
 
     def in_bounds(self, grids: List[GridPosition]) -> Generator[GridPosition]:
         c, r = self.map.columns // SECTOR_SIZE, self.map.rows // SECTOR_SIZE
-        return (p for p in grids if 0 <= p[0] < c and 0 <= p[1] < r)
+        return (p for p in grids if 0 <= p[0] <= c and 0 <= p[1] <= r)
 
     def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
         return [(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS]

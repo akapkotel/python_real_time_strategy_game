@@ -21,8 +21,10 @@ from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
 
 UNIT_HEALTH_BAR_WIDTH = 5
+SOLDIER_HEALTH_BAR_WIDTH = 4
 BUILDING_HEALTH_BAR_WIDTH = 10
 UNIT_HEALTHBAR_LENGTH_RATIO = 0.6
+SOLDIER_HEALTHBAR_LENGTH_RATIO = 0.4
 BUILDING_HEALTHBAR_LENGTH_RATIO = 1.8
 
 selection_textures = load_textures(
@@ -32,6 +34,16 @@ selection_textures = load_textures(
 building_selection_texture = load_texture(
     get_path_to_file('building_selection_marker.png'), 0, 0, 180, 180
 )
+soldier_selection_texture = load_texture(
+    get_path_to_file('soldier_selection_marker.png'), 0, 0, 40, 40
+)
+
+
+def selected_unit_marker(entity):
+    if entity.is_infantry:
+        return SelectedSoldierMarker(entity)
+    else:
+        return SelectedUnitMarker(entity)
 
 
 class SelectedEntityMarker:
@@ -97,7 +109,7 @@ class SelectedEntityMarker:
             sprite.kill()
 
 
-class SelectionUnitMarker(SelectedEntityMarker):
+class SelectedUnitMarker(SelectedEntityMarker):
     healthbar_width = UNIT_HEALTH_BAR_WIDTH
     healthbar_length_ratio = UNIT_HEALTHBAR_LENGTH_RATIO
 
@@ -109,7 +121,18 @@ class SelectionUnitMarker(SelectedEntityMarker):
         self.borders.texture = selection_textures[group_index]
 
 
-class SelectionVehicleMarker(SelectionUnitMarker):
+class SelectedSoldierMarker(SelectedEntityMarker):
+    healthbar_width = SOLDIER_HEALTH_BAR_WIDTH
+    healthbar_length_ratio = SOLDIER_HEALTHBAR_LENGTH_RATIO
+
+    def __init__(self, selected: Unit):
+        super().__init__(selected)
+        # units selection marker has 10 versions, blank + 9 different numbers
+        # to show which PermanentUnitsGroup an Unit belongs to:
+        self.borders.texture = soldier_selection_texture
+
+
+class SelectedVehicleMarker(SelectedUnitMarker):
 
     def __init__(self, selected: Vehicle):
         super().__init__(selected)
@@ -291,7 +314,7 @@ class UnitsManager:
 
     def create_units_selection_markers(self, units: Collection[Unit]):
         for unit in units:
-            marker = SelectionUnitMarker(selected=unit)
+            marker = selected_unit_marker(unit)
             self.selection_markers.add(marker)
 
     def create_building_selection_marker(self, building: Building):
@@ -311,7 +334,7 @@ class UnitsManager:
         self.game.update_interface_content(context=None)
 
     def clear_selection_markers(self,
-                                killed: Set[SelectionUnitMarker] = None):
+                                killed: Set[SelectedUnitMarker] = None):
         killed = killed if killed is not None else self.selection_markers
         for marker in killed:
             marker.kill()
@@ -340,3 +363,8 @@ class UnitsManager:
                 self.select_units(*group.units)
         except KeyError:
             pass
+
+    def on_human_entity_being_killed(self, entity: PlayerEntity):
+        if len(self.selected_units) == 0 and entity in self.selected_units:
+            self.unselect_all_selected()
+        self.cursor.update_cursor_texture()

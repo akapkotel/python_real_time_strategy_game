@@ -11,12 +11,12 @@ from arcade.arcade_types import Point
 from buildings.buildings import Building
 from map.map import map_grid_to_position
 from players_and_factions.player import Player
-from units.units import Unit, Vehicle, Tank
+from units.units import Unit, Vehicle, Tank, Soldier
 from utils.classes import Singleton
 from utils.enums import UnitWeight, Robustness
 from utils.functions import (
-    add_player_color_to_name, get_path_to_file, to_texture_name,
-    decolorized_name
+    add_player_color_to_name, get_path_to_file, name_to_texture_name,
+    decolorised_name
 )
 from utils.logging import log
 from .gameobject import GameObject, TerrainObject
@@ -34,7 +34,7 @@ class GameObjectsSpawner(Singleton):
         log(f'ObjectsFactory was initialized successfully...', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
-        name = to_texture_name(decolorized_name(name))
+        name = name_to_texture_name(decolorised_name(name))
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
         elif name in self.configs['buildings']:

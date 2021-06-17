@@ -24,16 +24,16 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     total_objects_count = 0
 
     def __init__(self,
-                 object_name: str,
+                 texture_name: str,
                  robustness: Robustness = 0,
                  position: Point = (0, 0),
                  id: Optional[int] = None):
         x, y = position
-        filename = get_path_to_file(object_name)
+        filename = get_path_to_file(texture_name)
         super().__init__(filename, center_x=x, center_y=y)
         OwnedObject.__init__(self, owners=True)
         EventsCreator.__init__(self)
-        self.object_name = object_name
+        self.object_name = texture_name
 
         GameObject.total_objects_count += 1
         if id is None:

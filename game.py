@@ -97,6 +97,7 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
+    infantry_damage_factor: float = 2.0
     buildings_damage_factor: float = 0.1
 
 
@@ -569,6 +570,9 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
+            node = random.choice(walkable)
+            infantry = self.spawn('soldier.png', player, node.position, id=None)
+            spawned_units.append(infantry)
         self.units.extend(spawned_units)
 
     def test_missions(self):
@@ -586,6 +590,8 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         mission.add_players(players=[human, cpu_player])
         conditions = [unit_type, mission_timer, no_units, cpu_no_units, map_revealed]
         mission.add_conditions(conditions=conditions, optional=True)
+
+        mission.unlock_technologies_for_player(human, 'technology_1')
 
     def register(self, registered):
         registered: Union[Player, Faction, GameObject, UiElementsBundle]

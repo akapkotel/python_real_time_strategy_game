@@ -8,7 +8,7 @@ from collections import namedtuple, defaultdict
 
 from .conditions import Condition
 from players_and_factions.player import Player
-
+from .research import Technology
 
 MissionDescriptor = namedtuple('MissionDescriptor',
                                ['name',
@@ -33,6 +33,7 @@ class Mission:
         self.map_name = map_name
         self.conditions: List[Condition] = []
         self.players: Set[int] = set()
+        self.allowed_technologies: Dict[int, Dict[int, Technology]] = {}
         self.victory_points: Dict[int, int] = defaultdict(int)
         self.required_victory_points: Dict[int, int] = defaultdict(int)
         self.ended = False
@@ -54,6 +55,14 @@ class Mission:
             self.players.add(player.id)
             self.victory_points[player.id] = 0
             self.required_victory_points[player.id] = 0
+            self.allowed_technologies[player.id] = {}
+
+    def unlock_technologies_for_player(self, player: Player, *technologies: str):
+        for tech_name in technologies:
+            tech_data = self.game.configs['technologies'][tech_name]
+            _class = eval(tech_data['class'])
+            technology = _class(*[d for d in list(tech_data.values())[3:]])
+            self.allowed_technologies[player.id][technology.id] = technology
 
     def add_conditions(self, conditions, optional: bool = True):
         for condition in conditions:
