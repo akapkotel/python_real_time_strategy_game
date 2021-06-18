@@ -22,6 +22,8 @@ class KeyboardHandler(ToggledElement):
         log(f'Pressed key: {symbol} other pressed keys: {self.keys_pressed}')
         self.keys_pressed.add(symbol)
         self.evaluate_pressed_key(symbol)
+        if self.keyboard_input_consumer is not None:
+            self.send_key_to_input_consumer(symbol)
 
     def on_key_release(self, symbol: int):
         if symbol == LCTRL and self.window.is_game_running:
@@ -59,7 +61,6 @@ class KeyboardHandler(ToggledElement):
     def update(self):
         if self.keys_pressed:
             self.keyboard_map_scroll()
-            self.handle_key_input_consumers()
 
     @ignore_in_menu
     def keyboard_map_scroll(self):
@@ -70,9 +71,8 @@ class KeyboardHandler(ToggledElement):
             self.window.change_viewport(- dx * 50, - dy * 50)
 
     @ignore_in_game
-    def handle_key_input_consumers(self):
-        if self.keyboard_input_consumer is not None:
-            self.keyboard_input_consumer.extend(self.keys_pressed)
+    def send_key_to_input_consumer(self, symbol: int):
+        self.keyboard_input_consumer.append(symbol)
 
     def bind_keyboard_input_consumer(self, consumer: TextInputField):
         self.keyboard_input_consumer = consumer

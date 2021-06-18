@@ -907,6 +907,10 @@ class TextInputField(UiElement, list):
         if (key := chr(symbol)).isprintable():
             super().append(key)
 
+    def append(self, symbol: int):
+        if key := chr(symbol).isprintable():
+            super().append(key)
+
     def get_text(self) -> str:
         return ''.join(self)
 

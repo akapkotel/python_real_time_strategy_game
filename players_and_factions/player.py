@@ -20,7 +20,7 @@ from utils.functions import (
     ignore_in_editor_mode, new_id, add_player_color_to_name, decolorised_name
 )
 from utils.geometry import (
-    distance_2d, is_visible, calculate_circular_area
+    clamp, distance_2d, is_visible, calculate_circular_area
 )
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 from utils.scheduling import EventsCreator
@@ -279,8 +279,6 @@ class PlayerEntity(GameObject):
     dict generated from CSV config file -> see ObjectsFactory class and it's
     'spawn' method.
     """
-    # game: Optional[Game] = None
-
     production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
     production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
 
@@ -351,6 +349,10 @@ class PlayerEntity(GameObject):
     @property
     def health(self) -> float:
         return self._health
+
+    @health.setter
+    def health(self, value: float):
+        self._health = clamp(value, self._max_health, 0)
 
     @property
     def weapons(self) -> bool:
@@ -484,7 +486,7 @@ class PlayerEntity(GameObject):
 
     @property
     def no_current_target(self) -> bool:
-        return self.targeted_enemy is None or not self.targeted_enemy.in_range(self)
+        return self.targeted_enemy is None or not self.in_range(self.targeted_enemy)
 
     def fight_or_run_away(self, enemy: PlayerEntity):
         self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
@@ -537,7 +539,7 @@ class PlayerEntity(GameObject):
         it is propagated to the damage-dealer.
         """
         self.create_hit_audio_visual_effects()
-        self._health -= max(random.gauss(damage, damage // 4) - self.armour, 0)
+        self.health -= max(random.gauss(damage, damage // 4) - self.armour, 0)
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)

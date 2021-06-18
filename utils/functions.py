@@ -194,3 +194,9 @@ def new_id(objects: Dict) -> int:
         return max(objects.keys()) << 1
     else:
         return 2
+
+
+def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
+    texture_name = get_path_to_file(texture_name)
+    image = PIL.Image.open(texture_name)
+    return image.size[0] // columns, image.size[1] // rows

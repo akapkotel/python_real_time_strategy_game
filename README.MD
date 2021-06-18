@@ -112,6 +112,7 @@ To be done.
 6. Multiplayer.
 7. "Playing" section above.
 8. Installer/executable for Windows and Linux.
+9. Docker image.
 
 ### Gameplay mechanics:
 1. Many various resources consumed to produce units and maintain

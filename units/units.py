@@ -6,7 +6,7 @@ import time
 
 from abc import abstractmethod
 from collections import deque
-from typing import Deque, List, Dict, Optional, Set, Union, cast
+from typing import Deque, List, Dict, Optional, Set, Union
 
 import PIL
 from arcade import Sprite, load_textures, draw_circle_filled, Texture
@@ -22,7 +22,7 @@ from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
-from utils.functions import get_path_to_file, decolorised_name
+from utils.functions import (get_path_to_file, get_texture_size)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
@@ -88,6 +88,7 @@ class Unit(PlayerEntity):
         """
         name = self.explosion_name
         required = len([u for u in self.game.units if u.explosion_name == name])
+        self.game.explosions_pool.add("SHOTBLAST", required)
         self.game.explosions_pool.add(name, required)
 
     @abstractmethod
@@ -207,7 +208,7 @@ class Unit(PlayerEntity):
         """
         Waiting for free path is useful when next node is only temporarily
         blocked (blocking Unit is moving) and allows to avoid pathfinding
-        the path with A* algorthm. Instead, Unit 'shelves' currently found
+        the path with A* algorithm. Instead, Unit 'shelves' currently found
         path and after 1 second 'unshelves' it in countdown_waiting method.
         """
         self.path_wait_counter = time.time() + 1
@@ -370,6 +371,9 @@ class Unit(PlayerEntity):
         When Unit detected enemies but they are out of attack range, it can
         move closer to engage them.
         """
+        if self.targeted_enemy is not None:
+            if self.in_range(self.targeted_enemy):
+                return self.stop()
         if not self.has_destination:
             enemy_to_attack = random.choice([e for e in known_enemies])
             position = self.game.pathfinder.get_closest_walkable_position(
@@ -426,12 +430,11 @@ class Vehicle(Unit):
         self.fuel = 100.0
         self.fuel_consumption = 0.0
 
-    def _load_textures_and_reset_hitbox(self, unit_name: str):
-        name = get_path_to_file(unit_name)
-        image = PIL.Image.open(name)
-        width, height = image.size[0] // 8, image.size[1]
+    def _load_textures_and_reset_hitbox(self, texture_name: str):
+        width, height = get_texture_size(texture_name, columns=8)
+        full_texture_name = get_path_to_file(texture_name)
         self.textures = load_textures(
-            get_path_to_file(unit_name),
+            get_path_to_file(full_texture_name),
             [(i * width, 0, width, height) for i in range(8)]
         )
 
@@ -503,15 +506,14 @@ class Tank(Vehicle):
 
         self.threads_time = 0
 
-    def _load_textures_and_reset_hitbox(self, unit_name: str):
+    def _load_textures_and_reset_hitbox(self, texture_name: str):
         """
         Create 8 lists of 8-texture spritesheets for each combination of hull
         and turret directions.
         """
-        name = get_path_to_file(unit_name)
-        image = PIL.Image.open(name)
-        width, height = image.size[0] // 8, image.size[1] // 8
-        self.textures = [load_textures(get_path_to_file(unit_name),
+        width, height = get_texture_size(texture_name, 8, 8)
+        full_texture_name = get_path_to_file(texture_name)
+        self.textures = [load_textures(full_texture_name,
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
         self.set_texture(self.facing_direction)
@@ -588,36 +590,35 @@ class Tank(Vehicle):
 
 
 class Soldier(Unit):
+
     _max_health = 100
-    health = _max_health
     health_restoration = 0.003
-    weapon: Weapon = None
 
     def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
                  position: Point, id: Optional[int] = None):
         super().__init__(texture_name, player, weight, position, id)
-        texture_name = get_path_to_file(texture_name)
-        sprite_sheet = PIL.Image.open(texture_name)
-        width, height = sprite_sheet.size[0] // 8, sprite_sheet.size[1]
-        idle_textures = load_textures(
-            texture_name, [(i * width, 0, width, height) for i in range(8)]
-        )
-
-        self.all_textures: Dict[str, List[Texture]] = {
-            IDLE: idle_textures
-        }
-
         self.last_step = 0
-        self.face_direction = 0
         self.pose = IDLE
-        self.switch_pose(IDLE)
+        self.all_textures: Dict[str, List[Texture]] = {}
+        self._load_textures_and_reset_hitbox(texture_name)
+
+    def _load_textures_and_reset_hitbox(self, texture_name: str):
+        """
+        Create 8 lists of 8-texture spritesheets for each combination of hull
+        and turret directions.
+        """
+        full_texture_name = get_path_to_file(texture_name)
+        width, height = get_texture_size(texture_name, columns=8)
+        self.all_textures[IDLE] = load_textures(
+            full_texture_name, [(i * width, 0, width, height) for i in range(8)]
+        )
+        self.textures = self.all_textures[self.pose]
+        self.set_texture(self.facing_direction)
+        self.set_hit_box(self.texture.hit_box_points)
 
     def on_update(self, delta_time=1/60):
-        if self.alive:
-            self.update_animation(delta_time)
-            super().on_update(delta_time)
-        else:
-            self.kill()
+        super().on_update(delta_time)
+        # self.update_animation(delta_time)
 
     def switch_pose(self, pose_name: str):
         self.pose = pose_name
@@ -634,6 +635,7 @@ class Soldier(Unit):
             self.set_texture(self.cur_texture_index)
 
     def on_being_damaged(self, damage: float):
+        damage = max(random.gauss(damage, damage // 4) - self.armour, 0)
         self.health -= damage * self.game.settings.infantry_damage_factor
 
     def restore_health(self):
