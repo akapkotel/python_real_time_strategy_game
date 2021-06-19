@@ -31,7 +31,7 @@ class GameObjectsSpawner(Singleton):
         """
         self.pathfinder = self.game.pathfinder
         self.configs: Dict[str, Dict[str, Dict[str, Any]]] = self.game.configs
-        log(f'ObjectsFactory was initialized successfully...', console=True)
+        log(f'GameObjectsSpawner was initialized successfully...', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
         name = name_to_texture_name(decolorised_name(name))
@@ -58,9 +58,9 @@ class GameObjectsSpawner(Singleton):
         # the textures spritesheet used for his units and buildings. But for
         # the configuration of his objects we still use 'raw' name:
         colorized_name = add_player_color_to_name(name, player.color)
-        building = Building(colorized_name, player, position, **kwargs)
         category = 'buildings'
-        return self._configure_spawned_attributes(category, name, building)
+        kwargs = self.get_entity_configs(category, name)
+        return Building(colorized_name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = 'units'
@@ -84,6 +84,13 @@ class GameObjectsSpawner(Singleton):
         )
         return unit
 
+    def get_entity_configs(self, category, name) -> Dict:
+        config_data = self.configs[category][name]
+        return {
+            key: value for (key, value) in config_data.items() if
+            value != name and 'class' not in key
+        }
+
     def _configure_spawned_attributes(self, category, name, spawned):
         config_data = self.configs[category][name]  # 'raw' not colorized name
         for key, value in config_data.items():
@@ -95,7 +102,6 @@ class GameObjectsSpawner(Singleton):
         if 'wreck' in name:
             texture_index = args[0]
             return self._spawn_wreck(name, position, texture_index)
-        category = 'terrain'
         return GameObject(name, position=position)
 
     @staticmethod

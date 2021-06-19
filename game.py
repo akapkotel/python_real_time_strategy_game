@@ -326,14 +326,15 @@ class GameWindow(Window, EventsCreator):
         super().close()
 
 
-class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
+class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     """This is an actual Game-instance, created when player starts the game."""
     instance: Optional[Game] = None
 
     def __init__(self, loader: Optional[Generator] = None):
         LoadableWindowView.__init__(self, loader)
-        EventsCreator.__init__(self)
         UiBundlesHandler.__init__(self)
+        EventsCreator.__init__(self)
+
         self.assign_reference_to_self_for_all_classes()
 
         self.generate_random_entities = self.loader is None
@@ -354,7 +355,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         self.buildings = SelectiveSpriteList(is_static=True)
         self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
-        self.interface: UiSpriteList() = self.create_interface()
+        self.interface: UiSpriteList() = self.create_user_interface()
         self.set_updated_and_drawn_lists()
 
         self.events_scheduler = EventsScheduler()
@@ -364,9 +365,6 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
 
         self.fog_of_war: Optional[FogOfWar] = None
 
-        # if self.settings.editor_mode:
-        #     self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
-        # else:
         self.scenario_editor = None
 
         # All GameObjects are initialized by the specialised factory:
@@ -413,7 +411,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             setattr(_class, game, self)
         Game.instance = self.window.cursor.game = self
 
-    def create_interface(self) -> UiSpriteList:
+    def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH * 0.9, SCREEN_Y
         ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
         frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
@@ -451,9 +449,7 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
         buildings_panel = UiElementsBundle(
             name=BUILDINGS_PANEL,
             index=2,
-            elements=[
-                Button('game_button_stop.png', ui_x, 800),
-            ],
+            elements=[],
             register_to=self
         )
         return self.ui_elements_spritelist  # UiBundlesHandler attribute
@@ -477,11 +473,14 @@ class Game(LoadableWindowView, EventsCreator, UiBundlesHandler):
             else:
                 self.configure_units_interface(context)
 
-    def configure_building_interface(self, context: Building):
+    def configure_building_interface(self, context_building: Building):
         self.load_bundle(name=BUILDINGS_PANEL)
+        if context_building.is_units_producer:
+            for i, produced in enumerate(context_building.produced_units):
+                print(produced)
 
     @ignore_in_editor_mode
-    def configure_units_interface(self, context: List[Unit]):
+    def configure_units_interface(self, context_units: List[Unit]):
         self.load_bundle(name=UNITS_PANEL)
 
     def create_effect(self, effect_type: Any, name: str, x, y):

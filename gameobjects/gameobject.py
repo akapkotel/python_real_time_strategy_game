@@ -84,6 +84,12 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
     def stop_updating(self):
         self.is_updated = False
 
+    def on_mouse_enter(self):
+        pass
+
+    def on_mouse_exit(self):
+        pass
+
     def kill(self):
         log(f'Removing GameObject: {self.object_name}')
         self.unregister_from_all_owners()

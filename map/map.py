@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import random
 
-from collections import deque
+from collections import deque, defaultdict
 from functools import partial
 from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator, \
-    Collection
+    Collection, DefaultDict
 
 from arcade import Sprite, Texture, load_spritesheet
 
@@ -236,8 +236,8 @@ class Map:
     def get_nodes_column(self, column: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[0] == column]
 
-    def get_all_nodes(self) -> List[MapNode]:
-        return list(self.nodes.values())
+    def get_all_nodes(self) -> Generator[MapNode]:
+        return (n for n in self.nodes.values())
 
     def node(self, grid: GridPosition) -> MapNode:
         try:
@@ -262,8 +262,8 @@ class Sector:
         Each MapSector is a 10x10 square containing 100 MapNodes.
         """
         self.grid = grid
-        self.units_and_buildings: Dict[int, Set[PlayerEntity]] = {}
         self.map.sectors[grid] = self
+        self.units_and_buildings: DefaultDict[int, Set[PlayerEntity]] = defaultdict(set)
 
     def get_entities(self, player_id: int) -> Optional[Set[PlayerEntity]]:
         return self.units_and_buildings.get(player_id)
@@ -275,10 +275,7 @@ class Sector:
             pass
 
     def add_player_entity(self, entity: PlayerEntity):
-        try:
-            self.units_and_buildings[entity.player.id].add(entity)
-        except KeyError:
-            self.units_and_buildings[entity.player.id] = {entity}
+        self.units_and_buildings[entity.player.id].add(entity)
 
     def adjacent_sectors(self) -> List[Sector]:
         raw_grids = self.adjacent_grids(*self.grid)

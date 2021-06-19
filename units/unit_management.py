@@ -105,6 +105,7 @@ class SelectedEntityMarker:
         self.game.selection_markers_sprites.append(bar)
 
     def kill(self):
+        self.selected.selection_marker = None
         for sprite in self.sprites:
             sprite.kill()
 
@@ -288,11 +289,11 @@ class UnitsManager:
     def on_building_clicked(self, clicked_building: Building):
         # TODO: resolving possible building-related tasks for units first
         self.select_building(clicked_building)
-        self.game.update_interface_content(context=clicked_building)
 
     def select_building(self, building: Building):
         self.selected_building = building
         self.create_selection_markers(building=building)
+        self.game.update_interface_content(context=building)
 
     def update_selection_markers_set(self, new, lost):
         discarded = {m for m in self.selection_markers if m.selected in lost}
@@ -301,7 +302,7 @@ class UnitsManager:
 
     @ignore_in_menu
     def select_units(self, *units: Unit):
-        self.selected_units = HashedList(units)
+        self.selected_units.extend(units)
         self.create_selection_markers(units)
         self.game.update_interface_content(context=units)
         self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
@@ -313,18 +314,23 @@ class UnitsManager:
             self.create_building_selection_marker(building)
 
     def create_units_selection_markers(self, units: Collection[Unit]):
-        for unit in units:
-            marker = selected_unit_marker(unit)
-            self.selection_markers.add(marker)
+        self.selection_markers.update(
+            SelectedSoldierMarker(unit) if unit.is_infantry
+            else SelectedUnitMarker(unit) for unit in units
+        )
 
     def create_building_selection_marker(self, building: Building):
         marker = SelectedBuildingMarker(building)
         self.selection_markers.add(marker)
 
     def remove_from_selection_markers(self, entity: PlayerEntity):
-        for marker in self.selection_markers:
+        for marker in self.selection_markers.copy():
             if marker.selected is entity:
-                marker.kill()
+                self.kill_selection_marker(marker)
+
+    def kill_selection_marker(self, marker):
+        self.selection_markers.discard(marker)
+        marker.kill()
 
     @ignore_in_menu
     def unselect_all_selected(self):
@@ -335,10 +341,9 @@ class UnitsManager:
 
     def clear_selection_markers(self,
                                 killed: Set[SelectedUnitMarker] = None):
-        killed = killed if killed is not None else self.selection_markers
+        killed = self.selection_markers.copy() if killed is None else killed
         for marker in killed:
-            marker.kill()
-        self.selection_markers.difference_update(killed)
+            self.kill_selection_marker(marker)
 
     def update_selection_markers(self):
         for marker in self.selection_markers:
@@ -365,6 +370,6 @@ class UnitsManager:
             pass
 
     def on_human_entity_being_killed(self, entity: PlayerEntity):
-        if len(self.selected_units) == 0 and entity in self.selected_units:
+        if len(self.selected_units) == 1 and entity in self.selected_units:
             self.unselect_all_selected()
         self.cursor.update_cursor_texture()

@@ -210,14 +210,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         node.building = self
 
     def update_current_sector(self) -> Set[Sector]:
-        distinct_sectors = set()
-        for node in self.occupied_nodes:
-            distinct_sectors.add(node.sector)
+        distinct_sectors = {node.sector for node in self.occupied_nodes}
         for sector in distinct_sectors:
-            try:
-                sector.units_and_buildings[self.player.id].add(self)
-            except KeyError:
-                sector.units_and_buildings[self.player.id] = {self, }
+            sector.units_and_buildings[self.player.id].add(self)
         return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
@@ -227,6 +222,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @property
     def damaged(self) -> bool:
         return self.health < self._max_health
+
+    def on_mouse_enter(self):
+        if self.selection_marker is None:
+            self.game.units_manager.create_building_selection_marker(self)
+
+    def on_mouse_exit(self):
+        selected_building = self.game.units_manager.selected_building
+        if self.selection_marker is not None and self is not selected_building:
+            self.game.units_manager.remove_from_selection_markers(self)
 
     def on_update(self, delta_time: float = 1/60):
         if self.alive:

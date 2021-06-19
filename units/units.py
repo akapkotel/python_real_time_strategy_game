@@ -8,7 +8,6 @@ from abc import abstractmethod
 from collections import deque
 from typing import Deque, List, Dict, Optional, Set, Union
 
-import PIL
 from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
@@ -130,6 +129,15 @@ class Unit(PlayerEntity):
 
     def heading_to(self, destination: Union[MapNode, GridPosition]):
         return self.path and self.path[0] == self.map.map_grid_to_position(destination)
+
+    def on_mouse_enter(self):
+        if self.selection_marker is None:
+            self.game.units_manager.create_units_selection_markers((self,))
+
+    def on_mouse_exit(self):
+        selected_units = self.game.units_manager.selected_units
+        if self.selection_marker is not None and self not in selected_units:
+            self.game.units_manager.remove_from_selection_markers(self)
 
     def on_update(self, delta_time: float = 1/60):
         if self.alive:
