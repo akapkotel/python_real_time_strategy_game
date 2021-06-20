@@ -1,4 +1,4 @@
 object_name,class,produced_units,produced_resource,research_facility
-capitol.png,Building,None,None,False
-Barracks.png,Building,(soldier),None,False
-medium_factory.png,Building,(tank_medium),None,False
+capitol,Building,None,None,False
+Barracks,Building,(soldier),None,False
+medium_factory,Building,(tank_medium),None,False

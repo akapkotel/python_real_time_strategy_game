@@ -248,7 +248,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         GameObjects placed at the MouseCursor position.
         """
         pointed = self.get_pointed_sprite(*self.position)
-        if isinstance(pointed, GameObject) and pointed.is_rendered:
+        if isinstance(pointed, PlayerEntity):
             self.switch_selected_gameobject(pointed)
             self.update_mouse_pointed_ui_element(None)
         else:
@@ -259,9 +259,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.pointed_gameobject is not pointed:
             if self.pointed_gameobject is not None:
                 self.pointed_gameobject.on_mouse_exit()
-            if pointed is not None:
+            if pointed is not None and pointed.is_rendered:
                 pointed.on_mouse_enter()
-        self.pointed_gameobject = pointed
+                self.pointed_gameobject = pointed
+            else:
+                self.pointed_gameobject = None
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn_area in some

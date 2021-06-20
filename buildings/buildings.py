@@ -14,6 +14,7 @@ from utils.geometry import close_enough, is_visible
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+from utils.logging import logger
 
 
 class UnitsProducer:
@@ -21,22 +22,25 @@ class UnitsProducer:
     An interface for all Buildings which can produce Units in game.
     """
 
-    def __init__(self, produced_units: Tuple[Type[PlayerEntity]]):
+    def __init__(self, produced_units: Tuple[str]):
         self.produced_units = produced_units
-        self.production_queue: Deque[Type[PlayerEntity]] = deque()
-        self.production_progress: float = 0.0
-        self.production_per_frame: float = 0.0
+        self.production_queue: Deque[str] = deque()
+        self.production_progress: int = 0
+        self.production_time: int = 0
         self.is_producing: bool = False
-        self.deployment_point: GridPosition = (0, 0)
+        self.deployment_point = self.center_x, self.center_y - 120
 
-    def start_production(self, product: Type[PlayerEntity]):
-        if product.__class__ not in self.produced_units:
+    @logger(console=True)
+    def start_production(self, product: str):
+        if product not in self.produced_units:
             return
+        if not self.is_producing:
+            self._start_production(product)
         self.production_queue.appendleft(product)
-        self._start_production(product)
 
-    def _start_production(self, product: Type[PlayerEntity]):
+    def _start_production(self, product: str):
         self.set_production_progress_and_speed(product)
+        self._toggle_production()
 
     def cancel_production(self):
         if self.is_producing:
@@ -44,25 +48,27 @@ class UnitsProducer:
         self.production_progress = 0.0
         self.production_queue.clear()
 
-    def set_production_progress_and_speed(self, product: Type[PlayerEntity]):
-        self.production_progress = 0.0
-        self.production_per_frame = product.production_per_frame
+    def set_production_progress_and_speed(self, product: str):
+        self.production_progress = 0
+        production_time = self.game.configs['units'][product]['production_time']
+        self.production_time = production_time * self.game.settings.fps
 
     def _toggle_production(self):
         self.is_producing = not self.is_producing
 
     def update_units_production(self):
         if self.is_producing:
-            self.production_progress += self.production_per_frame
-            if self.production_progress >= 100:
-                self.finish_production()
+            self.production_progress += 1
+            if self.production_progress == self.production_time:
+                self.finish_production(self.production_queue.pop())
         elif self.production_queue:
-            self.start_production(product=self.production_queue[-1])
+            self._start_production(product=self.production_queue[-1])
 
-    def finish_production(self):
+    @logger(console=True)
+    def finish_production(self, finished_product: str):
         self._toggle_production()
         self.production_progress = 0.0
-        spawned_unit = self.production_queue.pop()
+        self.game.spawn(finished_product, self.player, self.deployment_point)
 
     def __getstate__(self) -> Dict:
         return {}
@@ -145,7 +151,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                  player: Player,
                  position: Point,
                  id: Optional[int] = None,
-                 produced_units: Optional[Tuple[Type[PlayerEntity]]] = None,
+                 produced_units: Optional[Tuple[str]] = None,
                  produced_resource: Optional[str] = None,
                  research_facility: bool = False):
         """
@@ -174,6 +180,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.position = self.place_building_properly_on_the_grid()
         self.occupied_nodes: List[MapNode] = self.block_map_nodes()
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
+
+    @property
+    def configs(self):
+        return self.game.configs['buildings'][self.object_name]
 
     def place_building_properly_on_the_grid(self) -> Point:
         """

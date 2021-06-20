@@ -34,7 +34,7 @@ class GameObjectsSpawner(Singleton):
         log(f'GameObjectsSpawner was initialized successfully...', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
-        name = name_to_texture_name(decolorised_name(name))
+        name = decolorised_name(name)
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
         elif name in self.configs['buildings']:
@@ -57,26 +57,24 @@ class GameObjectsSpawner(Singleton):
         # since player can pick various Colors we need to 'colorize" name of
         # the textures spritesheet used for his units and buildings. But for
         # the configuration of his objects we still use 'raw' name:
-        colorized_name = add_player_color_to_name(name, player.color)
         category = 'buildings'
         kwargs = self.get_entity_configs(category, name)
-        return Building(colorized_name, player, position, **kwargs)
+        return Building(name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = 'units'
         class_name = eval(self.configs[category][name]['class'])
-        colorized_name = add_player_color_to_name(name, player.color)
         if 'id' in kwargs:
-            unit = self._respawn_unit_from_id(class_name, colorized_name,
+            unit = self._respawn_unit_from_id(class_name, name,
                                               player, position, kwargs['id'])
         else:
-            unit = class_name(colorized_name, player, UnitWeight.LIGHT, position)
+            unit = class_name(name, player, UnitWeight.LIGHT, position)
         return self._configure_spawned_attributes(category, name, unit)
 
-    def _respawn_unit_from_id(self, class_name, colorized_name, player,
+    def _respawn_unit_from_id(self, class_name, name, player,
                               position, id):
         unit = class_name(
-            colorized_name,
+            name,
             player,
             UnitWeight.LIGHT,
             position,
@@ -109,12 +107,12 @@ class GameObjectsSpawner(Singleton):
         wreck = TerrainObject(name, Robustness.INDESTRUCTIBLE, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
-        if isinstance(texture_index, Tuple):  # for tanks with turrets
-            i, j = texture_index
+        try:  # for tanks with turrets
+            i, j = texture_index  # Tuple
             wreck.texture = load_texture(texture_name, j * (width // 8),
                                          i * (height // 8), width // 8,
                                          height // 8)
-        else:
+        except TypeError:
             wreck.texture = load_texture(texture_name,
                                          texture_index * (width // 8),
                                          0, width // 8, height)

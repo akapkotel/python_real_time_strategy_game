@@ -474,10 +474,16 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 self.configure_units_interface(context)
 
     def configure_building_interface(self, context_building: Building):
-        self.load_bundle(name=BUILDINGS_PANEL)
+        self.load_bundle(name=BUILDINGS_PANEL, clear=True)
+        left, _, bottom, _ = self.viewport
+        x, y = left + SCREEN_WIDTH - 200, bottom + SCREEN_Y
         if context_building.is_units_producer:
             for i, produced in enumerate(context_building.produced_units):
-                print(produced)
+                self.get_bundle(BUILDINGS_PANEL).add(
+                    Button(produced + '_icon.png', x, y + 50 * i, produced,
+                           functions=partial(context_building.start_production,
+                                             produced))
+                )
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
@@ -530,7 +536,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_buildings_spawning(self):
         self.buildings.append(self.spawn(
-            'medium_factory.png',
+            'medium_factory',
             self.players[2],
             (400, 600),
         ))
@@ -559,7 +565,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_units_spawning(self):
         spawned_units = []
-        unit_name = 'tank_medium.png'
+        unit_name = 'tank_medium'
         walkable = [w for w in list(self.map.nodes.values()) if w.walkable]
         for player in (self.players.values()):
             node = random.choice(walkable)
@@ -570,7 +576,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 self.spawn_group(names, player, node.position)
             )
             node = random.choice(walkable)
-            infantry = self.spawn('soldier.png', player, node.position, id=None)
+            infantry = self.spawn('soldier', player, node.position, id=None)
             spawned_units.append(infantry)
         self.units.extend(spawned_units)
 
@@ -581,7 +587,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         map_revealed = MapRevealed(human).set_vp(1)
         no_units = NoUnitsLeft(human).triggers(Defeat())
         mission_timer = TimePassed(human, 10).set_vp(1).triggers(Victory())
-        unit_type = HasUnitsOfType(human, 'tank_medium.png').set_vp(1)
+        unit_type = HasUnitsOfType(human, 'tank_medium').set_vp(1)
 
         cpu_player = self.players[4]
         cpu_no_units = NoUnitsLeft(cpu_player).triggers(Defeat())

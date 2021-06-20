@@ -249,7 +249,8 @@ class UiBundlesHandler(ObjectsOwner):
 
     def load_bundle(self,
                     name: Optional[str] = None,
-                    index: Optional[int] = None):
+                    index: Optional[int] = None,
+                    clear: bool = False):
         """
         Only add UiElementsBundle elements to the current list, without
         removing anything from it.
@@ -261,7 +262,7 @@ class UiBundlesHandler(ObjectsOwner):
         else:
             return
         if bundle is not None:
-            self._load_bundle(bundle)
+            self._load_bundle(bundle, clear)
 
     def unload_bundle(self,
                       name: Optional[str] = None,
@@ -278,14 +279,22 @@ class UiBundlesHandler(ObjectsOwner):
     def __getitem__(self, name: Union[str, int]) -> Optional[UiElementsBundle]:
         return self.ui_elements_bundles.get(name, self.get_bundle_of_index(name))
 
+    def get_bundle(self, name: str) -> UiElementsBundle:
+        try:
+            return self.ui_elements_bundles[name]
+        except KeyError:
+            raise KeyError(f'UiElementsBundle: {name} not found!')
+
     def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
         try:
             return next(b for b in self.ui_elements_bundles.values() if b.index == index)
         except StopIteration:
             return
 
-    def _load_bundle(self, bundle: UiElementsBundle):
+    def _load_bundle(self, bundle: UiElementsBundle, clear: bool = False):
         log(f'LOADING BUNDLE: {bundle.name}')
+        if clear:
+            bundle.elements.clear()
         bundle.on_load()
         bundle.displayed_in_manager = self
         self.active_bundles.add(bundle.index)

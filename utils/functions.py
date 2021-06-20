@@ -74,7 +74,7 @@ def remove_path_from_name(filename):
     return filename.rsplit('/', 1)[1]
 
 
-def object_name_to_filename(object_name: str) -> str:
+def name_with_extension(object_name: str) -> str:
     return '.'.join((object_name, 'png'))
 
 
@@ -102,9 +102,11 @@ def find_paths_to_all_files_of_type(extension: str,
 
 
 def add_player_color_to_name(name: str, color: Color) -> str:
-    split = name.split('.')
-    color = colors_names[color]
-    return ''.join((split[0], '_', color, '.', split[1]))
+    if (color := colors_names[color]) not in name:
+        # split = name.split('.')
+        # return ''.join((split[0], '_', color, '.', split[1]))
+        return '_'.join((name, color))
+    return name
 
 
 def decolorised_name(name: str) -> str:
@@ -197,6 +199,6 @@ def new_id(objects: Dict) -> int:
 
 
 def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
-    texture_name = get_path_to_file(texture_name)
-    image = PIL.Image.open(texture_name)
+    path_and_texture_name = get_path_to_file(texture_name)
+    image = PIL.Image.open(path_and_texture_name)
     return image.size[0] // columns, image.size[1] // rows

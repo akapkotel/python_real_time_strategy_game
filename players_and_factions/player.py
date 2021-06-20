@@ -288,11 +288,11 @@ class PlayerEntity(GameObject):
                  position: Point,
                  robustness: Robustness = 0,
                  id: Optional[int] = None):
-        GameObject.__init__(self, texture_name, robustness, position, id)
+        colorized_texture = add_player_color_to_name(texture_name, player.color)
+        GameObject.__init__(self, colorized_texture, robustness, position, id)
         self.map = self.game.map
-
         self.name = decolorised_name(texture_name)
-
+        self.colorized_name = colorized_texture
         self.player: Player = player
         self.faction: Faction = self.player.faction
 

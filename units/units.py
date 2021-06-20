@@ -21,7 +21,8 @@ from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
-from utils.functions import (get_path_to_file, get_texture_size)
+from utils.functions import (get_path_to_file, get_texture_size,
+                             name_with_extension)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
@@ -74,11 +75,15 @@ class Unit(PlayerEntity):
 
         self._weapons.extend(
             Weapon(name=name, owner=self) for name in
-            self.game.configs['units'][self.name]['weapons_names']
+            self.configs['weapons_names']
         )
 
         self.explosion_name = 'EXPLOSION'
         # self.update_explosions_pool()
+
+    @property
+    def configs(self):
+        return self.game.configs['units'][self.object_name]
 
     def update_explosions_pool(self):
         """
@@ -91,7 +96,7 @@ class Unit(PlayerEntity):
         self.game.explosions_pool.add(name, required)
 
     @abstractmethod
-    def _load_textures_and_reset_hitbox(self, unit_name: str):
+    def _load_textures_and_reset_hitbox(self):
         """
         Since we can have many different spritesheets representing our Unit.
         Some units have rotating turrets, so above the normal 8-texture
@@ -340,14 +345,18 @@ class Unit(PlayerEntity):
             self.unschedule_event(event)
 
     def cancel_path_requests(self):
-        self.game.pathfinder.cancel_unit_path_requests(self)
+        self.game.pathfinder.cancel_unit_path_requests(unit=self)
 
     def stop_completely(self):
         self.set_navigating_group(navigating_group=None)
+        self.leave_waypoints_queue()
         self.cancel_path_requests()
         self.awaited_path = None
         self.path.clear()
         self.stop()
+
+    def leave_waypoints_queue(self):
+        self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
 
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
@@ -431,18 +440,17 @@ class Vehicle(Unit):
         super().__init__(texture_name, player, weight, position, id)
         self.virtual_angle = int(ROTATION_STEP * self.cur_texture_index) % 360
 
-        thread_texture = f'{self.object_name.rsplit("_", 1)[0]}_threads.png'
+        thread_texture = f'{self.object_name.rstrip(".png")}_threads.png'
         self.thread_texture = get_path_to_file(thread_texture)
         self.threads_time = 0
 
         self.fuel = 100.0
         self.fuel_consumption = 0.0
 
-    def _load_textures_and_reset_hitbox(self, texture_name: str):
-        width, height = get_texture_size(texture_name, columns=8)
-        full_texture_name = get_path_to_file(texture_name)
+    def _load_textures_and_reset_hitbox(self):
+        width, height = get_texture_size(self.full_name, columns=8)
         self.textures = load_textures(
-            get_path_to_file(full_texture_name),
+            get_path_to_file(self.filename_with_path),
             [(i * width, 0, width, height) for i in range(8)]
         )
 
@@ -470,7 +478,7 @@ class Vehicle(Unit):
         super().kill()
 
     def spawn_wreck(self):
-        wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'
+        wreck_name = f'{self.object_name.rstrip(".png")}_wreck.png'
         wreck = self.game.spawner.spawn(
             wreck_name, None, self.position, self.cur_texture_index
         )
@@ -508,20 +516,19 @@ class Tank(Vehicle):
         # combine facing_direction with turret to obtain proper texture:
         self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
 
-        self._load_textures_and_reset_hitbox(texture_name)
+        self._load_textures_and_reset_hitbox()
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
 
         self.threads_time = 0
 
-    def _load_textures_and_reset_hitbox(self, texture_name: str):
+    def _load_textures_and_reset_hitbox(self):
         """
         Create 8 lists of 8-texture spritesheets for each combination of hull
         and turret directions.
         """
-        width, height = get_texture_size(texture_name, 8, 8)
-        full_texture_name = get_path_to_file(texture_name)
-        self.textures = [load_textures(full_texture_name,
+        width, height = get_texture_size(self.full_name, 8, 8)
+        self.textures = [load_textures(self.filename_with_path,
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
         self.set_texture(self.facing_direction)
@@ -574,9 +581,8 @@ class Tank(Vehicle):
         super().on_update(delta_time)
 
     def leave_threads(self):
-        self.threads_time += 1
-        if self.threads_time > 4:
-            self.threads_time = 0
+        if self.game.timer['f'] >= self.threads_time:
+            self.threads_time = self.game.timer['f'] + 4
             self.game.vehicles_threads.append(
                 VehicleThreads(self.thread_texture,
                                self.facing_direction,
@@ -589,7 +595,7 @@ class Tank(Vehicle):
         super().engage_enemy(enemy)
 
     def spawn_wreck(self):
-        wreck_name = f'{self.object_name.rsplit("_", 1)[0]}_wreck.png'
+        wreck_name = f'{self.object_name.rstrip(".png")}_wreck.png'
         wreck = self.game.spawner.spawn(
             wreck_name, None, self.position,
             (self.facing_direction, self.turret_facing_direction)
@@ -608,17 +614,16 @@ class Soldier(Unit):
         self.last_step = 0
         self.pose = IDLE
         self.all_textures: Dict[str, List[Texture]] = {}
-        self._load_textures_and_reset_hitbox(texture_name)
+        self._load_textures_and_reset_hitbox()
 
-    def _load_textures_and_reset_hitbox(self, texture_name: str):
+    def _load_textures_and_reset_hitbox(self):
         """
         Create 8 lists of 8-texture spritesheets for each combination of hull
         and turret directions.
         """
-        full_texture_name = get_path_to_file(texture_name)
-        width, height = get_texture_size(texture_name, columns=8)
+        width, height = get_texture_size(self.full_name, columns=8)
         self.all_textures[IDLE] = load_textures(
-            full_texture_name, [(i * width, 0, width, height) for i in range(8)]
+            get_path_to_file(self.full_name), [(i * width, 0, width, height) for i in range(8)]
         )
         self.textures = self.all_textures[self.pose]
         self.set_texture(self.facing_direction)

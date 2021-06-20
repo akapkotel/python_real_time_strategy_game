@@ -255,7 +255,7 @@ class UnitsManager:
             self.on_terrain_click_with_units(x, y, modifiers, units)
 
     def create_movement_order(self, units, x, y):
-        if LCTRL in self.game.window.pressed_keys:
+        if LCTRL in self.game.window.keyboard.keys_pressed:
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)

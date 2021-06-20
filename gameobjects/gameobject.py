@@ -8,7 +8,8 @@ from arcade.arcade_types import Point
 
 from utils.data_types import GridPosition
 from utils.enums import Robustness, UnitWeight
-from utils.functions import get_path_to_file
+from utils.functions import get_path_to_file, decolorised_name, \
+    name_with_extension
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator
@@ -28,12 +29,16 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
                  robustness: Robustness = 0,
                  position: Point = (0, 0),
                  id: Optional[int] = None):
+        # raw name of the object without texture extension and Player color
+        # used to query game.configs and as a basename to build other names
+        self.object_name = decolorised_name(texture_name)
+        # name with texture extension added used to find ant load texture
+        self.full_name = name_with_extension(texture_name)
+        self.filename_with_path = get_path_to_file(self.full_name)
         x, y = position
-        filename = get_path_to_file(texture_name)
-        super().__init__(filename, center_x=x, center_y=y)
+        super().__init__(self.filename_with_path, center_x=x, center_y=y)
         OwnedObject.__init__(self, owners=True)
         EventsCreator.__init__(self)
-        self.object_name = texture_name
 
         GameObject.total_objects_count += 1
         if id is None:

@@ -221,7 +221,7 @@ class Map:
             trees = self.generate_random_trees()
         for node in self.nodes.values():
             if (tree_type := trees.get(node.grid)) is not None:
-                tree = TerrainObject(f'tree_leaf_{tree_type}.png', 4, node.position)
+                tree = TerrainObject(f'tree_leaf_{tree_type}', 4, node.position)
                 self.game.static_objects.append(tree)
                 node.tree = tree_type
 
@@ -388,7 +388,7 @@ class MapNode:
 
 class WaypointsQueue:
     """
-    When human player gives hist Units movement orders with left CTRL key
+    When human player gives his Units movement orders with left CTRL key
     pressed, he can plan multiple consecutive moves ahead, which would be
     executed when LCTRL is released, or when player points back to the first
     waypoint of the queue. The second scenario would produce a looped path to
@@ -401,29 +401,39 @@ class WaypointsQueue:
         self.waypoints = []
         self.units_waypoints = {unit: [] for unit in units}
         self.active = False
+        self.loop = False
 
     def add_waypoint(self, x: int, y: int):
         x, y = normalize_position(x, y)
         if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
+            self.loop = True
             Pathfinder.instance.finish_waypoints_queue()
         else:
             self.waypoints.append((x, y))
             self.add_waypoints_for_each_unit(len(self.units), x, y)
 
     def add_waypoints_for_each_unit(self, amount: int, x: int, y: int):
-        waypoints = Pathfinder.instance.get_group_of_waypoints(amount, x, y)
+        waypoints = Pathfinder.instance.get_group_of_waypoints(x, y, amount)
         for i, unit in enumerate(self.units):
             self.units_waypoints[unit].append(waypoints[i])
 
     def update(self):
-        # TODO: execution of the waypoints queue
         for unit, waypoints in self.units_waypoints.items():
-            destination = waypoints[-1]
-            if unit.reached_destination(destination):
-                waypoints.pop()
-            elif not (unit.has_destination or unit.heading_to(destination)):
-                unit.move_to(destination)
-            if not waypoints:
+            self.evaluate_unit_waypoints(unit, waypoints)
+        self.remove_finished()
+
+    def evaluate_unit_waypoints(self, unit, waypoints):
+        destination = waypoints[-1]
+        if unit.reached_destination(destination):
+            removed = waypoints.pop()
+            if self.loop:
+                waypoints.insert(0, removed)
+        elif not (unit.has_destination or unit.heading_to(destination)):
+            unit.move_to(destination)
+
+    def remove_finished(self):
+        for unit in self.units_waypoints.copy():
+            if not self.units_waypoints[unit]:
                 del self.units_waypoints[unit]
 
     def start(self):
@@ -602,9 +612,14 @@ class Pathfinder(EventsCreator):
         self.path_requests_count += 1
 
     def cancel_unit_path_requests(self, unit: Unit):
-        for request in self.requests_for_paths.copy():
-            if request[0] is unit:
-                self.requests_for_paths.remove(request)
+        for request in (r for r in self.requests_for_paths.copy() if r[0] is unit):
+            self.requests_for_paths.remove(request)
+
+    def remove_unit_from_waypoint_queue(self, unit: Unit):
+        for waypoints_queue in self.waypoints_queues:
+            if unit in waypoints_queue.units:
+                del waypoints_queue.units_waypoints[unit]
+                return waypoints_queue.units.remove(unit)
 
     def get_group_of_waypoints(self,
                                x: int,
@@ -622,7 +637,6 @@ class Pathfinder(EventsCreator):
             waypoints = [w for w in calculate_circular_area(*center, radius) if
                          w in nodes and nodes[w].walkable]
             radius += 1
-        # return sorted(waypoints, key=lambda w: distance_2d(w, center))
         waypoints.sort(key=lambda w: distance_2d(w, center))
         return [d[0] for d in zip(waypoints, range(required_waypoints))]
 
@@ -647,4 +661,3 @@ if __name__:
     from units.units import Unit
     from map.pathfinding import a_star
     from buildings.buildings import Building
-
