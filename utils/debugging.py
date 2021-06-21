@@ -93,7 +93,8 @@ class GameDebugger:
     def draw_debugged_mouse_pointed_nodes(self):
         position = normalize_position(*self.game.window.cursor.position)
         node = self.game.map.position_to_node(*position)
-
+        if node is None:
+            return
         draw_circle_outline(node.x, node.y, 10, RED, 2)
 
         for adj in node.adjacent_nodes + [node]:

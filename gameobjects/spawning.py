@@ -32,7 +32,6 @@ class GameObjectsSpawner(Singleton):
         log(f'GameObjectsSpawner was initialized successfully...', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
-        name = decolorised_name(name)
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
         elif name in self.configs['buildings']:
@@ -56,29 +55,16 @@ class GameObjectsSpawner(Singleton):
         # the textures spritesheet used for his units and buildings. But for
         # the configuration of his objects we still use 'raw' name:
         category = 'buildings'
+        uid = kwargs['id'] if 'id' in kwargs else None
         kwargs = self.get_entity_configs(category, name)
-        return Building(name, player, position, **kwargs)
+        return Building(name, player, position, id=uid, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = 'units'
         class_name = eval(self.configs[category][name]['class'])
-        if 'id' in kwargs:
-            unit = self._respawn_unit_from_id(class_name, name,
-                                              player, position, kwargs['id'])
-        else:
-            unit = class_name(name, player, UnitWeight.LIGHT, position)
+        uid = kwargs['id'] if 'id' in kwargs else None
+        unit = class_name(name, player, UnitWeight.LIGHT, position, id=uid)
         return self._configure_spawned_attributes(category, name, unit)
-
-    def _respawn_unit_from_id(self, class_name, name, player,
-                              position, id):
-        unit = class_name(
-            name,
-            player,
-            UnitWeight.LIGHT,
-            position,
-            id=id
-        )
-        return unit
 
     def get_entity_configs(self, category, name) -> Dict:
         config_data = self.configs[category][name]
@@ -95,13 +81,13 @@ class GameObjectsSpawner(Singleton):
         return spawned
 
     def _spawn_terrain_object(self, name, position, *args, **kwagrs) -> GameObject:
-        if 'wreck' in name:
+        if 'wreck' in name or 'corpse' in name:
             texture_index = args[0]
-            return self._spawn_wreck(name, position, texture_index)
+            return self._spawn_wreck_or_body(name, position, texture_index)
         return GameObject(name, position=position)
 
     @staticmethod
-    def _spawn_wreck(name, position, texture_index) -> GameObject:
+    def _spawn_wreck_or_body(name, position, texture_index) -> GameObject:
         wreck = TerrainObject(name, Robustness.INDESTRUCTIBLE, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size

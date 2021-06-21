@@ -14,6 +14,7 @@ from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import (
     Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 )
+from utils.functions import ignore_in_editor_mode
 from utils.geometry import close_enough, is_visible
 
 
@@ -190,7 +191,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                  produced_resource: Optional[str] = None,
                  research_facility: bool = False):
         """
-
         :param building_name: str -- texture name
         :param player: Player -- which player controlls this building
         :param position: Point -- coordinates of the center (x, y)
@@ -262,11 +262,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def update_observed_area(self, *args, **kwargs):
         self.observed_nodes = nodes = self.calculate_observed_area()
-        self.game.fog_of_war.reveal_nodes([n.grid for n in nodes])
+        self.game.fog_of_war.reveal_nodes({n.grid for n in nodes})
 
-    @property
-    def damaged(self) -> bool:
-        return self.health < self._max_health
+    @ignore_in_editor_mode
+    def update_fighting(self):
+        if self.weapons:
+            # TODO: buildings with machine-guns and personnel fighting back
+            raise NotImplementedError
 
     def on_mouse_enter(self):
         if self.selection_marker is None:
@@ -293,10 +295,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         elif self.is_research_facility:
             self.update_research()
 
-    def update_fighting(self):
-        # TODO: buildings with machine-guns and personnel fighting back
-        pass
-
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
         if close_enough(self.position, other.position, self.detection_radius):
@@ -314,6 +312,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         for sector in self.occupied_sectors:
             sectors.update(sector.adjacent_sectors())
         return list(sectors)
+
+    def on_soldier_enter(self, soldier):
+        raise NotImplementedError
 
     def on_being_damaged(self, damage: float) -> bool:
         damage *= self.game.settings.buildings_damage_factor

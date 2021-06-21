@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Tuple
 
 from arcade import SpriteList, Sprite
 

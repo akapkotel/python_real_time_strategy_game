@@ -22,14 +22,12 @@ from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
 from utils.functions import (get_path_to_file, get_texture_size,
-                             name_with_extension)
+                             name_with_extension, ignore_in_editor_mode)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
 )
 from .weapons import Weapon
-
-IDLE = 'IDLE'
 
 
 class Unit(PlayerEntity):
@@ -361,6 +359,19 @@ class Unit(PlayerEntity):
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
+    @ignore_in_editor_mode
+    def update_fighting(self):
+        if (enemy := self.targeted_enemy) is not None:
+            self.fight_or_run_away(enemy)
+        elif (enemies := self.known_enemies) and not self.is_building:
+            self.move_towards_enemies_nearby(enemies)
+
+    def fight_or_run_away(self, enemy: PlayerEntity):
+        self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
+
+    def run_away(self, enemy: PlayerEntity):
+        raise NotImplementedError
+
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
         if self.player is self.game.local_human_player and not other.is_unit:
@@ -388,10 +399,9 @@ class Unit(PlayerEntity):
         When Unit detected enemies but they are out of attack range, it can
         move closer to engage them.
         """
-        if self.targeted_enemy is not None:
-            if self.in_range(self.targeted_enemy):
-                return self.stop()
-        if not self.has_destination:
+        if (enemy := self.targeted_enemy) is not None and self.in_range(enemy):
+            self.stop()
+        elif not self.has_destination:
             enemy_to_attack = random.choice([e for e in known_enemies])
             position = self.game.pathfinder.get_closest_walkable_position(
                 *enemy_to_attack.position)
@@ -531,14 +541,14 @@ class Tank(Vehicle):
         self.textures = [load_textures(self.filename_with_path,
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
-        self.set_texture(self.facing_direction)
+        self.set_texture(self.facing_direction, self.facing_direction)
         self.set_hit_box(self.texture.hit_box_points)
 
     def set_rotated_texture(self):
         if (enemy := self.turret_aim_target) is not None:
             self.set_hull_and_turret_texture(enemy)
         else:
-            self.angle_to_texture(self.virtual_angle)
+            self.angle_to_texture(hull_angle=self.virtual_angle)
 
     def set_hull_and_turret_texture(self, enemy):
         turret_angle = calculate_angle(*self.position, *enemy.position)
@@ -555,18 +565,17 @@ class Tank(Vehicle):
         else:
             self.turret_facing_direction = self.angles[int(turret_angle)]
         self.barrel_end = self.turret_facing_direction
-        self.set_texture(self.facing_direction)
+        self.set_texture(self.facing_direction, self.turret_facing_direction)
 
-    def set_texture(self, hull_texture_index: int):
+    def set_texture(self, hull_texture_index: int, turret_texture_index: int):
         """
         We override original method to work with 2 texture indexes combined:
         first for the hull (which list of textures to use) and second for
         turret for actual texture to be chosen from the list.
         """
-        texture = self.textures[hull_texture_index][self.turret_facing_direction]
+        texture = self.textures[hull_texture_index][turret_texture_index]
         if texture == self._texture:
             return
-
         self.clear_spatial_hashes()
         self._point_list_cache = None
         self._texture = texture
@@ -603,6 +612,12 @@ class Tank(Vehicle):
         self.configure_wreck(wreck)
 
 
+IDLE = 0
+MOVE = 1
+KNEEL = 2
+CRAWL = 3
+
+
 class Soldier(Unit):
 
     _max_health = 100
@@ -612,34 +627,47 @@ class Soldier(Unit):
                  position: Point, id: Optional[int] = None):
         super().__init__(texture_name, player, weight, position, id)
         self.last_step = 0
-        self.pose = IDLE
-        self.all_textures: Dict[str, List[Texture]] = {}
+        self.stance = IDLE
+        self.all_textures: Dict[int, List[List[Texture]]] = {}
         self._load_textures_and_reset_hitbox()
 
+        self.equipment = None
+
     def _load_textures_and_reset_hitbox(self):
-        """
-        Create 8 lists of 8-texture spritesheets for each combination of hull
-        and turret directions.
-        """
-        width, height = get_texture_size(self.full_name, columns=8)
-        self.all_textures[IDLE] = load_textures(
-            get_path_to_file(self.full_name), [(i * width, 0, width, height) for i in range(8)]
-        )
-        self.textures = self.all_textures[self.pose]
-        self.set_texture(self.facing_direction)
+        texture_name = get_path_to_file(self.full_name)
+        width, height = get_texture_size(self.full_name, rows=9, columns=8)
+
+        self.all_textures = {
+            stance: self.load_pose_textures(texture_name, width, height, stance)
+            for stance in (IDLE,)  # MOVE, KNEEL, CRAWL
+        }
+
+        self.textures = self.all_textures[self.stance][self.facing_direction]
+        self.set_texture(0)
         self.set_hit_box(self.texture.hit_box_points)
+
+    @staticmethod
+    def load_pose_textures(texture_name, width, height, stance):
+        start = 8 * stance
+        return [
+            load_textures(
+                texture_name, [(i * width, j * height, width, height)
+                               for i in range(8)]
+            ) for j in range(start, start + 8)
+        ]
 
     def on_update(self, delta_time=1/60):
         super().on_update(delta_time)
-        # self.update_animation(delta_time)
+        if self.moving:
+            self.update_animation(delta_time)
 
-    def switch_pose(self, pose_name: str):
-        self.pose = pose_name
-        self.textures = self.all_textures[pose_name]
+    def angle_to_texture(self, angle_to_target: float):
+        index = self.angles[int(angle_to_target)]
+        self.textures = self.all_textures[self.stance][index]
 
     def update_animation(self, delta_time: float = 1/60):
         self.last_step += delta_time
-        if self.last_step > 0.3:
+        if self.last_step > 0.15:
             self.last_step = 0
             if self.cur_texture_index < len(self.textures) - 1:
                 self.cur_texture_index += 1
@@ -656,12 +684,25 @@ class Soldier(Unit):
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
 
-    def kill(self):
-        self.create_death_animation()
+    def kill(self, outside=True):
+        if outside:
+            self.create_death_animation()
         super().kill()
 
     def create_death_animation(self):
-        pass
+        self.spawn_corpse()
+
+    def spawn_corpse(self):
+        corpse_name = f'{self.colorized_name}_corpse.png'
+        corpse = self.game.spawner.spawn(
+            corpse_name, None, self.position, self.facing_direction
+        )
+        self.configure_corpse(corpse)
+
+    def configure_corpse(self, corpse):
+        corpse.register_to_objectsowners(self.game)
+        corpse.schedule_event(ScheduledEvent(corpse, 10.0, corpse.kill))
+        map_tile = self.map.position_to_node(*corpse.position)
 
 
 class UnitsOrderedDestinations:

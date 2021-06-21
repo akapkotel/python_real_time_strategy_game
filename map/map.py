@@ -298,6 +298,7 @@ class Sector:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.units_and_buildings = defaultdict(set)
         self.map = Sector.map
 
 

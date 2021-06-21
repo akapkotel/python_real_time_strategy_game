@@ -359,7 +359,7 @@ class PlayerEntity(GameObject):
 
     @health.setter
     def health(self, value: float):
-        self._health = clamp(value, self._max_health, 0)
+        self._health = clamp(self._health + value, self._max_health, 0)
 
     @property
     def weapons(self) -> bool:
@@ -388,33 +388,11 @@ class PlayerEntity(GameObject):
 
     def on_update(self, delta_time: float = 1/60):
         self.update_visibility()
-        self.update_nearby_friends()
         self.update_known_enemies_set()
-        self.update_targeted_enemy()
+        if self.weapons:
+            self.update_targeted_enemy()
         self.update_fighting()
         super().on_update(delta_time)
-
-    @ignore_in_editor_mode
-    def update_targeted_enemy(self):
-        """
-        Set the random or weakest of the enemies in range of this entity
-        weapons as the current hit to attack if not targeting any yet.
-        """
-        if (enemies := self.known_enemies) and self.no_current_target:
-            if in_range := [e for e in enemies if e.in_range(self)]:
-                if self.experience > 35:
-                    self.targeted_enemy = sorted(in_range, key=lambda e: e.health)[0]
-                else:
-                    self.targeted_enemy = random.choice(in_range)
-            else:
-                self.targeted_enemy = None
-
-    @ignore_in_editor_mode
-    def update_fighting(self):
-        if (enemy := self.targeted_enemy) is not None:
-            self.fight_or_run_away(enemy)
-        elif (enemies := self.known_enemies) and not self.is_building:
-            self.move_towards_enemies_nearby(enemies)
 
     def draw(self):
         if self.is_rendered:
@@ -446,32 +424,32 @@ class PlayerEntity(GameObject):
         observed_area = self.map.in_bounds(observed_area)
         return {self.map[id] for id in observed_area}
 
-    def update_nearby_friends(self):
-        self.nearby_friends = self.get_nearby_friends()
-
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
-            self.notify_detected_enemies_about_self(enemies)
-            self.notify_all_nearby_friends_about_enemies(enemies)
         self.known_enemies = enemies.union(self.mutually_detected_enemies)
 
-    def notify_all_nearby_friends_about_enemies(self, enemies):
+    @ignore_in_editor_mode
+    def update_targeted_enemy(self):
         """
-        By informing other, friendly Units and Buildings about detected
-        enemies, we can cut down the number of detection-tests, and more
-        congested the area is, the more processing time we save.
+        Set the random or weakest of the enemies in range of this entity
+        weapons as the current hit to attack if not targeting any yet.
         """
-        for friend in self.nearby_friends:
-            friend.known_enemies.update(enemies)
+        if (enemies := self.known_enemies) and self.no_current_target:
+            if in_range := [e for e in enemies if e.in_range(self)]:
+                self.choice_new_enemy_to_target(in_range)
+            else:
+                self.targeted_enemy = None
 
-    def notify_detected_enemies_about_self(self, enemies):
-        """
-        Informing visible enemy that we are visible for him is an obvious way
-        to cut detection-tests by half.
-        """
-        for enemy in enemies:
-            enemy.mutually_detected_enemies.add(self)
+    def choice_new_enemy_to_target(self, in_range):
+        if self.experience > 35:
+            self.targeted_enemy = sorted(in_range, key=lambda e: e.health)[0]
+        else:
+            self.targeted_enemy = random.choice(in_range)
+
+    @ignore_in_editor_mode
+    def update_fighting(self):
+        raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         sectors = self.get_sectors_to_scan_for_enemies()
@@ -495,9 +473,6 @@ class PlayerEntity(GameObject):
     def no_current_target(self) -> bool:
         return self.targeted_enemy is None or not self.in_range(self.targeted_enemy)
 
-    def fight_or_run_away(self, enemy: PlayerEntity):
-        self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
-
     def engage_enemy(self, enemy: PlayerEntity):
         if enemy.alive:
             self.attack(enemy)
@@ -512,10 +487,8 @@ class PlayerEntity(GameObject):
     def check_if_enemy_destroyed(self, enemy: PlayerEntity):
         if not enemy.alive:
             self.experience += enemy.kill_experience
+            self.known_enemies.discard(enemy)
             self.targeted_enemy = None
-
-    def run_away(self, enemy: PlayerEntity):
-        raise NotImplementedError
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
@@ -534,10 +507,6 @@ class PlayerEntity(GameObject):
 
     def damaged(self) -> bool:
         return self._health < self._max_health
-
-    @abstractmethod
-    def get_nearby_friends(self) -> Set[PlayerEntity]:
-        raise NotImplementedError
 
     def on_being_damaged(self, damage: float):
         """
@@ -558,10 +527,6 @@ class PlayerEntity(GameObject):
         if self.selection_marker is not None:
             self.selection_marker.kill()
         super().kill()
-
-    @abstractmethod
-    def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
-        raise NotImplementedError
 
     def save(self) -> Dict:
         saved_entity = super().save()

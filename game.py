@@ -42,7 +42,7 @@ from utils.functions import (
 from utils.logging import log, logger, timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
-    SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList
+    SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList,
 )
 from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
