@@ -18,6 +18,7 @@ SOUNDS_EXTENSION = 'wav'
 MUSIC_TRACK_SUFFIX = 'theme'
 UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
 UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(5)]
+UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
 
 
 class AudioPlayer(Singleton):
@@ -132,11 +133,12 @@ class AudioPlayer(Singleton):
         """Play a single sound. Use this for sound effects."""
         if name not in self.sounds:
             log(f'Sound: {name} not found!', console=True)
-        if self.is_music(name) and not self._music_on:
-            return
+        elif self.is_music(name) and not self._music_on:
+            pass
         elif not self._sound_effects_on:
-            return
-        self._play_sound(name, loop=False, volume=volume)
+            pass
+        else:
+            self._play_sound(name, loop=False, volume=volume)
 
     def play_music(self, name: str, loop=True, volume: Optional[float] = None):
         """Use this for background sound-themes."""

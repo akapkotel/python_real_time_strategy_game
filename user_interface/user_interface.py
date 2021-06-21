@@ -10,14 +10,17 @@ from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 
 from arcade import (
     Sprite, load_texture, draw_rectangle_outline, draw_text,
-    draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision
+    draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision,
+    draw_lrtb_rectangle_filled
 )
 from arcade.arcade_types import Color
 
+from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
 from utils.ownership_relations import ObjectsOwner, OwnedObject
 
-from utils.functions import make_texture, get_path_to_file, name_to_texture_name
+from utils.functions import make_texture, get_path_to_file, \
+    name_to_texture_name, to_rgba
 from utils.logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
@@ -72,8 +75,10 @@ class UiElementsBundle(OwnedObject):
     elements: List[UiElement]
     register_to: ObjectsOwner
     _owners = None
-    on_load: Optional[Callable] = lambda: None
+    _on_load: Optional[Callable] = None
+    _on_unload: Optional[Callable] = None
     displayed_in_manager: Optional[UiBundlesHandler] = None
+    displayed: bool = True
 
     def __post_init__(self):
         self.register_to_objectsowners(self.register_to)
@@ -94,7 +99,7 @@ class UiElementsBundle(OwnedObject):
             self.displayed_in_manager.append(element)
 
     def remove(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             self._remove(element)
             element.bundle = None
             if self.displayed_in_manager is not None:
@@ -104,23 +109,23 @@ class UiElementsBundle(OwnedObject):
         return self.elements.__iter__()
 
     def toggle_element(self, name: str, state: bool):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             element.toggle(state)
 
     def show_element(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             element.show()
 
     def hide_element(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             element.hide()
 
     def activate_element(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             element.activate()
 
     def deactivate_element(self, name: str):
-        if (element := self._find_by_name(name)) is not None:
+        if (element := self.find_by_name(name)) is not None:
             element.deactivate()
 
     def remove_subgroup(self, subgroup: int):
@@ -139,7 +144,7 @@ class UiElementsBundle(OwnedObject):
                 element.hide()
                 element.deactivate()
 
-    def _find_by_name(self, name: str) -> Optional[UiElement]:
+    def find_by_name(self, name: str) -> Optional[UiElement]:
         for element in (e for e in self.elements if e.name == name):
             return element
 
@@ -153,6 +158,16 @@ class UiElementsBundle(OwnedObject):
     def update_elements_positions(self, dx, dy):
         for element in self.elements:
             element.update_position(dx, dy)
+
+    def on_load(self):
+        self.displayed = True
+        if self._on_load is not None:
+            self._on_load()
+
+    def on_unload(self):
+        self.displayed = False
+        if self._on_unload is not None:
+            self._on_unload()
 
 
 class UiBundlesHandler(ObjectsOwner):
@@ -310,6 +325,7 @@ class UiBundlesHandler(ObjectsOwner):
             if element.bundle == bundle:
                 bundle.displayed_in_manager = None
                 self.remove(element)
+        bundle.on_unload()
 
     def remove(self, element: UiElement):
         self.ui_elements_spritelist.remove(element)
@@ -317,8 +333,13 @@ class UiBundlesHandler(ObjectsOwner):
     def _unload_all(self,
                     exception: Optional[str] = None,
                     exceptions: Optional[List[str]] = None):
+        for bundle in self.ui_elements_bundles.values():
+            bundle.on_unload()
         self.active_bundles.clear()
         self.ui_elements_spritelist.clear()
+        self._reload_exceptions_bundles(exception, exceptions)
+
+    def _reload_exceptions_bundles(self, exception, exceptions):
         if exception is not None:
             self.load_bundle(name=exception)
         elif exceptions is not None:
@@ -663,6 +684,29 @@ class Button(UiElement):
             draw_rectangle_filled(*self.position, width, height, self.button_color)
         if not self._active:
             draw_rectangle_filled(*self.position, self.width, self.height, FOG)
+
+
+class ProgressButton(Button):
+    """
+    This button displays a progress of some process it is attached to. Updating
+    and tracking of this progress is up to user.
+    """
+    _progress = 0
+
+    @property
+    def progress(self):
+        return self._progress
+
+    @progress.setter
+    def progress(self, value):
+        self._progress = clamp(value, 100, 0)
+
+    def draw(self):
+        super().draw()
+        if self._progress:
+            top = self.bottom + (self.height * 0.01) * self._progress
+            color = to_rgba(GREEN, alpha=150)
+            draw_lrtb_rectangle_filled(self.left, self.right, top, self.bottom, color)
 
 
 class GenericTextButton(Button):

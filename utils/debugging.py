@@ -7,12 +7,13 @@ from arcade import (
     draw_rectangle_filled,
 )
 
-from game import TILE_HEIGHT, TILE_WIDTH
+from game import TILE_HEIGHT, TILE_WIDTH, SCREEN_HEIGHT
 from map.map import normalize_position, position_to_map_grid
 from utils.colors import RED, GREEN, WHITE, BLACK
 from utils.functions import to_rgba
 from utils.logging import log
 from units.units import Unit
+from players_and_factions.player import ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 
 
 class GameDebugger:
@@ -25,6 +26,7 @@ class GameDebugger:
     debug_mouse = True
     debug_map = True
     debug_units = True
+    debug_resources = True
     debug_pathfinding = True
     debugged = []
     map_grid: Optional[ShapeElementList] = None
@@ -47,10 +49,19 @@ class GameDebugger:
     def draw(self):
         if self.debug_map:
             self.draw_debugged_map_grid()
+        if self.debug_resources:
+            self.draw_debug_resources()
         if self.debug_mouse:
             self.draw_debugged_mouse_pointed_nodes()
         self.draw_debugged()
         self.draw_log()
+
+    def draw_debug_resources(self):
+        human = self.game.local_human_player
+        x, y = self.game.viewport[3] - 25, self.game.viewport[0]
+        for i, resource in enumerate((ENERGY, STEEL, ELECTRONICS, CONSCRIPTS)):
+            text = f'{resource.title()}: {human.resource(resource)}'
+            draw_text(text, x + 200 * i, y, WHITE)
 
     def create_map_debug_grid(self) -> ShapeElementList:
         grid = ShapeElementList()

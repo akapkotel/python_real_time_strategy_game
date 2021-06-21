@@ -123,7 +123,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        functions=window.delete_saved_game),
             ],
             register_to=self,
-            on_load=window.update_saved_games_list
+            _on_load=window.update_saved_games_list
         )
 
         y = (i for i in range(300, SCREEN_HEIGHT, 125))
@@ -137,7 +137,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        functions=window.save_game),
             ],
             register_to=self,
-            on_load=window.update_saved_games_list
+            _on_load=window.update_saved_games_list
         )
 
         x, y = SCREEN_WIDTH // 4, SCREEN_Y

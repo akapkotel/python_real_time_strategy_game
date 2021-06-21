@@ -5,8 +5,10 @@ import random
 
 from collections import deque, defaultdict
 from functools import partial
-from typing import Deque, Dict, List, Optional, Set, Tuple, Union, Generator, \
-    Collection, DefaultDict
+from typing import (
+    Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
+    DefaultDict
+)
 
 from arcade import Sprite, Texture, load_spritesheet
 

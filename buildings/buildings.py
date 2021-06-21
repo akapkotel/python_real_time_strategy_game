@@ -2,14 +2,18 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, List, Optional, Set, Tuple, Type, Dict
+from functools import partial
+from typing import Deque, List, Optional, Set, Tuple, Dict
 
 from arcade.arcade_types import Point
 
-from utils.data_types import GridPosition
+from effects.sound import UNIT_PRODUCTION_FINISHED
+from user_interface.user_interface import ProgressButton
 from missions.research import Technology
 from map.map import MapNode, Sector, normalize_position
-from players_and_factions.player import Player, PlayerEntity
+from players_and_factions.player import (
+    Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
+)
 from utils.geometry import close_enough, is_visible
 
 
@@ -25,26 +29,41 @@ class UnitsProducer:
     def __init__(self, produced_units: Tuple[str]):
         self.produced_units = produced_units
         self.production_queue: Deque[str] = deque()
+        self.currently_produced: Optional[str] = None
         self.production_progress: int = 0
         self.production_time: int = 0
-        self.is_producing: bool = False
         self.deployment_point = self.center_x, self.center_y - 120
 
     @logger(console=True)
-    def start_production(self, product: str):
-        if product not in self.produced_units:
-            return
-        if not self.is_producing:
-            self._start_production(product)
-        self.production_queue.appendleft(product)
+    def start_production(self, unit: str):
+        if unit in self.produced_units and self.enough_resources(unit):
+            if self.currently_produced is None:
+                self._start_production(unit, confirmation=True)
+            self.production_queue.appendleft(unit)
 
-    def _start_production(self, product: str):
-        self.set_production_progress_and_speed(product)
-        self._toggle_production()
+    def enough_resources(self, unit: str) -> bool:
+        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+            required_amount = self.game.configs['units'][unit][resource]
+            if not self.player.has_resource(resource, required_amount):
+                self.player.notify_player_of_resource_deficit(resource)
+                return False
+        return True
+
+    def _start_production(self, unit: str, confirmation=False):
+        self.set_production_progress_and_speed(unit)
+        self.consume_resources(unit)
+        self._toggle_production(produced=unit)
+        if confirmation:
+            self.game.window.sound_player.play_sound('production_started.wav')
+
+    def consume_resources(self, unit: str):
+        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+            required_amount = self.game.configs['units'][unit][resource]
+            self.player.consume_resource(resource, required_amount)
 
     def cancel_production(self):
-        if self.is_producing:
-            self._toggle_production()
+        if self.currently_produced:
+            self._toggle_production(produced=None)
         self.production_progress = 0.0
         self.production_queue.clear()
 
@@ -53,22 +72,38 @@ class UnitsProducer:
         production_time = self.game.configs['units'][product]['production_time']
         self.production_time = production_time * self.game.settings.fps
 
-    def _toggle_production(self):
-        self.is_producing = not self.is_producing
+    def _toggle_production(self, produced):
+        self.currently_produced = produced
 
     def update_units_production(self):
-        if self.is_producing:
+        if self.currently_produced is not None:
             self.production_progress += 1
+            self.update_production_button(progress=self.production_progress)
             if self.production_progress == self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
-            self._start_production(product=self.production_queue[-1])
+            self._start_production(unit=self.production_queue[-1])
+
+    def update_production_button(self, progress):
+        if (panel := self.game.get_bundle(BUILDINGS_PANEL)).displayed:
+            production_button = panel.find_by_name(self.currently_produced)
+            production_button.progress = (progress / self.production_time) * 100
 
     @logger(console=True)
-    def finish_production(self, finished_product: str):
-        self._toggle_production()
-        self.production_progress = 0.0
-        self.game.spawn(finished_product, self.player, self.deployment_point)
+    def finish_production(self, finished_unit: str):
+        self.production_progress = progress = 0
+        self.update_production_button(progress)
+        self._toggle_production(produced=None)
+        self.game.spawn(finished_unit, self.player, self.deployment_point)
+        self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
+
+    def create_production_buttons(self, x, y) -> List[ProgressButton]:
+        production_buttons = []
+        for i, unit in enumerate(self.produced_units):
+            b = ProgressButton(unit + '_icon.png', x, y + 50 * i, unit,
+                               functions=partial(self.start_production, unit))
+            production_buttons.append(b)
+        return production_buttons
 
     def __getstate__(self) -> Dict:
         return {}
@@ -304,4 +339,4 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
-    from game import Game, TILE_HEIGHT, TILE_WIDTH
+    from game import Game, TILE_HEIGHT, TILE_WIDTH, BUILDINGS_PANEL

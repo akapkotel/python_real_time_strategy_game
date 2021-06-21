@@ -476,14 +476,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def configure_building_interface(self, context_building: Building):
         self.load_bundle(name=BUILDINGS_PANEL, clear=True)
         left, _, bottom, _ = self.viewport
-        x, y = left + SCREEN_WIDTH - 200, bottom + SCREEN_Y
+        x, y = left + SCREEN_WIDTH * 0.9, bottom + SCREEN_Y
         if context_building.is_units_producer:
-            for i, produced in enumerate(context_building.produced_units):
-                self.get_bundle(BUILDINGS_PANEL).add(
-                    Button(produced + '_icon.png', x, y + 50 * i, produced,
-                           functions=partial(context_building.start_production,
-                                             produced))
-                )
+            buttons = context_building.create_production_buttons(x, y)
+            self.get_bundle(BUILDINGS_PANEL).extend(buttons)
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):

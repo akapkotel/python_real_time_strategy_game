@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import PIL
 
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence
 
 from arcade import load_texture
 from arcade.arcade_types import Point
@@ -14,10 +14,8 @@ from players_and_factions.player import Player
 from units.units import Unit, Vehicle, Tank, Soldier
 from utils.classes import Singleton
 from utils.enums import UnitWeight, Robustness
-from utils.functions import (
-    add_player_color_to_name, get_path_to_file, name_to_texture_name,
-    decolorised_name
-)
+from utils.functions import get_path_to_file, decolorised_name
+
 from utils.logging import log
 from .gameobject import GameObject, TerrainObject
 
@@ -91,8 +89,8 @@ class GameObjectsSpawner(Singleton):
 
     def _configure_spawned_attributes(self, category, name, spawned):
         config_data = self.configs[category][name]  # 'raw' not colorized name
-        for key, value in config_data.items():
-            if value != name and 'class' not in key:
+        for i, (key, value) in enumerate(config_data.items()):
+            if i < 8 and value != name and 'class' not in key:
                 setattr(spawned, key, value)
         return spawned
 

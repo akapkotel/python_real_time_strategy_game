@@ -134,12 +134,19 @@ class ResourcesManager:
 
     def __init__(self):
         for resource_name in self.resources_names:
-            setattr(self, resource_name, 0)
+            setattr(self, resource_name, 1000)
             setattr(self, f"{resource_name}_yield_per_frame", 0.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
 
+    def resource(self, resource: str):
+        return getattr(self, resource, 0)
+
     def has_resource(self, resource: str, amount: int = 1):
         return getattr(self, resource, 0) >= amount
+
+    def notify_player_of_resource_deficit(self, resource: str):
+        sound = f'not_enough_{resource}.wav'
+        self.game.window.sound_player.play_sound(sound)
 
     def change_resource_yield_per_frame(self, resource: str, change: float):
         old_yield = getattr(self, f"{resource}_yield_per_frame")

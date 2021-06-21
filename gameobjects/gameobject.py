@@ -8,8 +8,9 @@ from arcade.arcade_types import Point
 
 from utils.data_types import GridPosition
 from utils.enums import Robustness, UnitWeight
-from utils.functions import get_path_to_file, decolorised_name, \
-    name_with_extension
+from utils.functions import (
+    get_path_to_file, decolorised_name, name_with_extension
+)
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator

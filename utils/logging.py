@@ -5,9 +5,6 @@ from time import perf_counter
 from typing import Union
 
 
-format = ''
-
-
 logging.basicConfig(
     filename='resources/logging/logfile.txt',
     filemode='w',
@@ -18,11 +15,9 @@ logging.basicConfig(
 
 
 def log(logged_message: str, console: Union[int, bool] = False):
+    logging.info(logged_message)
     if console:
         print(logged_message)
-        logging.warning(logged_message)
-    else:
-        logging.info(logged_message)
 
 
 def logger(console=False):
