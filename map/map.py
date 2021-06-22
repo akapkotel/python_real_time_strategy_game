@@ -346,6 +346,10 @@ class MapNode:
     def building(self) -> Optional[Building]:
         return self._building
 
+    @property
+    def unit_or_building(self) -> Optional[Union[Unit, Building]]:
+        return self._unit or self._building
+
     @building.setter
     def building(self, value: Optional[Building]):
         self._building = value

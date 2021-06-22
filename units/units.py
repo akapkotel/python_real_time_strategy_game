@@ -77,7 +77,7 @@ class Unit(PlayerEntity):
         )
 
         self.explosion_name = 'EXPLOSION'
-        # self.update_explosions_pool()
+        self.update_explosions_pool()
 
     @property
     def configs(self):
@@ -239,7 +239,7 @@ class Unit(PlayerEntity):
         if blocker.find_free_tile_to_unblock_way(self.path):
             self.wait_for_free_path(self.path)
         else:
-            destination = self.map.position_to_map_grid(*self.path[-1])
+            destination = position_to_map_grid(*self.path[-1])
             self.move_to(destination)
 
     def find_free_tile_to_unblock_way(self, path) -> bool:
@@ -359,18 +359,11 @@ class Unit(PlayerEntity):
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
-    @ignore_in_editor_mode
-    def update_fighting(self):
+    def fight_enemies(self):
         if (enemy := self.targeted_enemy) is not None:
-            self.fight_or_run_away(enemy)
+            self.engage_enemy(enemy)
         elif (enemies := self.known_enemies) and not self.is_building:
             self.move_towards_enemies_nearby(enemies)
-
-    def fight_or_run_away(self, enemy: PlayerEntity):
-        self.engage_enemy(enemy) if self.weapons else self.run_away(enemy)
-
-    def run_away(self, enemy: PlayerEntity):
-        raise NotImplementedError
 
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
@@ -450,7 +443,7 @@ class Vehicle(Unit):
         super().__init__(texture_name, player, weight, position, id)
         self.virtual_angle = int(ROTATION_STEP * self.cur_texture_index) % 360
 
-        thread_texture = f'{self.object_name.rstrip(".png")}_threads.png'
+        thread_texture = f'{self.object_name}_threads.png'
         self.thread_texture = get_path_to_file(thread_texture)
         self.threads_time = 0
 
@@ -604,7 +597,7 @@ class Tank(Vehicle):
         super().engage_enemy(enemy)
 
     def spawn_wreck(self):
-        wreck_name = f'{self.object_name.rstrip(".png")}_wreck.png'
+        wreck_name = f'{self.object_name}_wreck.png'
         wreck = self.game.spawner.spawn(
             wreck_name, None, self.position,
             (self.facing_direction, self.turret_facing_direction)
@@ -619,7 +612,6 @@ CRAWL = 3
 
 
 class Soldier(Unit):
-
     _max_health = 100
     health_restoration = 0.003
 

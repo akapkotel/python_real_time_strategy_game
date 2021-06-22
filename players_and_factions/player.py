@@ -389,9 +389,7 @@ class PlayerEntity(GameObject):
     def on_update(self, delta_time: float = 1/60):
         self.update_visibility()
         self.update_known_enemies_set()
-        if self.weapons:
-            self.update_targeted_enemy()
-        self.update_fighting()
+        self.update_battle_behaviour()
         super().on_update(delta_time)
 
     def draw(self):
@@ -448,17 +446,35 @@ class PlayerEntity(GameObject):
             self.targeted_enemy = random.choice(in_range)
 
     @ignore_in_editor_mode
-    def update_fighting(self):
+    def update_battle_behaviour(self):
+        if self.weapons:
+            self.update_targeted_enemy()
+            self.fight_enemies()
+        elif self.is_unit:
+            self.run_away()
+
+    @abstractmethod
+    def fight_enemies(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def run_away(self):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        sectors = self.get_sectors_to_scan_for_enemies()
-        enemies = set()
-        for sector in sectors:
-            for player_id, entities in sector.units_and_buildings.items():
-                if self.game.players[player_id].is_enemy(self.player):
-                    enemies.update(entities)
-        return {e for e in enemies if self.in_observed_area(e)}
+        visible_enemies = set()
+        for node in (n for n in self.observed_nodes if n.unit_or_building is not None):
+            if (enemy := node.unit_or_building).is_enemy(self):
+                visible_enemies.add(enemy)
+        return visible_enemies
+
+        # sectors = self.get_sectors_to_scan_for_enemies()
+        # enemies = set()
+        # for sector in sectors:
+        #     for player_id, entities in sector.units_and_buildings.items():
+        #         if self.game.players[player_id].is_enemy(self.player):
+        #             enemies.update(entities)
+        # return {e for e in enemies if self.in_observed_area(e)}
 
     def in_observed_area(self, other: Union[Unit, Building]) -> bool:
         try:

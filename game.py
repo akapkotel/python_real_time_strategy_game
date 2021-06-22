@@ -651,25 +651,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def update_view(self, delta_time):
         self.update_timer()
-        self.events_scheduler.update()
-        if self.debugger is not None:
-            self.debugger.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players()
-        self.fog_of_war.update()
-        self.pathfinder.update()
-        self.mini_map.update()
-        if self.current_mission is not None:
-            self.current_mission.update()
+        for updated in (self.events_scheduler, self.debugger, self.fog_of_war,
+                        self.pathfinder, self.mini_map, self.current_mission):
+            if updated is not None:
+                updated.update()
 
     def after_loading(self):
         self.window.show_view(self)
-        self.generate_random_map_objects()
+        # self.generate_random_map_objects()
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
+        self.generate_random_map_objects()
 
     def update_timer(self):
         seconds = time.time() - self.timer['start']

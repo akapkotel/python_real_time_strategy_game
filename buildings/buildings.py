@@ -264,11 +264,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.observed_nodes = nodes = self.calculate_observed_area()
         self.game.fog_of_war.reveal_nodes({n.grid for n in nodes})
 
-    @ignore_in_editor_mode
-    def update_fighting(self):
-        if self.weapons:
-            # TODO: buildings with machine-guns and personnel fighting back
-            raise NotImplementedError
+    def fight_enemies(self):
+        if (enemy := self.targeted_enemy) is not None:
+            self.engage_enemy(enemy)
 
     def on_mouse_enter(self):
         if self.selection_marker is None:

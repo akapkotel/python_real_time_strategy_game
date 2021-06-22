@@ -787,7 +787,6 @@ class Checkbox(UiElement):
         :param active:
         :param visible:
         :param parent:
-        :param function_on_right_click:
         :param functions:
         :param ticked:
         :param variable: Tuple[object, str] -- to bind a variable to this
@@ -825,7 +824,7 @@ class Checkbox(UiElement):
             self.toggle_variable()
 
     def toggle_variable(self):
-        print(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
+        log(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
         setattr(self.variable[0], self.variable[1], self.ticked)
 
     def draw(self):
