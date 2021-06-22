@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import deque
 from functools import partial
-from typing import Deque, List, Optional, Set, Tuple, Dict
+from typing import Deque, List, Optional, Set, Tuple, Dict, Generator
 
 from arcade.arcade_types import Point
 
@@ -120,11 +120,11 @@ class ResourceProducer:
                  recipient: Optional[Player] = None):
         self.resource: str = extracted_resource
         self.require_transport = require_transport
-        self.yield_per_frame = 0.033
+        self.yield_per_frame = value = 0.033
         self.reserves = 0.0
         self.stockpile = 0.0
         self.recipient: Optional[Player] = recipient
-        self.recipient.change_resource_yield_per_frame()
+        self.recipient.change_resource_yield_per_frame(self.resource, value)
 
     def update_resource_production(self):
         self.reserves -= self.yield_per_frame
@@ -315,7 +315,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         raise NotImplementedError
 
     def on_being_damaged(self, damage: float) -> bool:
-        damage *= self.game.settings.buildings_damage_factor
+        # TODO: killing personnel inside Building
+        # TODO: decreasing  Building productivity
         return super().on_being_damaged(damage)
 
     def kill(self):

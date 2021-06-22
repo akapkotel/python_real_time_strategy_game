@@ -69,8 +69,8 @@ class GameObjectsSpawner(Singleton):
     def get_entity_configs(self, category, name) -> Dict:
         config_data = self.configs[category][name]
         return {
-            key: value for (key, value) in config_data.items() if
-            value != name and 'class' not in key
+            key: value for i, (key, value) in enumerate(config_data.items()) if
+            value != name and 'class' not in key and i < 5
         }
 
     def _configure_spawned_attributes(self, category, name, spawned):

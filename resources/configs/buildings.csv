@@ -1,4 +1,4 @@
-object_name,class,produced_units,produced_resource,research_facility
-capitol,Building,None,None,False
-Barracks,Building,(soldier),None,False
-medium_factory,Building,(tank_medium),None,False
+object_name,class,produced_units,produced_resource,research_facility,max_health
+capitol,Building,None,None,False,1000
+Barracks,Building,(soldier),None,False,500
+medium_factory,Building,(tank_medium),None,False,1500

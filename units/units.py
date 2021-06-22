@@ -6,11 +6,12 @@ import time
 
 from abc import abstractmethod
 from collections import deque
-from typing import Deque, List, Dict, Optional, Set, Union
+from typing import Deque, List, Dict, Optional, Set, Union, Generator
 
 from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
+import utils.timing
 from effects.explosions import Explosion
 from buildings.buildings import Building
 from map.map import (
@@ -468,7 +469,7 @@ class Vehicle(Unit):
         self.fuel -= self.fuel_consumption
 
     def leave_threads(self):
-        if self.is_rendered and (time := self.game.timer['s'] - self.threads_time) >= 4:
+        if self.is_rendered and (time := utils.timing.timer['s'] - self.threads_time) >= 4:
             self.threads_time = time
             self.game.vehicles_threads.append(
                 VehicleThreads(self.thread_texture,
@@ -667,10 +668,6 @@ class Soldier(Unit):
                 self.cur_texture_index = 0
             self.set_texture(self.cur_texture_index)
 
-    def on_being_damaged(self, damage: float):
-        damage = max(random.gauss(damage, damage // 4) - self.armour, 0)
-        self.health -= damage * self.game.settings.infantry_damage_factor
-
     def restore_health(self):
         wounds = round(self._max_health - self.health, 3)
         health_gained = min(self.health_restoration, wounds)
@@ -694,7 +691,6 @@ class Soldier(Unit):
     def configure_corpse(self, corpse):
         corpse.register_to_objectsowners(self.game)
         corpse.schedule_event(ScheduledEvent(corpse, 10.0, corpse.kill))
-        map_tile = self.map.position_to_node(*corpse.position)
 
 
 class UnitsOrderedDestinations:
@@ -704,7 +700,7 @@ class UnitsOrderedDestinations:
     destination by the Pathfinder. Game uses these positions to display on the
     ordered destinations on the screen for the Player convenience.
     """
-    size = 5 / 60
+    size = 5 / 90
 
     def __init__(self):
         self.destinations = []
@@ -712,7 +708,7 @@ class UnitsOrderedDestinations:
 
     def new_destinations(self, destinations: List[Point]):
         self.destinations = destinations
-        self.time_left = 60
+        self.time_left = 90
 
     def on_update(self, delta_time):
         if self.time_left > 0:

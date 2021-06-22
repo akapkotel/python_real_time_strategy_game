@@ -5,7 +5,7 @@ import random
 
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union, Generator
 
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
@@ -34,6 +34,9 @@ ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
+
+
+TOTAL = 0
 
 
 class Faction(EventsCreator, ObjectsOwner, OwnedObject):
@@ -322,7 +325,8 @@ class PlayerEntity(GameObject):
         self.is_unit = not self.is_building
         self.is_infantry = isinstance(self, Soldier)
 
-        self._max_health = 100
+        category = 'units' if self.is_unit else 'buildings'
+        self._max_health = self.game.configs[category][self.object_name]['max_health']
         self._health = self._max_health
         self.armour = 0
         self.cover = 0
@@ -354,8 +358,16 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     @property
+    def max_health(self) -> float:
+        return self._max_health
+
+    @property
     def health(self) -> float:
         return self._health
+
+    @property
+    def health_percentage(self) -> float:
+        return self._health / self._max_health * 100
 
     @health.setter
     def health(self, value: float):
@@ -462,24 +474,17 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        visible_enemies = set()
-        for node in (n for n in self.observed_nodes if n.unit_or_building is not None):
-            if (enemy := node.unit_or_building).is_enemy(self):
-                visible_enemies.add(enemy)
-        return visible_enemies
-
-        # sectors = self.get_sectors_to_scan_for_enemies()
-        # enemies = set()
-        # for sector in sectors:
-        #     for player_id, entities in sector.units_and_buildings.items():
-        #         if self.game.players[player_id].is_enemy(self.player):
-        #             enemies.update(entities)
-        # return {e for e in enemies if self.in_observed_area(e)}
+        enemies = set()
+        for sector in self.get_sectors_to_scan_for_enemies():
+            for player_id, entities in sector.units_and_buildings.items():
+                if self.game.players[player_id].is_enemy(self.player):
+                    enemies.update(entities)
+        return {e for e in enemies if self.in_observed_area(e)}
 
     def in_observed_area(self, other: Union[Unit, Building]) -> bool:
-        try:
+        try:  # Unit
             return other.current_node in self.observed_nodes
-        except AttributeError:
+        except AttributeError:  # Building
             return len(self.observed_nodes.intersection(other.occupied_nodes)) > 0
 
     def in_range(self, other: Union[Unit, Building]) -> bool:
@@ -507,7 +512,7 @@ class PlayerEntity(GameObject):
             self.targeted_enemy = None
 
     @abstractmethod
-    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
+    def get_sectors_to_scan_for_enemies(self) -> Generator[Sector]:
         raise NotImplementedError
 
     def visible_for(self, other: PlayerEntity) -> bool:

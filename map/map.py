@@ -20,7 +20,8 @@ from utils.scheduling import EventsCreator
 from utils.functions import (
     get_path_to_file, all_files_of_type_named
 )
-from utils.logging import log, logger, timer
+from utils.logging import log, logger
+from utils.timing import timer
 from utils.geometry import distance_2d, calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!

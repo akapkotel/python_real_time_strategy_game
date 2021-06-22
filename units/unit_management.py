@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Sequence, Set, Tuple, Dict, Iterator, Union, \
-    Collection
+from typing import (
+    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection
+)
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
 from arcade.arcade_types import Color, Point
@@ -62,12 +63,12 @@ class SelectedEntityMarker:
 
     def __init__(self, selected: PlayerEntity):
         selected.selection_marker = self
-        self.position = selected.position
+        self.position = x, y = selected.position
         self.selected = selected
-        self.borders = Sprite()
+        self.borders = Sprite(center_x=x, center_y=y)
         self.sprites = []  # not updated, used to cache and kill sprites only
 
-        self.health = health = selected.health
+        self.health = health = selected.health_percentage
         width, height, color = self.health_to_color_and_size(health)
         self.healthbar = healthbar = SpriteSolidColor(width, height, color)
 
@@ -89,12 +90,13 @@ class SelectedEntityMarker:
             sprite.position = x, y
 
     def update_healthbar(self, x):
-        if (health := self.selected.health) != self.health:
+        if (health := self.selected.health_percentage) != self.health:
             width, height, color = self.health_to_color_and_size(health)
             if color != self.healthbar.color:
                 self.replace_healthbar_with_new_color(color, height, width)
             else:
                 self.healthbar.width = width
+            self.health = health
         ratio = self.healthbar_length_ratio * 0.5
         self.healthbar.position = x - (100 - health) * ratio, self.borders.top
 
@@ -108,6 +110,7 @@ class SelectedEntityMarker:
         self.selected.selection_marker = None
         for sprite in self.sprites:
             sprite.kill()
+        self.sprites.clear()
 
 
 class SelectedUnitMarker(SelectedEntityMarker):
@@ -131,6 +134,7 @@ class SelectedSoldierMarker(SelectedEntityMarker):
         # units selection marker has 10 versions, blank + 9 different numbers
         # to show which PermanentUnitsGroup an Unit belongs to:
         self.borders.texture = soldier_selection_texture
+        self.update_healthbar(self.position[0])
 
 
 class SelectedVehicleMarker(SelectedUnitMarker):

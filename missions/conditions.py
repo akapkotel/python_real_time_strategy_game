@@ -4,6 +4,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Optional
 
+import utils.timing
 from players_and_factions.player import Player, Faction
 from missions.consequences import AddVictoryPoints, Consequence
 from utils.logging import log

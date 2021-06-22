@@ -1,6 +1,8 @@
-object_name,class,max_speed,rotation_speed,fuel_consumption,weapons_names,armour,kill_experience,production_time,conscripts,steel,energy,electronics
-tank_light,Tank,4,6,0.001,(light_tank_gun),1.0,5,15,2,100,100,100
-tank_medium,Tank,2,4,0.003,(medium_tank_gun),1.75,10,25,3,200,250,150
-heavy_tank,Tank,1,2,0.006,(heavy_tank_gun),2.25,20,45,4,350,400,200
-soldier,Soldier,1,6,0,(infantry_rifle),0,1,10,1,10,20,10
-saboteur,SOldier,2,6,0,(pistol),0,1,12,1,5,10,5
+object_name,class,max_speed,rotation_speed,fuel_consumption,weapons_names,armour,kill_experience,production_time,conscripts,steel,energy,electronics,max_health
+tank_light,Tank,4,6,0.001,(light_tank_gun),1.0,5,15,2,100,100,100,100
+tank_medium,Tank,2,4,0.003,(medium_tank_gun),1.75,10,25,3,200,250,150,150
+heavy_tank,Tank,1,2,0.006,(heavy_tank_gun),2.25,20,45,4,350,400,200,250
+soldier,Soldier,1,6,0,(sniper_rifle),0,1,10,1,10,20,10,25
+saboteur,Soldier,2,6,0,(pistol),0,1,12,1,5,10,5,25
+engineer,Soldier,1,4,0,None,0,1,10,1,5,10,5,25
+sniper,Soldier,2,6,0,(sniper_rifle),0,10,20,1,5,10,15,25

@@ -39,7 +39,8 @@ from utils.functions import (
     get_path_to_file, get_screen_size, to_rgba, SEPARATOR,
     ignore_in_editor_mode
 )
-from utils.logging import log, logger, timer
+from utils.logging import log, logger
+from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList,
@@ -97,8 +98,6 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
-    infantry_damage_factor: float = 2.0
-    buildings_damage_factor: float = 0.1
 
 
 class GameWindow(Window, EventsCreator):
@@ -517,7 +516,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 [u.position for u in self.local_human_player.units]
             )
             self.window.move_viewport_to_the_position(*position)
-        self.update_interface_position(self.viewport[1], self.viewport[-1])
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
@@ -661,12 +659,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def after_loading(self):
         self.window.show_view(self)
-        # self.generate_random_map_objects()
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
         self.drawn.insert(-2, self.fog_of_war)
         super().after_loading()
         self.generate_random_map_objects()
+        self.update_interface_position(self.viewport[1], self.viewport[3])
 
     def update_timer(self):
         seconds = time.time() - self.timer['start']
@@ -685,7 +683,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def load_timer(self, loaded_timer):
         """
         Subtract total time played from loading time to correctly reset timer
-        after loading game.
+        after loading game and continue time-counting from where it was stopped
+        last time.
         """
         self.timer = loaded_timer
         self.timer['start'] = time.time() - loaded_timer['total']
