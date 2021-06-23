@@ -6,7 +6,7 @@ import time
 
 from abc import abstractmethod
 from collections import deque
-from typing import Deque, List, Dict, Optional, Set, Union, Generator
+from typing import Deque, List, Dict, Optional, Set, Union
 
 from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
@@ -22,8 +22,7 @@ from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
 from utils.colors import GREEN
 from utils.scheduling import ScheduledEvent
-from utils.functions import (get_path_to_file, get_texture_size,
-                             name_with_extension, ignore_in_editor_mode)
+from utils.functions import (get_path_to_file, get_texture_size)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS
@@ -216,7 +215,7 @@ class Unit(PlayerEntity):
     def has_destination(self) -> bool:
         return self.path or self.awaited_path or self in Pathfinder.instance
 
-    def wait_for_free_path(self, path: Union[deque, MapPath]):
+    def wait_for_free_path(self, path: Deque):
         """
         Waiting for free path is useful when next node is only temporarily
         blocked (blocking Unit is moving) and allows to avoid pathfinding
@@ -259,20 +258,19 @@ class Unit(PlayerEntity):
 
     def update_pathfinding(self):
         if self.awaited_path is not None:
-            self.countdown_waiting()
-        if self.path:
+            self.countdown_waiting(self.awaited_path)
+        elif self.path:
             self.follow_path()
         else:
             self.stop()
 
-    def countdown_waiting(self):
+    def countdown_waiting(self, path):
         if time.time() >= self.path_wait_counter:
-            path = self.awaited_path
             node = self.map.position_to_node(*path[0])
             if node.walkable or len(path) < 20:
                 self.restart_path(path)
             else:
-                self.wait_for_free_path(path)
+                self.path_wait_counter += 1
 
     def restart_path(self, path):
         if len(path) > 20:
@@ -323,7 +321,6 @@ class Unit(PlayerEntity):
 
     def move_to_current_waypoint(self, destination, distance_left):
         angle = calculate_angle(*self.position, *destination)
-        # self.angle_to_texture(angle)
         self.current_speed = speed = min(distance_left, self.max_speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
 
@@ -333,10 +330,9 @@ class Unit(PlayerEntity):
         self.game.pathfinder.request_path(self, start, destination)
 
     def create_new_path(self, new_path: MapPath):
-        old_path = [self.path.popleft()] if self.path else []
         self.path.clear()
-        self.path.extend(old_path + new_path[1:])
         self.awaited_path = None
+        self.path.extend(new_path[1:])
         self.unschedule_earlier_move_orders()
 
     def unschedule_earlier_move_orders(self):
@@ -352,7 +348,7 @@ class Unit(PlayerEntity):
         self.cancel_path_requests()
         self.awaited_path = None
         self.path.clear()
-        self.stop()
+        # self.stop()
 
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)

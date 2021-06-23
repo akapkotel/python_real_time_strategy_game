@@ -48,9 +48,8 @@ from utils.improved_spritelists import (
 from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
-
-
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
@@ -86,7 +85,8 @@ DEBUG = False
 class Settings:
     """
     Just a simple data container for convenient storage and acces to bunch of
-    minor variables, which would overcrowd Window __init__.
+    minor variables, which would overcrowd Window __init__. It also helps to
+    share many attributes between GameWindow and Game classes easily.
     """
     fps: int = FPS
     full_screen: bool = FULL_SCREEN
@@ -168,18 +168,12 @@ class GameWindow(Window, EventsCreator):
 
     @property
     def is_game_running(self) -> bool:
-        return self.current_view == self.game_view
+        return self.current_view is self.game_view
 
     def start_new_game(self):
         if self.game_view is None:
             self.game_view = Game(loader=None)
         self.show_view(self.game_view)
-
-    @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
-    def quit_current_game(self):
-        self.game_view.unload()
-        self.show_view(self.menu_view)
-        self.menu_view.toggle_game_related_buttons()
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_update(self, delta_time: float):
@@ -312,6 +306,12 @@ class GameWindow(Window, EventsCreator):
             loader = self.save_manager.load_game(save_name=selected_save.name)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
+
+    @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
+    def quit_current_game(self):
+        self.game_view.unload()
+        self.show_view(self.menu_view)
+        self.menu_view.toggle_game_related_buttons()
 
     @ask_player_for_confirmation(SCREEN_CENTER, 'loading menu')
     def delete_saved_game(self):
