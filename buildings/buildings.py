@@ -43,6 +43,7 @@ class UnitsProducer:
     @logger(console=True)
     def start_production(self, unit: str):
         if unit in self.produced_units and self.enough_resources(unit):
+            self.consume_resources(unit)
             if self.currently_produced is None:
                 self._start_production(unit, confirmation=True)
             self.production_queue.appendleft(unit)
@@ -57,7 +58,6 @@ class UnitsProducer:
 
     def _start_production(self, unit: str, confirmation=False):
         self.set_production_progress_and_speed(unit)
-        self.consume_resources(unit)
         self._toggle_production(produced=unit)
         if confirmation:
             self.game.window.sound_player.play_sound('production_started.wav')
@@ -78,27 +78,38 @@ class UnitsProducer:
         production_time = self.game.configs['units'][product]['production_time']
         self.production_time = production_time * self.game.settings.fps
 
-    def _toggle_production(self, produced):
+    def _toggle_production(self, produced: Optional[str]):
         self.currently_produced = produced
 
     def update_units_production(self):
+        self.update_production_buttons(progress=self.production_progress)
         if self.currently_produced is not None:
             self.production_progress += 1
-            self.update_production_button(progress=self.production_progress)
             if self.production_progress == self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
             self._start_production(unit=self.production_queue[-1])
 
-    def update_production_button(self, progress):
+    def update_production_buttons(self, progress):
         if (panel := self.game.get_bundle(BUILDINGS_PANEL)).displayed:
-            production_button = panel.find_by_name(self.currently_produced)
-            production_button.progress = (progress / self.production_time) * 100
+            for produced in self.produced_units:
+                button = panel.find_by_name(produced)
+                self.update_single_button(button, produced, progress)
+
+    def update_single_button(self, button, produced, progress):
+        button.counter = self.production_queue.count(produced)
+        if produced == self.currently_produced:
+            button.progress = (progress / self.production_time) * 100
+        else:
+            button.progress = 0
+
+    def count_enqueued(self, unit: str) -> int:
+        return sum(1 for u in self.production_queue if u == unit)
 
     @logger(console=True)
     def finish_production(self, finished_unit: str):
         self.production_progress = progress = 0
-        self.update_production_button(progress)
+        self.update_production_buttons(progress)
         self._toggle_production(produced=None)
         self.spawn_finished_unit(finished_unit)
         self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
@@ -111,7 +122,7 @@ class UnitsProducer:
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
         for i, unit in enumerate(self.produced_units):
-            b = ProgressButton(unit + '_icon.png', x, y + 50 * i, unit,
+            b = ProgressButton(unit + '_icon.png', x, y + 105 * i, unit,
                                functions=partial(self.start_production, unit))
             production_buttons.append(b)
         return production_buttons

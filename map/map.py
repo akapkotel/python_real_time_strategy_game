@@ -71,6 +71,10 @@ def adjacent_map_grids(x: Number, y: Number) -> List[GridPosition]:
     return [(grid[0] + p[0], grid[1] + p[1]) for p in ADJACENT_OFFSETS]
 
 
+def adjacent_distance(this: GridPosition, adjacent: GridPosition) -> int:
+    return DIAGONAL_DIST if diagonal(this, adjacent) else VERTICAL_DIST
+
+
 def diagonal(first_grid: GridPosition, second_grid: GridPosition) -> bool:
     return first_grid[0] != second_grid[0] and first_grid[1] != second_grid[1]
 

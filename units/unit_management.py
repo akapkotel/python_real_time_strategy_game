@@ -66,7 +66,9 @@ class SelectedEntityMarker:
         self.position = x, y = selected.position
         self.selected = selected
         self.borders = Sprite(center_x=x, center_y=y)
-        self.sprites = []  # not updated, used to cache and kill sprites only
+        # store our own references to Sprites to kill them when marker is
+        # killed after it's Entity was unselected:
+        self.sprites = []
 
         self.health = health = selected.health_percentage
         width, height, color = self.health_to_color_and_size(health)

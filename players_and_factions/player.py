@@ -141,11 +141,11 @@ class ResourcesManager:
             setattr(self, f"{resource_name}_yield_per_frame", 0.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
 
-    def resource(self, resource: str):
+    def resource(self, resource: str) -> int:
         return getattr(self, resource, 0)
 
-    def has_resource(self, resource: str, amount: int = 1):
-        return getattr(self, resource, 0) >= amount
+    def has_resource(self, resource: str, amount: int = 1) -> bool:
+        return self.resource(resource) >= amount
 
     def notify_player_of_resource_deficit(self, resource: str):
         sound = f'not_enough_{resource}.wav'
@@ -162,8 +162,7 @@ class ResourcesManager:
             setattr(self, resource_name, stock + change)
 
     def consume_resource(self, resource_name: str, amount: float):
-        stock = getattr(self, resource_name)
-        setattr(self, resource_name, stock - amount)
+        setattr(self, resource_name, getattr(self, resource_name) - amount)
 
 
 class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):

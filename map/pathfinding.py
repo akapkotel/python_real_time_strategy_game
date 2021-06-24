@@ -11,10 +11,10 @@ from utils.logging import log
 from utils.timing import timer
 from utils.classes import PriorityQueue
 from game import PROFILING_LEVEL
-from map.map import MapNode, MapPath, VERTICAL_DIST, diagonal, Map
+from map.map import (MapNode, MapPath, Map, VERTICAL_DIST, adjacent_distance)
 
 
-@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=True)
+@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
 def a_star(map: Map,
            start: GridPosition,
            end: GridPosition,
@@ -56,8 +56,7 @@ def a_star(map: Map,
             #  using real terrain costs and calculate fast heuristic for
             #  each waypoints pair, because it efficiently finds best
             #  path, but it ignores tiles-moving-costs:
-            cost_to_adjacent = 14 if diagonal(current, adjacent_grid) else 10
-            total = cost_so_far[current] + cost_to_adjacent
+            total = cost_so_far[current] + adjacent_distance(current, adjacent_grid)
             if total < cost_so_far[adjacent_grid]:
                 previous[adjacent_grid] = current
                 cost_so_far[adjacent_grid] = total

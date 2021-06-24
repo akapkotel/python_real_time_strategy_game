@@ -700,6 +700,7 @@ class ProgressButton(Button):
     and tracking of this progress is up to user.
     """
     _progress = 0
+    _counter = 0
 
     @property
     def progress(self):
@@ -709,12 +710,22 @@ class ProgressButton(Button):
     def progress(self, value):
         self._progress = clamp(value, 100, 0)
 
+    @property
+    def counter(self):
+        return self._counter
+
+    @counter.setter
+    def counter(self, value: int):
+        self._counter = value
+
     def draw(self):
         super().draw()
         if self._progress:
             top = self.bottom + (self.height * 0.01) * self._progress
             color = to_rgba(GREEN, alpha=150)
             draw_lrtb_rectangle_filled(self.left, self.right, top, self.bottom, color)
+        if self._counter:
+            draw_text(str(self._counter), self.left + 5, self.top - 20, RED)
 
 
 class GenericTextButton(Button):
