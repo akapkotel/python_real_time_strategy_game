@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import time
 from functools import partial
 
 import PIL
@@ -14,6 +15,7 @@ from arcade import (
     draw_lrtb_rectangle_filled
 )
 from arcade.arcade_types import Color
+from arcade.key import BACKSPACE, ENTER
 
 from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
@@ -195,6 +197,12 @@ class UiBundlesHandler(ObjectsOwner):
         # selectable groups allow to group together a bunch of same-context
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
+
+    def set_keyboard_handler(self, handler: KeyboardHandler):
+        for bundle in self.ui_elements_bundles.values():
+            for element in bundle.elements:
+                if isinstance(element, TextInputField):
+                    element.set_keyboard_handler(handler)
 
     def open_confirmation_dialog(self,
                                  position: Tuple,
@@ -934,18 +942,24 @@ class ListBox(UiElement):
     ...
 
 
-class TextInputField(UiElement, list):
+class TextInputField(UiElement):
     """
-    TODO:
+    TextInputField is a keyboard-interactive UiElement, which listen to the
+    bound KeyboardHandler instance and stores pressed keys into the internal
+    list of characters, to be displayed as string.
     """
 
     def __init__(self, texture_name: str, x: int, y: int, name: str,
-                 keyboard_handler: KeyboardHandler):
+                 keyboard_handler: KeyboardHandler = None):
         super().__init__(texture_name, x, y)
+        self.name = name
+        self.input_characters = []
         self.keyboard_handler = keyboard_handler
 
+    def set_keyboard_handler(self, handler: KeyboardHandler):
+        self.keyboard_handler = handler
+
     def on_mouse_press(self, button: int):
-        super().on_mouse_press(button)
         self.bind_to_mouse_and_keyboard_handlers()
 
     def bind_to_mouse_and_keyboard_handlers(self):
@@ -955,25 +969,44 @@ class TextInputField(UiElement, list):
     def unbind_keyboard_handler(self):
         self.keyboard_handler.unbind_keyboard_input_consumer()
 
-    def append(self, symbol: int):
-        if (key := chr(symbol)).isprintable():
-            super().append(key)
+    def receive(self, symbol: int, shift_pressed=False):
+        if symbol == BACKSPACE:
+            self.erase_last_character()
+        elif symbol == ENTER:
+            self.on_enter_pressed()
+        elif self.not_too_long and (key := chr(symbol)).isascii():
+            self.input_characters.append(key.upper() if shift_pressed else key)
 
-    def append(self, symbol: int):
-        if key := chr(symbol).isprintable():
-            super().append(key)
+    @property
+    def not_too_long(self) -> bool:
+        return len(self.input_characters) < 26
+
+    def erase_last_character(self):
+        try:
+            self.input_characters.pop()
+        except IndexError:
+            pass
+
+    def on_enter_pressed(self):
+        for function in self.functions:
+            function()
+
+    def _raw_text(self) -> str:
+        return ''.join(self.input_characters)
 
     def get_text(self) -> str:
-        return ''.join(self)
+        return self._raw_text().strip()
 
     def draw(self):
         super().draw()
-        if len(self) > 0:
+        if self.input_characters:
             self.draw_inner_text()
 
     def draw_inner_text(self):
         x, y = self.position
-        draw_text(self.get_text(), x, y, WHITE, anchor_x='center', anchor_y='center')
+        c = 'center'
+        text = self._raw_text()
+        draw_text(text, x, y, WHITE, 15, bold=True, anchor_x=c, anchor_y=c)
 
 
 class ScrollBar(UiElement):

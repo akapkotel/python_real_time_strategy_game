@@ -58,8 +58,9 @@ class SaveManager(Singleton):
 
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
         extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
-        full_save_path = os.path.join(self.saves_path, save_name + extension)
-        self.delete_saved_game(save_name)  # to avoid 'adding' to existing file
+        path = self.scenarios_path if scenario else self.saves_path
+        full_save_path = os.path.join(path, save_name + extension)
+        self.delete_file(save_name, scenario)  # to avoid 'adding' to existing file
         with shelve.open(full_save_path) as file:
             file['saved_date'] = time.localtime()
             file['timer'] = game.save_timer()
@@ -76,7 +77,7 @@ class SaveManager(Singleton):
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
         self.update_saves()
-        log(f'Game saved successfully as: {save_name + SAVE_EXTENSION}', True)
+        log(f'Game saved successfully as: {save_name + extension}', True)
 
     def get_full_path_to_file_with_extension(self, save_name: str) -> str:
         """
@@ -173,10 +174,11 @@ class SaveManager(Singleton):
     def load_mini_map(self, minimap):
         self.game.mini_map = MiniMap(minimap, loaded=True)
 
-    def delete_saved_game(self, save_name: str):
+    def delete_file(self, save_name: str, scenario: bool):
+        paths = self.saved_games if scenario else self.scenarios
         try:
-            os.remove(self.saved_games[save_name])
-            del self.saved_games[save_name]
+            os.remove(paths[save_name])
+            del paths[save_name]
         except Exception as e:
             log(f'{str(e)}', console=True)
 

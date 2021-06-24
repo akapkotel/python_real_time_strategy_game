@@ -31,7 +31,7 @@ from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
-    SelectableGroup, ask_player_for_confirmation
+    SelectableGroup, ask_player_for_confirmation, TextInputField
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -66,8 +66,8 @@ MINIMAP_HEIGHT = 197
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 50
-COLUMNS = 50
+ROWS = 250
+COLUMNS = 250
 
 FPS = 30
 GAME_SPEED = 1.0
@@ -137,7 +137,7 @@ class GameWindow(Window, EventsCreator):
         self.current_viewport = self.get_viewport()
 
         # keyboard-related:
-        self.keyboard = KeyboardHandler(window=self)
+        self.keyboard = KeyboardHandler(self, self.menu_view)
 
     @property
     def screen_center(self) -> Point:
@@ -280,7 +280,7 @@ class GameWindow(Window, EventsCreator):
         return self.current_view.viewport
 
     def update_saved_games_list(self):
-        loading_menu = self.menu_view.ui_elements_bundles[LOADING_MENU]
+        loading_menu = self.menu_view.get_bundle(LOADING_MENU)
         loading_menu.remove_subgroup(4)
         x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
         self.menu_view.selectable_groups['saves'] = group = SelectableGroup()
@@ -294,9 +294,18 @@ class GameWindow(Window, EventsCreator):
         self.show_view(self.menu_view)
         self.menu_view.switch_to_bundle(name='saving_menu')
 
-    def save_game(self):
-        save_name = f'saved_game({time.asctime()})'
-        self.save_manager.save_game(save_name, self.game_view)
+    def save_game(self, text_input_field: Optional[TextInputField] = None):
+        """
+        Save current game-state into the shelve file with .sav extension.
+
+        :param text_input_field: TextInputField -- field from which name for a
+        new saved-game file should be read. If field is empty, automatic save
+        name would be generated
+        """
+        if not (save_name := text_input_field.get_text()):
+            save_name = f'saved_game({time.asctime()})'
+        scenario = self.settings.editor_mode
+        self.save_manager.save_game(save_name, self.game_view, scenario)
 
     def load_game(self):
         if self.game_view is not None:
@@ -317,7 +326,7 @@ class GameWindow(Window, EventsCreator):
     def delete_saved_game(self):
         saves = self.menu_view.selectable_groups['saves']
         if saves.currently_selected is not None:
-            self.save_manager.delete_saved_game(saves.currently_selected.name)
+            self.save_manager.delete_file(saves.currently_selected.name, False)
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
@@ -790,7 +799,7 @@ if __name__ == '__main__':
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
     from missions.consequences import Defeat, Victory
-    from user_interface.menu import Menu, LOADING_MENU
+    from user_interface.menu import Menu, LOADING_MENU, SAVING_MENU
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager

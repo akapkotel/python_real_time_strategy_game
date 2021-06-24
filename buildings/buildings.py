@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import deque
 from functools import partial
-from typing import Deque, List, Optional, Set, Tuple, Dict, Generator
+from typing import Deque, List, Optional, Set, Tuple, Dict
 
 from arcade.arcade_types import Point
 
@@ -14,7 +14,6 @@ from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import (
     Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 )
-from utils.functions import ignore_in_editor_mode
 from utils.geometry import close_enough, is_visible
 
 
@@ -28,12 +27,18 @@ class UnitsProducer:
     """
 
     def __init__(self, produced_units: Tuple[str]):
+        # Units which are available to produce in this Building:
         self.produced_units = produced_units
+        # Queue of Units to be produced
         self.production_queue: Deque[str] = deque()
+        # Name of the Unit, which is currently in production, if any:
         self.currently_produced: Optional[str] = None
         self.production_progress: int = 0
         self.production_time: int = 0
-        self.deployment_point = self.center_x, self.center_y - 120
+        # Where finished Unit would spawn:
+        self.spawn_point = self.center_x, self.center_y - 120
+        # Point on the Map for finished Units to go after being spawned:
+        self.deployment_point = None
 
     @logger(console=True)
     def start_production(self, unit: str):
@@ -95,8 +100,13 @@ class UnitsProducer:
         self.production_progress = progress = 0
         self.update_production_button(progress)
         self._toggle_production(produced=None)
-        self.game.spawn(finished_unit, self.player, self.deployment_point)
+        self.spawn_finished_unit(finished_unit)
         self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
+
+    def spawn_finished_unit(self, finished_unit: str):
+        unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
+        if self.deployment_point is not None:
+            unit.move_to(self.deployment_point)
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
@@ -213,7 +223,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.detection_radius += self._get_collision_radius()
 
         self.position = self.place_building_properly_on_the_grid()
-        self.occupied_nodes: List[MapNode] = self.block_map_nodes()
+        self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
     @property
@@ -230,7 +240,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         offset_y = 0 if (self.height // TILE_HEIGHT) % 3 == 0 else TILE_HEIGHT // 2
         return self.center_x + offset_x, self.center_y + offset_y
 
-    def block_map_nodes(self) -> List[MapNode]:
+    def block_map_nodes(self) -> Set[MapNode]:
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         max_x_grid = int(self.right // TILE_WIDTH)
@@ -241,7 +251,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             range(min_y_grid, max_y_grid)
         }
         [self.block_map_node(node) for node in occupied_nodes]
-        return list(occupied_nodes)
+        return set(occupied_nodes)
 
     @property
     def moving(self) -> bool:

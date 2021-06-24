@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import math
 
-from functools import lru_cache
 from collections import defaultdict
 from typing import Dict, Union
 
@@ -12,11 +11,11 @@ from utils.logging import log
 from utils.timing import timer
 from utils.classes import PriorityQueue
 from game import PROFILING_LEVEL
-from map.map import MapNode, MapPath
+from map.map import MapNode, MapPath, VERTICAL_DIST, diagonal, Map
 
 
-@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
-def a_star(map_nodes: Dict[GridPosition, MapNode],
+@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=True)
+def a_star(map: Map,
            start: GridPosition,
            end: GridPosition,
            pathable: bool = False) -> Union[MapPath, bool]:
@@ -33,7 +32,8 @@ def a_star(map_nodes: Dict[GridPosition, MapNode],
     found
     """
     log(f'Searching for path from {start} to {end}...')
-    unexplored = PriorityQueue(start, heuristic(start, end) * 1.001)
+    map_nodes = map.nodes
+    unexplored = PriorityQueue(start, heuristic(start, end))
     explored = set()
     previous: Dict[GridPosition, GridPosition] = {}
 
@@ -56,34 +56,23 @@ def a_star(map_nodes: Dict[GridPosition, MapNode],
             #  using real terrain costs and calculate fast heuristic for
             #  each waypoints pair, because it efficiently finds best
             #  path, but it ignores tiles-moving-costs:
-            total = cost_so_far[current] + heuristic(adjacent_grid, current)
+            cost_to_adjacent = 14 if diagonal(current, adjacent_grid) else 10
+            total = cost_so_far[current] + cost_to_adjacent
             if total < cost_so_far[adjacent_grid]:
                 previous[adjacent_grid] = current
                 cost_so_far[adjacent_grid] = total
-                priority = total + heuristic(adjacent_grid, end) * 1.001
+                priority = total + heuristic(adjacent_grid, end)
                 put_to_unexplored(adjacent_grid, priority)
-        explored.update(walkable)
+            explored.add(adjacent)
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:
-        return a_star(map_nodes, start, end, pathable=True)
+        return a_star(map, start, end, pathable=True)
     return False  # no third pass, if there is no possible path!
 
 
-def heuristic(start: GridPosition, end: GridPosition) -> float:
-    return abs(end[0] - start[0]) + abs(end[1] - start[1])
-    # distances = (end[0] - start[0]), (end[1] - start[1])
-    # x_dist, y_dist = sorted(distances)  # to avoid duplicating keys
-    # return self.euclidean_distances(x_dist, y_dist)
-
-@lru_cache
-def euclidean_distances(self, x_dist, y_dist):
-    """
-    Calculate heuristic distance between two GridPositions using built-in
-    math.hypot function and lru_cache to store already calculated distances
-    (since we have a finite number of possible distances on the map grid).
-    """
-    return math.hypot(x_dist, y_dist)
+def heuristic(start: GridPosition, end: GridPosition) -> int:
+    return (abs(end[0] - start[0]) + abs(end[1] - start[1])) * VERTICAL_DIST
 
 
 def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],

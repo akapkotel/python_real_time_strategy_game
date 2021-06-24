@@ -85,9 +85,9 @@ class SelectedEntityMarker:
 
     def update(self):
         self.position = x, y = self.selected.position
-        self.update_healthbar(x)
         for sprite in self.sprites[:-1]:
             sprite.position = x, y
+        self.update_healthbar(x)
 
     def update_healthbar(self, x):
         if (health := self.selected.health_percentage) != self.health:

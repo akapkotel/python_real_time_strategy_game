@@ -28,7 +28,8 @@ from utils.geometry import distance_2d, calculate_circular_area
 
 
 PATH = 'PATH'
-DIAGONAL = 1.4142  # approx square root of 2
+VERTICAL_DIST = 10
+DIAGONAL_DIST = 14  # approx square root of 2
 MAP_TEXTURES = {
     'mud': load_spritesheet(
         get_path_to_file('mud_tileset_6x6.png'), 60, 45, 4, 16, 0)
@@ -70,8 +71,8 @@ def adjacent_map_grids(x: Number, y: Number) -> List[GridPosition]:
     return [(grid[0] + p[0], grid[1] + p[1]) for p in ADJACENT_OFFSETS]
 
 
-def diagonal(first_id: GridPosition, second_id: GridPosition) -> bool:
-    return first_id[0] != second_id[0] and first_id[1] != second_id[1]
+def diagonal(first_grid: GridPosition, second_grid: GridPosition) -> bool:
+    return first_grid[0] != second_grid[0] and first_grid[1] != second_grid[1]
 
 
 def random_terrain_texture() -> Texture:
@@ -115,10 +116,12 @@ class Map:
         # adjacent ones instead of whole map for enemies:
         self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
+        self.distances: Dict[GridPosition, Dict[GridPosition, int]] = {}
 
         self.generate_sectors()
         self.generate_nodes()
-        self.calculate_distances_between_nodes()
+        # self.calculate_distances_between_nodes()
+        # TODO: find efficient way to use these costs in pathfinding
 
         try:
             trees = map_settings['trees']
@@ -209,14 +212,14 @@ class Map:
         self.game.terrain_tiles.append(sprite)
 
     def calculate_distances_between_nodes(self):
-        distances: Dict[(GridPosition, GridPosition), float] = {}
         for node in self.nodes.values():
+            self.distances[node.grid] = {}
             for grid in self.in_bounds(adjacent_map_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
-                distance = DIAGONAL if diagonal(node.grid, grid) else 1
-                distance *= (node.terrain_cost + adjacent_node.terrain_cost)
-                node.costs[grid] = distance
-        return distances
+                distance = DIAGONAL_DIST if diagonal(node.grid, grid) else VERTICAL_DIST
+                terrain_cost = (node.terrain_cost + adjacent_node.terrain_cost)
+                # node.costs[grid] = distance * terrain_cost
+                self.distances[node.grid][grid] = distance * terrain_cost
 
     @logger()
     def plant_trees(self, trees: Optional[Dict[GridPosition, int]] = None):
@@ -266,7 +269,7 @@ class Sector:
         """
         self.grid = grid
         self.map.sectors[grid] = self
-        self.units_and_buildings: DefaultDict[int, Set[PlayerEntity]] = defaultdict(set)
+        self.units_and_buildings: DefaultDict[int, Set[Union[Unit, Building]]] = defaultdict(set)
 
     def get_entities(self, player_id: int) -> Optional[Set[PlayerEntity]]:
         return self.units_and_buildings.get(player_id)
@@ -483,7 +486,7 @@ class NavigatingUnitsGroup:
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
         start = units[0].current_node.grid
-        path = a_star(self.map.nodes, start, self.destination, True)
+        path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
             self.slice_paths(units, destinations, path)
@@ -586,16 +589,19 @@ class Pathfinder(EventsCreator):
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
 
     def update(self):
+        self.update_waypoints_queues()
+        self.update_navigating_groups()
+        self.process_next_path_request()
+
+    def process_next_path_request(self):
         """
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
         """
-        self.update_waypoints_queues()
-        self.update_navigating_groups()
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
             if self.map.grid_to_node(destination).walkable:
-                if path := a_star(self.map.nodes, start, destination):
+                if path := a_star(self.map, start, destination):
                     self.paths_found += 1
                     return unit.create_new_path(path)
             self.request_path(unit, start, destination)

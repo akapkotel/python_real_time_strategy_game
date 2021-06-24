@@ -362,6 +362,9 @@ class Unit(PlayerEntity):
         elif (enemies := self.known_enemies) and not self.is_building:
             self.move_towards_enemies_nearby(enemies)
 
+    def run_away(self):
+        pass
+
     def visible_for(self, other: PlayerEntity) -> bool:
         other: Union[Unit, Building]
         if self.player is self.game.local_human_player and not other.is_unit:

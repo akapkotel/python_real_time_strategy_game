@@ -4,7 +4,7 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField
 )
 from utils.views import LoadableWindowView
 
@@ -120,13 +120,14 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=window.load_game),
                 Button('menu_button_deletesave.png', x, next(y),
-                       functions=window.delete_saved_game),
+                       functions=window.delete_saved_game)
             ],
             register_to=self,
             _on_load=window.update_saved_games_list
         )
 
-        y = (i for i in range(300, SCREEN_HEIGHT, 125))
+        y = (i for i in range(675, 300, -125))
+        text_input = TextInputField('text_input_field.png', x, next(y), 'input')
         saving_menu = UiElementsBundle(
             index=2,
             name=SAVING_MENU,
@@ -134,7 +135,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 back_to_menu_button,
                 # left column - ui-buttons:
                 Button('menu_button_savegame.png', x, next(y),
-                       functions=window.save_game),
+                       functions=partial(window.save_game, text_input)),
+                text_input
             ],
             register_to=self,
             _on_load=window.update_saved_games_list

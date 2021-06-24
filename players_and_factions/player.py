@@ -5,7 +5,7 @@ import random
 
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Tuple, Union, Generator
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
@@ -227,16 +227,11 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
 
     def update(self):
         self.known_enemies.clear()
-        self.clear_mutually_detected_enemies()
         self._update_resources_stock()
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
         self.known_enemies.update(enemies)
         self.faction.known_enemies.update(enemies)
-
-    def clear_mutually_detected_enemies(self):
-        for entity in self.units | self.buildings:
-            entity.mutually_detected_enemies.clear()
 
     @property
     def defeated(self) -> bool:
@@ -309,12 +304,6 @@ class PlayerEntity(GameObject):
         # Each Unit or Building keeps a set containing enemies it actually
         # sees and updates this set each frame:
         self.known_enemies: Set[PlayerEntity] = set()
-
-        # when an Unit or Building detect enemy, enemy detects it too
-        # automatically, to decrease number of is_visible functions calls:
-        self.mutually_detected_enemies: Set[PlayerEntity] = set()
-
-        self.nearby_friends: Set[PlayerEntity] = set()
 
         self.targeted_enemy: Optional[PlayerEntity] = None
 
@@ -437,7 +426,7 @@ class PlayerEntity(GameObject):
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
-        self.known_enemies = enemies.union(self.mutually_detected_enemies)
+        self.known_enemies = enemies
 
     @ignore_in_editor_mode
     def update_targeted_enemy(self):
@@ -474,20 +463,20 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        enemies = set()
+        enemies = []
         for sector in self.get_sectors_to_scan_for_enemies():
             for player_id, entities in sector.units_and_buildings.items():
                 if self.game.players[player_id].is_enemy(self.player):
-                    enemies.update(entities)
+                    enemies.extend(entities)
         return {e for e in enemies if self.in_observed_area(e)}
 
     def in_observed_area(self, other: Union[Unit, Building]) -> bool:
-        try:  # Unit
+        try:
             return other.current_node in self.observed_nodes
-        except AttributeError:  # Building
-            return len(self.observed_nodes.intersection(other.occupied_nodes)) > 0
+        except AttributeError:
+            return len(self.observed_nodes & other.occupied_nodes) > 0
 
-    def in_range(self, other: Union[Unit, Building]) -> bool:
+    def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
     @property
@@ -512,7 +501,7 @@ class PlayerEntity(GameObject):
             self.targeted_enemy = None
 
     @abstractmethod
-    def get_sectors_to_scan_for_enemies(self) -> Generator[Sector]:
+    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         raise NotImplementedError
 
     def visible_for(self, other: PlayerEntity) -> bool:

@@ -5,18 +5,21 @@ from typing import Set, Optional
 from arcade import Window
 from arcade.key import *
 
-from user_interface.user_interface import ToggledElement, TextInputField
+from user_interface.user_interface import (
+    ToggledElement, TextInputField, UiBundlesHandler
+)
 from utils.functions import ignore_in_menu, ignore_in_game
-from utils.logging import log, logger
+from utils.logging import log
 
 
 class KeyboardHandler(ToggledElement):
     keys_pressed: Set[int] = set()
 
-    def __init__(self, window: Window):
+    def __init__(self, window: Window, text_input_consumer: UiBundlesHandler):
         super().__init__()
         self.window = window
         self.keyboard_input_consumer: Optional[TextInputField] = None
+        text_input_consumer.set_keyboard_handler(handler=self)
 
     def on_key_press(self, symbol: int):
         log(f'Pressed key: {symbol} other pressed keys: {self.keys_pressed}')
@@ -72,7 +75,7 @@ class KeyboardHandler(ToggledElement):
 
     @ignore_in_game
     def send_key_to_input_consumer(self, symbol: int):
-        self.keyboard_input_consumer.append(symbol)
+        self.keyboard_input_consumer.receive(symbol, LSHIFT in self.keys_pressed)
 
     def bind_keyboard_input_consumer(self, consumer: TextInputField):
         self.keyboard_input_consumer = consumer
