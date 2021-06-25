@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import random
 from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict
@@ -36,25 +37,17 @@ class UnitsProducer:
         self.production_progress: int = 0
         self.production_time: int = 0
         # Where finished Unit would spawn:
-        self.spawn_point = self.center_x, self.center_y - 120
+        self.spawn_point = self.center_x, self.center_y - 3 * TILE_HEIGHT
         # Point on the Map for finished Units to go after being spawned:
         self.deployment_point = None
 
     @logger(console=True)
     def start_production(self, unit: str):
-        if unit in self.produced_units and self.enough_resources(unit):
-            self.consume_resources(unit)
+        if self.player.enough_resources_for(expense=unit):
+            self.consume_resources_from_the_pool(unit)
             if self.currently_produced is None:
                 self._start_production(unit, confirmation=True)
             self.production_queue.appendleft(unit)
-
-    def enough_resources(self, unit: str) -> bool:
-        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
-            required_amount = self.game.configs['units'][unit][resource]
-            if not self.player.has_resource(resource, required_amount):
-                self.player.notify_player_of_resource_deficit(resource)
-                return False
-        return True
 
     def _start_production(self, unit: str, confirmation=False):
         self.set_production_progress_and_speed(unit)
@@ -62,16 +55,40 @@ class UnitsProducer:
         if confirmation:
             self.game.window.sound_player.play_sound('production_started.wav')
 
-    def consume_resources(self, unit: str):
+    def consume_resources_from_the_pool(self, unit: str):
         for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
             required_amount = self.game.configs['units'][unit][resource]
             self.player.consume_resource(resource, required_amount)
 
-    def cancel_production(self):
-        if self.currently_produced:
-            self._toggle_production(produced=None)
-        self.production_progress = 0.0
-        self.production_queue.clear()
+    def cancel_production(self, unit: str):
+        """
+        First remove scheduled production, if more than 1 Unit is in queue.
+        Then, if onl one is produced, cancel current production. Return to the
+        pool resources supposed to be used in Unit production.
+        """
+        if unit in (queue := self.production_queue):
+            self.remove_unit_from_production_queue(unit)
+            self.return_resources_to_the_pool(unit)
+            if unit == self.currently_produced and unit not in queue:
+                self._toggle_production(produced=None)
+                self.production_progress = 0.0
+
+    def remove_unit_from_production_queue(self, unit):
+        self.production_queue.reverse()
+        self.production_queue.remove(unit)
+        self.production_queue.reverse()
+
+    def return_resources_to_the_pool(self, unit):
+        """
+        If production was already started, some resources would be lost. Only
+        resources 'reserved' for enqueued production are fully returned.
+        """
+        returned = 1
+        if unit not in self.production_queue:
+            returned = self.production_progress / self.production_time
+        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+            required_amount = self.game.configs['units'][unit][resource]
+            self.player.add_resource(resource, required_amount * returned)
 
     def set_production_progress_and_speed(self, product: str):
         self.production_progress = 0
@@ -82,7 +99,8 @@ class UnitsProducer:
         self.currently_produced = produced
 
     def update_units_production(self):
-        self.update_production_buttons(progress=self.production_progress)
+        if self.player is self.game.local_human_player:
+            self.update_production_buttons(progress=self.production_progress)
         if self.currently_produced is not None:
             self.production_progress += 1
             if self.production_progress == self.production_time:
@@ -103,9 +121,6 @@ class UnitsProducer:
         else:
             button.progress = 0
 
-    def count_enqueued(self, unit: str) -> int:
-        return sum(1 for u in self.production_queue if u == unit)
-
     @logger(console=True)
     def finish_production(self, finished_unit: str):
         self.production_progress = progress = 0
@@ -115,6 +130,10 @@ class UnitsProducer:
         self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
 
     def spawn_finished_unit(self, finished_unit: str):
+        spawn_node = self.game.map.position_to_node(*self.spawn_point)
+        if (unit := spawn_node.unit) is not None:
+            n = random.choice(spawn_node.walkable_adjacent)
+            unit.move_to(n.grid)
         unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
         if self.deployment_point is not None:
             unit.move_to(self.deployment_point)
@@ -124,6 +143,7 @@ class UnitsProducer:
         for i, unit in enumerate(self.produced_units):
             b = ProgressButton(unit + '_icon.png', x, y + 105 * i, unit,
                                functions=partial(self.start_production, unit))
+            b.bind_function(partial(self.cancel_production, unit), 4)
             production_buttons.append(b)
         return production_buttons
 

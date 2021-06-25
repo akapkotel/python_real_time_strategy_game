@@ -161,6 +161,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @logger()
     def on_right_button_press(self, x: float, y: float, modifiers: int):
         self.placeable_gameobject = None
+        if self.pointed_ui_element is not None:
+            self.pointed_ui_element.on_mouse_press(MOUSE_BUTTON_RIGHT)
 
     @logger()
     def on_middle_button_press(self, x: float, y: float, modifiers: int):
@@ -190,7 +192,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_right_button_release(self, x: float, y: float, modifiers: int):
         self.forced_cursor = None
         if self.mouse_dragging:
-            self.mouse_dragging = False
+            self.mouse_dragging = None
+        elif self.pointed_ui_element is not None:
+            pass
         elif self.units_manager.units_or_building_selected:
             self.units_manager.unselect_all_selected()
         else:

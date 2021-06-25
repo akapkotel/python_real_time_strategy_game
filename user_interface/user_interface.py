@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
 from arcade import (
     Sprite, load_texture, draw_rectangle_outline, draw_text,
     draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision,
-    draw_lrtb_rectangle_filled
+    draw_lrtb_rectangle_filled, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT
 )
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
@@ -419,12 +419,14 @@ class CursorInteractive(Hierarchical):
         self.dragged = False
         self.can_be_dragged = can_be_dragged
 
+        self.functions = {MOUSE_BUTTON_LEFT: [], MOUSE_BUTTON_RIGHT: []}
+
         if functions is None:
-            self.functions = []
+            pass
         elif isinstance(functions, Callable):
-            self.functions = [functions, ]
+            self.functions[MOUSE_BUTTON_LEFT] = [functions, ]
         else:
-            self.functions = [f for f in functions]
+            self.functions[MOUSE_BUTTON_LEFT] = [f for f in functions]
 
         self.cursor: Optional['MouseCursor'] = None
 
@@ -451,19 +453,20 @@ class CursorInteractive(Hierarchical):
 
     def on_mouse_press(self, button: int):
         log(f'Mouse button {button} clicked on {self}')
-        if self.functions:
-            self._call_bound_functions()
+        if self.functions[button]:
+            self._call_bound_functions(button)
         self.dragged = self.can_be_dragged
 
-    def _call_bound_functions(self):
-        for function in self.functions:
+    def _call_bound_functions(self, button: int):
+        for function in self.functions[button]:
             function()
 
-    def bind_function(self, function: Callable):
-        self.functions.append(function)
+    def bind_function(self, function: Callable, button: int = MOUSE_BUTTON_LEFT):
+        self.functions[button].append(function)
 
     def unbind_function(self, function=None):
-        self.functions.remove(function)
+        for functions in (f for f in self.functions.values() if function in f):
+            functions.remove(function)
 
     def on_mouse_release(self, button: int):
         self.dragged = False
@@ -520,7 +523,7 @@ class Selectable:
         self.selected = False
         if selectable_group is not None:
             selectable_group.bind_selectable(self)
-            self.functions.append(self.toggle_selection)
+            self.functions[MOUSE_BUTTON_LEFT].append(self.toggle_selection)
 
     def toggle_selection(self):
         self.select() if not self.selected else self.unselect()
@@ -725,7 +728,7 @@ class ProgressButton(Button):
             color = to_rgba(GREEN, alpha=150)
             draw_lrtb_rectangle_filled(self.left, self.right, top, self.bottom, color)
         if self._counter:
-            draw_text(str(self._counter), self.left + 5, self.top - 20, RED)
+            draw_text(str(self._counter), self.left + 5, self.top - 20, RED, 15)
 
 
 class GenericTextButton(Button):
@@ -767,8 +770,8 @@ class Tab(Button):
         self.bundle.switch_to_subgroup(self.subgroup)
         self.deactivate()
 
-    def _call_bound_functions(self):
-        super()._call_bound_functions()
+    def _call_bound_functions(self, button: int):
+        super()._call_bound_functions(button)
         self.deactivate()
 
     def activate(self):

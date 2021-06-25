@@ -31,7 +31,7 @@ from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
-    SelectableGroup, ask_player_for_confirmation, TextInputField
+    SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel
 )
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
@@ -59,7 +59,7 @@ FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
 SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 SCREEN_CENTER = SCREEN_X, SCREEN_Y
-UI_WIDTH = 400
+UI_WIDTH = SCREEN_WIDTH // 5
 MINIMAP_WIDTH = 388
 MINIMAP_HEIGHT = 197
 
@@ -420,14 +420,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         Game.instance = self.window.cursor.game = self
 
     def create_user_interface(self) -> UiSpriteList:
-        ui_x, ui_y = SCREEN_WIDTH * 0.9, SCREEN_Y
-        ui_size = SCREEN_WIDTH // 5, SCREEN_HEIGHT
+        ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
+        ui_size = UI_WIDTH, SCREEN_HEIGHT
+        top_panel = Frame('ui_top_panel.png', SCREEN_X - 190,
+                          SCREEN_HEIGHT+30, SCREEN_WIDTH - UI_WIDTH, 60)
         frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         options_panel = UiElementsBundle(
             name=BASIC_UI,
             index=0,
             elements=[
                 frame,
+                top_panel,
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
@@ -440,6 +443,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                         parent=frame)
             ],
             register_to=self
+        )
+        y = SCREEN_HEIGHT + 30
+        options_panel.extend(
+            [
+                UiTextLabel(110 + 250 * i, y, '0', 15, WHITE, resource)
+                for i, resource in enumerate(Player.resources_names)
+            ]
         )
 
         units_panel = UiElementsBundle(
@@ -532,7 +542,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
-        player = Player(id=2, color=RED, faction=faction)
+        player = HumanPlayer(id=2, color=RED, faction=faction)
         cpu_player = CpuPlayer(color=GREEN)
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)
@@ -785,7 +795,7 @@ if __name__ == '__main__':
     )
     from effects.explosions import Explosion, ExplosionsPool
     from players_and_factions.player import (
-        Faction, Player, CpuPlayer, PlayerEntity
+        Faction, Player, CpuPlayer, PlayerEntity, HumanPlayer
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor

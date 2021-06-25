@@ -10,10 +10,12 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
-from game import Game, UPDATE_RATE
+from game import Game, UPDATE_RATE, BASIC_UI
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
+from user_interface.user_interface import UiElementsBundle, UiTextLabel
+from utils.colors import WHITE, GREEN, RED
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
 from utils.functions import (
@@ -141,6 +143,21 @@ class ResourcesManager:
             setattr(self, f"{resource_name}_yield_per_frame", 0.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
 
+    def enough_resources_for(self, expense: str) -> bool:
+        category = self._identify_expense_category(expense)
+        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+            required_amount = self.game.configs[category][expense][resource]
+            if not self.has_resource(resource, required_amount):
+                self.notify_player_of_resource_deficit(resource)
+                return False
+        return True
+
+    def _identify_expense_category(self, expense: str) -> str:
+        for category, items in self.game.configs.items():
+            if expense in items:
+                return category
+        raise KeyError(f'No such name ({expense}) in configs files!')
+
     def resource(self, resource: str) -> int:
         return getattr(self, resource, 0)
 
@@ -162,7 +179,10 @@ class ResourcesManager:
             setattr(self, resource_name, stock + change)
 
     def consume_resource(self, resource_name: str, amount: float):
-        setattr(self, resource_name, getattr(self, resource_name) - amount)
+        setattr(self, resource_name, getattr(self, resource_name) - abs(amount))
+
+    def add_resource(self, resource_name: str, amount: float):
+        setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
 
 class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
@@ -257,6 +277,28 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
+
+
+class HumanPlayer(Player):
+
+    def __init__(self,
+                 id: Optional[int] = None,
+                 name: Optional[str] = None,
+                 color: Optional[Color] = None,
+                 faction: Optional[Faction] = None):
+        super().__init__(id, name, color, faction)
+
+    def update(self):
+        super().update()
+        self.update_ui_resource_panel()
+
+    def update_ui_resource_panel(self):
+        bundle = self.game.get_bundle(BASIC_UI)
+        for resource in self.resources_names:
+            label = bundle.find_by_name(name=resource)
+            value = int(self.resource(resource))
+            label.text = str(value)
+            label.text_color = RED if not value else GREEN
 
 
 class CpuPlayer(Player):

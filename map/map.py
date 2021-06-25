@@ -538,7 +538,7 @@ class NavigatingUnitsGroup:
     @staticmethod
     def find_next_path_for_unit(unit, steps):
         destination = steps[-1]
-        if unit.reached_destination(destination) or unit.nearby(destination):
+        if unit.reached_destination(destination):  # or unit.nearby(destination)
             steps.pop()
         elif not (unit.has_destination or unit.heading_to(destination)):
             unit.move_to(destination)
