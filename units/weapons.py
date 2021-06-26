@@ -41,16 +41,22 @@ class Weapon:
     def shoot(self, target: PlayerEntity):
         self.next_firing_time = time.time() + self.rate_of_fire
         self.create_shot_audio_visual_effects()
-        hit_chance = self.calculate_hit_chance(target)
-        if gauss(hit_chance, hit_chance / 5) < hit_chance and self.can_penetrate(target):
+        if self.can_penetrate(target) and self.hit_target(target):
             target.on_being_damaged(damage=self.damage)
 
-    def calculate_hit_chance(self, target):
-        experience = self.owner.experience // 20
-        cover = -target.cover
-        movement = -25 if self.owner.moving else 0
-        target_movement = -15 if target.moving else 0
-        return self.accuracy + experience + movement + target_movement + cover
+    def hit_target(self, target: PlayerEntity) -> bool:
+        hit_chance = sum(
+            (
+                self.accuracy,
+                self.owner.experience * 0.05,
+                25 if target.is_building else 0,
+                -target.cover,
+                -25 if self.owner.moving else 0,
+                -15 if target.moving else 0,
+                -25 if target.is_infantry and not self.owner.is_infantry else 0
+            )
+        )
+        return gauss(hit_chance, hit_chance * 0.20) < hit_chance
 
     def create_shot_audio_visual_effects(self):
         self.owner.game.window.sound_player.play_sound(self.shot_sound)

@@ -7,7 +7,7 @@ from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict
 
 from arcade.arcade_types import Point
-
+from units.units import Soldier
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import ProgressButton
 from missions.research import Technology
@@ -102,14 +102,15 @@ class UnitsProducer:
         if self.player is self.game.local_human_player:
             self.update_production_buttons(progress=self.production_progress)
         if self.currently_produced is not None:
-            self.production_progress += 1
-            if self.production_progress == self.production_time:
+            self.production_progress += 0.01 * self.health_percentage
+            if int(self.production_progress) == self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
             self._start_production(unit=self.production_queue[-1])
 
     def update_production_buttons(self, progress):
-        if (panel := self.game.get_bundle(BUILDINGS_PANEL)).displayed:
+        if self.is_selected:
+            panel = self.game.get_bundle(BUILDINGS_PANEL)
             for produced in self.produced_units:
                 button = panel.find_by_name(produced)
                 self.update_single_button(button, produced, progress)
@@ -257,9 +258,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
+        self.garrisoned_soldiers: List[Soldier] = []
+
     @property
     def configs(self):
         return self.game.configs['buildings'][self.object_name]
+
+    @property
+    def is_selected(self) -> bool:
+        return self.game.units_manager.selected_building is self
 
     def place_building_properly_on_the_grid(self) -> Point:
         """
@@ -316,15 +323,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def on_mouse_exit(self):
         selected_building = self.game.units_manager.selected_building
         if self.selection_marker is not None and self is not selected_building:
-            self.game.units_manager.remove_from_selection_markers(self)
+            self.game.units_manager.remove_from_selection_markers(entity=self)
 
     def on_update(self, delta_time: float = 1/60):
-        if self.alive:
-            super().on_update(delta_time)
-            self.update_production()
-            self.update_observed_area()
-        else:
-            self.kill()
+        super().on_update(delta_time)
+        self.update_production()
+        self.update_observed_area()
 
     def update_production(self):
         if self.is_units_producer:
@@ -340,20 +344,22 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             return is_visible(self.position, other.position, obstacles)
         return False
 
-    def get_nearby_friends(self) -> Set[PlayerEntity]:
-        friends: Set[PlayerEntity] = set()
-        for sector in self.occupied_sectors:
-            friends.update(u for u in sector.units_and_buildings[self.player.id])
-        return friends
-
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         sectors = set()
         for sector in self.occupied_sectors:
             sectors.update(sector.adjacent_sectors())
         return list(sectors)
 
-    def on_soldier_enter(self, soldier):
-        raise NotImplementedError
+    def on_soldier_enter(self, soldier: Soldier):
+        self.garrisoned_soldiers.append(soldier)
+        soldier.position = self.position
+
+    def on_soldier_exit(self):
+        try:
+            soldier = self.garrisoned_soldiers.pop()
+            soldier.leave_building()
+        except IndexError:
+            pass
 
     def on_being_damaged(self, damage: float) -> bool:
         # TODO: killing personnel inside Building

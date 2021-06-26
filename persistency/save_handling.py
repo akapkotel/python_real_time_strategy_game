@@ -175,7 +175,7 @@ class SaveManager(Singleton):
         self.game.mini_map = MiniMap(minimap, loaded=True)
 
     def delete_file(self, save_name: str, scenario: bool):
-        paths = self.saved_games if scenario else self.scenarios
+        paths = self.scenarios if scenario else self.saved_games
         try:
             os.remove(paths[save_name])
             del paths[save_name]

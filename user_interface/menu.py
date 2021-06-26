@@ -4,7 +4,8 @@ from __future__ import annotations
 from functools import partial
 
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField
+    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
+    UiTextLabel
 )
 from utils.views import LoadableWindowView
 
@@ -20,7 +21,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):
         super().__init__()
-        UiBundlesHandler.__init__(self)
+        UiBundlesHandler.__init__(self, use_spatial_hash=True)
         self.set_updated_and_drawn_lists()
         self.create_submenus()
 
@@ -183,6 +184,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name='campaign menu',
             elements=[
                 back_to_menu_button,
+                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
             ],
             register_to=self
         )
@@ -192,6 +194,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name='multiplayer menu',
             elements=[
                 back_to_menu_button,
+                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
             ],
             register_to=self
         )

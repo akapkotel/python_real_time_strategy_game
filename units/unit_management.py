@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import (
-    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection
+    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection, List
 )
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
@@ -13,13 +13,15 @@ from buildings.buildings import Building
 from effects.sound import (
     UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
 )
+from units.units_tasking import UnitTask, TaskEnterBuilding
 from utils.classes import HashedList
 from utils.colors import GREEN, RED, YELLOW
 from game import Game
 from players_and_factions.player import PlayerEntity
-from units.units import Unit, Vehicle
+from units.units import Unit, Vehicle, Soldier
 from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
+from utils.scheduling import EventsCreator
 
 UNIT_HEALTH_BAR_WIDTH = 5
 SOLDIER_HEALTH_BAR_WIDTH = 4
@@ -209,7 +211,7 @@ class PermanentUnitsGroup:
             unit.permanent_units_group = 0
 
 
-class UnitsManager:
+class UnitsManager(EventsCreator):
     """
     This class is an intermediary between Cursor class and PlayerEntities. It
     allows player to interact with units, buildings etc. by the mouse-cursor.
@@ -220,7 +222,12 @@ class UnitsManager:
     game: Optional[Game] = None
 
     def __init__(self, cursor):
+        """
+        :param cursor: MouseCursor -- reference to the cursor used in game
+        """
+        super().__init__()
         self.cursor = cursor
+        self.cursor.bind_units_manager(manager=self)
         self.window = cursor.window
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
@@ -240,12 +247,14 @@ class UnitsManager:
         # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
+        self.tasks: List[UnitTask] = []
+
     @property
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
 
     @ignore_in_menu
-    def on_left_click_without_selection(self, modifiers, x, y):
+    def on_left_click_no_selection(self, modifiers, x, y):
         pointed = self.cursor.pointed_unit or self.cursor.pointed_building
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
@@ -278,25 +287,41 @@ class UnitsManager:
 
     def on_friendly_player_entity_clicked(self, clicked: PlayerEntity):
         clicked: Union[Unit, Building]
-        self.unselect_all_selected()
         if clicked.is_building:
             self.on_building_clicked(clicked)
         else:
             self.on_unit_clicked(clicked)
 
     def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
-        cx, cy = clicked.position
-        x, y = self.game.pathfinder.get_closest_walkable_position(cx, cy)
-        self.send_units_to_pointed_location(units, x, y)
+        self.send_units_to_pointed_location(units, *clicked.position)
 
     def on_unit_clicked(self, clicked_unit: Unit):
+        self.unselect_all_selected()
         self.select_units(clicked_unit)
 
     def on_building_clicked(self, clicked_building: Building):
-        # TODO: resolving possible building-related tasks for units first
-        self.select_building(clicked_building)
+        if self.only_soldiers_selected:
+            soldiers = self.get_selected_soldiers()
+            self.send_soldiers_to_building(clicked_building, soldiers)
+        else:
+            self.select_building(clicked_building)
+
+    @property
+    def only_soldiers_selected(self) -> bool:
+        if not self.selected_units:
+            return False
+        return all(s for s in self.selected_units if s.is_infantry)
+
+    def get_selected_soldiers(self) -> List[Soldier]:
+        return [s for s in self.selected_units if s.is_infantry]
+
+    def send_soldiers_to_building(self, building: Building, soldiers: List[Soldier]):
+        print(f'Soldiers {soldiers} were sent to {building}')
+        self.send_units_to_pointed_location(soldiers, *building.position)
+        self.tasks.append(TaskEnterBuilding(self, soldiers, building))
 
     def select_building(self, building: Building):
+        self.unselect_all_selected()
         self.selected_building = building
         self.create_selection_markers(building=building)
         self.game.update_interface_content(context=building)
@@ -341,8 +366,8 @@ class UnitsManager:
     @ignore_in_menu
     def unselect_all_selected(self):
         self.selected_units.clear()
-        self.clear_selection_markers()
         self.selected_building = None
+        self.clear_selection_markers()
         self.game.update_interface_content(context=None)
 
     def clear_selection_markers(self,
@@ -376,6 +401,7 @@ class UnitsManager:
             pass
 
     def on_human_entity_being_killed(self, entity: PlayerEntity):
-        if len(self.selected_units) == 1 and entity in self.selected_units:
-            self.unselect_all_selected()
-        self.cursor.update_cursor_texture()
+        self.remove_from_selection_markers(entity=entity)
+        self.selected_units.remove(entity)
+        if not self.selected_units:
+            self.cursor.update_cursor_texture()

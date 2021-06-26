@@ -14,8 +14,7 @@ from game import Game, UPDATE_RATE, BASIC_UI
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
-from user_interface.user_interface import UiElementsBundle, UiTextLabel
-from utils.colors import WHITE, GREEN, RED
+from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
 from utils.functions import (
@@ -112,7 +111,7 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         other.friendly_factions.add(self.id)
 
     def update(self):
-        log(f'Updating faction: {self.name}')
+        log(f'Updating faction: {self.name} players: {self.players}')
         self.known_enemies.clear()
         for player in self.players:
             player.update()
@@ -210,7 +209,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.buildings: Set[Building] = set()
 
         self.known_enemies: Set[PlayerEntity] = set()
-        
+
         self.register_to_objectsowners(self.game, self.faction)
 
     def __repr__(self) -> str:
@@ -267,19 +266,21 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         self.unregister_from_all_owners()
 
     def __getstate__(self) -> Dict:
-        saved_player = self.__dict__.copy()
+        saved_player = {k: v for (k, v) in self.__dict__.items()}
         saved_player['faction'] = self.faction.id
-        saved_player['units'] = set()
-        saved_player['buildings'] = set()
-        saved_player['known_enemies'] = set()
+        saved_player['units'].clear()
+        saved_player['buildings'].clear()
+        saved_player['known_enemies'].clear()
         return saved_player
 
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
+        self.register_to_objectsowners(self.game, self.faction)
 
 
 class HumanPlayer(Player):
+    cpu = False
 
     def __init__(self,
                  id: Optional[int] = None,
@@ -311,9 +312,6 @@ class CpuPlayer(Player):
                  faction: Optional[Faction] = None):
         super().__init__(id, name, color, faction)
 
-    def update(self):
-        super().update()
-
 
 class PlayerEntity(GameObject):
     """
@@ -334,11 +332,9 @@ class PlayerEntity(GameObject):
                  position: Point,
                  robustness: Robustness = 0,
                  id: Optional[int] = None):
-        colorized_texture = add_player_color_to_name(texture_name, player.color)
-        GameObject.__init__(self, colorized_texture, robustness, position, id)
+        self.colored_name = add_player_color_to_name(texture_name, player.color)
+        super().__init__(self.colored_name, robustness, position, id)
         self.map = self.game.map
-        self.name = decolorised_name(texture_name)
-        self.colorized_name = colorized_texture
         self.player: Player = player
         self.faction: Faction = self.player.faction
 
@@ -396,12 +392,12 @@ class PlayerEntity(GameObject):
         return self._health
 
     @property
-    def health_percentage(self) -> float:
-        return self._health / self._max_health * 100
+    def health_percentage(self) -> int:
+        return int(self._health / self._max_health * 100)
 
     @health.setter
     def health(self, value: float):
-        self._health = clamp(self._health + value, self._max_health, 0)
+        self._health = value
 
     @property
     def weapons(self) -> bool:
@@ -410,10 +406,6 @@ class PlayerEntity(GameObject):
     @property
     def ammunition(self) -> bool:
         return self._ammunition > 0
-
-    @health.setter
-    def health(self, value: float):
-        self._health = value
 
     @staticmethod
     @abstractmethod
@@ -443,11 +435,15 @@ class PlayerEntity(GameObject):
         return self._health > 0
 
     def update_visibility(self):
-        if self in self.game.local_drawn_units_and_buildings:
+        if self.should_be_rendered:
             if not self.is_rendered:
                 self.start_drawing()
         elif self.is_rendered:
             self.stop_drawing()
+
+    @property
+    def should_be_rendered(self) -> bool:
+        return self.game.local_drawn_units_and_buildings
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
@@ -556,6 +552,10 @@ class PlayerEntity(GameObject):
     def selectable(self) -> bool:
         return self.player is self.game.local_human_player
 
+    @property
+    def is_selected(self) -> bool:
+        raise NotImplementedError
+
     def damaged(self) -> bool:
         return self._health < self._max_health
 
@@ -566,14 +566,20 @@ class PlayerEntity(GameObject):
         it is propagated to the damage-dealer.
         """
         self.create_hit_audio_visual_effects()
-        self.health -= max(random.gauss(damage, damage // 4) - self.armour, 0)
+        deviation = self.game.settings.damage_randomness_factor
+        self.health -= random.gauss(damage, damage * deviation)
+        self.health_check()
+
+    def health_check(self):
+        if self._health <= 0:
+            self.kill()
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)
         # self.game.create_effect(Explosion(*position, 'HITBLAST'))
 
     def kill(self):
-        if self.player is self.game.local_human_player:
+        if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.on_human_entity_being_killed(entity=self)
         if self.selection_marker is not None:
             self.selection_marker.kill()

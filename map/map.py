@@ -318,6 +318,9 @@ class MapNode:
     """
     map: Optional[Map] = None
 
+    __slots__ = ['grid', 'sector', 'position', 'costs', 'x', 'y', '_building',
+                 '_allowed_for_pathfinding', '_unit', 'tree', 'terrain_cost']
+
     def __init__(self, x, y, sector):
         self.grid = x, y
         self.sector = sector
@@ -326,7 +329,6 @@ class MapNode:
 
         self._allowed_for_pathfinding = True
 
-        self._terrain_object_id: Optional[int] = None
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
 
@@ -590,6 +592,8 @@ class Pathfinder(EventsCreator):
         self.created_waypoints_queue = None
 
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
+        if not self.map.position_to_node(x, y).walkable:
+            x, y = self.get_closest_walkable_position(x, y)
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
 
     def update(self):
@@ -662,14 +666,12 @@ class Pathfinder(EventsCreator):
                                       x: Number,
                                       y: Number) -> NormalizedPoint:
         nearest_walkable = None
-        node = self.map.position_to_node(x, y)
+        if (node := self.map.position_to_node(x, y)).walkable:
+            return node.position
         while nearest_walkable is None:
             adjacent = node.adjacent_nodes
-            for node in adjacent:
-                if node.walkable:
-                    return node.position
-                else:
-                    continue
+            for node in (n for n in adjacent if n.walkable):
+                return node.position
             node = random.choice(adjacent)
 
 

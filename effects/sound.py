@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
 from collections import defaultdict
 
 from utils.classes import Singleton
@@ -17,7 +17,8 @@ SOUNDS_DIRECTORY = 'resources/sounds'
 SOUNDS_EXTENSION = 'wav'
 MUSIC_TRACK_SUFFIX = 'theme'
 UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
-UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(5)]
+print(UNITS_MOVE_ORDERS_CONFIRMATIONS)
+UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
 UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
 
 

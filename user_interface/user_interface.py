@@ -214,7 +214,7 @@ class UiBundlesHandler(ObjectsOwner):
             index=8,
             name=CONFIRMATON_DIALOG,
             elements=[
-                UiTextLabel(x, y * 1.5, 'Are you sure?', 20),
+                UiTextLabel(x, y * 1.5, 'Are you sure?', 30),
                 Button('menu_button_confirm.png', x // 2, y,
                        functions=(function_if_yes, close_dialog)),
                 Button('menu_button_cancel.png', x * 1.5, y,

@@ -13,7 +13,6 @@ from arcade.arcade_types import Point
 
 import utils.timing
 from effects.explosions import Explosion
-from buildings.buildings import Building
 from map.map import (
     GridPosition, MapNode, MapPath, Pathfinder, Sector, normalize_position,
     position_to_map_grid
@@ -75,6 +74,9 @@ class Unit(PlayerEntity):
             Weapon(name=name, owner=self) for name in
             self.configs['weapons_names']
         )
+
+        self.tasks = []
+        self.current_task = None
 
         self.explosion_name = 'EXPLOSION'
         self.update_explosions_pool()
@@ -138,20 +140,23 @@ class Unit(PlayerEntity):
             self.game.units_manager.create_units_selection_markers((self,))
 
     def on_mouse_exit(self):
-        selected_units = self.game.units_manager.selected_units
-        if self.selection_marker is not None and self not in selected_units:
-            self.game.units_manager.remove_from_selection_markers(self)
+        if self.selection_marker is not None and not self.is_selected:
+            self.game.units_manager.remove_from_selection_markers(entity=self)
+
+    @property
+    def is_selected(self) -> bool:
+        selected = self in self.game.units_manager.selected_units
+        if (selection := self.game.cursor.mouse_drag_selection) is None:
+            return selected
+        return selected or self in selection
 
     def on_update(self, delta_time: float = 1/60):
-        if self.alive:
-            super().on_update(delta_time)
-            new_current_node = self.map.position_to_node(*self.position)
-            self.update_observed_area(new_current_node)
-            self.update_blocked_map_nodes(new_current_node)
-            self.update_current_sector()
-            self.update_pathfinding()
-        else:
-            self.kill()
+        super().on_update(delta_time)
+        new_current_node = self.map.position_to_node(*self.position)
+        self.update_observed_area(new_current_node)
+        self.update_blocked_map_nodes(new_current_node)
+        self.update_current_sector()
+        self.update_pathfinding()
 
     def update_observed_area(self, new_current_node: MapNode):
         if self.observed_nodes and new_current_node == self.current_node:
@@ -366,14 +371,10 @@ class Unit(PlayerEntity):
         pass
 
     def visible_for(self, other: PlayerEntity) -> bool:
-        other: Union[Unit, Building]
         if self.player is self.game.local_human_player and not other.is_unit:
             if other.current_node not in self.observed_nodes:
                 return False
         return super().visible_for(other)
-
-    def get_nearby_friends(self) -> Set[PlayerEntity]:
-        return self.current_sector.get_entities(self.player.id)
 
     def set_permanent_units_group(self, index: int = 0):
         if (cur_index := self.permanent_units_group) and cur_index != index:
@@ -495,6 +496,8 @@ class Vehicle(Unit):
 
 
 class VehicleThreads(Sprite):
+
+    __slots__ = ['textures']
 
     def __init__(self, texture, index, x, y):
         super().__init__(texture, center_x=x, center_y=y, hit_box_algorithm='None')
@@ -625,6 +628,8 @@ class Soldier(Unit):
 
         self.equipment = None
 
+        self.outside = True
+
     def _load_textures_and_reset_hitbox(self):
         texture_name = get_path_to_file(self.full_name)
         width, height = get_texture_size(self.full_name, rows=9, columns=8)
@@ -648,6 +653,14 @@ class Soldier(Unit):
             ) for j in range(start, start + 8)
         ]
 
+    @property
+    def should_be_rendered(self) -> bool:
+        return self.game.local_drawn_units_and_buildings and self.outside
+
+    @property
+    def selectable(self) -> bool:
+        return self.player is self.game.local_human_player and self.outside
+
     def on_update(self, delta_time=1/60):
         super().on_update(delta_time)
         if self.moving:
@@ -667,6 +680,17 @@ class Soldier(Unit):
                 self.cur_texture_index = 0
             self.set_texture(self.cur_texture_index)
 
+    def enter_building(self, building):
+        self.stop_completely()
+        self.game.units_manager.remove_from_selection_markers(entity=self)
+        building.on_soldier_enter(soldier=self)
+        self.outside = False
+
+    def leave_building(self, building):
+        x, y = building.position
+        self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
+        self.outside = True
+
     def restore_health(self):
         wounds = round(self._max_health - self.health, 3)
         health_gained = min(self.health_restoration, wounds)
@@ -681,7 +705,7 @@ class Soldier(Unit):
         self.spawn_corpse()
 
     def spawn_corpse(self):
-        corpse_name = f'{self.colorized_name}_corpse.png'
+        corpse_name = f'{self.colored_name}_corpse.png'
         corpse = self.game.spawner.spawn(
             corpse_name, None, self.position, self.facing_direction
         )

@@ -75,7 +75,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # selection:
         self.mouse_drag_selection: Optional[MouseDragSelection] = None
 
-        self.units_manager = UnitsManager(cursor=self)
+        # is set when new Game instance is created
+        self.units_manager: Optional[UnitsManager] = None
 
         self.forced_cursor: Optional[int] = None
 
@@ -117,6 +118,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
                 duration=duration, texture=frames[i], tile_id=i
             ) for i in range(frames_count)
         ]
+
+    def bind_units_manager(self, manager: UnitsManager):
+        self.units_manager = manager
 
     @property
     def updated_spritelists(self):
@@ -176,12 +180,17 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
+        self.on_left_button_release_in_game(modifiers, x, y)
+
+    @ignore_in_menu
+    def on_left_button_release_in_game(self, modifiers, x, y):
         if self.mouse_drag_selection is None:
             if self.pointed_ui_element is None:
-                self.units_manager.on_left_click_without_selection(modifiers, x, y)
+                self.units_manager.on_left_click_no_selection(modifiers, x, y)
         else:
             self.close_drag_selection()
 
+    @ignore_in_menu
     def close_drag_selection(self):
         self.units_manager.unselect_all_selected()
         if units := [u for u in self.mouse_drag_selection.units]:
@@ -221,6 +230,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             else:
                 self.mouse_drag_selection = MouseDragSelection(self.game, x, y)
 
+    @ignore_in_menu
     def update_drag_selection(self, x, y):
         if self.pointed_ui_element is None:
             new, lost = self.mouse_drag_selection.update(x, y)
@@ -232,7 +242,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
-        self.units_manager.update_selection_markers()
+        if self.units_manager is not None:
+            self.units_manager.update_selection_markers()
         self.update_cursor_pointed()
         self.update_cursor_texture()
         self.update_animation()

@@ -37,7 +37,7 @@ from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
     get_path_to_file, get_screen_size, to_rgba, SEPARATOR,
-    ignore_in_editor_mode
+    ignore_in_editor_mode, bind
 )
 from utils.logging import log, logger
 from utils.timing import timer
@@ -66,8 +66,8 @@ MINIMAP_HEIGHT = 197
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
 SECTOR_SIZE = 8
-ROWS = 100
-COLUMNS = 100
+ROWS = 50
+COLUMNS = 50
 
 FPS = 30
 GAME_SPEED = 1.0
@@ -98,6 +98,7 @@ class Settings:
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
+    damage_randomness_factor = 0.25
 
 
 class GameWindow(Window, EventsCreator):
@@ -347,6 +348,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.generate_random_entities = self.loader is None
 
+        self.cursor = self.window.cursor
         self.configs = self.window.configs
         self.settings = self.window.settings  # shared with Window class
         self.timer = {
@@ -393,7 +395,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
-        self.units_manager: UnitsManager = self.window.cursor.units_manager
+        self.units_manager = UnitsManager(cursor=self.cursor)
 
         self.current_mission: Optional[Mission] = None
 
