@@ -9,6 +9,7 @@ from arcade import (
     load_textures
 )
 
+from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN
@@ -25,16 +26,9 @@ from user_interface.user_interface import (
 )
 
 from utils.functions import get_path_to_file, ignore_in_menu
-from utils.logging import log, logger
+from utils.logging import logger
 
 DrawnAndUpdated = Union[SpriteList, SelectiveSpriteList, 'MouseCursor']
-
-CURSOR_NORMAL_TEXTURE = 0
-CURSOR_FORBIDDEN_TEXTURE = 1
-CURSOR_ATTACK_TEXTURE = 2
-CURSOR_SELECTION_TEXTURE = 3
-CURSOR_MOVE_TEXTURE = 4
-CURSOR_REPAIR_TEXTURE = 5
 
 
 class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
@@ -88,10 +82,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def load_textures(self):
         names = ('normal.png', 'forbidden.png', 'attack.png', 'select.png',
-                 'move.png')
+                 'move.png', 'enter.png')
         self.textures.extend(
             [load_texture(get_path_to_file(name)) for name in names[1:]]
-        )  # without 'normal.png' since it is already is_loaded
+        )  # without 'normal.png' since it is already loaded
         self.create_cursor_animations_frames(names)
         self.set_texture(CURSOR_NORMAL_TEXTURE)
 
@@ -199,7 +193,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @ignore_in_menu
     def on_right_button_release(self, x: float, y: float, modifiers: int):
-        self.forced_cursor = None
         if self.mouse_dragging:
             self.mouse_dragging = None
         elif self.pointed_ui_element is not None:
@@ -243,7 +236,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def update(self):
         super().update()
         if self.units_manager is not None:
-            self.units_manager.update_selection_markers()
+            self.units_manager.update()
         self.update_cursor_pointed()
         self.update_cursor_texture()
         self.update_animation()
@@ -275,8 +268,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             if self.pointed_gameobject is not None:
                 self.pointed_gameobject.on_mouse_exit()
             if pointed is not None and pointed.is_rendered:
-                pointed.on_mouse_enter()
                 self.pointed_gameobject = pointed
+                pointed.on_mouse_enter()
             else:
                 self.pointed_gameobject = None
 
@@ -326,15 +319,21 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update_cursor_texture(self):
         if self.window.is_game_running:
-            if self.pointed_ui_element:
-                self.set_texture(CURSOR_NORMAL_TEXTURE)
-            elif (forced := self.forced_cursor) is not None:
-                self.set_texture(forced)
-            elif self.units_manager.selected_units:
-                return self.cursor_texture_with_units_selected()
-            elif entity := (self.pointed_unit or self.pointed_building):
-                return self.cursor_texture_on_pointing_at_entity(entity)
-        self.set_texture(CURSOR_NORMAL_TEXTURE)
+            self.cursor_in_game()
+        else:
+            self.set_texture(CURSOR_NORMAL_TEXTURE)
+
+    def cursor_in_game(self):
+        if self.pointed_ui_element:
+            self.set_texture(CURSOR_NORMAL_TEXTURE)
+        elif (forced := self.forced_cursor) is not None:
+            self.set_texture(forced)
+        elif self.units_manager.selected_units:
+            self.cursor_texture_with_units_selected()
+        elif entity := (self.pointed_unit or self.pointed_building):
+            self.cursor_texture_on_pointing_at_entity(entity)
+        else:
+            self.set_texture(CURSOR_NORMAL_TEXTURE)
 
     def cursor_texture_with_units_selected(self):
         if entity := (self.pointed_unit or self.pointed_building):
@@ -367,7 +366,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # displaying static texture we switch updated cursor animation:
         self.frames = self.all_frames_lists[index]
 
-    def force_cursor(self, index: int):
+    def force_cursor(self, index: Optional[int]):
+        print('FORCED CURSOR: ', index)
         self.forced_cursor = index
 
     @property

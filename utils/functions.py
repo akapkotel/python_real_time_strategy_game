@@ -202,3 +202,17 @@ def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
     path_and_texture_name = get_path_to_file(texture_name)
     image = PIL.Image.open(path_and_texture_name)
     return image.size[0] // columns, image.size[1] // rows
+
+
+def bind(first_object: Tuple[object, str], second_object: Tuple[object, str]):
+    """
+    Set the mutual references for a pair objects, so they would knot about each
+    other. For each object provide a tuple containing reference to object as a
+    first element, and string name of the attribute it should be assigned to in
+    other object.
+
+    :param first_object: Tuple[object, str]
+    :param second_object: Tuple[object, str]
+    """
+    setattr(first_object[0], second_object[1], second_object[0])
+    setattr(second_object[0], first_object[1], first_object[0])

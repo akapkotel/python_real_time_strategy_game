@@ -26,27 +26,22 @@ from utils.scheduling import EventsCreator
 UNIT_HEALTH_BAR_WIDTH = 5
 SOLDIER_HEALTH_BAR_WIDTH = 4
 BUILDING_HEALTH_BAR_WIDTH = 10
-UNIT_HEALTHBAR_LENGTH_RATIO = 0.6
-SOLDIER_HEALTHBAR_LENGTH_RATIO = 0.4
-BUILDING_HEALTHBAR_LENGTH_RATIO = 1.8
+UNIT_HEALTH_BAR_LENGTH_RATIO = 0.6
+SOLDIER_HEALTH_BAR_LENGTH_RATIO = 0.4
+BUILDING_HEALTH_BAR_LENGTH_RATIO = 1.8
 
 selection_textures = load_textures(
     get_path_to_file('unit_selection_marker.png'),
     [(i * 60, 0, 60, 60) for i in range(10)]
 )
+soldier_selection_textures = load_textures(
+    get_path_to_file('soldier_selection_marker.png'),
+    [(i * 40, 0, 40, 40) for i in range(10)]
+    # get_path_to_file('soldier_selection_marker.png'), 0, 0, 40, 40
+)
 building_selection_texture = load_texture(
     get_path_to_file('building_selection_marker.png'), 0, 0, 180, 180
 )
-soldier_selection_texture = load_texture(
-    get_path_to_file('soldier_selection_marker.png'), 0, 0, 40, 40
-)
-
-
-def selected_unit_marker(entity):
-    if entity.is_infantry:
-        return SelectedSoldierMarker(entity)
-    else:
-        return SelectedUnitMarker(entity)
 
 
 class SelectedEntityMarker:
@@ -60,8 +55,8 @@ class SelectedEntityMarker:
     Sprites in SpriteLists.
     """
     game: Optional[Game] = None
-    healthbar_width = 0
-    healthbar_length_ratio = 1
+    health_bar_width = 0
+    health_bar_length_ratio = 1
 
     def __init__(self, selected: PlayerEntity):
         selected.selection_marker = self
@@ -74,40 +69,40 @@ class SelectedEntityMarker:
 
         self.health = health = selected.health_percentage
         width, height, color = self.health_to_color_and_size(health)
-        self.healthbar = healthbar = SpriteSolidColor(width, height, color)
+        self.health_bar = health_bar = SpriteSolidColor(width, height, color)
 
-        self.sprites = sprites = [self.borders, healthbar]
+        self.sprites = sprites = [self.borders, health_bar]
         self.game.selection_markers_sprites.extend(sprites)
 
     def health_to_color_and_size(self, health: float) -> Tuple[int, int, Color]:
-        length = int(self.healthbar_length_ratio * health)
+        length = int(self.health_bar_length_ratio * health)
         if health > 66:
-            return length, self.healthbar_width, GREEN
+            return length, self.health_bar_width, GREEN
         elif health > 33:
-            return length, self.healthbar_width, YELLOW
-        return length, self.healthbar_width, RED
+            return length, self.health_bar_width, YELLOW
+        return length, self.health_bar_width, RED
 
     def update(self):
         self.position = x, y = self.selected.position
         for sprite in self.sprites[:-1]:
             sprite.position = x, y
-        self.update_healthbar(x)
+        self.update_health_bar(x)
 
-    def update_healthbar(self, x):
+    def update_health_bar(self, x):
         if (health := self.selected.health_percentage) != self.health:
             width, height, color = self.health_to_color_and_size(health)
-            if color != self.healthbar.color:
-                self.replace_healthbar_with_new_color(color, height, width)
+            if color != self.health_bar.color:
+                self.replace_health_bar_with_new_color(color, height, width)
             else:
-                self.healthbar.width = width
+                self.health_bar.width = width
             self.health = health
-        ratio = self.healthbar_length_ratio * 0.5
-        self.healthbar.position = x - (100 - health) * ratio, self.borders.top
+        ratio = self.health_bar_length_ratio * 0.5
+        self.health_bar.position = x - (100 - health) * ratio, self.borders.top
 
-    def replace_healthbar_with_new_color(self, color, height, width):
-        self.healthbar.kill()
-        self.healthbar = bar = SpriteSolidColor(width, height, color)
-        self.sprites.append(self.healthbar)
+    def replace_health_bar_with_new_color(self, color, height, width):
+        self.health_bar.kill()
+        self.health_bar = bar = SpriteSolidColor(width, height, color)
+        self.sprites.append(self.health_bar)
         self.game.selection_markers_sprites.append(bar)
 
     def kill(self):
@@ -118,8 +113,8 @@ class SelectedEntityMarker:
 
 
 class SelectedUnitMarker(SelectedEntityMarker):
-    healthbar_width = UNIT_HEALTH_BAR_WIDTH
-    healthbar_length_ratio = UNIT_HEALTHBAR_LENGTH_RATIO
+    health_bar_width = UNIT_HEALTH_BAR_WIDTH
+    health_bar_length_ratio = UNIT_HEALTH_BAR_LENGTH_RATIO
 
     def __init__(self, selected: Unit):
         super().__init__(selected)
@@ -130,15 +125,16 @@ class SelectedUnitMarker(SelectedEntityMarker):
 
 
 class SelectedSoldierMarker(SelectedEntityMarker):
-    healthbar_width = SOLDIER_HEALTH_BAR_WIDTH
-    healthbar_length_ratio = SOLDIER_HEALTHBAR_LENGTH_RATIO
+    health_bar_width = SOLDIER_HEALTH_BAR_WIDTH
+    health_bar_length_ratio = SOLDIER_HEALTH_BAR_LENGTH_RATIO
 
     def __init__(self, selected: Unit):
         super().__init__(selected)
         # units selection marker has 10 versions, blank + 9 different numbers
         # to show which PermanentUnitsGroup an Unit belongs to:
-        self.borders.texture = soldier_selection_texture
-        self.update_healthbar(self.position[0])
+        group_index = selected.permanent_units_group
+        self.borders.texture = soldier_selection_textures[group_index]
+        self.update_health_bar(self.position[0])
 
 
 class SelectedVehicleMarker(SelectedUnitMarker):
@@ -150,7 +146,7 @@ class SelectedVehicleMarker(SelectedUnitMarker):
         
     def update(self):
         self.position = x, y = self.selected.position
-        self.update_healthbar(x)
+        self.update_health_bar(x)
         self.update_fuel_bar(x)
         for sprite in self.sprites[:-1]:
             sprite.position = x, y
@@ -160,8 +156,8 @@ class SelectedVehicleMarker(SelectedUnitMarker):
 
 
 class SelectedBuildingMarker(SelectedEntityMarker):
-    healthbar_width = BUILDING_HEALTH_BAR_WIDTH
-    healthbar_length_ratio = BUILDING_HEALTHBAR_LENGTH_RATIO
+    health_bar_width = BUILDING_HEALTH_BAR_WIDTH
+    health_bar_length_ratio = BUILDING_HEALTH_BAR_LENGTH_RATIO
 
     def __init__(self, building: PlayerEntity):
         super().__init__(building)
@@ -247,7 +243,9 @@ class UnitsManager(EventsCreator):
         # PermanentUnitsGroup class in units_management.py
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
-        self.tasks: List[UnitTask] = []
+        # Units could be assigned with tasks to do, which n-require to be
+        # updated to check the task status, if Unit finished it's task etc.
+        self.units_tasks: List[UnitTask] = []
 
     @property
     def units_or_building_selected(self) -> bool:
@@ -310,15 +308,14 @@ class UnitsManager(EventsCreator):
     def only_soldiers_selected(self) -> bool:
         if not self.selected_units:
             return False
-        return all(s for s in self.selected_units if s.is_infantry)
+        return all(s.is_infantry for s in self.selected_units)
 
     def get_selected_soldiers(self) -> List[Soldier]:
         return [s for s in self.selected_units if s.is_infantry]
 
     def send_soldiers_to_building(self, building: Building, soldiers: List[Soldier]):
-        print(f'Soldiers {soldiers} were sent to {building}')
         self.send_units_to_pointed_location(soldiers, *building.position)
-        self.tasks.append(TaskEnterBuilding(self, soldiers, building))
+        self.units_tasks.append(TaskEnterBuilding(self, soldiers, building))
 
     def select_building(self, building: Building):
         self.unselect_all_selected()
@@ -375,6 +372,9 @@ class UnitsManager(EventsCreator):
         killed = self.selection_markers.copy() if killed is None else killed
         for marker in killed:
             self.kill_selection_marker(marker)
+
+    def update(self):
+        self.update_selection_markers()
 
     def update_selection_markers(self):
         for marker in self.selection_markers:

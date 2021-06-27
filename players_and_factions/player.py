@@ -443,7 +443,7 @@ class PlayerEntity(GameObject):
 
     @property
     def should_be_rendered(self) -> bool:
-        return self.game.local_drawn_units_and_buildings
+        return self in self.game.local_drawn_units_and_buildings
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):

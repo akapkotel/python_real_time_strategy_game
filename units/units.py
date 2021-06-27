@@ -406,8 +406,14 @@ class Unit(PlayerEntity):
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
         self.create_death_animation()
+        self.remove_from_tasks()
         self.stop_completely()
         super().kill()
+
+    def remove_from_tasks(self):
+        for task in self.tasks:
+            task.units.remove(self)
+        self.tasks.clear()
 
     def set_navigating_group(self, navigating_group):
         if self.navigating_group is not None:

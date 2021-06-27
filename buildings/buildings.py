@@ -9,13 +9,15 @@ from typing import Deque, List, Optional, Set, Tuple, Dict
 from arcade.arcade_types import Point
 from units.units import Soldier
 from effects.sound import UNIT_PRODUCTION_FINISHED
-from user_interface.user_interface import ProgressButton
+from user_interface.user_interface import ProgressButton, UiElementsBundle, \
+    UiElement, Button
 from missions.research import Technology
 from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import (
     Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 )
 from utils.geometry import close_enough, is_visible
+from controllers.constants import CURSOR_ENTER_TEXTURE
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -99,8 +101,6 @@ class UnitsProducer:
         self.currently_produced = produced
 
     def update_units_production(self):
-        if self.player is self.game.local_human_player:
-            self.update_production_buttons(progress=self.production_progress)
         if self.currently_produced is not None:
             self.production_progress += 0.01 * self.health_percentage
             if int(self.production_progress) == self.production_time:
@@ -108,12 +108,11 @@ class UnitsProducer:
         elif self.production_queue:
             self._start_production(unit=self.production_queue[-1])
 
-    def update_production_buttons(self, progress):
-        if self.is_selected:
-            panel = self.game.get_bundle(BUILDINGS_PANEL)
-            for produced in self.produced_units:
-                button = panel.find_by_name(produced)
-                self.update_single_button(button, produced, progress)
+    def update_production_buttons(self, panel: UiElementsBundle):
+        for produced in self.produced_units:
+            progress = self.production_progress
+            button = panel.find_by_name(produced)
+            self.update_single_button(button, produced, progress)
 
     def update_single_button(self, button, produced, progress):
         button.counter = self.production_queue.count(produced)
@@ -124,8 +123,7 @@ class UnitsProducer:
 
     @logger(console=True)
     def finish_production(self, finished_unit: str):
-        self.production_progress = progress = 0
-        self.update_production_buttons(progress)
+        self.production_progress = 0
         self._toggle_production(produced=None)
         self.spawn_finished_unit(finished_unit)
         self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
@@ -259,6 +257,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
         self.garrisoned_soldiers: List[Soldier] = []
+        self.max_garrisoned_soldiers = 8
 
     @property
     def configs(self):
@@ -319,16 +318,27 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def on_mouse_enter(self):
         if self.selection_marker is None:
             self.game.units_manager.create_building_selection_marker(self)
+            if self.game.units_manager.only_soldiers_selected:
+                self.check_soldiers_garrisoning_possibility()
+
+    def check_soldiers_garrisoning_possibility(self):
+        friendly_building = self.player is self.game.local_human_player
+        free_space = len(self.garrisoned_soldiers) < self.max_garrisoned_soldiers
+        if (friendly_building and free_space) or not friendly_building:
+            self.game.cursor.force_cursor(index=CURSOR_ENTER_TEXTURE)
 
     def on_mouse_exit(self):
         selected_building = self.game.units_manager.selected_building
         if self.selection_marker is not None and self is not selected_building:
             self.game.units_manager.remove_from_selection_markers(entity=self)
+        if self.game.cursor.forced_cursor == CURSOR_ENTER_TEXTURE:
+            self.game.cursor.force_cursor(index=None)
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
         self.update_production()
         self.update_observed_area()
+        self.update_ui_buildings_panel()
 
     def update_production(self):
         if self.is_units_producer:
@@ -337,6 +347,26 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.update_resource_production()
         elif self.is_research_facility:
             self.update_research()
+
+    def update_ui_buildings_panel(self):
+        if self.player is self.game.local_human_player and self.is_selected:
+            panel = self.game.get_bundle(BUILDINGS_PANEL)
+            if self.is_units_producer:
+                self.update_production_buttons(panel)
+            if self.garrisoned_soldiers:
+                pass
+
+    def create_ui_buttons(self, x, y) -> List[UiElement]:
+        buttons = [self.create_garrison_button(x, y)]
+        if self.is_units_producer:
+            buttons.extend(self.create_production_buttons(x, y))
+        return buttons
+
+    def create_garrison_button(self, x, y) -> Button:
+        return Button('ui_leave_building_btn.png', x - 100, y + 200, 'leave',
+                      active=len(self.garrisoned_soldiers) > 0,
+                      functions=self.on_soldier_exit
+        )
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
@@ -353,13 +383,21 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def on_soldier_enter(self, soldier: Soldier):
         self.garrisoned_soldiers.append(soldier)
         soldier.position = self.position
+        self.update_garrison_button()
+
+    def update_garrison_button(self):
+        if self.player is self.game.local_human_player and self.is_selected:
+            button = self.game.get_bundle(BUILDINGS_PANEL).find_by_name('leave')
+            button.toggle(state=len(self.garrisoned_soldiers) > 0)
 
     def on_soldier_exit(self):
         try:
             soldier = self.garrisoned_soldiers.pop()
-            soldier.leave_building()
+            soldier.leave_building(self)
         except IndexError:
             pass
+        finally:
+            self.update_garrison_button()
 
     def on_being_damaged(self, damage: float) -> bool:
         # TODO: killing personnel inside Building
