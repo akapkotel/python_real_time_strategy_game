@@ -20,11 +20,11 @@ _game.py_ script in your IDE (e.g. PyCharm) or in terminal.
 #### PLAYING:
 To be done.
 
-![Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/menu.png)
+![Menu](./screenshots/menu.png)
 
-![Game Mode Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/game_mode_selection.png)
+![Game Mode Menu](./screenshots/game_mode_selection.png)
 
-![Game](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/actual_game.png)
+![Game](./screenshots/actual_game.png)
 
 ### WHAT IS DONE:
 1. Window and Views as different 'states' of the game.
