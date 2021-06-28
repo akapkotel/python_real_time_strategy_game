@@ -1,4 +1,4 @@
 object_name,class,produced_units,produced_resource,research_facility,max_health,armour
 capitol,Building,None,None,False,1000,1
 Barracks,Building,(soldier),None,False,500,1
-medium_factory,Building,(tank_medium),None,False,1500,1
+medium_factory,Building,(tank_medium;soldier),None,False,1500,1

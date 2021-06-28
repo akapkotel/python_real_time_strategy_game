@@ -6,21 +6,24 @@ This is my ambitious struggle against Python inefficiencies. An RTS game
 made with Python 3.6 and Arcade 2.26 Library is my attempt to make
 something what should **NOT** be done with this language.
 
-I've decided to use Arcade library because of it's useful _SpriteLists_
+I've decided to use Arcade library because of useful _SpriteLists_
 concept and efficient way of drawing Sprites. All advantages and
 disadvantages of Arcade library are available here:
 [Arcade performance](https://arcade.academy/performance_tips.html)
 
 #### INSTALLATION AND RUN:
 
-For now, you have to clone or download this repository, create new
+For now, you have to clone or download this repository. Then create new
 virtual environment, install requirements and run it by running
 _game.py_ script in your IDE (e.g. PyCharm) or in terminal.
 
 #### PLAYING:
 To be done.
+
 ![Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/menu.png)
+
 ![Game Mode Menu](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/game_mode_selection.png)
+
 ![Game](https://github.com/akapkotel/python_real_time_strategy_game//blob/master/actual_game.png)
 
 ### WHAT IS DONE:
@@ -42,13 +45,13 @@ To be done.
     each other.
 11. Alternative scheduling calls system to work with the (to be done)
     saving and loading game.
-12. Simple permanent group of units are now 'saved' and player can
+12. Simple permanent group of units is now 'saved' and player can
     activate them with 0-9 keys press.
 13. Mouse-drag scrolling the map.
 14. Small improvement to efficiency by spreading of many pathfinding
     calls for several update-frames, so no big lag when sending units to
     the opposite corner of the map.
-15. Added queueing the pathfinding-requests and a Pathfinder changed to
+15. Added queueing the pathfinding-requests, and a Pathfinder changed to
     the Singleton.
 16. Divided map to the Sectors to avoid visibility-tests between all
     Units and Buildings in game.
@@ -61,9 +64,9 @@ To be done.
     ui-sound-effects.
 21. Display currently selected permanent units group number above each
    unit belonging to this group.
-22. Units are now 1x8 or 8x8 (tanks with turrets) spritesheets, so they
+22. Units are now 1x8 or 8x8 (tanks with turrets) sprite-sheets, so they
     can face 8 directions (and other 8 directions for turrets). Each
-    Unit can be spawned in many, various colors, depending opf the
+    Unit can be spawned in many, various colors, depending on the
     player's choice.
 23. Optimized visibility-detection, to reduce cpu overhead.
 24. Units automatically moving towards detected enemies out of their
@@ -80,8 +83,13 @@ To be done.
 33. Added playlists for background music tracks.
 10.06.2021:
 34. Improved mini-map: better resolution, no more ugly big rectangles!
-35. Trees are now saved!
+35. Saving Trees works now!
 36. Loading menu with auto-updating list of existing save-files.
+28.06.2021:
+37. UI for Buildings and Units-production added.
+38. Player can now produce new units.
+39. Soldiers can enter end leave Buildings.
+40. UI displays amount of resources, player has.
 
 #### TO BE DONE:
 #### Minor:
@@ -107,8 +115,8 @@ To be done.
 1. User-interface. (currently being developed)
 2. Menu! (currently being developed)
 3. AI (with finite-state=-machine?)
-4. Saving and loading game (with shelve?)
-5. Sounds and music (reimplement system from Pytanks for now?)
+4. Saving and loading game (with shelve?) - DONE
+5. Sounds and music - DONE
 6. Multiplayer.
 7. "Playing" section above.
 8. Installer/executable for Windows and Linux.

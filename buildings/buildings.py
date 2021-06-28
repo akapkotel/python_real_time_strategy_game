@@ -43,7 +43,7 @@ class UnitsProducer:
         # Point on the Map for finished Units to go after being spawned:
         self.deployment_point = None
 
-    @logger(console=True)
+    @logger()
     def start_production(self, unit: str):
         if self.player.enough_resources_for(expense=unit):
             self.consume_resources_from_the_pool(unit)
@@ -121,7 +121,7 @@ class UnitsProducer:
         else:
             button.progress = 0
 
-    @logger(console=True)
+    @logger()
     def finish_production(self, finished_unit: str):
         self.production_progress = 0
         self._toggle_production(produced=None)
@@ -147,7 +147,11 @@ class UnitsProducer:
         return production_buttons
 
     def __getstate__(self) -> Dict:
-        return {}
+        return {
+            'production_progress': self.production_progress,
+            'currently_produced': self.currently_produced,
+            'production_time': self.production_time,
+        }
 
     def __setstate__(self, state):
         self.__dict__.update(state)
@@ -362,11 +366,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             buttons.extend(self.create_production_buttons(x, y))
         return buttons
 
-    def create_garrison_button(self, x, y) -> Button:
-        return Button('ui_leave_building_btn.png', x - 100, y + 200, 'leave',
-                      active=len(self.garrisoned_soldiers) > 0,
-                      functions=self.on_soldier_exit
+    def create_garrison_button(self, x, y) -> ProgressButton:
+        button = ProgressButton(
+            'ui_leave_building_btn.png', x - 100, y + 200, 'leave',
+            active=len(self.garrisoned_soldiers) > 0,
+            functions=self.on_soldier_exit
         )
+        button.counter = len(self.garrisoned_soldiers)
+        return button
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = [b for b in self.game.buildings if b.id is not self.id]
@@ -380,6 +387,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             sectors.update(sector.adjacent_sectors())
         return list(sectors)
 
+    @property
+    def is_garrison_full(self) -> bool:
+        return len(self.garrisoned_soldiers) == self.max_garrisoned_soldiers
+
     def on_soldier_enter(self, soldier: Soldier):
         self.garrisoned_soldiers.append(soldier)
         soldier.position = self.position
@@ -388,7 +399,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def update_garrison_button(self):
         if self.player is self.game.local_human_player and self.is_selected:
             button = self.game.get_bundle(BUILDINGS_PANEL).find_by_name('leave')
-            button.toggle(state=len(self.garrisoned_soldiers) > 0)
+            button.counter = soldiers_count = len(self.garrisoned_soldiers)
+            button.toggle(state=soldiers_count > 0)
 
     def on_soldier_exit(self):
         try:
@@ -401,7 +413,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def on_being_damaged(self, damage: float) -> bool:
         # TODO: killing personnel inside Building
-        # TODO: decreasing  Building productivity
         return super().on_being_damaged(damage)
 
     def kill(self):

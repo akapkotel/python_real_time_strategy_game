@@ -7,7 +7,10 @@ from utils.scheduling import ScheduledEvent
 
 class UnitTask:
     """
-
+    UnitsTask allows to assign to the groups of Units an objective, and then
+    keep updating the task, checking if it is finished or not. Default way the
+    task works is that it is automatically rescheduling it's 'update' method
+    after each update call, if any alive Unit is still assigned to it.
     """
 
     def __init__(self, units_manager, units):
@@ -24,11 +27,14 @@ class UnitTask:
         return f'{self.__class__.__name__} id: {id(self)}'
 
     def update(self):
-        log(f'Updating task: {self}', True)
-        if self.units:
+        log(f'Updating task: {self}, units: {self.units}', True)
+        if self.condition():
             self.schedule_next_update()
         else:
             self.kill_task()
+
+    def condition(self) -> bool:
+        return self.units
 
     def schedule_next_update(self):
         self.manager.schedule_event(
@@ -44,17 +50,36 @@ class UnitTask:
 class TaskEnterBuilding(UnitTask):
 
     def __init__(self, units_manager, soldiers, building):
-        self.building = building
+        self.target = building
         super().__init__(units_manager, soldiers)
 
     def update(self):
         for soldier in [s for s in self.units]:
-            self.check_if_soldier_can_enter_building(soldier)
+            self.check_if_soldier_can_enter(soldier)
         super().update()
 
-    def check_if_soldier_can_enter_building(self, soldier):
-        for adjacent in soldier.current_node.adjacent_nodes:
-            if adjacent in self.building.occupied_nodes:
-                soldier.enter_building(self.building)
-                self.units.remove(self)
-                break
+    def condition(self) -> bool:
+        return self.units and not self.target.is_garrison_full
+
+    def check_if_soldier_can_enter(self, soldier):
+        if self.target.occupied_nodes.intersection(soldier.adjacent_nodes):
+            soldier.enter_building(self.target)
+            self.units.remove(soldier)
+        else:
+            self.check_if_soldier_heading_to_target(soldier)
+
+    def check_if_soldier_heading_to_target(self, soldier):
+        if not soldier.has_destination:
+            x, y = self.target.position
+            self.manager.game.pathfinder.navigate_units_to_destination(soldier, x, y)
+
+
+class TaskEnterVehicle(TaskEnterBuilding):
+
+    def __init__(self, units_manager, soldiers, vehicle):
+        super().__init__(units_manager, soldiers, vehicle)
+
+    def check_if_soldier_can_enter(self, soldier):
+        if self.target.current_node in soldier.current_node.adjacent_nodes:
+            soldier.enter_vehicle(self.target)
+            self.units.remove(soldier)

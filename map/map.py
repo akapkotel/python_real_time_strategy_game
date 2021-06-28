@@ -670,8 +670,8 @@ class Pathfinder(EventsCreator):
             return node.position
         while nearest_walkable is None:
             adjacent = node.adjacent_nodes
-            for node in (n for n in adjacent if n.walkable):
-                return node.position
+            for adjacent_node in (n for n in adjacent if n.walkable):
+                return adjacent_node.position
             node = random.choice(adjacent)
 
 

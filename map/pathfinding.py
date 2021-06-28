@@ -50,19 +50,18 @@ def a_star(map: Map,
         node = map_nodes[current]
         walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
         for adjacent in (a for a in walkable if a.grid not in explored):
-            if (adjacent_grid := adjacent.grid) in unexplored:
-                continue
+            adj_grid = adjacent.grid
             # TODO: implement Jump Point Search, for now, we resign from
             #  using real terrain costs and calculate fast heuristic for
             #  each waypoints pair, because it efficiently finds best
             #  path, but it ignores tiles-moving-costs:
-            total = cost_so_far[current] + adjacent_distance(current, adjacent_grid)
-            if total < cost_so_far[adjacent_grid]:
-                previous[adjacent_grid] = current
-                cost_so_far[adjacent_grid] = total
-                priority = total + heuristic(adjacent_grid, end)
-                put_to_unexplored(adjacent_grid, priority)
-            explored.add(adjacent)
+            total = cost_so_far[current] + adjacent_distance(current, adj_grid)
+            if total < cost_so_far[adj_grid]:
+                previous[adj_grid] = current
+                cost_so_far[adj_grid] = total
+                priority = total + heuristic(adj_grid, end)
+                put_to_unexplored(adj_grid, priority)
+        explored.update(walkable)
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:

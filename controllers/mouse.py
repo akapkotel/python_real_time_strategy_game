@@ -367,7 +367,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.frames = self.all_frames_lists[index]
 
     def force_cursor(self, index: Optional[int]):
-        print('FORCED CURSOR: ', index)
         self.forced_cursor = index
 
     @property

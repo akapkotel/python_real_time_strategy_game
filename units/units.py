@@ -116,6 +116,10 @@ class Unit(PlayerEntity):
         self.set_texture(index)
 
     @property
+    def adjacent_nodes(self) -> List[MapNode]:
+        return self.current_node.adjacent_nodes
+
+    @property
     def moving(self) -> float:
         return self.change_x or self.change_y
 
@@ -124,13 +128,6 @@ class Unit(PlayerEntity):
             return destination.grid == self.current_node.grid
         except AttributeError:
             return destination == self.current_node.grid
-
-    def nearby(self, position: Union[MapNode, GridPosition]) -> bool:
-        adjacent_grids = {n.grid for n in self.current_node.adjacent_nodes}
-        try:
-            return position in adjacent_grids
-        except KeyError:
-            return position.grid in adjacent_grids
 
     def heading_to(self, destination: Union[MapNode, GridPosition]):
         return self.path and self.path[0] == self.map.map_grid_to_position(destination)
