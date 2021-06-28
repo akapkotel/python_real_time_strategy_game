@@ -1,8 +1,13 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
 import heapq
+from abc import abstractmethod
+from collections import defaultdict
 
-from typing import Callable
+from typing import Callable, Any, Optional, List, DefaultDict
+
+from utils.logging import log, logger
 
 
 class Singleton:
@@ -93,3 +98,63 @@ class PriorityQueue:
 
     def get(self):
         return heapq.heappop(self.elements)[1]  # (priority, item)
+
+
+class Observed:
+
+    def __init__(self, observers: Optional[List[Observer]] = None):
+        self._observed_attributes: DefaultDict[str, List[Observer]] = defaultdict(list)
+        if observers:
+            self.attach_observers(observers=observers)
+
+    def __setattr__(self, key, value):
+        try:
+            if key in (observed := self._observed_attributes):
+                for observer in observed[key]:
+                    observer.notify(key, value)
+        except AttributeError:
+            pass
+        finally:
+            super().__setattr__(key, value)
+
+    def attach_observers(self, observers: List[Observer], *attributes: str):
+        for observer in observers:
+            self.attach(observer, *attributes)
+
+    def attach(self, observer: Observer, *attributes: str):
+        log(f'Attaching Observer: {observer}.', console=True)
+        if attributes:
+            for attribute in attributes:
+                self._observed_attributes[attribute].append(observer)
+        else:
+            self._observed_attributes['on_kill'].append(observer)
+        observer.on_being_attached(attached=self)
+
+    def detach_observers(self):
+        all_observers = set()
+        for observers in self._observed_attributes.values():
+            all_observers.update(observers)
+        for observer in all_observers:
+            self.detach(observer)
+
+    def detach(self, observer: Observer):
+        for attribute, observers in self._observed_attributes.items():
+            if observer in observers:
+                log(f'Detaching Observer: {observer}', console=True)
+                observer.on_being_detached(detached=self)
+                observers.remove(observer)
+
+
+class Observer:
+
+    @abstractmethod
+    def on_being_attached(self, attached: Observed):
+        raise NotImplementedError
+
+    @abstractmethod
+    def notify(self, attribute: str, value: Any):
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_being_detached(self, detached: Observed):
+        raise NotImplementedError

@@ -223,7 +223,6 @@ class ResearchFacility:
 
 
 class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
-
     game: Optional[Game] = None
 
     def __init__(self,
@@ -277,8 +276,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         width and height so they occupy minimum MapNodes.
         """
         self.position = normalize_position(*self.position)
-        offset_x = 0 if (self.width // TILE_WIDTH) % 3 == 0 else TILE_WIDTH // 2
-        offset_y = 0 if (self.height // TILE_HEIGHT) % 3 == 0 else TILE_HEIGHT // 2
+        offset_x = 0 if not (self.width // TILE_WIDTH) % 3 else TILE_WIDTH // 2
+        offset_y = 0 if not (self.height // TILE_HEIGHT) % 3 else TILE_HEIGHT // 2
         return self.center_x + offset_x, self.center_y + offset_y
 
     def block_map_nodes(self) -> Set[MapNode]:
@@ -288,15 +287,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         max_y_grid = int(self.top // TILE_HEIGHT)
         occupied_nodes = {
             self.game.map.grid_to_node((x, y)) for x in
-            range(min_x_grid, max_x_grid + 1) for y in
-            range(min_y_grid, max_y_grid)
+            range(min_x_grid, max_x_grid) for y in
+            range(min_y_grid, max_y_grid - 1)
         }
         [self.block_map_node(node) for node in occupied_nodes]
         return set(occupied_nodes)
 
     @property
     def moving(self) -> bool:
-        return False
+        return False  # this is rather obvious, this is a Building
 
     @staticmethod
     def unblock_map_node(node: MapNode):
@@ -388,8 +387,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return list(sectors)
 
     @property
-    def is_garrison_full(self) -> bool:
-        return len(self.garrisoned_soldiers) == self.max_garrisoned_soldiers
+    def soldiers_slots_left(self) -> int:
+        """Check if more Soldiers can enter this building."""
+        return self.max_garrisoned_soldiers - len(self.garrisoned_soldiers)
 
     def on_soldier_enter(self, soldier: Soldier):
         self.garrisoned_soldiers.append(soldier)
@@ -416,11 +416,24 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return super().on_being_damaged(damage)
 
     def kill(self):
+        if self.garrisoned_soldiers:
+            self.kill_garrisoned_soldiers()
+        self.unblock_occupied_nodes()
+        self.leave_occupied_sectors()
+        super().kill()
+
+    def unblock_occupied_nodes(self):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
+
+    def leave_occupied_sectors(self):
         for sector in self.occupied_sectors:
             sector.discard_entity(self)
-        super().kill()
+
+    def kill_garrisoned_soldiers(self):
+        for soldier in self.garrisoned_soldiers:
+            soldier.kill()
+        self.garrisoned_soldiers.clear()
 
     def save(self) -> Dict:
         saved_building = super().save()

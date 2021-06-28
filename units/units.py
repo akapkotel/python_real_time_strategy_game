@@ -350,7 +350,7 @@ class Unit(PlayerEntity):
         self.cancel_path_requests()
         self.awaited_path = None
         self.path.clear()
-        # self.stop()
+        self.cancell_tasks()
 
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
@@ -368,9 +368,8 @@ class Unit(PlayerEntity):
         pass
 
     def visible_for(self, other: PlayerEntity) -> bool:
-        if self.player is self.game.local_human_player and not other.is_unit:
-            if other.current_node not in self.observed_nodes:
-                return False
+        if self.player is self.game.local_human_player and other.is_building:
+            return len(self.observed_nodes & other.occupied_nodes) > 0
         return super().visible_for(other)
 
     def set_permanent_units_group(self, index: int = 0):
@@ -400,16 +399,16 @@ class Unit(PlayerEntity):
 
     def kill(self):
         self.current_sector.discard_entity(self)
+        self.game.units_manager.unselect(self)
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
         self.create_death_animation()
-        self.remove_from_tasks()
         self.stop_completely()
         super().kill()
 
-    def remove_from_tasks(self):
+    def cancell_tasks(self):
         for task in self.tasks:
-            task.units.remove(self)
+            task.remove(self)
         self.tasks.clear()
 
     def set_navigating_group(self, navigating_group):
@@ -492,7 +491,7 @@ class Vehicle(Unit):
         self.configure_wreck(wreck)
 
     def configure_wreck(self, wreck):
-        wreck.register_to_objectsowners(self.game)
+        wreck.attach(observer=self.game)
         wreck.schedule_event(ScheduledEvent(wreck, 10.0, wreck.kill))
         map_tile = self.map.position_to_node(*wreck.position)
         map_tile._allowed_for_pathfinding = False
@@ -685,7 +684,7 @@ class Soldier(Unit):
 
     def enter_building(self, building):
         self.stop_completely()
-        self.game.units_manager.remove_from_selection_markers(entity=self)
+        self.game.units_manager.unselect(self)
         building.on_soldier_enter(soldier=self)
         self.outside = False
 
@@ -715,7 +714,7 @@ class Soldier(Unit):
         self.configure_corpse(corpse)
 
     def configure_corpse(self, corpse):
-        corpse.register_to_objectsowners(self.game)
+        corpse.attach(observer=self.game)
         corpse.schedule_event(ScheduledEvent(corpse, 10.0, corpse.kill))
 
 

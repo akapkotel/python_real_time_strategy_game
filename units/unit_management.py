@@ -360,6 +360,15 @@ class UnitsManager(EventsCreator):
         self.selection_markers.discard(marker)
         marker.kill()
 
+    def unselect(self, entity: PlayerEntity):
+        if entity.is_building:
+            self.selected_building = None
+        else:
+            self.selected_units.remove(entity)
+        self.remove_from_selection_markers(entity)
+        if not self.selected_units:
+            self.game.update_interface_content(context=None)
+
     @ignore_in_menu
     def unselect_all_selected(self):
         self.selected_units.clear()
@@ -399,9 +408,3 @@ class UnitsManager(EventsCreator):
                 self.select_units(*group.units)
         except KeyError:
             pass
-
-    def on_human_entity_being_killed(self, entity: PlayerEntity):
-        self.remove_from_selection_markers(entity=entity)
-        self.selected_units.remove(entity)
-        if not self.selected_units:
-            self.cursor.update_cursor_texture()

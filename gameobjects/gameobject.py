@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from arcade import AnimatedTimeBasedSprite
 from arcade.arcade_types import Point
 
+from utils.classes import Observed, Observer
 from utils.data_types import GridPosition
 from utils.enums import Robustness, UnitWeight
 from utils.functions import (
@@ -14,10 +15,10 @@ from utils.functions import (
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator
-from utils.ownership_relations import OwnedObject
+from user_interface.user_interface import OwnedObject
 
 
-class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
+class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     """
     GameObject represents all in-game objects, like units, buildings,
     terrain props, trees etc.
@@ -29,7 +30,8 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
                  texture_name: str,
                  robustness: Robustness = 0,
                  position: Point = (0, 0),
-                 id: Optional[int] = None):
+                 id: Optional[int] = None,
+                 observers: Optional[List[Observer]] = None):
         # raw name of the object without texture extension and Player color
         # used to query game.configs and as a basename to build other names
         self.object_name = decolorised_name(texture_name)
@@ -38,7 +40,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         self.filename_with_path = get_path_to_file(self.full_name)
         x, y = position
         super().__init__(self.filename_with_path, center_x=x, center_y=y)
-        OwnedObject.__init__(self, owners=True)
+        Observed.__init__(self, observers)
         EventsCreator.__init__(self)
 
         GameObject.total_objects_count += 1
@@ -97,16 +99,18 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, OwnedObject):
         pass
 
     def kill(self):
-        log(f'Removing GameObject: {self.object_name}')
-        self.unregister_from_all_owners()
-        self.selective_spritelist.remove(self)
-        super().kill()
+        log(f'Destroying GameObject: {self.object_name}', True)
+        try:
+            self.selective_spritelist.remove(self)
+        finally:
+            self.detach_observers()
+            super().kill()
 
 
 class TerrainObject(GameObject):
 
     def __init__(self, filename: str, robustness: Robustness, position: Point):
-        super().__init__(filename, robustness, position)
+        GameObject.__init__(self, filename, robustness, position)
         self.map_node = self.game.map.position_to_node(*self.position)
         self.map_node.pathable = False
 

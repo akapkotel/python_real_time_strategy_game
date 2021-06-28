@@ -31,8 +31,10 @@ from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor, EDITOR
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
-    SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel
+    SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel,
+    OwnedObject
 )
+from utils.classes import Observer, Observed
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
@@ -45,7 +47,6 @@ from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
     SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList,
 )
-from utils.ownership_relations import OwnedObject
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -335,14 +336,16 @@ class GameWindow(Window, EventsCreator):
         super().close()
 
 
-class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
+class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
     """This is an actual Game-instance, created when player starts the game."""
+
     instance: Optional[Game] = None
 
     def __init__(self, loader: Optional[Generator] = None):
         LoadableWindowView.__init__(self, loader)
         UiBundlesHandler.__init__(self)
         EventsCreator.__init__(self)
+        Observer.__init__(self)
 
         self.assign_reference_to_self_for_all_classes()
 
@@ -606,63 +609,60 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         cpu_player = self.players[4]
         cpu_no_units = NoUnitsLeft(cpu_player).triggers(Defeat())
 
-        mission.add_players(players=[human, cpu_player])
-        conditions = [unit_type, mission_timer, no_units, cpu_no_units, map_revealed]
-        mission.add_conditions(conditions=conditions, optional=True)
+        mission.extend(human, cpu_player)
+        mission.extend(unit_type, mission_timer, no_units, cpu_no_units, map_revealed)
 
         mission.unlock_technologies_for_player(human, 'technology_1')
 
-    def register(self, registered):
-        registered: Union[Player, Faction, GameObject, UiElementsBundle]
-        # using isinstance since functools.singledispatchmetod breaks, because
-        # of the end-file imports used to avoid circular-imports problem, it is
-        # not elegant way, but removing all type-hints to get rid of imports is
-        # much worse TODO: find another way
-        if isinstance(registered, GameObject):
-            self.register_gameobject(registered)
-        elif isinstance(registered, (Player, Faction)):
-            self.register_player_or_faction(registered)
+    def on_being_attached(self, attached: Observed):
+        if isinstance(attached, GameObject):
+            self.attach_gameobject(attached)
+        elif isinstance(attached, (Player, Faction)):
+            print(attached)
+            self.attach_player_or_faction(attached)
         else:
-            super().register(registered)  # Game inherits from UiBundlesHandler
+            log(f'Tried to attach {attached} which Game is unable to attach.')
 
-    def register_gameobject(self, registered: GameObject):
-        if isinstance(registered, PlayerEntity):
-            if registered.is_building:
-                self.buildings.append(registered)
+    def notify(self, attribute: str, value: Any):
+        pass
+
+    def on_being_detached(self, detached: Observed):
+        if isinstance(detached, GameObject):
+            self.detach_gameobject(detached)
+        elif isinstance(detached, (Player, Faction)):
+            self.detach_player_or_faction(detached)
+        else:
+            log(f'Tried to detach {detached} which Game is unable to detach.')
+
+    def attach_gameobject(self, gameobject: GameObject):
+        if isinstance(gameobject, PlayerEntity):
+            if gameobject.is_building:
+                self.buildings.append(gameobject)
             else:
-                self.units.append(registered)
+                self.units.append(gameobject)
         else:
-            self.terrain_tiles.append(registered)
+            self.terrain_tiles.append(gameobject)
 
-    def register_player_or_faction(self, registered: Union[Player, Faction]):
-        if isinstance(registered, Player):
-            self.players[registered.id] = registered
+    def attach_player_or_faction(self, attached: Union[Player, Faction]):
+        if isinstance(attached, Player):
+            self.players[attached.id] = attached
         else:
-            self.factions[registered.id] = registered
+            self.factions[attached.id] = attached
 
-    def unregister(self, owned: OwnedObject):
-        owned: Union[PlayerEntity, Player, Faction, UiElementsBundle]
-        if isinstance(owned, GameObject):
-            self.unregister_gameobject(owned)
-        elif isinstance(owned, (Player, Faction)):
-            self.unregister_player_or_faction(owned)
-        else:
-            super().unregister(owned)
-
-    def unregister_gameobject(self, owned: GameObject):
-        if isinstance(owned, PlayerEntity):
-            if owned.is_building:
-                self.buildings.remove(owned)
+    def detach_gameobject(self, gameobject: GameObject):
+        if isinstance(gameobject, PlayerEntity):
+            if gameobject.is_building:
+                self.buildings.remove(gameobject)
             else:
-                self.units.remove(owned)
+                self.units.remove(gameobject)
         else:
-            self.terrain_tiles.remove(owned)
+            self.terrain_tiles.remove(gameobject)
 
-    def unregister_player_or_faction(self, owned: Union[Player, Faction]):
-        if isinstance(owned, Player):
-            del self.players[owned.id]
+    def detach_player_or_faction(self, detached: Union[Player, Faction]):
+        if isinstance(detached, Player):
+            del self.players[detached.id]
         else:
-            del self.factions[owned.id]
+            del self.factions[detached.id]
 
     def get_notified(self, *args, **kwargs):
         pass

@@ -21,7 +21,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):
         super().__init__()
-        UiBundlesHandler.__init__(self, use_spatial_hash=True)
+        UiBundlesHandler.__init__(self)
         self.set_updated_and_drawn_lists()
         self.create_submenus()
 

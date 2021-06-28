@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import time
-from functools import partial
+from abc import abstractmethod
+from functools import partial, singledispatchmethod
 
 import PIL
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type
+from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type, Any
 
 from arcade import (
     Sprite, load_texture, draw_rectangle_outline, draw_text,
@@ -17,9 +17,9 @@ from arcade import (
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
 
+from utils.classes import Observed, Observer
 from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
-from utils.ownership_relations import ObjectsOwner, OwnedObject
 
 from utils.functions import make_texture, get_path_to_file, \
     name_to_texture_name, to_rgba
@@ -28,336 +28,7 @@ from utils.logging import log
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
-CONFIRMATON_DIALOG = 'Confirmaton dialog'
-
-
-def ask_player_for_confirmation(
-        position: Tuple,
-        after_switch_to_bundle: str):
-    """
-    Use this function to decorate method you want, to be preceded by display of
-    simple confirm-or-cancel dialog for the player. The dialog would be shown
-    first, and after player clicks 'confirm' decorated method would be called.
-    If player clicks 'cancel', method would be ignored and a UiElementsBundle
-    of name provided in after_switch_to_bundle param is loaded.\n
-    To IGNORE this prompt, pass special argument ignore_confirmation=True to
-    the called decorated method - it will be digested by the internal wrapper,
-    and will cause aborting of the dialog procedure, and decorated method is
-    going to be executed instead.
-
-    :param position: Tuple[x, y] -- position on which dialog will be centered
-    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be displayed after player makes choice.
-    :return: Callable
-    """
-    def decorator(function):
-        def wrapper(self, ignore_confirmation=False):
-            if ignore_confirmation:
-                return function(self)
-            function_on_yes = partial(function, self)
-            return self.menu_view.open_confirmation_dialog(
-                position, after_switch_to_bundle, function_on_yes
-            )
-        return wrapper
-    return decorator
-
-
-@dataclass
-class UiElementsBundle(OwnedObject):
-    """
-    A bundle of UiElement objects kept together to easy switch between Menu
-    submenus and dynamically change UI content.
-
-    Initialize with params:\n
-    index: int \n
-    name: str \n
-    elements: Optional[List[UiElement]]
-    """
-    index: int
-    name: str
-    elements: List[UiElement]
-    register_to: ObjectsOwner
-    _owners = None
-    _on_load: Optional[Callable] = None
-    _on_unload: Optional[Callable] = None
-    displayed_in_manager: Optional[UiBundlesHandler] = None
-    displayed: bool = True
-
-    def __post_init__(self):
-        self.register_to_objectsowners(self.register_to)
-        self.bind_elements_to_bundle(self.elements)
-
-    def bind_elements_to_bundle(self, elements):
-        for element in elements:
-            element.bundle = self
-
-    def extend(self, elements):
-        for element in elements:
-            self.add(element)
-
-    def add(self, element: UiElement):
-        self.elements.append(element)
-        element.bundle = self
-        if self.displayed_in_manager is not None:
-            self.displayed_in_manager.append(element)
-
-    def remove(self, name: str):
-        if (element := self.find_by_name(name)) is not None:
-            self._remove(element)
-            element.bundle = None
-            if self.displayed_in_manager is not None:
-                self.displayed_in_manager.remove(element)
-
-    def __iter__(self):
-        return self.elements.__iter__()
-
-    def toggle_element(self, name: str, state: bool):
-        if (element := self.find_by_name(name)) is not None:
-            element.toggle(state)
-
-    def show_element(self, name: str):
-        if (element := self.find_by_name(name)) is not None:
-            element.show()
-
-    def hide_element(self, name: str):
-        if (element := self.find_by_name(name)) is not None:
-            element.hide()
-
-    def activate_element(self, name: str):
-        if (element := self.find_by_name(name)) is not None:
-            element.activate()
-
-    def deactivate_element(self, name: str):
-        if (element := self.find_by_name(name)) is not None:
-            element.deactivate()
-
-    def remove_subgroup(self, subgroup: int):
-        for element in self.elements[::]:
-            if element.subgroup == subgroup:
-                element.hide()
-                element.deactivate()
-                self.elements.remove(element)
-
-    def switch_to_subgroup(self, subgroup: int):
-        for element in self.elements:
-            if element.subgroup in (None, subgroup):
-                element.show()
-                element.activate()
-            else:
-                element.hide()
-                element.deactivate()
-
-    def find_by_name(self, name: str) -> Optional[UiElement]:
-        for element in (e for e in self.elements if e.name == name):
-            return element
-
-    def get_elements_of_type(self, class_name: Type[UiElement]) -> List:
-        return [e for e in self.elements if isinstance(e, class_name)]
-
-    def _remove(self, element: UiElement):
-        self.elements.remove(element)
-        element.bundle = None
-
-    def update_elements_positions(self, dx, dy):
-        for element in self.elements:
-            element.update_position(dx, dy)
-
-    def on_load(self):
-        self.displayed = True
-        if self._on_load is not None:
-            self._on_load()
-
-    def on_unload(self):
-        self.displayed = False
-        if self._on_unload is not None:
-            self._on_unload()
-
-
-class UiBundlesHandler(ObjectsOwner):
-    """
-    This class keeps track of currently is_loaded and displayed UiElements,
-    allowing switching between different groups of buttons, checkboxes etc.
-    and dynamically compose content of the screen eg. in game menu or player
-    interface.
-    """
-
-    def __init__(self, use_spatial_hash=False):
-        """
-        To add UiElementsBundle to this handler you need only to initialize
-        this bundle inside of the class inheriting from the handler and it
-        will automatically add itself to the list of bundles and it's all
-        elements will .
-        """
-        ObjectsOwner.__init__(self)
-        # all bundles available to load and display:
-        self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
-        # currently displayed UiElements of the chosen bundle/s:
-        self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
-        # set used to quickly check if a bundle is displayed or not:
-        self.active_bundles: Set[int] = set()
-        # selectable groups allow to group together a bunch of same-context
-        # UiElements and provide a convenient way to communicate between them:
-        self.selectable_groups: Dict[str, SelectableGroup] = {}
-
-    def set_keyboard_handler(self, handler: KeyboardHandler):
-        for bundle in self.ui_elements_bundles.values():
-            for element in bundle.elements:
-                if isinstance(element, TextInputField):
-                    element.set_keyboard_handler(handler)
-
-    def open_confirmation_dialog(self,
-                                 position: Tuple,
-                                 after_switch_to_bundle: str,
-                                 function_if_yes: Callable):
-        x, y = position
-        close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
-        self.switch_to_bundle(UiElementsBundle(
-            index=8,
-            name=CONFIRMATON_DIALOG,
-            elements=[
-                UiTextLabel(x, y * 1.5, 'Are you sure?', 30),
-                Button('menu_button_confirm.png', x // 2, y,
-                       functions=(function_if_yes, close_dialog)),
-                Button('menu_button_cancel.png', x * 1.5, y,
-                       functions=(close_dialog, ))
-            ],
-            register_to=self
-        ))
-
-    def close_confirmation_dialog(self, after_switch_to_bundle: str):
-        self.switch_to_bundle_of_name(name=after_switch_to_bundle)
-        self.unregister(self.ui_elements_bundles[CONFIRMATON_DIALOG])
-
-    def register(self, acquired: OwnedObject):
-        acquired: UiElementsBundle
-        self.ui_elements_bundles[acquired.name] = acquired
-        self.ui_elements_spritelist.extend(acquired.elements)
-        self.bind_ui_elements_with_ui_spritelist(acquired.elements)
-
-    def unregister(self, owned: OwnedObject):
-        owned: UiElementsBundle
-        del self.ui_elements_bundles[owned.name]
-
-    def get_notified(self, *args, **kwargs):
-        pass
-
-    def switch_to_bundle(self,
-                         bundle: UiElementsBundle = None,
-                         name: str = None,
-                         index: int = None):
-        if bundle is not None:
-            return self._switch_to_bundle(bundle)
-        elif name in self.ui_elements_bundles:
-            return self._switch_to_bundle(self.ui_elements_bundles[name])
-        elif index is not None:
-            return self.switch_to_bundle_of_index(index)
-
-    def switch_to_bundle_of_index(self, index: int = 0):
-        for bundle in self.ui_elements_bundles.values():
-            if bundle.index == index:
-                return self._switch_to_bundle(bundle)
-
-    def switch_to_bundle_of_name(self, name: str):
-        if name in self.ui_elements_bundles:
-            self._switch_to_bundle(self.ui_elements_bundles[name])
-
-    def _switch_to_bundle(self, bundle: UiElementsBundle):
-        log(f'Switched to submenu {bundle.name} of index: {bundle.index}')
-        self._unload_all()
-        self._load_bundle(bundle)
-        self.active_bundles.add(bundle.index)
-
-    def bind_ui_elements_with_ui_spritelist(self, elements):
-        for ui_element in elements:
-            ui_element.ui_spritelist = self.ui_elements_spritelist
-
-    def load_bundle(self,
-                    name: Optional[str] = None,
-                    index: Optional[int] = None,
-                    clear: bool = False):
-        """
-        Only add UiElementsBundle elements to the current list, without
-        removing anything from it.
-        """
-        if name is not None:
-            bundle = self.ui_elements_bundles.get(name, None)
-        elif index is not None:
-            bundle = self.get_bundle_of_index(index)
-        else:
-            return
-        if bundle is not None:
-            self._load_bundle(bundle, clear)
-
-    def unload_bundle(self,
-                      name: Optional[str] = None,
-                      index: Optional[int] = None):
-        if name is not None:
-            bundle = self.ui_elements_bundles.get(name, None)
-        elif index is not None:
-            bundle = self.get_bundle_of_index(index)
-        else:
-            return
-        if bundle is not None:
-            self._unload_bundle(bundle)
-
-    def __getitem__(self, name: Union[str, int]) -> Optional[UiElementsBundle]:
-        return self.ui_elements_bundles.get(name, self.get_bundle_of_index(name))
-
-    def get_bundle(self, name: str) -> UiElementsBundle:
-        try:
-            return self.ui_elements_bundles[name]
-        except KeyError:
-            raise KeyError(f'UiElementsBundle: {name} not found!')
-
-    def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
-        try:
-            return next(b for b in self.ui_elements_bundles.values() if b.index == index)
-        except StopIteration:
-            return
-
-    def _load_bundle(self, bundle: UiElementsBundle, clear: bool = False):
-        log(f'LOADING BUNDLE: {bundle.name}')
-        if clear:
-            bundle.elements.clear()
-        bundle.on_load()
-        bundle.displayed_in_manager = self
-        self.active_bundles.add(bundle.index)
-        self.ui_elements_spritelist.extend(bundle.elements)
-        self.bind_ui_elements_with_ui_spritelist(bundle.elements)
-
-    def append(self, element: UiElement):
-        self.ui_elements_spritelist.append(element)
-
-    def _unload_bundle(self, bundle: UiElementsBundle):
-        self.active_bundles.discard(bundle.index)
-        for element in self.ui_elements_spritelist[::-1]:
-            if element.bundle == bundle:
-                bundle.displayed_in_manager = None
-                self.remove(element)
-        bundle.on_unload()
-
-    def remove(self, element: UiElement):
-        self.ui_elements_spritelist.remove(element)
-
-    def _unload_all(self,
-                    exception: Optional[str] = None,
-                    exceptions: Optional[List[str]] = None):
-        for bundle in self.ui_elements_bundles.values():
-            bundle.on_unload()
-        self.active_bundles.clear()
-        self.ui_elements_spritelist.clear()
-        self._reload_exceptions_bundles(exception, exceptions)
-
-    def _reload_exceptions_bundles(self, exception, exceptions):
-        if exception is not None:
-            self.load_bundle(name=exception)
-        elif exceptions is not None:
-            for exception in exceptions:
-                self.load_bundle(exception)
-
-    def update_not_displayed_bundles_positions(self, dx, dy):
-        for bundle in self.ui_elements_bundles.values():
-            if bundle.index not in self.active_bundles:
-                bundle.update_elements_positions(dx, dy)
+CONFIRMATION_DIALOG = 'Confirmaton dialog'
 
 
 class Hierarchical:
@@ -554,7 +225,7 @@ class SelectableGroup:
             element.unselect()
 
 
-class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectable):
+class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
     """
     Basic class for all user-interface and menu objects, like buttons,
     scrollbars, mouse-cursors etc.
@@ -579,12 +250,19 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, OwnedObject, Selectab
         super().__init__(full_texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
-        OwnedObject.__init__(self, owners=True)
         Selectable.__init__(self, selectable_group=selectable_group)
         self.name = name
-        self.bundle = None
+        self._bundle = None
         self.subgroup = subgroup
         self.ui_spritelist = None
+
+    @property
+    def bundle(self):
+        return self._bundle
+
+    @bundle.setter
+    def bundle(self, bundle: UiElementsBundle):
+        self._bundle = bundle
 
     def this_or_child(self, cursor) -> UiElement:
         """
@@ -1027,6 +705,405 @@ class ScrollBar(UiElement):
     sound_on_mouse_enter = None
     sound_on_mouse_click = None
     ...
+
+
+def ask_player_for_confirmation(
+        position: Tuple,
+        after_switch_to_bundle: str):
+    """
+    Use this function to decorate method you want, to be preceded by display of
+    simple confirm-or-cancel dialog for the player. The dialog would be shown
+    first, and after player clicks 'confirm' decorated method would be called.
+    If player clicks 'cancel', method would be ignored and a UiElementsBundle
+    of name provided in after_switch_to_bundle param is loaded.\n
+    To IGNORE this prompt, pass special argument ignore_confirmation=True to
+    the called decorated method - it will be digested by the internal wrapper,
+    and will cause aborting of the dialog procedure, and decorated method is
+    going to be executed instead.
+
+    :param position: Tuple[x, y] -- position on which dialog will be centered
+    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be displayed after player makes choice.
+    :return: Callable
+    """
+    def decorator(function):
+        def wrapper(self, ignore_confirmation=False):
+            if ignore_confirmation:
+                return function(self)
+            function_on_yes = partial(function, self)
+            return self.menu_view.open_confirmation_dialog(
+                position, after_switch_to_bundle, function_on_yes
+            )
+        return wrapper
+    return decorator
+
+
+class OwnedObject:
+
+    def __init__(self, owner=None):
+        """-
+        :param owner: bool : default: False. Change it to True if you want
+        this OwnedObjects to use default Set[ObjectsOwner] to keep track of
+        the objects owning this instance. If implementing your own collection,
+        leave it False.
+        """
+        self.owner = owner
+
+    def register_to_objectsowner(self, owner: ObjectsOwner):
+        self.owner = owner
+        owner.register(self)
+
+    def unregister_from_objectsowner(self):
+        if self.owner is not None:
+            self.owner.unregister(self)
+            self.owner = None
+
+    def __getstate__(self) -> Dict:
+        saved_object = self.__dict__.copy()
+        saved_object['owner'] = None
+        return saved_object
+
+
+@dataclass
+class UiElementsBundle(OwnedObject):
+    """
+    A bundle of UiElement objects kept together to easy switch between Menu
+    submenus and dynamically change UI content.
+
+    Initialize with params:\n
+    index: int \n
+    name: str \n
+    elements: Optional[List[UiElement]]
+    """
+    index: int
+    name: str
+    elements: List[UiElement]
+    register_to: ObjectsOwner
+    owner = None
+    _on_load: Optional[Callable] = None
+    _on_unload: Optional[Callable] = None
+    displayed_in_manager: Optional[UiBundlesHandler] = None
+    displayed: bool = True
+
+    def __post_init__(self):
+        self.register_to_objectsowner(self.register_to)
+        self.bind_elements_to_bundle(self.elements)
+
+    def bind_elements_to_bundle(self, elements):
+        for element in elements:
+            element.bundle = self
+
+    def extend(self, elements):
+        for element in elements:
+            self.add(element)
+
+    def add(self, element: UiElement):
+        self.elements.append(element)
+        element.bundle = self
+        if self.displayed_in_manager is not None:
+            self.displayed_in_manager.append(element)
+
+    def remove(self, name: str):
+        if (element := self.find_by_name(name)) is not None:
+            self._remove(element)
+            element.bundle = None
+            if self.displayed_in_manager is not None:
+                self.displayed_in_manager.remove(element)
+
+    def __iter__(self):
+        return self.elements.__iter__()
+
+    def toggle_element(self, name: str, state: bool):
+        if (element := self.find_by_name(name)) is not None:
+            element.toggle(state)
+
+    def show_element(self, name: str):
+        if (element := self.find_by_name(name)) is not None:
+            element.show()
+
+    def hide_element(self, name: str):
+        if (element := self.find_by_name(name)) is not None:
+            element.hide()
+
+    def activate_element(self, name: str):
+        if (element := self.find_by_name(name)) is not None:
+            element.activate()
+
+    def deactivate_element(self, name: str):
+        if (element := self.find_by_name(name)) is not None:
+            element.deactivate()
+
+    def remove_subgroup(self, subgroup: int):
+        for element in self.elements[::]:
+            if element.subgroup == subgroup:
+                element.hide()
+                element.deactivate()
+                self.elements.remove(element)
+
+    def switch_to_subgroup(self, subgroup: int):
+        for element in self.elements:
+            if element.subgroup in (None, subgroup):
+                element.show()
+                element.activate()
+            else:
+                element.hide()
+                element.deactivate()
+
+    def find_by_name(self, name: str) -> Optional[UiElement]:
+        for element in (e for e in self.elements if e.name == name):
+            return element
+
+    def get_elements_of_type(self, class_name: Type[UiElement]) -> List:
+        return [e for e in self.elements if isinstance(e, class_name)]
+
+    def _remove(self, element: UiElement):
+        self.elements.remove(element)
+        element._bundle = None
+
+    def update_elements_positions(self, dx, dy):
+        for element in self.elements:
+            element.update_position(dx, dy)
+
+    def on_load(self):
+        self.displayed = True
+        if self._on_load is not None:
+            self._on_load()
+
+    def on_unload(self):
+        self.displayed = False
+        if self._on_unload is not None:
+            self._on_unload()
+
+
+class ObjectsOwner:
+    """
+    ObjectsOwner has only a bunch of abstract methods used to add new
+    OwnedObjects and remove them. These methods must be implemented for each
+    subclass individually, since each type of ObjectsOwner will handle
+    different types of OwnedObjects for various reasons and use them for it's
+    own purposes.
+    CLasses inheriting from ObjectsOwner must keep their own containers for
+    their registered OwnedObjects, since this class does not provide default
+    one. Reason for that is to force subclasses to name their data-attributes
+    properly to their usage and type of OwnedObjects stored inside.
+    """
+
+    @abstractmethod
+    def register(self, acquired: OwnedObject):
+        raise NotImplementedError
+
+    @abstractmethod
+    def unregister(self, owned: OwnedObject):
+        raise NotImplementedError
+
+
+class UiBundlesHandler(ObjectsOwner):
+    """
+    This class keeps track of currently is_loaded and displayed UiElements,
+    allowing switching between different groups of buttons, checkboxes etc.
+    and dynamically compose content of the screen eg. in game menu or player
+    interface.
+    """
+
+    def __init__(self, use_spatial_hash=False):
+        """
+        To add UiElementsBundle to this handler you need only to initialize
+        this bundle inside of the class inheriting from the handler and it
+        will automatically add itself to the list of bundles and it's all
+        elements will .
+        """
+        ObjectsOwner.__init__(self)
+        # all bundles available to load and display:
+        self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
+        # currently displayed UiElements of the chosen bundle/s:
+        self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
+        # set used to quickly check if a bundle is displayed or not:
+        self.active_bundles: Set[int] = set()
+        # selectable groups allow to group together a bunch of same-context
+        # UiElements and provide a convenient way to communicate between them:
+        self.selectable_groups: Dict[str, SelectableGroup] = {}
+
+    def set_keyboard_handler(self, handler: KeyboardHandler):
+        for bundle in self.ui_elements_bundles.values():
+            for element in bundle.elements:
+                if isinstance(element, TextInputField):
+                    element.set_keyboard_handler(handler)
+
+    def open_confirmation_dialog(self,
+                                 position: Tuple,
+                                 after_switch_to_bundle: str,
+                                 function_if_yes: Callable):
+        x, y = position
+        close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
+        self.switch_to_bundle(UiElementsBundle(
+            index=8,
+            name=CONFIRMATION_DIALOG,
+            elements=[
+                UiTextLabel(x, y * 1.5, 'Are you sure?', 30),
+                Button('menu_button_confirm.png', x // 2, y,
+                       functions=(function_if_yes, close_dialog)),
+                Button('menu_button_cancel.png', x * 1.5, y,
+                       functions=(close_dialog, ))
+            ],
+            register_to=self
+        ))
+
+    def close_confirmation_dialog(self, after_switch_to_bundle: str):
+        self.switch_to_bundle_of_name(name=after_switch_to_bundle)
+        self.remove(self.ui_elements_bundles[CONFIRMATION_DIALOG])
+
+    def register(self, acquired: OwnedObject):
+        self.append(acquired)
+        # acquired: UiElementsBundle
+        # self.ui_elements_bundles[acquired.name] = acquired
+        # self.ui_elements_spritelist.extend(acquired.elements)
+        # self.bind_ui_elements_with_ui_spritelist(acquired.elements)
+
+    def unregister(self, owned: OwnedObject):
+        owned: UiElementsBundle
+        self.remove(owned)
+        # del self.ui_elements_bundles[owned.name]
+
+    def get_notified(self, *args, **kwargs):
+        pass
+
+    def switch_to_bundle(self,
+                         bundle: UiElementsBundle = None,
+                         name: str = None,
+                         index: int = None):
+        if bundle is not None:
+            return self._switch_to_bundle(bundle)
+        elif name in self.ui_elements_bundles:
+            return self._switch_to_bundle(self.ui_elements_bundles[name])
+        elif index is not None:
+            return self.switch_to_bundle_of_index(index)
+
+    def switch_to_bundle_of_index(self, index: int = 0):
+        for bundle in self.ui_elements_bundles.values():
+            if bundle.index == index:
+                return self._switch_to_bundle(bundle)
+
+    def switch_to_bundle_of_name(self, name: str):
+        if name in self.ui_elements_bundles:
+            self._switch_to_bundle(self.ui_elements_bundles[name])
+
+    def _switch_to_bundle(self, bundle: UiElementsBundle):
+        log(f'Switched to submenu {bundle.name} of index: {bundle.index}')
+        self._unload_all()
+        self._load_bundle(bundle)
+        self.active_bundles.add(bundle.index)
+
+    def bind_ui_elements_with_ui_spritelist(self, elements):
+        for ui_element in elements:
+            ui_element.ui_spritelist = self.ui_elements_spritelist
+
+    def load_bundle(self,
+                    name: Optional[str] = None,
+                    index: Optional[int] = None,
+                    clear: bool = False):
+        """
+        Only add UiElementsBundle elements to the current list, without
+        removing anything from it.
+        """
+        if name is not None:
+            bundle = self.ui_elements_bundles.get(name, None)
+        elif index is not None:
+            bundle = self.get_bundle_of_index(index)
+        else:
+            return
+        if bundle is not None:
+            self._load_bundle(bundle, clear)
+
+    def unload_bundle(self,
+                      name: Optional[str] = None,
+                      index: Optional[int] = None):
+        if name is not None:
+            bundle = self.ui_elements_bundles.get(name, None)
+        elif index is not None:
+            bundle = self.get_bundle_of_index(index)
+        else:
+            return
+        if bundle is not None:
+            self._unload_bundle(bundle)
+
+    def __getitem__(self, name: Union[str, int]) -> Optional[UiElementsBundle]:
+        return self.ui_elements_bundles.get(name, self.get_bundle_of_index(name))
+
+    def get_bundle(self, name: str) -> UiElementsBundle:
+        try:
+            return self.ui_elements_bundles[name]
+        except KeyError:
+            raise KeyError(f'UiElementsBundle: {name} not found!')
+
+    def get_bundle_of_index(self, index: int) -> Optional[UiElementsBundle]:
+        try:
+            return next(b for b in self.ui_elements_bundles.values() if b.index == index)
+        except StopIteration:
+            return
+
+    def _load_bundle(self, bundle: UiElementsBundle, clear: bool = False):
+        log(f'LOADING BUNDLE: {bundle.name}')
+        if clear:
+            bundle.elements.clear()
+        bundle.on_load()
+        bundle.displayed_in_manager = self
+        self.active_bundles.add(bundle.index)
+        self.ui_elements_spritelist.extend(bundle.elements)
+        self.bind_ui_elements_with_ui_spritelist(bundle.elements)
+
+    @singledispatchmethod
+    def append(self, element):
+        raise TypeError('Bad argument. Accepted: UiELement, UiElementsBundle')
+
+    @append.register
+    def _(self, element: UiElement):
+        self.ui_elements_spritelist.append(element)
+
+    @append.register
+    def _(self, element: UiElementsBundle):
+        self.ui_elements_bundles[element.name] = element
+        self.ui_elements_spritelist.extend(element.elements)
+        self.bind_ui_elements_with_ui_spritelist(element.elements)
+
+    def _unload_bundle(self, bundle: UiElementsBundle):
+        self.active_bundles.discard(bundle.index)
+        for element in self.ui_elements_spritelist[::-1]:
+            if element._bundle == bundle:
+                bundle.displayed_in_manager = None
+                self.remove(element)
+        bundle.on_unload()
+
+    @singledispatchmethod
+    def remove(self, element):
+        raise TypeError('Bad argument. Accepted: UiELement, UiElementsBundle')
+
+    @remove.register
+    def _(self, element: UiElement):
+        self.ui_elements_spritelist.remove(element)
+
+    @remove.register
+    def _(self, element: UiElementsBundle):
+        del self.ui_elements_bundles[element.name]
+
+    def _unload_all(self,
+                    exception: Optional[str] = None,
+                    exceptions: Optional[List[str]] = None):
+        for bundle in self.ui_elements_bundles.values():
+            bundle.on_unload()
+        self.active_bundles.clear()
+        self.ui_elements_spritelist.clear()
+        self._reload_exceptions_bundles(exception, exceptions)
+
+    def _reload_exceptions_bundles(self, exception, exceptions):
+        if exception is not None:
+            self.load_bundle(name=exception)
+        elif exceptions is not None:
+            for exception in exceptions:
+                self.load_bundle(exception)
+
+    def update_not_displayed_bundles_positions(self, dx, dy):
+        for bundle in self.ui_elements_bundles.values():
+            if bundle.index not in self.active_bundles:
+                bundle.update_elements_positions(dx, dy)
 
 
 # To avoid circular imports

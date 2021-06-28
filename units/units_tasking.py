@@ -12,6 +12,7 @@ class UnitTask:
     task works is that it is automatically rescheduling it's 'update' method
     after each update call, if any alive Unit is still assigned to it.
     """
+    identifier = 0
 
     def __init__(self, units_manager, units):
         self.manager = units_manager
@@ -21,7 +22,14 @@ class UnitTask:
 
     def bind_task_to_units(self):
         for unit in self.units:
+            self.remove_same_tasks(unit)
             unit.tasks.append(self)
+
+    def remove_same_tasks(self, unit):
+        for task in [t for t in unit.tasks]:
+            if task.identifier == self.identifier:
+                unit.tasks.remove(task)
+                task.remove(unit)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__} id: {id(self)}'
@@ -41,6 +49,12 @@ class UnitTask:
             ScheduledEvent(self.manager, 1, self.update)
         )
 
+    def remove(self, unit):
+        try:
+            self.units.remove(unit)
+        except ValueError:
+            pass
+
     def kill_task(self):
         self.manager.units_tasks.remove(self)
         for unit in self.units:
@@ -48,6 +62,7 @@ class UnitTask:
 
 
 class TaskEnterBuilding(UnitTask):
+    identifier = 1
 
     def __init__(self, units_manager, soldiers, building):
         self.target = building
@@ -59,12 +74,12 @@ class TaskEnterBuilding(UnitTask):
         super().update()
 
     def condition(self) -> bool:
-        return self.units and not self.target.is_garrison_full
+        return self.units and self.target and self.target.soldiers_slots_left
 
     def check_if_soldier_can_enter(self, soldier):
         if self.target.occupied_nodes.intersection(soldier.adjacent_nodes):
             soldier.enter_building(self.target)
-            self.units.remove(soldier)
+            self.remove(soldier)
         else:
             self.check_if_soldier_heading_to_target(soldier)
 
@@ -75,6 +90,7 @@ class TaskEnterBuilding(UnitTask):
 
 
 class TaskEnterVehicle(TaskEnterBuilding):
+    identifier = 2
 
     def __init__(self, units_manager, soldiers, vehicle):
         super().__init__(units_manager, soldiers, vehicle)

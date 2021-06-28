@@ -5,7 +5,7 @@ import random
 
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
@@ -14,6 +14,7 @@ from game import Game, UPDATE_RATE, BASIC_UI
 from gameobjects.gameobject import GameObject, Robustness
 from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
+from utils.classes import Observed, Observer
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
@@ -23,7 +24,7 @@ from utils.functions import (
 from utils.geometry import (
     clamp, distance_2d, is_visible, calculate_circular_area
 )
-from utils.ownership_relations import ObjectsOwner, OwnedObject
+from user_interface.user_interface import OwnedObject, ObjectsOwner
 from utils.scheduling import EventsCreator
 
 
@@ -40,7 +41,7 @@ CONSCRIPTS = 'conscripts'
 TOTAL = 0
 
 
-class Faction(EventsCreator, ObjectsOwner, OwnedObject):
+class Faction(EventsCreator, Observer, Observed):
     """
     Faction bundles several Players into one team of allies and helps tracking
     who is fighting against whom.
@@ -53,8 +54,8 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
                  friends: Optional[Set[FactionId]] = None,
                  enemies: Optional[Set[FactionId]] = None):
         EventsCreator.__init__(self)
-        ObjectsOwner.__init__(self)
-        OwnedObject.__init__(self)
+        Observer.__init__(self)
+        Observed.__init__(self)
         self.id = id or new_id(self.game.factions)
         self.name: str = name or f'Faction {self.id}'
 
@@ -68,28 +69,28 @@ class Faction(EventsCreator, ObjectsOwner, OwnedObject):
         self.buildings: Set[Building] = set()
         self.known_enemies: Set[PlayerEntity] = set()
 
-        self.register_to_objectsowners(self.game)
+        self.attach(observer=self.game)
 
     def __repr__(self) -> str:
         return self.name
 
-    def register(self, acquired: OwnedObject):
-        acquired: Player
-        self.players.add(acquired)
+    def on_being_attached(self, attached: Observed):
+        attached: Player
+        self.players.add(attached)
         if self.leader is None:
-            self.new_leader(acquired)
+            self.new_leader(attached)
 
-    def unregister(self, owned: OwnedObject):
-        owned: Player
-        self.players.discard(owned)
-        if owned is self.leader:
+    def notify(self, attribute: str, value: Any):
+        pass
+
+    def on_being_detached(self, detached: Observed):
+        detached: Player
+        self.players.discard(detached)
+        if detached is self.leader and self.players:
             self.new_leader()
 
     def new_leader(self, leader: Optional[Player] = None):
         self.leader = leader or sorted(self.players, key=lambda x: x.id)[-1]
-
-    def get_notified(self, *args, **kwargs):
-        pass
 
     def is_enemy(self, other: Faction) -> bool:
         return other.id in self.enemy_factions
@@ -184,7 +185,8 @@ class ResourcesManager:
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
 
-class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
+class Player(ResourcesManager, EventsCreator, Observer, Observed):
+
     game: Optional[Game] = None
     cpu = False
 
@@ -195,8 +197,8 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
                  faction: Optional[Faction] = None):
         ResourcesManager.__init__(self)
         EventsCreator.__init__(self)
-        ObjectsOwner.__init__(self)
-        OwnedObject.__init__(self)
+        Observer.__init__(self)
+        Observed.__init__(self)
         self.id = id or new_id(self.game.players)
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
@@ -210,31 +212,31 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
 
         self.known_enemies: Set[PlayerEntity] = set()
 
-        self.register_to_objectsowners(self.game, self.faction)
+        self.attach_observers(observers=[self.game, self.faction])
 
     def __repr__(self) -> str:
         return self.name
 
-    def register(self, acquired: OwnedObject):
-        acquired: Union[Unit, Building]
-        if isinstance(acquired, Unit):
-            self.units.add(acquired)
-            self.faction.units.add(acquired)
+    def on_being_attached(self, attached: Observed):
+        attached: Union[Unit, Building]
+        if isinstance(attached, Unit):
+            self.units.add(attached)
+            self.faction.units.add(attached)
         else:
-            self.buildings.add(acquired)
-            self.faction.buildings.add(acquired)
+            self.buildings.add(attached)
+            self.faction.buildings.add(attached)
 
-    def unregister(self, owned: OwnedObject):
-        owned: Union[Unit, Building]
-        try:
-            self.units.remove(owned)
-            self.faction.units.remove(owned)
-        except KeyError:
-            self.buildings.discard(owned)
-            self.faction.buildings.discard(owned)
-
-    def get_notified(self, *args, **kwargs):
+    def notify(self, attribute: str, value: Any):
         pass
+
+    def on_being_detached(self, detached: Observed):
+        detached: Union[Unit, Building]
+        try:
+            self.units.remove(detached)
+            self.faction.units.remove(detached)
+        except KeyError:
+            self.buildings.discard(detached)
+            self.faction.buildings.discard(detached)
 
     def is_enemy(self, other: Player) -> bool:
         return self.faction.is_enemy(other.faction)
@@ -263,7 +265,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
         new_technology.gain_technology_effects(researcher=self)
 
     def kill(self):
-        self.unregister_from_all_owners()
+        self.detach_observers()
 
     def __getstate__(self) -> Dict:
         saved_player = {k: v for (k, v) in self.__dict__.items()}
@@ -276,7 +278,7 @@ class Player(ResourcesManager, EventsCreator, ObjectsOwner, OwnedObject):
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
-        self.register_to_objectsowners(self.game, self.faction)
+        self.attach_observers(observers=[self.game, self.faction])
 
 
 class HumanPlayer(Player):
@@ -377,7 +379,14 @@ class PlayerEntity(GameObject):
         self.experience = 0
         self.kill_experience = 0
 
-        self.register_to_objectsowners(self.game, self.player)
+        self.attach_observers(observers=[self.game, self.player])
+
+    def __bool__(self) -> bool:
+        return self.alive
+
+    @property
+    def alive(self) -> bool:
+        return self._health > 0
 
     @abstractmethod
     def moving(self) -> bool:
@@ -429,10 +438,6 @@ class PlayerEntity(GameObject):
     def draw(self):
         if self.is_rendered:
             super().draw()
-
-    @property
-    def alive(self) -> bool:
-        return self._health > 0
 
     def update_visibility(self):
         if self.should_be_rendered:
@@ -580,9 +585,7 @@ class PlayerEntity(GameObject):
 
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
-            self.game.units_manager.on_human_entity_being_killed(entity=self)
-        if self.selection_marker is not None:
-            self.selection_marker.kill()
+            self.game.units_manager.unselect(entity=self)
         super().kill()
 
     def save(self) -> Dict:

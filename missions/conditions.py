@@ -16,10 +16,11 @@ class Condition:
     Players achieved his objectives. You can use them as events also.
     """
 
-    def __init__(self, player: Player):
+    def __init__(self, player: Player, optional: bool = False):
         self.name = self.__class__.__name__
         self.player = player
         self.mission: Optional[Mission] = None
+        self.optional = False
         self.victory_points = 0
         self._consequences = []
 

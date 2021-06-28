@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from functools import singledispatchmethod
+
 from utils.colors import CLEAR_GREEN, RED
 
 from typing import List, Set, Dict
@@ -50,13 +52,6 @@ class Mission:
     def get_descriptor(self) -> MissionDescriptor:
         return MissionDescriptor(self.name, self.map_name, self.conditions, self.description)
 
-    def add_players(self, players):
-        for player in players:
-            self.players.add(player.id)
-            self.victory_points[player.id] = 0
-            self.required_victory_points[player.id] = 0
-            self.allowed_technologies[player.id] = {}
-
     def unlock_technologies_for_player(self, player: Player, *technologies: str):
         for tech_name in technologies:
             tech_data = self.game.configs['technologies'][tech_name]
@@ -64,15 +59,25 @@ class Mission:
             technology = _class(*[d for d in list(tech_data.values())[3:]])
             self.allowed_technologies[player.id][technology.id] = technology
 
-    def add_conditions(self, conditions, optional: bool = True):
-        for condition in conditions:
-            self.new_condition(condition, optional)
+    @singledispatchmethod
+    def extend(self, *items):
+        raise TypeError(f'Unknown items. Accepted are: Condition, Player')
 
-    def new_condition(self, condition: Condition, optional):
-        condition.bind_mission(self)
-        self.conditions.append(condition)
-        if not optional and ((points := condition.victory_points) > 0):
-            self.required_victory_points[condition.player.id] += points
+    @extend.register
+    def _(self, *items: Condition):
+        for condition in items:
+            condition.bind_mission(self)
+            self.conditions.append(condition)
+            if not condition.optional and (points := condition.victory_points):
+                self.required_victory_points[condition.player.id] += points
+
+    @extend.register
+    def _(self, *items: Player):
+        for player in items:
+            self.players.add(player.id)
+            self.victory_points[player.id] = 0
+            self.required_victory_points[player.id] = 0
+            self.allowed_technologies[player.id] = {}
 
     def remove_condition(self, condition: Condition):
         self.conditions.remove(condition)
