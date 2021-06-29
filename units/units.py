@@ -437,6 +437,10 @@ class Unit(PlayerEntity):
         )
         return saved_unit
 
+    def load(self, loaded_data: Dict):
+        super().load(loaded_data)
+        self.path = deque(loaded_data['path'])
+
 
 class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
@@ -444,9 +448,7 @@ class Vehicle(Unit):
     def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
-        self.virtual_angle = int(ROTATION_STEP * self.cur_texture_index) % 360
-
-        thread_texture = f'{self.object_name}_threads.png'
+        thread_texture = ''.join((self.object_name, '_threads.png'))
         self.thread_texture = get_path_to_file(thread_texture)
         self.threads_time = 0
 
@@ -539,7 +541,7 @@ class Tank(Vehicle):
         self.textures = [load_textures(self.filename_with_path,
             [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
         ]
-        self.set_texture(self.facing_direction, self.facing_direction)
+        self.set_texture(self.facing_direction, self.turret_facing_direction)
         self.set_hit_box(self.texture.hit_box_points)
 
     def set_rotated_texture(self):
@@ -716,6 +718,14 @@ class Soldier(Unit):
     def configure_corpse(self, corpse):
         corpse.attach(observer=self.game)
         corpse.schedule_event(ScheduledEvent(corpse, 10.0, corpse.kill))
+
+
+class Engineer(Soldier):
+    pass
+
+    @classmethod
+    def create_ui_buttons(cls, x, y):
+        pass
 
 
 class UnitsOrderedDestinations:

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 from math import inf
-from time import time as get_time
-from typing import List, Tuple, Dict, Any, Optional, Callable
+from typing import List, Tuple, Dict, Any, Optional, Callable, Union
 
 from utils.logging import log, logger
 
@@ -38,7 +37,7 @@ class ScheduledEvent:
 
     def __repr__(self):
         return (f'Event scheduled by: {self.creator.__class__.__name__}, '
-                f'functions: {self.function.__name__}, args: {self.args}, '
+                f'function: {self.function.__name__}, args: {self.args}, '
                 f'kwargs: {self.kwargs}, time left: {self.delay_left}')
 
     @logger()
@@ -49,7 +48,22 @@ class ScheduledEvent:
             log(f'{self} failed to execute with exception: {str(e)}')
 
     def shelve(self):
-        raise NotImplementedError
+        return {
+            'creator': self.get_creator_name(),
+            'delay': self.delay,
+            'function': self.function.__name__,
+            'args': self.args,
+            'kwargs': self.kwargs,
+            'repeat': self.repeat,
+            'delay left': EventsScheduler.instance.time_left_to_event_execution(self)
+        }
+
+    def get_creator_name(self) -> Union[str, Tuple[str, int]]:
+        try:
+            identifier = self.creator.id
+            return self.creator.__class__.__name__, identifier
+        except AttributeError:
+            return self.creator.__class__.__name__
 
     def unshelve(self):
         raise NotImplementedError
@@ -64,7 +78,8 @@ class EventsScheduler:
     """
     instance = None
 
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         self.schedulers: List[EventsCreator] = []
         self.scheduled_events: List[ScheduledEvent] = []
         self.execution_times: List[float] = []
@@ -75,7 +90,7 @@ class EventsScheduler:
         self.schedulers.append(event.creator)
         self.scheduled_events.append(event)
         delay = event.delay_left or event.delay
-        self.execution_times.append(get_time() + delay)
+        self.execution_times.append(self.game.timer['total'] + delay)
 
     @logger()
     def unschedule(self, index: int):
@@ -87,7 +102,7 @@ class EventsScheduler:
             pass
 
     def update(self):
-        time = get_time()
+        time = self.game.timer['total']
         for i, event in enumerate(self.scheduled_events):
             if time >= self.execution_times[i]:
                 event.execute()
@@ -98,13 +113,26 @@ class EventsScheduler:
 
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         index = self.scheduled_events.index(event)
-        return self.execution_times[index] - get_time()
+        return self.game.timer['total'] - self.execution_times[index]
 
-    def shelve_scheduled_events(self):
-        raise NotImplementedError
+    def save(self) -> List[Dict]:
+        return self.shelve_scheduled_events()
 
-    def unshelve_scheduled_events(self):
-        raise NotImplementedError
+    def shelve_scheduled_events(self) -> List[Dict]:
+        return [event.shelve() for event in self.scheduled_events]
+
+    def load(self, shelved_events: List[Dict]):
+        self.unshelve_scheduled_events(shelved_events)
+
+    def unshelve_scheduled_events(self, shelved_events: List[Dict]):
+        for shelved in shelved_events:
+            print(shelved)
+            creator = self.game.find_object_by_class_and_id(shelved['creator'])
+            delay = shelved['delay']
+            function = getattr(creator, shelved['function'])
+            self.schedule(
+                ScheduledEvent(creator, delay, function, *list(shelved.values())[3:])
+            )
 
 
 class EventsCreator:
@@ -130,38 +158,6 @@ class EventsCreator:
 
     def remove_event_from_scheduled_list(self, event: ScheduledEvent):
         self.scheduled_events.remove(event)
-
-    def shelve_scheduled_events(self) -> List[Dict]:
-        """
-        Call it in __getstate__ method to save self.scheduled_events of an
-         object.
-         """
-        scheduler = EventsScheduler.instance
-        return [
-            {'delay_left': scheduler.time_left_to_event_execution(event),
-             'delay': event.delay,
-             'function_name': event.function.__name__,
-             'self': 'self' if hasattr(event.function, '__self__') else None,
-             'args': event.args,
-             'kwargs': event.kwargs,
-             'repeat': event.repeat} for event in self.scheduled_events
-        ]
-
-    def unshelve_scheduled_events(self, shelve_data: List[Dict]) -> List[ScheduledEvent]:
-        # call it in __setstate__ method
-        return [
-            ScheduledEvent(
-                creator=self,
-                delay=data['delay'],
-                function=eval(f"{data['self']}.{data['function_name']}" if
-                              data['self'] else data['function_name']),
-                args=data['args'],
-                kwargs=data['kwargs'],
-                repeat=data['repeat'],
-                delay_left=data['delay_left']
-            )
-            for data in shelve_data
-        ]
 
     @staticmethod
     def get_function_bound_object(function: Callable) -> Optional[str]:

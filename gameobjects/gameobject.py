@@ -15,7 +15,6 @@ from utils.functions import (
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.scheduling import EventsCreator
-from user_interface.user_interface import OwnedObject
 
 
 class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
@@ -65,7 +64,6 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
             'id': self.id,
             'object_name': self.object_name,
             'position': self._position,  # (self.center_x, self.center_y)
-            'scheduled_events': self.shelve_scheduled_events()
         }
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
@@ -99,7 +97,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         pass
 
     def kill(self):
-        log(f'Destroying GameObject: {self.object_name}', True)
+        log(f'Destroying GameObject: {self}', True)
         try:
             self.selective_spritelist.remove(self)
         finally:

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from abc import abstractmethod
+from collections import defaultdict
 from functools import partial, singledispatchmethod
 
 import PIL
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type, Any
+from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type, \
+    Any
 
 from arcade import (
     Sprite, load_texture, draw_rectangle_outline, draw_text,
@@ -17,6 +18,7 @@ from arcade import (
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
 
+from user_interface.constants import CONFIRMATION_DIALOG
 from utils.classes import Observed, Observer
 from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
@@ -28,15 +30,13 @@ from utils.logging import log
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
-CONFIRMATION_DIALOG = 'Confirmaton dialog'
-
-
 class Hierarchical:
     """
     Interface offering hierarchical order of elements, e.g. one element can
     have 'children' and/or 'parent' object. Hierarchy allows user to work
     with an objects and theirs children-objects simultaneously.
     """
+    __slots__ = ['_parent', '_children']
 
     def __init__(self, parent: Optional[Hierarchical] = None):
         self._parent = parent
@@ -189,6 +189,9 @@ class ToggledElement:
 
 
 class Selectable:
+    """"""
+    # __slots__ = ['selectable_group', 'selected']
+
     def __init__(self, selectable_group: Optional[SelectableGroup] = None):
         self.selectable_group = selectable_group
         self.selected = False
@@ -208,6 +211,8 @@ class Selectable:
 
 
 class SelectableGroup:
+    __slots__ = ['selectable_elements']
+
     def __init__(self):
         self.selectable_elements: List[Selectable] = []
 
@@ -737,34 +742,8 @@ def ask_player_for_confirmation(
     return decorator
 
 
-class OwnedObject:
-
-    def __init__(self, owner=None):
-        """-
-        :param owner: bool : default: False. Change it to True if you want
-        this OwnedObjects to use default Set[ObjectsOwner] to keep track of
-        the objects owning this instance. If implementing your own collection,
-        leave it False.
-        """
-        self.owner = owner
-
-    def register_to_objectsowner(self, owner: ObjectsOwner):
-        self.owner = owner
-        owner.register(self)
-
-    def unregister_from_objectsowner(self):
-        if self.owner is not None:
-            self.owner.unregister(self)
-            self.owner = None
-
-    def __getstate__(self) -> Dict:
-        saved_object = self.__dict__.copy()
-        saved_object['owner'] = None
-        return saved_object
-
-
 @dataclass
-class UiElementsBundle(OwnedObject):
+class UiElementsBundle(Observed):
     """
     A bundle of UiElement objects kept together to easy switch between Menu
     submenus and dynamically change UI content.
@@ -777,15 +756,16 @@ class UiElementsBundle(OwnedObject):
     index: int
     name: str
     elements: List[UiElement]
-    register_to: ObjectsOwner
+    register_to: Observer
     owner = None
     _on_load: Optional[Callable] = None
     _on_unload: Optional[Callable] = None
     displayed_in_manager: Optional[UiBundlesHandler] = None
     displayed: bool = True
+    observed_attributes = defaultdict(list)
 
     def __post_init__(self):
-        self.register_to_objectsowner(self.register_to)
+        self.attach(observer=self.register_to)
         self.bind_elements_to_bundle(self.elements)
 
     def bind_elements_to_bundle(self, elements):
@@ -874,29 +854,7 @@ class UiElementsBundle(OwnedObject):
             self._on_unload()
 
 
-class ObjectsOwner:
-    """
-    ObjectsOwner has only a bunch of abstract methods used to add new
-    OwnedObjects and remove them. These methods must be implemented for each
-    subclass individually, since each type of ObjectsOwner will handle
-    different types of OwnedObjects for various reasons and use them for it's
-    own purposes.
-    CLasses inheriting from ObjectsOwner must keep their own containers for
-    their registered OwnedObjects, since this class does not provide default
-    one. Reason for that is to force subclasses to name their data-attributes
-    properly to their usage and type of OwnedObjects stored inside.
-    """
-
-    @abstractmethod
-    def register(self, acquired: OwnedObject):
-        raise NotImplementedError
-
-    @abstractmethod
-    def unregister(self, owned: OwnedObject):
-        raise NotImplementedError
-
-
-class UiBundlesHandler(ObjectsOwner):
+class UiBundlesHandler(Observer):
     """
     This class keeps track of currently is_loaded and displayed UiElements,
     allowing switching between different groups of buttons, checkboxes etc.
@@ -911,7 +869,7 @@ class UiBundlesHandler(ObjectsOwner):
         will automatically add itself to the list of bundles and it's all
         elements will .
         """
-        ObjectsOwner.__init__(self)
+        Observer.__init__(self)
         # all bundles available to load and display:
         self.ui_elements_bundles: Dict[str, UiElementsBundle] = {}
         # currently displayed UiElements of the chosen bundle/s:
@@ -951,20 +909,14 @@ class UiBundlesHandler(ObjectsOwner):
         self.switch_to_bundle_of_name(name=after_switch_to_bundle)
         self.remove(self.ui_elements_bundles[CONFIRMATION_DIALOG])
 
-    def register(self, acquired: OwnedObject):
-        self.append(acquired)
-        # acquired: UiElementsBundle
-        # self.ui_elements_bundles[acquired.name] = acquired
-        # self.ui_elements_spritelist.extend(acquired.elements)
-        # self.bind_ui_elements_with_ui_spritelist(acquired.elements)
+    def on_being_attached(self, attached: Observed):
+        self.append(attached)
 
-    def unregister(self, owned: OwnedObject):
-        owned: UiElementsBundle
-        self.remove(owned)
-        # del self.ui_elements_bundles[owned.name]
-
-    def get_notified(self, *args, **kwargs):
+    def notify(self, attribute: str, value: Any):
         pass
+
+    def on_being_detached(self, detached: Observed):
+        self.remove(detached)
 
     def switch_to_bundle(self,
                          bundle: UiElementsBundle = None,

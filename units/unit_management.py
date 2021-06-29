@@ -366,7 +366,10 @@ class UnitsManager(EventsCreator):
         else:
             self.selected_units.remove(entity)
         self.remove_from_selection_markers(entity)
-        if not self.selected_units:
+        self.update_interface_on_selection_change()
+
+    def update_interface_on_selection_change(self):
+        if not self.selected_units and self.selected_building is None:
             self.game.update_interface_content(context=None)
 
     @ignore_in_menu

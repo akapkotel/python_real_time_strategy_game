@@ -7,8 +7,6 @@ from collections import defaultdict
 
 from typing import Callable, Any, Optional, List, DefaultDict
 
-from utils.logging import log, logger
-
 
 class Singleton:
     instances = {}
@@ -103,13 +101,13 @@ class PriorityQueue:
 class Observed:
 
     def __init__(self, observers: Optional[List[Observer]] = None):
-        self._observed_attributes: DefaultDict[str, List[Observer]] = defaultdict(list)
+        self.observed_attributes: DefaultDict[str, List[Observer]] = defaultdict(list)
         if observers:
             self.attach_observers(observers=observers)
 
     def __setattr__(self, key, value):
         try:
-            if key in (observed := self._observed_attributes):
+            if key in (observed := self.observed_attributes):
                 for observer in observed[key]:
                     observer.notify(key, value)
         except AttributeError:
@@ -122,25 +120,23 @@ class Observed:
             self.attach(observer, *attributes)
 
     def attach(self, observer: Observer, *attributes: str):
-        log(f'Attaching Observer: {observer}.', console=True)
         if attributes:
             for attribute in attributes:
-                self._observed_attributes[attribute].append(observer)
+                self.observed_attributes[attribute].append(observer)
         else:
-            self._observed_attributes['on_kill'].append(observer)
+            self.observed_attributes['on_kill'].append(observer)
         observer.on_being_attached(attached=self)
 
     def detach_observers(self):
         all_observers = set()
-        for observers in self._observed_attributes.values():
+        for observers in self.observed_attributes.values():
             all_observers.update(observers)
         for observer in all_observers:
             self.detach(observer)
 
     def detach(self, observer: Observer):
-        for attribute, observers in self._observed_attributes.items():
+        for attribute, observers in self.observed_attributes.items():
             if observer in observers:
-                log(f'Detaching Observer: {observer}', console=True)
                 observer.on_being_detached(detached=self)
                 observers.remove(observer)
 

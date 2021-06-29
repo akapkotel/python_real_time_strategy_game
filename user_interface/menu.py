@@ -3,18 +3,14 @@ from __future__ import annotations
 
 from functools import partial
 
+from user_interface.constants import (
+    LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU
+)
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
     UiTextLabel
 )
 from utils.views import LoadableWindowView
-
-LOADING_MENU = 'loading menu'
-SAVING_MENU = 'saving_menu'
-MAIN_MENU = 'main menu'
-
-OPTIONS_SUBMENU = 'options'
-CREDITS_SUBMENU = 'credits'
 
 
 class Menu(LoadableWindowView, UiBundlesHandler):

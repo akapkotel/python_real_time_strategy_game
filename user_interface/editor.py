@@ -5,6 +5,7 @@ from typing import List, Tuple
 from arcade import Color
 
 from gameobjects.gameobject import PlaceableGameobject
+from user_interface.constants import EDITOR
 from user_interface.user_interface import (
     UiElementsBundle, Button, ScrollableContainer, EditorPlaceableObject,
     SelectableGroup
@@ -12,8 +13,6 @@ from user_interface.user_interface import (
 from utils.colors import RED, GREEN, YELLOW, BLUE, colors_names
 from utils.data_types import GridPosition
 from utils.functions import get_path_to_file, add_player_color_to_name
-
-EDITOR = 'editor'
 
 
 class ScenarioEditor:

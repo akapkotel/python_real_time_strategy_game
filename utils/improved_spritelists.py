@@ -24,6 +24,11 @@ class SpriteListWithSwitch(SpriteList):
         self.update_on = update_on
         self.draw_on = draw_on
 
+    def get_by_id(self, sprite_id: int) -> Optional[Sprite]:
+        for sprite in self:
+            if sprite.id == sprite_id:
+                return sprite
+
     def on_update(self, delta_time: float = 1/60):
         if self.update_on:
             super().on_update(delta_time)

@@ -19,12 +19,10 @@ from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId
 from utils.logging import log
 from utils.functions import (
-    ignore_in_editor_mode, new_id, add_player_color_to_name, decolorised_name
+    ignore_in_editor_mode, new_id, add_player_color_to_name
 )
-from utils.geometry import (
-    clamp, distance_2d, is_visible, calculate_circular_area
-)
-from user_interface.user_interface import OwnedObject, ObjectsOwner
+from utils.geometry import distance_2d, is_visible, calculate_circular_area, \
+    clamp
 from utils.scheduling import EventsCreator
 
 
@@ -36,9 +34,6 @@ ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
-
-
-TOTAL = 0
 
 
 class Faction(EventsCreator, Observer, Observed):
@@ -270,14 +265,16 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
     def __getstate__(self) -> Dict:
         saved_player = {k: v for (k, v) in self.__dict__.items()}
         saved_player['faction'] = self.faction.id
-        saved_player['units'].clear()
-        saved_player['buildings'].clear()
-        saved_player['known_enemies'].clear()
+        saved_player['units'] = set()
+        saved_player['buildings'] = set()
+        saved_player['known_enemies'] = set()
+        saved_player['observed_attributes'] = {}
         return saved_player
 
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
+        self.observed_attributes = defaultdict(list)
         self.attach_observers(observers=[self.game, self.faction])
 
 
@@ -406,7 +403,7 @@ class PlayerEntity(GameObject):
 
     @health.setter
     def health(self, value: float):
-        self._health = value
+        self._health = clamp(value, self._max_health, 0)
 
     @property
     def weapons(self) -> bool:
@@ -598,6 +595,14 @@ class PlayerEntity(GameObject):
             }
         )
         return saved_entity
+
+    def load(self, loaded_data: Dict):
+        """
+        After initializing Entity during loading saved game state, load """
+        ignored = ('object_name', 'id', 'player', 'position', 'path')
+        for key, value in loaded_data.items():
+            if key not in ignored:
+                setattr(self, key, value)
 
 
 if __name__:

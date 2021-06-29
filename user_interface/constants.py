@@ -1,0 +1,7 @@
+EDITOR = 'editor'
+LOADING_MENU = 'loading menu'
+SAVING_MENU = 'saving_menu'
+MAIN_MENU = 'main menu'
+OPTIONS_SUBMENU = 'options'
+CREDITS_SUBMENU = 'credits'
+CONFIRMATION_DIALOG = 'Confirmaton dialog'

@@ -145,7 +145,7 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will by larger than min and less than max."""
-    return max(minimum, min(value, maximum))
+    return value if minimum < value < maximum else max(minimum, min(value, maximum))
 
 
 def average_position_of_points_group(positions: Sequence[Point]) -> Point:

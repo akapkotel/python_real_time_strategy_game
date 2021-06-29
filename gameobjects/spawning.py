@@ -63,7 +63,7 @@ class GameObjectsSpawner(Singleton):
         category = 'units'
         class_name = eval(self.configs[category][name]['class'])
         uid = kwargs['id'] if 'id' in kwargs else None
-        unit = class_name(name, player, UnitWeight.LIGHT, position, id=uid)
+        unit = class_name(name, player, 1, position, id=uid)
         return self._configure_spawned_attributes(category, name, unit)
 
     def get_entity_configs(self, category, name) -> Dict:
@@ -80,7 +80,7 @@ class GameObjectsSpawner(Singleton):
                 setattr(spawned, key, value)
         return spawned
 
-    def _spawn_terrain_object(self, name, position, *args, **kwagrs) -> GameObject:
+    def _spawn_terrain_object(self, name, position, *args, **kwargs) -> GameObject:
         if 'wreck' in name or 'corpse' in name:
             texture_index = args[0]
             return self._spawn_wreck_or_body(name, position, texture_index)

@@ -28,18 +28,21 @@ from arcade.arcade_types import Color, Point
 
 from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
-from user_interface.editor import ScenarioEditor, EDITOR
+from user_interface.editor import ScenarioEditor
+from user_interface.constants import (
+    EDITOR, MAIN_MENU, LOADING_MENU, SAVING_MENU
+)
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
     SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel,
-    OwnedObject
+    UiElement
 )
-from utils.classes import Observer, Observed
+from utils.classes import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
     get_path_to_file, get_screen_size, to_rgba, SEPARATOR,
-    ignore_in_editor_mode, bind
+    ignore_in_editor_mode
 )
 from utils.logging import log, logger
 from utils.timing import timer
@@ -54,7 +57,6 @@ from utils.views import LoadingScreen, LoadableWindowView, Updateable
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
-MAIN_MENU = 'main menu'
 
 FULL_SCREEN = False
 SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
@@ -73,7 +75,7 @@ COLUMNS = 50
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 10
+PLAYER_UNITS = 5
 CPU_UNITS = 3
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
@@ -110,6 +112,7 @@ class GameWindow(Window, EventsCreator):
 
     def __init__(self, width: int, height: int, update_rate: float):
         Window.__init__(self, width, height, update_rate=update_rate)
+        EventsCreator.__init__(self)
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
@@ -294,7 +297,7 @@ class GameWindow(Window, EventsCreator):
 
     def open_saving_menu(self):
         self.show_view(self.menu_view)
-        self.menu_view.switch_to_bundle(name='saving_menu')
+        self.menu_view.switch_to_bundle(name=SAVING_MENU)
 
     def save_game(self, text_input_field: Optional[TextInputField] = None):
         """
@@ -336,16 +339,14 @@ class GameWindow(Window, EventsCreator):
         super().close()
 
 
-class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
+class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     """This is an actual Game-instance, created when player starts the game."""
-
     instance: Optional[Game] = None
 
     def __init__(self, loader: Optional[Generator] = None):
         LoadableWindowView.__init__(self, loader)
         UiBundlesHandler.__init__(self)
         EventsCreator.__init__(self)
-        Observer.__init__(self)
 
         self.assign_reference_to_self_for_all_classes()
 
@@ -371,7 +372,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
         self.interface: UiSpriteList() = self.create_user_interface()
         self.set_updated_and_drawn_lists()
 
-        self.events_scheduler = EventsScheduler()
+        self.events_scheduler = EventsScheduler(game=self)
 
         self.map: Optional[Map] = None
         self.pathfinder: Optional[Pathfinder] = None
@@ -423,6 +424,24 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
         for _class in (c for c in globals().values() if hasattr(c, game)):
             setattr(_class, game, self)
         Game.instance = self.window.cursor.game = self
+
+    def find_object_by_class_and_id(self, name_and_id: Union[str, Tuple[str, int]]):
+        if isinstance(name_and_id, Tuple):
+            object_class = eval(name_and_id[0])
+            object_id = name_and_id[1]
+            self.find_gameobject(object_class, object_id)
+        else:
+            object_class = eval(name_and_id)
+            return {Game: self, GameWindow: self.window,
+                    UnitsManager: self.units_manager}[object_class]
+
+    def find_gameobject(self, object_class, object_id):
+        if issubclass(object_class, Unit):
+            return self.units.get_by_id(sprite_id=object_id)
+        elif issubclass(object_class, Building):
+            return self.buildings.get_by_id(sprite_id=object_id)
+        elif issubclass(object_class, TerrainObject):
+            return self.terrain_tiles.get_by_id(sprite_id=object_id)
 
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
@@ -496,16 +515,23 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
             else:
                 self.configure_units_interface(context)
 
+    @ignore_in_editor_mode
     def configure_building_interface(self, context_building: Building):
         self.load_bundle(name=BUILDINGS_PANEL, clear=True)
-        left, _, bottom, _ = self.viewport
-        x, y = left + SCREEN_WIDTH - UI_WIDTH // 2, bottom + SCREEN_Y
-        buttons = context_building.create_ui_buttons(x, y)
+        buttons = context_building.create_ui_buttons(*self.get_ui_position)
         self.get_bundle(BUILDINGS_PANEL).extend(buttons)
+
+    @property
+    def get_ui_position(self):
+        left, _, bottom, _ = self.viewport
+        return left + SCREEN_WIDTH - UI_WIDTH // 2, bottom + SCREEN_Y
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
         self.load_bundle(name=UNITS_PANEL)
+        bundle = self.get_bundle(BUILDINGS_PANEL)
+        if all(isinstance(u, Engineer) for u in context_units):
+            bundle.extend(Engineer.create_ui_buttons(*self.get_ui_position))
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -562,7 +588,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
               object_name: str,
               player: Union[Player, int],
               position: Point,
-              id: Optional[int] = None) -> Optional[GameObject]:
+              id: Optional[int] = None,
+              **kwargs) -> Optional[GameObject]:
         if (player := self.get_player_instance(player)) is not None:
             return self.spawner.spawn(object_name, player, position, id=id)
         return None
@@ -620,6 +647,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
         elif isinstance(attached, (Player, Faction)):
             print(attached)
             self.attach_player_or_faction(attached)
+        elif isinstance(attached, (UiElementsBundle, UiElement)):
+            super().on_being_attached(attached)
         else:
             log(f'Tried to attach {attached} which Game is unable to attach.')
 
@@ -631,6 +660,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
             self.detach_gameobject(detached)
         elif isinstance(detached, (Player, Faction)):
             self.detach_player_or_faction(detached)
+        elif isinstance(detached, (UiElementsBundle, UiElement)):
+            self.remove(detached)
         else:
             log(f'Tried to detach {detached} which Game is unable to detach.')
 
@@ -687,7 +718,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator, Observer):
         self.update_interface_position(self.viewport[1], self.viewport[3])
 
     def update_timer(self):
-        seconds = time.time() - self.timer['start']
+        self.timer['total'] = seconds = time.time() - self.timer['start']
         game_time = time.gmtime(seconds)
         self.timer['f'] += 1
         self.timer['s'] = game_time.tm_sec
@@ -800,17 +831,17 @@ if __name__ == '__main__':
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit, UnitsOrderedDestinations
-    from gameobjects.gameobject import GameObject
+    from units.units import Unit, UnitsOrderedDestinations, Engineer
+    from gameobjects.gameobject import GameObject, TerrainObject
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
-    from missions.missions import Mission, Campaign
+    from missions.missions import Mission
     from missions.conditions import (
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
     from missions.consequences import Defeat, Victory
-    from user_interface.menu import Menu, LOADING_MENU, SAVING_MENU
+    from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager

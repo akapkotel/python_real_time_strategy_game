@@ -4,7 +4,7 @@ import os
 import shelve
 import time
 
-from typing import Optional
+from typing import Optional, List, Dict, Callable, Any
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
@@ -76,6 +76,7 @@ class SaveManager(Singleton):
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
+            file['scheduled_events'] = self.game.events_scheduler.save()
         self.update_saves()
         log(f'Game saved successfully as: {save_name + extension}', True)
 
@@ -97,44 +98,46 @@ class SaveManager(Singleton):
     def load_game(self, save_name: str):
         full_save_path = self.get_full_path_to_file_with_extension(save_name)
         with shelve.open(full_save_path) as file:
-            for name in ('timer', 'settings', 'viewports', 'map', 'factions',
-                         'players', 'local_human_player', 'units', 'buildings',
-                         'mission', 'permanent_units_groups', 'fog_of_war',
-                         'mini_map'):
+            loaded = ('timer', 'settings', 'viewports', 'map', 'factions',
+                      'players', 'local_human_player', 'units', 'buildings',
+                      'mission', 'permanent_units_groups', 'fog_of_war',
+                      'mini_map', 'scheduled_events')
+            progress = 1 / (len(loaded) + 1)
+            for name in loaded:
                 log(f'Loading: {name}...', console=True)
-                yield eval(f"self.load_{name}(file['{name}'])")
-        log(f'Game {save_name} loaded successfully!', True)
-        yield
+                function = eval(f'self.load_{name}')
+                argument = file[name]
+                yield self.loading_step(function, argument, progress)
+        log(f'Game {save_name} loaded successfully!', console=True)
+        yield progress
 
     @logger()
+    def loading_step(self, function: Callable, argument: Any, progress: float):
+        function(argument)
+        return progress
+
     def load_timer(self, loaded_timer):
         self.game.timer = loaded_timer
 
-    @logger()
     def load_settings(self, settings):
         self.game.window.settings = self.game.settings = settings
 
-    @logger()
     def load_viewports(self, viewports):
         self.game.viewport = viewports[0]
         self.game.window.menu_view.viewport = viewports[1]
 
-    @logger()
     def load_map(self, map_file):
         self.game.map = game_map = Map(map_settings=map_file)
         self.game.pathfinder = Pathfinder(game_map)
 
-    @logger()
     def load_factions(self, factions):
         for f in factions:
             id, name, f, e = f['id'], f['name'], f['friends'], f['enemies']
             self.game.factions[id] = Faction(id, name, f, e)
 
-    @logger()
     def load_players(self, players):
         self.game.players = {i: players[i] for i in players}
 
-    @logger()
     def load_local_human_player(self, index):
         self.game.local_human_player = self.game.players[index]
 
@@ -144,35 +147,34 @@ class SaveManager(Singleton):
     def load_buildings(self, buildings):
         return self.load_entities(buildings)
 
-    @logger()
     def load_entities(self, entities):
         """Respawn Units and Buildings."""
         if self.game.spawner is None:
             self.game.spawner = GameObjectsSpawner()
             self.game.explosions_pool = ExplosionsPool()
         for e in entities:
-            self.game.spawn(
+            entity = self.game.spawn(
                 e['object_name'], e['player'], e['position'], id=e['id']
             )
+            entity.load(e)
 
-    @logger()
     def load_mission(self, mission):
         self.game.current_mission = mission
 
-    @logger()
     def load_permanent_units_groups(self, groups):
         self.game.units_manager.permanent_units_groups = groups
         for group_id, group in groups.items():
             for unit in group:
                 unit.set_permanent_units_group(group_id)
 
-    @logger()
     def load_fog_of_war(self, fog_of_war):
         self.game.fog_of_war = fog_of_war
 
-    @logger()
     def load_mini_map(self, minimap):
         self.game.mini_map = MiniMap(minimap, loaded=True)
+
+    def load_scheduled_events(self, scheduled_events: List[Dict]):
+        self.game.events_scheduler.load(scheduled_events)
 
     def delete_file(self, save_name: str, scenario: bool):
         paths = self.scenarios if scenario else self.saved_games

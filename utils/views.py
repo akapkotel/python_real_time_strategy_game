@@ -110,8 +110,8 @@ class LoadableWindowView(View):
     @logger()
     def load_from_loader(self):
         try:
-            next(self.loader)
-            self.loading_progress += 0.071428571
+            progress = next(self.loader)
+            self.loading_progress += progress
         except StopIteration:
             self.loader = None
             self.after_loading()
