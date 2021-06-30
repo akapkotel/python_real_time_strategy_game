@@ -3,12 +3,14 @@ from __future__ import annotations
 
 from functools import partial
 
+from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
-    LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU
+    LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
+    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
-    UiTextLabel
+    UiTextLabel, Slider
 )
 from utils.views import LoadableWindowView
 
@@ -86,7 +88,14 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                     'Sound effects:', 20, ticked=window.sound_player.sound_effects_on,
                     variable=(window.sound_player, 'sound_effects_on'),
                     subgroup=2
-                )
+                ),
+                Slider('slider.png', x, next(y), 'Sound volume:', 200,
+                       variable=(window.sound_player, 'volume'), subgroup=2),
+                Slider('slider.png', x, next(y), 'Effects volume:', 200,
+                       variable=(window.sound_player, 'effects_volume'), subgroup=2),
+                Slider('slider.png', x, next(y), 'Music volume:', 200,
+                       variable=(window.sound_player, 'music_volume'),
+                       subgroup=2),
             ]
         )
 
@@ -142,7 +151,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         x, y = SCREEN_WIDTH // 4, SCREEN_Y
         new_game_menu = UiElementsBundle(
             index=3,
-            name='new game menu',
+            name=NEW_GAME_MENU,
             elements=[
                 back_to_menu_button,
                 Button('menu_button_skirmish.png', x, y,
@@ -166,18 +175,20 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
         skirmish_menu = UiElementsBundle(
             index=5,
-            name='skirmish menu',
+            name=SKIRMISH_MENU,
             elements=[
                 back_to_menu_button,
                 Button('menu_button_play.png', SCREEN_X, 300,
-                       functions=window.start_new_game)
+                       functions=window.start_new_game),
+                Slider('slider.png', SCREEN_X, 375, '', 400,
+                       min_value=50, max_value=250, step=1)
             ],
             register_to=self
         )
 
         campaign_menu = UiElementsBundle(
             index=6,
-            name='campaign menu',
+            name=CAMPAIGN_MENU,
             elements=[
                 back_to_menu_button,
                 UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
@@ -187,7 +198,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
         multiplayer_menu = UiElementsBundle(
             index=7,
-            name='multiplayer menu',
+            name=MULTIPLAYER_MENU,
             elements=[
                 back_to_menu_button,
                 UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)

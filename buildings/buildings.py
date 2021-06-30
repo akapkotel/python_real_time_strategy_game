@@ -9,8 +9,9 @@ from typing import Deque, List, Optional, Set, Tuple, Dict
 from arcade.arcade_types import Point
 from units.units import Soldier
 from effects.sound import UNIT_PRODUCTION_FINISHED
-from user_interface.user_interface import ProgressButton, UiElementsBundle, \
-    UiElement, Button
+from user_interface.user_interface import (
+    ProgressButton, UiElementsBundle, UiElement
+)
 from missions.research import Technology
 from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import (

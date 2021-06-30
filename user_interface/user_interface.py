@@ -18,8 +18,10 @@ from arcade import (
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
 
-from user_interface.constants import CONFIRMATION_DIALOG
+from controllers.constants import HORIZONTAL, VERTICAL
+from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.classes import Observed, Observer
+from utils.data_types import Number
 from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
 
@@ -127,6 +129,8 @@ class CursorInteractive(Hierarchical):
         if self.functions[button]:
             self._call_bound_functions(button)
         self.dragged = self.can_be_dragged
+        if self.can_be_dragged:
+            self.cursor.dragged_ui_element = self
 
     def _call_bound_functions(self, button: int):
         for function in self.functions[button]:
@@ -510,6 +514,9 @@ class Checkbox(UiElement):
             load_texture(full_texture_name, 30, 0, 30, 30)
         ]
         self.set_texture(int(self.ticked))
+        self.text = text
+        self.font_size = font_size
+        self.text_color = text_color
         self.text_label = UiTextLabel(
             x - int(len(text) * font_size * 0.45), y, text, font_size,
             text_color
@@ -533,8 +540,14 @@ class Checkbox(UiElement):
         setattr(self.variable[0], self.variable[1], self.ticked)
 
     def draw(self):
-        self.text_label.draw()
+        # self.text_label.draw()
+        self.draw_text()
         super().draw()
+
+    def draw_text(self):
+        x = self.left - PADDING_X
+        y = self.center_y
+        draw_text(self.text, x, y, self.text_color, self.font_size, anchor_x='right', anchor_y='center')
 
 
 class UiTextLabel(UiElement):
@@ -712,9 +725,136 @@ class ScrollBar(UiElement):
     ...
 
 
-def ask_player_for_confirmation(
-        position: Tuple,
-        after_switch_to_bundle: str):
+class _SliderHandle(UiElement):
+    """Used internally by the Slider class."""
+
+    def __init__(self, texture_name: str, x: int, y: int, axis, parent):
+        super().__init__(texture_name, x, y, parent=parent, can_be_dragged=True)
+        self.min_x = self.parent.left if axis == HORIZONTAL else self.parent.center_x
+        self.max_x = self.parent.right if axis == HORIZONTAL else self.parent.center_x
+        self.min_y = self.parent.bottom if axis == VERTICAL else self.parent.center_y
+        self.max_y = self.parent.top if axis == VERTICAL else self.parent.center_y
+        self.range_x = self.max_x - self.min_x
+        self.range_y = self.max_y - self.min_y
+
+    def on_mouse_drag(self, x: float = None, y: float = None):
+        self.center_x = clamp(x, self.max_x, self.min_x)
+        self.center_y = clamp(y, self.max_y, self.min_y)
+        self.update_value()
+
+    def update_value(self):
+        if self.range_x:
+            self.parent.value = (self.center_x - self.min_x) / self.range_x
+        else:
+            self.parent.value = (self.center_y - self.min_y) / self.range_y
+
+    def value_to_position(self, value: float):
+        if self.range_x:
+            self.center_x = self.min_x + self.range_x * value
+        else:
+            self.center_y = self.min_y + self.range_y * value
+
+
+class Slider(UiElement):
+    """
+    Slider allows user to manipulate some assigned value by increasing and
+    decreasing it with a slide-able handle in predefined range.
+    """
+
+    def __init__(self, texture_name: str, x: int, y: int, text: str, size: int,
+                 axis: str = HORIZONTAL, variable: Tuple[object, str] = None,
+                 min_value=None, max_value=None, step=None, show_value=True,
+                 subgroup: Optional[int] = None):
+        super().__init__(texture_name, x, y, subgroup=subgroup)
+        self.axis = axis
+        self.angle = 0 if axis == HORIZONTAL else 90
+        self.width = size if axis == HORIZONTAL else self.width
+        self.height = size if axis == VERTICAL else self.height
+
+        self.text = text
+
+        self.min_value = min_value
+        self.max_value = max_value
+        self.step = step
+        self.variable = variable
+        if variable is not None:
+            self._value = getattr(variable[0], variable[1])
+        else:
+            self.value = 0.5
+
+        self.show_value = show_value
+
+        self.handle = _SliderHandle('slider_handle.png', x, y, axis, self)
+        self.handle.value_to_position(self._value)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = self.convert_value(value)
+        if self.variable is not None:
+            setattr(self.variable[0], self.variable[1], self._value)
+
+    def convert_value(self, value):
+        max_value, min_value, step = self.max_value, self.min_value, self.step
+        if min_value is not None and max_value is not None:
+            value = min_value + (max_value - min_value) * value
+            if step is not None:
+                value = int((value // step) * step)
+        return value
+
+    @property
+    def active(self):
+        return self._active
+
+    @active.setter
+    def active(self, value: bool):
+        self.handle.active = self._active = value
+
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, value: bool):
+        self.handle.visible = self._visible = value
+
+    def toggle(self, state: bool):
+        self._active = self._visible = state
+        self.handle.toggle(state)
+
+    def activate(self):
+        self.handle.active = self._active = True
+
+    def deactivate(self):
+        self.handle.active = self._active = False
+
+    def show(self):
+        self.handle.visible = self._visible = True
+
+    def hide(self):
+        self.handle.visible = self._visible = False
+
+    def draw(self):
+        super().draw()
+        self.handle.draw()
+        self.draw_text()
+        if self.show_value:
+            self.draw_value()
+
+    def draw_text(self):
+        x = self.center_x
+        y = self.top + PADDING_Y
+        draw_text(str(self.text), x, y, WHITE, 20, anchor_x='right', anchor_y='center')
+
+    def draw_value(self):
+        x = self.right + PADDING_Y
+        draw_text(str(self._value), x, self.center_y, WHITE, 20, anchor_y='center')
+
+
+def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
     """
     Use this function to decorate method you want, to be preceded by display of
     simple confirm-or-cancel dialog for the player. The dialog would be shown
@@ -727,7 +867,8 @@ def ask_player_for_confirmation(
     going to be executed instead.
 
     :param position: Tuple[x, y] -- position on which dialog will be centered
-    :param after_switch_to_bundle: str -- name of the UiELementsBundle to be displayed after player makes choice.
+    :param after_switch_to_bundle: str -- name of the UiElementsBundle to be
+    displayed after player makes choice.
     :return: Callable
     """
     def decorator(function):
@@ -791,6 +932,14 @@ class UiElementsBundle(Observed):
 
     def __iter__(self):
         return self.elements.__iter__()
+
+    def get_elements(self) -> List[UiElement]:
+        elements = []
+        for element in self.elements:
+            elements.append(element)
+            # if (children := element.children) is not None:
+            #     elements.extend(children)
+        return elements
 
     def toggle_element(self, name: str, state: bool):
         if (element := self.find_by_name(name)) is not None:
@@ -1019,7 +1168,7 @@ class UiBundlesHandler(Observer):
     def _unload_bundle(self, bundle: UiElementsBundle):
         self.active_bundles.discard(bundle.index)
         for element in self.ui_elements_spritelist[::-1]:
-            if element._bundle == bundle:
+            if element.bundle == bundle:
                 bundle.displayed_in_manager = None
                 self.remove(element)
         bundle.on_unload()

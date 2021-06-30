@@ -140,10 +140,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @logger()
     def on_left_button_press(self, x: float, y: float, modifiers: int):
-        if (ui_elem := self.pointed_ui_element) is not None:
-            ui_elem.on_mouse_press(MOUSE_BUTTON_LEFT)
+        if (ui_element := self.pointed_ui_element) is not None:
+            ui_element.on_mouse_press(MOUSE_BUTTON_LEFT)
             self.evaluate_mini_map_click(x, y)
-        if self.bound_text_input_field not in (ui_elem, None):
+        if self.bound_text_input_field not in (ui_element, None):
             self.unbind_text_input_field()
 
     @ignore_in_menu
@@ -174,6 +174,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.on_right_button_release(x, y, modifiers)
 
     def on_left_button_release(self, x: float, y: float, modifiers: int):
+        self.dragged_ui_element = None
         self.on_left_button_release_in_game(modifiers, x, y)
 
     @ignore_in_menu
@@ -204,11 +205,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
-        if self.window.is_game_running:
-            if buttons == MOUSE_BUTTON_LEFT:
-                self.on_left_button_drag(dx, dy, x, y)
-            elif buttons == MOUSE_BUTTON_RIGHT:
-                self.move_viewport_with_mouse_drag(dx, dy)
+        if buttons == MOUSE_BUTTON_LEFT:
+            self.on_left_button_drag(dx, dy, x, y)
+        elif buttons == MOUSE_BUTTON_RIGHT:
+            self.move_viewport_with_mouse_drag(dx, dy)
 
     @ignore_in_menu
     def move_viewport_with_mouse_drag(self, dx, dy):
@@ -216,6 +216,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.window.change_viewport(dx, dy)
 
     def on_left_button_drag(self, dx, dy, x, y):
+        if self.window.is_game_running:
+            self.left_mouse_drag_in_game(dx, dy, x, y)
+        elif (ui_element := self.dragged_ui_element) is not None:
+            ui_element.on_mouse_drag(x, y)
+
+    def left_mouse_drag_in_game(self, dx, dy, x, y):
         if self.game.map.on_map_area(x, y):
             self.on_mouse_motion(x, y, dx, dy)
             if self.mouse_drag_selection is not None:

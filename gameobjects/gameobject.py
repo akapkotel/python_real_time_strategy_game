@@ -14,7 +14,7 @@ from utils.functions import (
 )
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
-from utils.scheduling import EventsCreator
+from utils.scheduling import EventsCreator, ScheduledEvent
 
 
 class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
@@ -110,11 +110,19 @@ class TerrainObject(GameObject):
     def __init__(self, filename: str, robustness: Robustness, position: Point):
         GameObject.__init__(self, filename, robustness, position)
         self.map_node = self.game.map.position_to_node(*self.position)
-        self.map_node.pathable = False
+        self.map_node.static_gameobject = self
+        self.attach(observer=self.game)
 
     def kill(self):
-        self.map_node.pathable = True
+        self.map_node.static_gameobject = None
         super().kill()
+
+
+class Wreck(TerrainObject):
+
+    def __init__(self, filename: str, robustness: Robustness, position: Point):
+        super().__init__(filename, robustness, position)
+        self.schedule_event(ScheduledEvent(self, 30.0, self.kill))
 
 
 class PlaceableGameobject:

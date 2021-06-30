@@ -219,6 +219,7 @@ class GameWindow(Window, EventsCreator):
                       buttons: int, modifiers: int):
         if self.cursor.active:
             left, _, bottom, _ = self.current_view.viewport
+            self.cursor.on_mouse_motion(x, y, dx, dy)
             self.cursor.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
@@ -284,6 +285,11 @@ class GameWindow(Window, EventsCreator):
         # so no need for redundant call to the Window method
         return self.current_view.viewport
 
+    def update_scenarios_list(self):
+        campaing_menu = self.menu_view.get_bundle(CAMPAIGN_MENU)
+        self.menu_view.selectable_groups['scenarios'] = group = SelectableGroup()
+        campaing_menu.remove_subgroup(5)
+
     def update_saved_games_list(self):
         loading_menu = self.menu_view.get_bundle(LOADING_MENU)
         loading_menu.remove_subgroup(4)
@@ -330,8 +336,8 @@ class GameWindow(Window, EventsCreator):
     @ask_player_for_confirmation(SCREEN_CENTER, 'loading menu')
     def delete_saved_game(self):
         saves = self.menu_view.selectable_groups['saves']
-        if saves.currently_selected is not None:
-            self.save_manager.delete_file(saves.currently_selected.name, False)
+        if (selected := saves.currently_selected) is not None:
+            self.save_manager.delete_file(selected.name, False)
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):

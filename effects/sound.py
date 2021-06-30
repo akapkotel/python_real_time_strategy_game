@@ -17,7 +17,6 @@ SOUNDS_DIRECTORY = 'resources/sounds'
 SOUNDS_EXTENSION = 'wav'
 MUSIC_TRACK_SUFFIX = 'theme'
 UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
-print(UNITS_MOVE_ORDERS_CONFIRMATIONS)
 UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
 UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
 
@@ -39,9 +38,9 @@ class AudioPlayer(Singleton):
         self._music_on = music_on
         self._sound_effects_on = sound_effects_on
 
-        self.volume: float = 1.0
-        self.music_volume: float = self.volume
-        self.effects_volume: float = self.volume
+        self.volume: float = 0.5
+        self.music_volume = self.volume
+        self.effects_volume = self.volume
 
         self.sounds: Dict[str, Sound] = self._preload_sounds(sounds_directory)
         self.currently_played: List[Player] = []
@@ -161,15 +160,15 @@ class AudioPlayer(Singleton):
             self.current_music = None
 
     def _play_music_track(self, name, loop, volume):
-        player = self._get_player(name, loop, volume)
+        player = self._get_player(name, loop, volume or self.music_volume)
         self.current_music = player
 
     def _play_sound(self, name, loop, volume):
-        player = self._get_player(name, loop, volume)
+        player = self._get_player(name, loop, volume or self.effects_volume)
         self.currently_played.append(player)
 
     def _get_player(self, name, loop, volume) -> Player:
-        volume = volume or self.volume
+        volume = min(volume, self.volume)
         return play_sound(self.sounds[name], volume, looping=loop)
 
     def play(self):

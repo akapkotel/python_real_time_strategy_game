@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 
 from collections import deque, defaultdict
-from functools import partial
+from functools import partial, cached_property
 from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
     DefaultDict
@@ -13,7 +13,7 @@ from typing import (
 from arcade import Sprite, Texture, load_spritesheet
 
 from game import PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
-from gameobjects.gameobject import TerrainObject
+from gameobjects.gameobject import TerrainObject, GameObject
 from utils.data_types import GridPosition, Number, SectorId
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
@@ -45,6 +45,7 @@ random_value = random.random
 NormalizedPoint = Tuple[int, int]
 MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
+TreeID = int
 
 
 def position_to_map_grid(x: Number, y: Number) -> GridPosition:
@@ -250,12 +251,13 @@ class Map:
         return (n for n in self.nodes.values())
 
     def node(self, grid: GridPosition) -> MapNode:
-        try:
-            return self.nodes[grid]
-        except KeyError:
-            node = MapNode(-1, -1, None)
-            node._allowed_for_pathfinding = False
-            return node
+        return self.nodes.get(grid, default=self.nonexistent_node)
+
+    @cached_property
+    def nonexistent_node(self) -> MapNode:
+        node = MapNode(-1, -1, None)
+        node.pathable = False
+        return node
 
 
 class Sector:
@@ -319,7 +321,8 @@ class MapNode:
     map: Optional[Map] = None
 
     __slots__ = ['grid', 'sector', 'position', 'costs', 'x', 'y', '_building',
-                 '_allowed_for_pathfinding', '_unit', 'tree', 'terrain_cost']
+                 '_pathable', '_unit', '_tree', 'terrain_cost',
+                 '_static_gameobject']
 
     def __init__(self, x, y, sector):
         self.grid = x, y
@@ -327,12 +330,13 @@ class MapNode:
         self.position = self.x, self.y = map_grid_to_position(self.grid)
         self.costs: Dict[GridPosition, float] = {}
 
-        self._allowed_for_pathfinding = True
+        self._pathable = True
 
+        self._tree: Optional[TreeID] = None
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
+        self._static_gameobject: Optional[GameObject, TreeID] = None
 
-        self.tree: Optional[int] = None
         self.terrain_cost: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:
@@ -343,6 +347,14 @@ class MapNode:
 
     def diagonal_to_other(self, other: GridPosition):
         return self.grid[0] != other[0] and self.grid[1] != other[1]
+
+    @property
+    def tree(self) -> Optional[TreeID]:
+        return self._tree
+
+    @tree.setter
+    def tree(self, value: Optional[TreeID]):
+        self._static_gameobject = self._tree = value
 
     @property
     def unit(self) -> Optional[Unit]:
@@ -356,13 +368,21 @@ class MapNode:
     def building(self) -> Optional[Building]:
         return self._building
 
+    @building.setter
+    def building(self, value: Optional[Building]):
+        self._static_gameobject = self._building = value
+
     @property
     def unit_or_building(self) -> Optional[Union[Unit, Building]]:
         return self._unit or self._building
 
-    @building.setter
-    def building(self, value: Optional[Building]):
-        self._building = value
+    @property
+    def static_gameobject(self) -> Optional[GameObject, TreeID]:
+        return self._static_gameobject
+
+    @static_gameobject.setter
+    def static_gameobject(self, value: Optional[GameObject, TreeID]):
+        self._static_gameobject = value
 
     @property
     def walkable(self) -> bool:
@@ -375,11 +395,11 @@ class MapNode:
     @property
     def pathable(self) -> bool:
         """Call it to find if this node is available for pathfinding at all."""
-        return self._allowed_for_pathfinding and self._building is None
+        return self._pathable and self._static_gameobject is None
 
     @pathable.setter
     def pathable(self, value: bool):
-        self._allowed_for_pathfinding = value
+        self._pathable = value
 
     @property
     def walkable_adjacent(self) -> List[MapNode]:

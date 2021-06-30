@@ -490,14 +490,6 @@ class Vehicle(Unit):
         wreck = self.game.spawner.spawn(
             wreck_name, None, self.position, self.cur_texture_index
         )
-        self.configure_wreck(wreck)
-
-    def configure_wreck(self, wreck):
-        wreck.attach(observer=self.game)
-        wreck.schedule_event(ScheduledEvent(wreck, 10.0, wreck.kill))
-        map_tile = self.map.position_to_node(*wreck.position)
-        map_tile._allowed_for_pathfinding = False
-
 
 class VehicleThreads(Sprite):
 
@@ -609,7 +601,6 @@ class Tank(Vehicle):
             wreck_name, None, self.position,
             (self.facing_direction, self.turret_facing_direction)
         )
-        self.configure_wreck(wreck)
 
 
 IDLE = 0
