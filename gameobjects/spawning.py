@@ -17,7 +17,7 @@ from utils.enums import UnitWeight, Robustness
 from utils.functions import get_path_to_file, decolorised_name
 
 from utils.logging import log
-from .gameobject import GameObject, TerrainObject
+from .gameobject import GameObject, TerrainObject, Wreck
 
 
 class GameObjectsSpawner(Singleton):
@@ -88,7 +88,7 @@ class GameObjectsSpawner(Singleton):
 
     @staticmethod
     def _spawn_wreck_or_body(name, position, texture_index) -> GameObject:
-        wreck = TerrainObject(name, Robustness.INDESTRUCTIBLE, position)
+        wreck = Wreck(name, Robustness.INDESTRUCTIBLE, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
         try:  # for tanks with turrets

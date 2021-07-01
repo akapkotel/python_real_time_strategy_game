@@ -6,6 +6,7 @@ from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict
 
+from arcade import load_texture
 from arcade.arcade_types import Point
 from units.units import Soldier
 from effects.sound import UNIT_PRODUCTION_FINISHED
@@ -17,6 +18,8 @@ from map.map import MapNode, Sector, normalize_position
 from players_and_factions.player import (
     Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 )
+from utils.functions import add_player_color_to_name, get_texture_size, \
+    name_to_texture_name, get_path_to_file
 from utils.geometry import close_enough, is_visible
 from controllers.constants import CURSOR_ENTER_TEXTURE
 
@@ -261,7 +264,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
         self.garrisoned_soldiers: List[Soldier] = []
-        self.max_garrisoned_soldiers = 8
+        self.garrison_max_soldiers = 8
 
     @property
     def configs(self):
@@ -313,7 +316,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def update_observed_area(self, *args, **kwargs):
         self.observed_nodes = nodes = self.calculate_observed_area()
-        self.game.fog_of_war.reveal_nodes({n.grid for n in nodes})
+        if self.player.is_local_human_player:
+            self.game.fog_of_war.reveal_nodes({n.grid for n in nodes})
 
     def fight_enemies(self):
         if (enemy := self.targeted_enemy) is not None:
@@ -326,8 +330,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.check_soldiers_garrisoning_possibility()
 
     def check_soldiers_garrisoning_possibility(self):
-        friendly_building = self.player is self.game.local_human_player
-        free_space = len(self.garrisoned_soldiers) < self.max_garrisoned_soldiers
+        friendly_building = self.player.is_local_human_player
+        free_space = len(self.garrisoned_soldiers) < self.garrison_max_soldiers
         if (friendly_building and free_space) or not friendly_building:
             self.game.cursor.force_cursor(index=CURSOR_ENTER_TEXTURE)
 
@@ -353,7 +357,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.update_research()
 
     def update_ui_buildings_panel(self):
-        if self.player is self.game.local_human_player and self.is_selected:
+        if self.player.is_local_human_player and self.is_selected:
             panel = self.game.get_bundle(BUILDINGS_PANEL)
             if self.is_units_producer:
                 self.update_production_buttons(panel)
@@ -390,15 +394,55 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @property
     def soldiers_slots_left(self) -> int:
         """Check if more Soldiers can enter this building."""
-        return self.max_garrisoned_soldiers - len(self.garrisoned_soldiers)
+        return self.garrison_max_soldiers - len(self.garrisoned_soldiers)
 
     def on_soldier_enter(self, soldier: Soldier):
-        self.garrisoned_soldiers.append(soldier)
-        soldier.position = self.position
+        if self.is_enemy(soldier):
+            self.on_enemy_soldier_breach(soldier)
+        else:
+            self.put_soldier_into_garrison(soldier)
         self.update_garrison_button()
 
+    def on_enemy_soldier_breach(self, soldier: Soldier):
+        if garrison := self.garrisoned_soldiers:
+            garrison.pop().kill() if random.random() < 0.5 else soldier.kill()
+        if not garrison:
+            self.takeover_building(soldier=soldier)
+
+    def put_soldier_into_garrison(self, soldier: Soldier):
+        self.garrisoned_soldiers.append(soldier)
+        soldier.position = self.position
+
+    def takeover_building(self, soldier: Soldier):
+        self.put_soldier_into_garrison(soldier=soldier)
+        path_and_texture, size = self.find_proper_texture(soldier.player)
+        self.change_building_texture(path_and_texture, size)
+        self.reconfigure_building(soldier.player)
+
+    def find_proper_texture(self, player) -> Tuple[str, Tuple]:
+        recolored = add_player_color_to_name(self.object_name, player.color)
+        texture_name = name_to_texture_name(recolored)
+        size = get_texture_size(texture_name)
+        path_and_texture = get_path_to_file(texture_name)
+        return path_and_texture, size
+
+    def change_building_texture(self, path_and_texture, size):
+        self.textures = [load_texture(path_and_texture, 0, 0, *size)]
+        self.set_texture(0)
+
+    def reconfigure_building(self, player: Player):
+        self.detach(self.player)
+        self.unblock_occupied_nodes()
+        self.leave_occupied_sectors()
+
+        self.player = player
+        self.faction = player.faction
+        self.attach(player)
+        self.occupied_nodes = self.block_map_nodes()
+        self.occupied_sectors = self.update_current_sector()
+
     def update_garrison_button(self):
-        if self.player is self.game.local_human_player and self.is_selected:
+        if self.player.is_local_human_player and self.is_selected:
             button = self.game.get_bundle(BUILDINGS_PANEL).find_by_name('leave')
             button.counter = soldiers_count = len(self.garrisoned_soldiers)
             button.toggle(state=soldiers_count > 0)

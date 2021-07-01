@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import random
+import time
 
 from abc import abstractmethod
 from collections import defaultdict
+from functools import cached_property
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade import rand_in_circle
@@ -27,6 +29,7 @@ from utils.scheduling import EventsCreator
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+from utils.timing import timer
 
 FUEL = 'fuel'
 FOOD = 'food'
@@ -212,6 +215,10 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
     def __repr__(self) -> str:
         return self.name
 
+    @cached_property
+    def is_local_human_player(self) -> bool:
+        return self is self.game.local_human_player
+
     def on_being_attached(self, attached: Observed):
         attached: Union[Unit, Building]
         if isinstance(attached, Unit):
@@ -243,6 +250,7 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
     def update(self):
         self.known_enemies.clear()
         self._update_resources_stock()
+        # print(self.buildings)
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
         self.known_enemies.update(enemies)
@@ -322,6 +330,8 @@ class PlayerEntity(GameObject):
     dict generated from CSV config file -> see ObjectsFactory class and it's
     'spawn' method.
     """
+    calculate_observed_area_time = 0
+    calculate_observed_area_count = 0
     production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
     production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
 
@@ -366,7 +376,7 @@ class PlayerEntity(GameObject):
 
         # flag used to avoid enemy units revealing map for human player, only
         # player's units and his allies units reveal map for him:
-        self.should_reveal_map = self.faction is self.game.local_human_player.faction
+        # self.should_reveal_map = self.faction is self.game.local_human_player.faction
 
         self._weapons: List[Weapon] = []
         # use this number to animate shot blast from weapon:
@@ -388,6 +398,10 @@ class PlayerEntity(GameObject):
     @abstractmethod
     def moving(self) -> bool:
         raise NotImplementedError
+
+    @property
+    def should_reveal_map(self) -> bool:
+        return self.faction is self.game.local_human_player.faction
 
     @property
     def max_health(self) -> float:
@@ -445,7 +459,7 @@ class PlayerEntity(GameObject):
 
     @property
     def should_be_rendered(self) -> bool:
-        return self in self.game.local_drawn_units_and_buildings
+        return self in self.game.local_drawn_units_and_buildings and self.on_screen
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
@@ -458,9 +472,8 @@ class PlayerEntity(GameObject):
 
     def calculate_observed_area(self) -> Set[MapNode]:
         position = position_to_map_grid(*self.position)
-        observed_area = calculate_circular_area(*position, 8)
-        observed_area = self.map.in_bounds(observed_area)
-        return {self.map[id] for id in observed_area}
+        circular_area = calculate_circular_area(*position, 8)
+        return {self.map[id] for id in self.map.in_bounds(circular_area)}
 
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
@@ -475,15 +488,15 @@ class PlayerEntity(GameObject):
         """
         if (enemies := self.known_enemies) and self.no_current_target:
             if in_range := [e for e in enemies if e.in_range(self)]:
-                self.choice_new_enemy_to_target(in_range)
+                self.targeted_enemy = self.choice_new_enemy_to_target(in_range)
             else:
                 self.targeted_enemy = None
 
-    def choice_new_enemy_to_target(self, in_range):
+    def choice_new_enemy_to_target(self, in_range: List[PlayerEntity]) -> PlayerEntity:
         if self.experience > 35:
-            self.targeted_enemy = sorted(in_range, key=lambda e: e.health)[0]
+            return sorted(in_range, key=lambda e: e.health)[0]
         else:
-            self.targeted_enemy = random.choice(in_range)
+            return random.choice(in_range)
 
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
@@ -552,7 +565,7 @@ class PlayerEntity(GameObject):
 
     @property
     def selectable(self) -> bool:
-        return self.player is self.game.local_human_player
+        return self.player.is_local_human_player
 
     @property
     def is_selected(self) -> bool:

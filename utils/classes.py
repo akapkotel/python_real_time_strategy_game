@@ -99,6 +99,15 @@ class PriorityQueue:
 
 
 class Observed:
+    """
+    My implementation of Observer pattern which allows to notify observers when
+    any attribute of the subject is changed. Observed object keeps track of
+    which Observer is interested in changes of which particular attribute, and
+    notifies it only when this attribute changes. It is also possible to attach
+    an 'general' Observer, which is notified only, when subject is deleted.
+    How the 'deletion' is interpreted is up to the user - it could be when
+    __del__ method is called, or when Observed is removed from some collection.
+    """
 
     def __init__(self, observers: Optional[List[Observer]] = None):
         self.observed_attributes: DefaultDict[str, List[Observer]] = defaultdict(list)

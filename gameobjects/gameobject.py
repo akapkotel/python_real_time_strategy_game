@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Optional, Dict, List
 
 from arcade import AnimatedTimeBasedSprite
@@ -56,15 +57,14 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
 
         self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
+    @lru_cache
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
 
-    def save(self) -> Dict:
-        return {
-            'id': self.id,
-            'object_name': self.object_name,
-            'position': self._position,  # (self.center_x, self.center_y)
-        }
+    @property
+    def on_screen(self) -> bool:
+        left, right, bottom, top = self.game.viewport
+        return left < self.right and right > self.left and bottom < self.top and top > self.bottom
 
     def destructible(self, weight: UnitWeight = 0) -> bool:
         return weight > self._robustness
@@ -104,6 +104,13 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
             self.detach_observers()
             super().kill()
 
+    def save(self) -> Dict:
+        return {
+            'id': self.id,
+            'object_name': self.object_name,
+            'position': self._position,  # (self.center_x, self.center_y)
+        }
+
 
 class TerrainObject(GameObject):
 
@@ -112,6 +119,10 @@ class TerrainObject(GameObject):
         self.map_node = self.game.map.position_to_node(*self.position)
         self.map_node.static_gameobject = self
         self.attach(observer=self.game)
+
+    def draw(self):
+        if self.on_screen:
+            super().draw()
 
     def kill(self):
         self.map_node.static_gameobject = None
@@ -122,7 +133,7 @@ class Wreck(TerrainObject):
 
     def __init__(self, filename: str, robustness: Robustness, position: Point):
         super().__init__(filename, robustness, position)
-        self.schedule_event(ScheduledEvent(self, 30.0, self.kill))
+        self.schedule_event(ScheduledEvent(self, 30, self.kill))
 
 
 class PlaceableGameobject:

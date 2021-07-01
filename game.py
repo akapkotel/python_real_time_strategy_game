@@ -30,7 +30,7 @@ from effects.sound import AudioPlayer
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor
 from user_interface.constants import (
-    EDITOR, MAIN_MENU, LOADING_MENU, SAVING_MENU
+    EDITOR, MAIN_MENU, LOADING_MENU, SAVING_MENU, CAMPAIGN_MENU
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
@@ -72,15 +72,15 @@ SECTOR_SIZE = 8
 ROWS = 50
 COLUMNS = 50
 
-FPS = 30
+FPS = 60
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 5
-CPU_UNITS = 3
+PLAYER_UNITS = 30
+CPU_UNITS = 1
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = False
+PYPROFILER = True
 DEBUG = False
 
 
@@ -97,11 +97,16 @@ class Settings:
     debug_mouse: bool = True
     debug_map: bool = False
     vehicles_threads: bool = True
-    threads_fadeout: int = 2
+    threads_fadeout: int = 2  # seconds
     shot_blasts: bool = True
     game_speed: float = GAME_SPEED
     editor_mode: bool = False
-    damage_randomness_factor = 0.25
+    damage_randomness_factor = 0.25  # standard deviation
+    trees_density: float = 0.05  # percentage chance
+    resources_abundance: float = 0.01
+    starting_resources: float = 0.5
+    map_width: int = 100
+    map_height: int = 75
 
 
 class GameWindow(Window, EventsCreator):
@@ -113,6 +118,8 @@ class GameWindow(Window, EventsCreator):
     def __init__(self, width: int, height: int, update_rate: float):
         Window.__init__(self, width, height, update_rate=update_rate)
         EventsCreator.__init__(self)
+        self.total_delta_time = 0
+        self.frames = 0
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
@@ -180,8 +187,10 @@ class GameWindow(Window, EventsCreator):
             self.game_view = Game(loader=None)
         self.show_view(self.game_view)
 
-    @timer(level=1, global_profiling_level=PROFILING_LEVEL)
+    # @timer(level=1, global_profiling_level=PROFILING_LEVEL, forced=False)
     def on_update(self, delta_time: float):
+        self.frames += 1
+        self.total_delta_time += delta_time
         log(f'Time: {delta_time}{SEPARATOR}', console=False)
         self.current_view.on_update(delta_time)
         if (cursor := self.cursor).active:
@@ -290,8 +299,8 @@ class GameWindow(Window, EventsCreator):
         self.menu_view.selectable_groups['scenarios'] = group = SelectableGroup()
         campaing_menu.remove_subgroup(5)
 
-    def update_saved_games_list(self):
-        loading_menu = self.menu_view.get_bundle(LOADING_MENU)
+    def update_saved_games_list(self, menu: str):
+        loading_menu = self.menu_view.get_bundle(menu)
         loading_menu.remove_subgroup(4)
         x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
         self.menu_view.selectable_groups['saves'] = group = SelectableGroup()
@@ -313,7 +322,10 @@ class GameWindow(Window, EventsCreator):
         new saved-game file should be read. If field is empty, automatic save
         name would be generated
         """
-        if not (save_name := text_input_field.get_text()):
+        saves = self.menu_view.selectable_groups['saves']
+        if (selected_save := saves.currently_selected) is not None:
+            save_name = selected_save.name.rstrip('.sav')
+        elif not (save_name := text_input_field.get_text()):
             save_name = f'saved_game({time.asctime()})'
         scenario = self.settings.editor_mode
         self.save_manager.save_game(save_name, self.game_view, scenario)
@@ -341,6 +353,7 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
+        print('FPS:', 1 / (self.total_delta_time / self.frames))
         log('Terminating application...')
         super().close()
 
@@ -412,8 +425,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.debugger: Optional[GameDebugger] = None
 
         # list used only when Game is randomly-generated:
+        rows, columns = self.settings.map_height, self.settings.map_width
         self.things_to_load = [
-            ['map', Map, 0.35, {'rows': ROWS, 'columns': COLUMNS,
+            ['map', Map, 0.35, {'rows': rows, 'columns': columns,
              'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.15],
@@ -421,7 +435,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
-                                         (TILE_WIDTH, TILE_HEIGHT), ROWS)],
+                                         (TILE_WIDTH, TILE_HEIGHT), rows)],
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
 
@@ -584,11 +598,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         player.start_war_with(cpu_player)
 
     def test_buildings_spawning(self):
-        self.buildings.append(self.spawn(
-            'medium_factory',
-            self.players[2],
-            (400, 600),
-        ))
+        self.buildings.extend(
+            (
+                self.spawn('medium_factory', self.players[2], (400, 600)),
+                self.spawn('medium_factory', self.players[4], (1000, 600), id=8888),
+            )
+        )
 
     def spawn(self,
               object_name: str,
@@ -626,8 +641,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 self.spawn_group(names, player, node.position)
             )
             node = random.choice(walkable)
-            infantry = self.spawn('soldier', player, node.position, id=None)
-            spawned_units.append(infantry)
+            soldier = self.spawn('soldier', player, node.position, id=None)
+            spawned_units.append(soldier)
+            if soldier.player is not self.local_human_player:
+                soldier.enter_building(self.find_gameobject(Building, 8888))
         self.units.extend(spawned_units)
 
     def test_missions(self):
@@ -651,7 +668,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if isinstance(attached, GameObject):
             self.attach_gameobject(attached)
         elif isinstance(attached, (Player, Faction)):
-            print(attached)
             self.attach_player_or_faction(attached)
         elif isinstance(attached, (UiElementsBundle, UiElement)):
             super().on_being_attached(attached)
@@ -678,6 +694,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             else:
                 self.units.append(gameobject)
         else:
+            print(gameobject)
             self.terrain_tiles.append(gameobject)
 
     def attach_player_or_faction(self, attached: Union[Player, Faction]):
@@ -827,6 +844,7 @@ def run_game():
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
+    total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (
         PermanentUnitsGroup, SelectedEntityMarker, UnitsManager

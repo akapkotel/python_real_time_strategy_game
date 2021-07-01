@@ -239,7 +239,7 @@ class Map:
     def generate_random_trees(self) -> Dict[GridPosition, int]:
         trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
         return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
-                if random.random() > 0.95}
+                if random.random() < self.game.settings.trees_density}
 
     def get_nodes_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -511,6 +511,7 @@ class NavigatingUnitsGroup:
             pass
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
+        print(units)
         start = units[0].current_node.grid
         path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
@@ -521,7 +522,7 @@ class NavigatingUnitsGroup:
         return destinations
 
     def slice_paths(self, units, destinations, path):
-        for i in range(len(path) // OPTIMAL_PATH_LENGTH):
+        for i in range(1, len(path) // OPTIMAL_PATH_LENGTH, OPTIMAL_PATH_LENGTH):
             step = path[i * OPTIMAL_PATH_LENGTH]
             units_steps = Pathfinder.instance.get_group_of_waypoints(*step, len(units))
             self.navigate_straightly_to_destination(units_steps, units)
@@ -538,6 +539,8 @@ class NavigatingUnitsGroup:
         """
         for unit, steps in self.units_paths.items():
             steps.reverse()
+            if len(steps) > 1:
+                steps.pop()
 
     def add_visible_indicators_of_destinations(self, destinations):
         positions = [map_grid_to_position(g) for g in destinations]
@@ -659,9 +662,11 @@ class Pathfinder(EventsCreator):
 
     def remove_unit_from_waypoint_queue(self, unit: Unit):
         for waypoints_queue in self.waypoints_queues:
-            if unit in waypoints_queue.units:
+            try:
                 del waypoints_queue.units_waypoints[unit]
                 return waypoints_queue.units.remove(unit)
+            except KeyError:
+                log(f'{self}: Failed attempt to dequeue non-existent Unit.')
 
     def get_group_of_waypoints(self,
                                x: int,
@@ -693,6 +698,7 @@ class Pathfinder(EventsCreator):
             for adjacent_node in (n for n in adjacent if n.walkable):
                 return adjacent_node.position
             node = random.choice(adjacent)
+            # TODO: potential infinite loop
 
 
 if __name__:

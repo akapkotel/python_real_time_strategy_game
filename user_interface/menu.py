@@ -129,7 +129,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        functions=window.delete_saved_game)
             ],
             register_to=self,
-            _on_load=window.update_saved_games_list
+            _on_load=partial(window.update_saved_games_list, LOADING_MENU)
         )
 
         y = (i for i in range(675, 300, -125))
@@ -145,7 +145,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 text_input
             ],
             register_to=self,
-            _on_load=window.update_saved_games_list
+            _on_load=partial(window.update_saved_games_list, SAVING_MENU)
         )
 
         x, y = SCREEN_WIDTH // 4, SCREEN_Y
@@ -173,15 +173,26 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
+        y = (i for i in range(300, 675, 75))
         skirmish_menu = UiElementsBundle(
             index=5,
             name=SKIRMISH_MENU,
             elements=[
                 back_to_menu_button,
-                Button('menu_button_play.png', SCREEN_X, 300,
+                Button('menu_button_play.png', SCREEN_X, next(y),
                        functions=window.start_new_game),
-                Slider('slider.png', SCREEN_X, 375, '', 400,
-                       min_value=50, max_value=250, step=1)
+                Slider('slider.png', SCREEN_X, next(y), 'Trees density:', 200,
+                       variable=(window.settings, 'trees_density'),
+                       min_value=0.01, max_value=0.1),
+                Slider('slider.png', SCREEN_X, next(y), 'Start resources:', 200,
+                       variable=(window.settings, 'starting_resources'),
+                       min_value=0.25, max_value=1.0),
+                Slider('slider.png', SCREEN_X, next(y), 'Map width:', 200,
+                       variable=(window.settings, 'map_width'),
+                       min_value=50, max_value=250, step=1),
+                Slider('slider.png', SCREEN_X, next(y), 'Map height:', 200,
+                       variable=(window.settings, 'map_height'),
+                       min_value=50, max_value=250, step=1),
             ],
             register_to=self
         )

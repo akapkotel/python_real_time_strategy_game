@@ -7,8 +7,9 @@ from functools import partial, singledispatchmethod
 import PIL
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Set, Tuple, Union, Type, \
-    Any
+from typing import (
+    Dict, List, Optional, Callable, Set, Tuple, Union, Type, Any
+)
 
 from arcade import (
     Sprite, load_texture, draw_rectangle_outline, draw_text,
@@ -21,12 +22,12 @@ from arcade.key import BACKSPACE, ENTER
 from controllers.constants import HORIZONTAL, VERTICAL
 from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.classes import Observed, Observer
-from utils.data_types import Number
 from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
 
-from utils.functions import make_texture, get_path_to_file, \
-    name_to_texture_name, to_rgba
+from utils.functions import (
+    make_texture, get_path_to_file, name_to_texture_name, to_rgba
+)
 from utils.logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
@@ -748,11 +749,26 @@ class _SliderHandle(UiElement):
         else:
             self.parent.value = (self.center_y - self.min_y) / self.range_y
 
-    def value_to_position(self, value: float):
+    @singledispatchmethod
+    def value_to_position(self, value):
+        pass
+
+    @value_to_position.register
+    def _(self, value: float):
         if self.range_x:
             self.center_x = self.min_x + self.range_x * value
         else:
             self.center_y = self.min_y + self.range_y * value
+
+    @value_to_position.register
+    def _(self, value: int):
+        value_range = (self.parent.max_value - self.parent.min_value)
+        if self.range_x:
+            unit = self.range_x / value_range
+            self.center_x = self.min_x + unit * value
+        else:
+            unit = self.range_y / value_range
+            self.center_y = self.min_y + unit * value
 
 
 class Slider(UiElement):

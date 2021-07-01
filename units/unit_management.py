@@ -291,7 +291,15 @@ class UnitsManager(EventsCreator):
             self.on_unit_clicked(clicked)
 
     def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
-        self.send_units_to_pointed_location(units, *clicked.position)
+        if clicked.is_building and self.only_soldiers_selected:
+            self.on_building_clicked(clicked)
+        else:
+            self.set_hostile_entity_as_units_target(clicked, units)
+            self.send_units_to_pointed_location(units, *clicked.position)
+
+    def set_hostile_entity_as_units_target(self, target, units):
+        for unit in units:
+            unit.targeted_enemy = target
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_all_selected()

@@ -78,6 +78,8 @@ class Unit(PlayerEntity):
         self.tasks = []
         self.current_task = None
 
+        self.outside = True
+
         self.explosion_name = 'EXPLOSION'
         self.update_explosions_pool()
 
@@ -368,7 +370,7 @@ class Unit(PlayerEntity):
         pass
 
     def visible_for(self, other: PlayerEntity) -> bool:
-        if self.player is self.game.local_human_player and other.is_building:
+        if self.player.is_local_human_player and other.is_building:
             return len(self.observed_nodes & other.occupied_nodes) > 0
         return super().visible_for(other)
 
@@ -402,7 +404,8 @@ class Unit(PlayerEntity):
         self.game.units_manager.unselect(self)
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
-        self.create_death_animation()
+        if self.outside:
+            self.create_death_animation()
         self.stop_completely()
         super().kill()
 
@@ -650,15 +653,16 @@ class Soldier(Unit):
 
     @property
     def should_be_rendered(self) -> bool:
-        return self.game.local_drawn_units_and_buildings and self.outside
+        return super().should_be_rendered and self.outside
 
     @property
     def selectable(self) -> bool:
-        return self.player is self.game.local_human_player and self.outside
+        return self.player.is_local_human_player and self.outside
 
     def on_update(self, delta_time=1/60):
-        super().on_update(delta_time)
-        if self.moving:
+        if self.outside:
+            super().on_update(delta_time)
+        if self.on_screen and self.moving:
             self.update_animation(delta_time)
 
     def angle_to_texture(self, angle_to_target: float):
@@ -678,8 +682,9 @@ class Soldier(Unit):
     def enter_building(self, building):
         self.stop_completely()
         self.game.units_manager.unselect(self)
-        building.on_soldier_enter(soldier=self)
         self.outside = False
+        self.targeted_enemy = None
+        building.on_soldier_enter(soldier=self)
 
     def leave_building(self, building):
         x, y = building.position
@@ -691,11 +696,6 @@ class Soldier(Unit):
         health_gained = min(self.health_restoration, wounds)
         self.health += health_gained
 
-    def kill(self, outside=True):
-        if outside:
-            self.create_death_animation()
-        super().kill()
-
     def create_death_animation(self):
         self.spawn_corpse()
 
@@ -704,11 +704,6 @@ class Soldier(Unit):
         corpse = self.game.spawner.spawn(
             corpse_name, None, self.position, self.facing_direction
         )
-        self.configure_corpse(corpse)
-
-    def configure_corpse(self, corpse):
-        corpse.attach(observer=self.game)
-        corpse.schedule_event(ScheduledEvent(corpse, 10.0, corpse.kill))
 
 
 class Engineer(Soldier):

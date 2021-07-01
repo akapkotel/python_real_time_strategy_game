@@ -23,27 +23,13 @@ def get_screen_size() -> Tuple:
     return int(screen.width), int(screen.height)
 
 
-def filter_sequence(sequence: Sequence,
-                    filtered_class: Any) -> List[Any]:
-    return [s for s in sequence if isinstance(s, filtered_class)]
-
-
-def first_object_of_type(iterable: Iterable, class_name: type(object)):
-    """
-    Search the <iterable> for first instance of object which class is named
-    <class_name>.
-    """
-    for obj in iterable:
-        if isinstance(obj, class_name):
-            return obj
-
-
-def get_attributes_with_attribute(instance: object, name: str,
-                                  ignore: Tuple = ()) -> List[Any]:
+def get_objects_with_attribute(instance: object,
+                               name: str,
+                               ignore: Tuple = ()) -> List[Any]:
     """
     Search all attributes of <instance> to find all objects which have their
     own attribute of <name> and return these objects as List. You can also add
-    a Tuple od class names to be ignored during query.
+    a Tuple of class names to be ignored during query.
     """
     attributes = instance.__dict__.values()
     return [
@@ -206,7 +192,7 @@ def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
 
 def bind(first_object: Tuple[object, str], second_object: Tuple[object, str]):
     """
-    Set the mutual references for a pair objects, so they would knot about each
+    Set the mutual references for a pair objects, so they would know about each
     other. For each object provide a tuple containing reference to object as a
     first element, and string name of the attribute it should be assigned to in
     other object.

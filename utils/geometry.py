@@ -138,8 +138,10 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
         dist_x = abs(x)
         for y in range(-max_distance, max_distance + 1):
             dist_y = abs(y)
-            if dist_x + dist_y < radius:
-                observable_area.append((grid_x + x, grid_y + y))
+            total_distance = dist_x + dist_y
+            if total_distance < radius:
+                grid = (grid_x + x, grid_y + y)
+                observable_area.append(grid)
     return observable_area
 
 

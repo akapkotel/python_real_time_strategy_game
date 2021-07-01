@@ -6,7 +6,7 @@ from arcade import (
 )
 
 
-from utils.functions import get_attributes_with_attribute
+from utils.functions import get_objects_with_attribute
 from utils.logging import log, logger
 from utils.improved_spritelists import SelectiveSpriteList
 from utils.colors import WHITE, GREEN
@@ -66,10 +66,10 @@ class LoadableWindowView(View):
         :param ignore_update: put here all SpriteLists and other objects
         which have on_update method but you want them to be NOT updated
         :param ignored: instead you can declare types of objects, you do not
-        want to be updated, nor drawn_area
+        want to be updated, nor drawn
         """
-        updated = get_attributes_with_attribute(self, 'on_update', ignored)
-        self.drawn = get_attributes_with_attribute(self, 'draw', ignored)
+        updated = get_objects_with_attribute(self, 'on_update', ignored)
+        self.drawn = get_objects_with_attribute(self, 'draw', ignored)
         self.updated = [u for u in updated if u not in ignore_update]
 
     def on_show_view(self):
