@@ -418,6 +418,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         path_and_texture, size = self.find_proper_texture(soldier.player)
         self.change_building_texture(path_and_texture, size)
         self.reconfigure_building(soldier.player)
+        self.game.sound_player.play_sound('enemy_building_captured.vaw')
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import random
-import time
 
 from abc import abstractmethod
 from collections import defaultdict
@@ -23,8 +22,7 @@ from utils.logging import log
 from utils.functions import (
     ignore_in_editor_mode, new_id, add_player_color_to_name
 )
-from utils.geometry import distance_2d, is_visible, calculate_circular_area, \
-    clamp
+from utils.geometry import distance_2d, is_visible, clamp, calculate_circular_area
 from utils.scheduling import EventsCreator
 
 
@@ -470,6 +468,7 @@ class PlayerEntity(GameObject):
         """
         raise NotImplementedError
 
+    @timer(forced=True)
     def calculate_observed_area(self) -> Set[MapNode]:
         position = position_to_map_grid(*self.position)
         circular_area = calculate_circular_area(*position, 8)

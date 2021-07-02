@@ -2,7 +2,7 @@
 
 import os
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Dict, List, Tuple
 
 import PIL
 from arcade import Texture

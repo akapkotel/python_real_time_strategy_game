@@ -491,18 +491,14 @@ class NavigatingUnitsGroup:
         self.map = Map.instance
         self.destination = position_to_map_grid(x, y)
         self.units_paths = {unit: [] for unit in units}
-        self.reset_units_navigating_groups(units)
+        for unit in units:
+            unit.set_navigating_group(navigating_group=self)
         destinations = self.create_units_group_paths(units)
         self.add_visible_indicators_of_destinations(destinations)
         self.reverse_units_paths()
 
     def __str__(self) -> str:
         return f"NavigatingUnitsGroup(units:{len(self.units_paths)})"
-
-    def reset_units_navigating_groups(self, units: List[Unit]):
-        for unit in units:
-            unit.stop_completely()
-            unit.set_navigating_group(navigating_group=self)
 
     def discard(self, unit: Unit):
         try:
@@ -617,7 +613,12 @@ class Pathfinder(EventsCreator):
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
         if not self.map.position_to_node(x, y).walkable:
             x, y = self.get_closest_walkable_position(x, y)
+        self.reset_units_navigating_groups(units)
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
+
+    def reset_units_navigating_groups(self, units: List[Unit]):
+        for unit in units:
+            unit.stop_completely()
 
     def update(self):
         self.update_waypoints_queues()

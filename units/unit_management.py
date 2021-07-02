@@ -223,8 +223,8 @@ class UnitsManager(EventsCreator):
         """
         super().__init__()
         self.cursor = cursor
+        self.window = self.game.window
         self.cursor.bind_units_manager(manager=self)
-        self.window = cursor.window
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
@@ -413,7 +413,7 @@ class UnitsManager(EventsCreator):
             group = self.permanent_units_groups[group_id]
             selected = self.selected_units
             if selected and set(selected) == group.units:
-                self.window.move_viewport_to_the_position(*group.position)
+                self.game.window.move_viewport_to_the_position(*group.position)
             else:
                 self.unselect_all_selected()
                 self.select_units(*group.units)

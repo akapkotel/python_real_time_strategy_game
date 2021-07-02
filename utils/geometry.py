@@ -4,6 +4,7 @@ from functools import lru_cache
 from math import atan2, degrees, hypot, radians, sin, cos, inf
 from typing import Optional, Sequence
 
+import numba as nb
 from numba import njit
 from shapely.geometry import LineString, Polygon
 
@@ -31,7 +32,7 @@ def precalculate_possible_sprites_angles(rotations=ROTATIONS,
     }
 
 
-@njit
+@njit(nogil=True, fastmath=True)
 def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     """
     Calculate angle in direction from 'start' to the 'end' point in degrees.
@@ -46,11 +47,13 @@ def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     return -degrees(rads) % 360
 
 
+@njit(nogil=True, fastmath=True)
 def distance_2d(coord_a: Point, coord_b: Point) -> float:
     """Calculate distance between two points in 2D space."""
     return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
 
 
+@njit(nogil=True, fastmath=True)
 def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
     """
     Calculate distance between two points in 2D space and find if distance
@@ -64,7 +67,8 @@ def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
     return distance_2d(coord_a, coord_b) <= distance
 
 
-@njit
+# @njit(nogil=True, fastmath=True)
+@njit(['float64, float64'], nogil=True, fastmath=True)
 def vector_2d(angle: float, scalar: float) -> Point:
     """
     Calculate x and y parts of the current vector.
@@ -145,6 +149,7 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
     return observable_area
 
 
+@njit(nogil=True, fastmath=True)
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will by larger than min and less than max."""
     return value if minimum < value < maximum else max(minimum, min(value, maximum))

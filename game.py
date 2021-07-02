@@ -694,7 +694,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             else:
                 self.units.append(gameobject)
         else:
-            print(gameobject)
             self.terrain_tiles.append(gameobject)
 
     def attach_player_or_faction(self, attached: Union[Player, Faction]):
@@ -827,6 +826,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.factions.clear()
         self.players.clear()
         self.window.game_view = None
+
+    @property
+    def sound_player(self) -> AudioPlayer:
+        return self.window.sound_player
 
 
 def run_profiled_game():
