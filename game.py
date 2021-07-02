@@ -445,7 +445,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             setattr(_class, game, self)
         Game.instance = self.window.cursor.game = self
 
-    def find_object_by_class_and_id(self, name_and_id: Union[str, Tuple[str, int]]):
+    def find_object_by_class_and_id(self,
+                                    name_and_id: Union[str, Tuple[str, int]]):
         if isinstance(name_and_id, Tuple):
             object_class = eval(name_and_id[0])
             object_id = name_and_id[1]
@@ -455,13 +456,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             return {Game: self, GameWindow: self.window,
                     UnitsManager: self.units_manager}[object_class]
 
-    def find_gameobject(self, object_class, object_id):
-        if issubclass(object_class, Unit):
-            return self.units.get_by_id(sprite_id=object_id)
-        elif issubclass(object_class, Building):
-            return self.buildings.get_by_id(sprite_id=object_id)
-        elif issubclass(object_class, TerrainObject):
-            return self.terrain_tiles.get_by_id(sprite_id=object_id)
+    def find_gameobject(self,
+                        object_class: Union[type(Unit), type(Building), type(TerrainObject)],
+                        object_id: int) -> Optional[GameObject]:
+        """
+        Find any GameObject existing in game by providing it's type and id.
+
+        :param object_class: type -- class of the object, possible are: Unit,
+        Building, TerrainObject
+        :param object_id: int -- an unique integer identifier of the GameObject
+        :return: Optional[GameObject]
+        """
+        return {
+            Unit: self.units,
+            Building: self.buildings,
+            TerrainObject: self.terrain_tiles
+        }[object_class].get_by_id(object_id)
 
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y

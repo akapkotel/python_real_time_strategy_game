@@ -434,11 +434,14 @@ class WaypointsQueue:
 
     def __init__(self, units: List[Unit]):
         self.map = Map.instance
-        self.units = units
+        self.units = [u for u in units]
         self.waypoints = []
         self.units_waypoints = {unit: [] for unit in units}
         self.active = False
         self.loop = False
+
+    def __contains__(self, unit: Unit) -> bool:
+        return unit in self.units
 
     def add_waypoint(self, x: int, y: int):
         x, y = normalize_position(x, y)
@@ -491,8 +494,7 @@ class NavigatingUnitsGroup:
         self.map = Map.instance
         self.destination = position_to_map_grid(x, y)
         self.units_paths = {unit: [] for unit in units}
-        for unit in units:
-            unit.set_navigating_group(navigating_group=self)
+        self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
         self.add_visible_indicators_of_destinations(destinations)
         self.reverse_units_paths()
@@ -500,14 +502,21 @@ class NavigatingUnitsGroup:
     def __str__(self) -> str:
         return f"NavigatingUnitsGroup(units:{len(self.units_paths)})"
 
+    def __contains__(self, unit: Unit) -> bool:
+        return unit in self.units_paths.keys()
+
     def discard(self, unit: Unit):
         try:
             del self.units_paths[unit]
         except KeyError:
-            pass
+            log(f'Failed to discard {unit} from {self}', True)
+
+    def reset_units_navigating_groups(self, units: List[Unit]):
+        for unit in units:
+            unit.stop_completely()
+            unit.set_navigating_group(navigating_group=self)
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
-        print(units)
         start = units[0].current_node.grid
         path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
@@ -549,11 +558,9 @@ class NavigatingUnitsGroup:
 
     def update(self):
         to_remove = []
+        remove = to_remove.append
         for unit, steps in self.units_paths.items():
-            if steps:
-                self.find_next_path_for_unit(unit, steps)
-            else:
-                to_remove.append(unit)
+            self.find_next_path_for_unit(unit, steps) if steps else remove(unit)
         self.remove_finished_paths(to_remove)
 
     @staticmethod
@@ -613,12 +620,7 @@ class Pathfinder(EventsCreator):
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
         if not self.map.position_to_node(x, y).walkable:
             x, y = self.get_closest_walkable_position(x, y)
-        self.reset_units_navigating_groups(units)
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
-
-    def reset_units_navigating_groups(self, units: List[Unit]):
-        for unit in units:
-            unit.stop_completely()
 
     def update(self):
         self.update_waypoints_queues()
@@ -662,12 +664,9 @@ class Pathfinder(EventsCreator):
             self.requests_for_paths.remove(request)
 
     def remove_unit_from_waypoint_queue(self, unit: Unit):
-        for waypoints_queue in self.waypoints_queues:
-            try:
-                del waypoints_queue.units_waypoints[unit]
-                return waypoints_queue.units.remove(unit)
-            except KeyError:
-                log(f'{self}: Failed attempt to dequeue non-existent Unit.')
+        for queue in (q for q in self.waypoints_queues if unit in q):
+            del queue.units_waypoints[unit]
+            return queue.units.remove(unit)
 
     def get_group_of_waypoints(self,
                                x: int,

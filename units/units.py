@@ -352,7 +352,7 @@ class Unit(PlayerEntity):
         self.cancel_path_requests()
         self.awaited_path = None
         self.path.clear()
-        self.cancell_tasks()
+        self.cancel_tasks()
 
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
@@ -409,7 +409,7 @@ class Unit(PlayerEntity):
         self.stop_completely()
         super().kill()
 
-    def cancell_tasks(self):
+    def cancel_tasks(self):
         for task in self.tasks:
             task.remove(self)
         self.tasks.clear()

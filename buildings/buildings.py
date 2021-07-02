@@ -8,7 +8,7 @@ from typing import Deque, List, Optional, Set, Tuple, Dict
 
 from arcade import load_texture
 from arcade.arcade_types import Point
-from units.units import Soldier
+from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement
@@ -489,7 +489,22 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             saved_building.update(ResourceProducer.__getstate__(self))
         if self.is_research_facility:
             saved_building.update(ResearchFacility.__getstate__(self))
+        if self.garrisoned_soldiers:
+            saved_building.update(self.save_garrison())
         return saved_building
+
+    def save_garrison(self) -> Dict:
+        return {
+            'garrisoned_soldiers': [s.id for s in self.garrisoned_soldiers]
+        }
+
+    def load(self, loaded_data: Dict):
+        super().load(loaded_data)
+        if saved_soldiers := loaded_data.get('garrisoned_soldiers'):
+            soldiers = [self.game.find_gameobject(Unit, s) for s in saved_soldiers]
+            self.garrisoned_soldiers.clear()
+            for soldier in soldiers:
+                soldier.enter_building(self)
 
 
 if __name__:

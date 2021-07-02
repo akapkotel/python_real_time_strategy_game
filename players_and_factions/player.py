@@ -468,7 +468,6 @@ class PlayerEntity(GameObject):
         """
         raise NotImplementedError
 
-    @timer(forced=True)
     def calculate_observed_area(self) -> Set[MapNode]:
         position = position_to_map_grid(*self.position)
         circular_area = calculate_circular_area(*position, 8)
@@ -610,7 +609,9 @@ class PlayerEntity(GameObject):
 
     def load(self, loaded_data: Dict):
         """
-        After initializing Entity during loading saved game state, load """
+        After initializing Entity during loading saved game state, load all the
+        attributes which were saved, but not passed to __init__ method.
+        """
         ignored = ('object_name', 'id', 'player', 'position', 'path')
         for key, value in loaded_data.items():
             if key not in ignored:
