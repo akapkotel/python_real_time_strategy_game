@@ -70,10 +70,22 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         return weight > self._robustness
 
     def on_update(self, delta_time: float = 1 / 60):
+        self.update_visibility()
         self.center_x += self.change_x
         self.center_y += self.change_y
         if self.frames:
             self.update_animation(delta_time)
+
+    def update_visibility(self):
+        if self.should_be_rendered:
+            if not self.is_rendered:
+                self.start_drawing()
+        elif self.is_rendered:
+            self.stop_drawing()
+
+    @property
+    def should_be_rendered(self) -> bool:
+        return self.on_screen
 
     def update_animation(self, delta_time: float = 1 / 60):
         super().update_animation(delta_time)
@@ -117,12 +129,9 @@ class TerrainObject(GameObject):
     def __init__(self, filename: str, robustness: Robustness, position: Point):
         GameObject.__init__(self, filename, robustness, position)
         self.map_node = self.game.map.position_to_node(*self.position)
-        self.map_node.static_gameobject = self
+        if robustness:
+            self.map_node.static_gameobject = self
         self.attach(observer=self.game)
-
-    def draw(self):
-        if self.on_screen:
-            super().draw()
 
     def kill(self):
         self.map_node.static_gameobject = None

@@ -299,7 +299,7 @@ class UnitsManager(EventsCreator):
 
     def set_hostile_entity_as_units_target(self, target, units):
         for unit in units:
-            unit.targeted_enemy = target
+            unit._targeted_enemy = target
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_all_selected()

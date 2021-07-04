@@ -4,7 +4,8 @@ from __future__ import annotations
 import random
 
 from collections import deque, defaultdict
-from functools import partial, cached_property
+from frozendict import frozendict
+from functools import partial, cached_property, singledispatchmethod
 from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
     DefaultDict
@@ -54,8 +55,7 @@ def position_to_map_grid(x: Number, y: Number) -> GridPosition:
 
 
 def normalize_position(x: Number, y: Number) -> NormalizedPoint:
-    grid = position_to_map_grid(x, y)
-    return map_grid_to_position(grid)
+    return map_grid_to_position((x // TILE_WIDTH, y // TILE_HEIGHT))
 
 
 def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
@@ -121,7 +121,7 @@ class Map:
         # adjacent ones instead of whole map for enemies:
         self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
-        self.distances: Dict[GridPosition, Dict[GridPosition, int]] = {}
+        self.distances = {}
 
         self.generate_sectors()
         self.generate_nodes()
@@ -153,7 +153,10 @@ class Map:
         return len(self.nodes)
 
     def __getitem__(self, item):
-        return self.nodes[item]
+        return self.nodes.get(item, self.nonexistent_node)
+
+    def __contains__(self, item: GridPosition):
+        return item in self.nodes
 
     def in_bounds(self, grid: Collection[GridPosition]) -> List[GridPosition]:
         return [g for g in grid if g in self.nodes]
@@ -167,22 +170,30 @@ class Map:
         except KeyError:
             return False
 
-    def walkable_adjacent(self, x, y) -> List[MapNode]:
-        return [n for n in self.adjacent_nodes(x, y) if n.walkable]
+    def walkable_adjacent(self, x, y) -> Set[MapNode]:
+        return {n for n in self.adjacent_nodes(x, y) if n.walkable}
 
-    def pathable_adjacent(self, x, y) -> List[MapNode]:
-        return [n for n in self.adjacent_nodes(x, y) if n.pathable]
+    def pathable_adjacent(self, x, y) -> Set[MapNode]:
+        return {n for n in self.adjacent_nodes(x, y) if n.pathable}
 
-    def adjacent_nodes(self, x: Number, y: Number) -> List[MapNode]:
-        return [
+    def adjacent_nodes(self, x: Number, y: Number) -> Set[MapNode]:
+        return {
             self.nodes[adj] for adj in self.in_bounds(adjacent_map_grids(x, y))
-        ]
+        }
 
     def position_to_node(self, x: Number, y: Number) -> MapNode:
         return self.grid_to_node(position_to_map_grid(x, y))
 
     def grid_to_node(self, grid: GridPosition) -> MapNode:
         return self.nodes.get(grid)
+
+    @property
+    def random_walkable_node(self) -> MapNode:
+        return random.choice(tuple(self.nodes.values()))
+
+    @property
+    def all_walkable_nodes(self) -> Generator[MapNode]:
+        return (node for node in self.nodes.values() if node.walkable)
 
     def generate_sectors(self):
         for x in range(self.columns):
@@ -217,14 +228,15 @@ class Map:
         self.game.terrain_tiles.append(sprite)
 
     def calculate_distances_between_nodes(self):
+        distances = self.distances
         for node in self.nodes.values():
-            self.distances[node.grid] = {}
+            costs_dict = {}
             for grid in self.in_bounds(adjacent_map_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
-                distance = DIAGONAL_DIST if diagonal(node.grid, grid) else VERTICAL_DIST
+                distance = adjacent_distance(grid, adjacent_node.grid)
                 terrain_cost = (node.terrain_cost + adjacent_node.terrain_cost)
-                # node.costs[grid] = distance * terrain_cost
-                self.distances[node.grid][grid] = distance * terrain_cost
+                node.costs[grid] = distance * terrain_cost
+            distances[node.grid] = costs_dict
 
     @logger()
     def plant_trees(self, trees: Optional[Dict[GridPosition, int]] = None):
@@ -232,8 +244,8 @@ class Map:
             trees = self.generate_random_trees()
         for node in self.nodes.values():
             if (tree_type := trees.get(node.grid)) is not None:
-                tree = TerrainObject(f'tree_leaf_{tree_type}', 4, node.position)
-                self.game.static_objects.append(tree)
+                self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
+                # TerrainObject(f'tree_leaf_{tree_type}', 4, node.position)
                 node.tree = tree_type
 
     def generate_random_trees(self) -> Dict[GridPosition, int]:
@@ -255,9 +267,60 @@ class Map:
 
     @cached_property
     def nonexistent_node(self) -> MapNode:
+        print('NONEXISTENT NODE')
         node = MapNode(-1, -1, None)
         node.pathable = False
         return node
+
+
+class Map2:
+
+    def __init(self):
+        self.sectors: Dict[GridPosition, SectorId] = {}
+        self._pathable: Dict[GridPosition, bool] = {}
+        self._walkable: Dict[GridPosition, bool] = {}
+        self._adjacent: Dict[GridPosition, Set[GridPosition]] = {}
+        self._units: Dict[GridPosition, Unit] = {}
+        self._buildings: Dict[GridPosition, Building] = {}
+        self._static: Dict[GridPosition, GameObject] = {}
+        self._trees: Dict[GridPosition, TreeID] = {}
+
+    def unit(self, grid) -> Optional[Unit]:
+        try:
+            return self._units[grid]
+        except KeyError:
+            return self._units.get(position_to_map_grid(*grid))
+
+    def building(self, grid) -> Optional[Building]:
+        try:
+            return self._buildings[grid]
+        except KeyError:
+            return self._buildings.get(position_to_map_grid(*grid))
+
+    def adjacent(self, grid) -> Optional[Set[GridPosition]]:
+        try:
+            return self._adjacent[grid]
+        except KeyError:
+            return self._adjacent.get(position_to_map_grid(*grid))
+
+    def is_walkable(self, grid):
+        try:
+            return self._walkable[grid]
+        except KeyError:
+            return self._walkable.get(position_to_map_grid(*grid))
+
+    def is_pathable(self, grid):
+        try:
+            return self._pathable[grid]
+        except KeyError:
+            return self._pathable.get(position_to_map_grid(*grid))
+
+    def walkable_adjacent(self, grid):
+        try:
+            return {n for n in self._adjacent[grid] if self._walkable[n]}
+        except KeyError:
+            grid = position_to_map_grid(*grid)
+            return {n for n in self._adjacent[grid] if self._walkable[n]}
 
 
 class Sector:
@@ -320,15 +383,11 @@ class MapNode:
     """
     map: Optional[Map] = None
 
-    __slots__ = ['grid', 'sector', 'position', 'costs', 'x', 'y', '_building',
-                 '_pathable', '_unit', '_tree', 'terrain_cost',
-                 '_static_gameobject']
-
     def __init__(self, x, y, sector):
         self.grid = x, y
         self.sector = sector
         self.position = self.x, self.y = map_grid_to_position(self.grid)
-        self.costs: Dict[GridPosition, float] = {}
+        self.costs = None
 
         self._pathable = True
 
@@ -340,7 +399,7 @@ class MapNode:
         self.terrain_cost: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:
-        return f'MapNode(grid position: {self.grid}, position: {self.position})'
+        return f'MapNode(grid: {self.grid}, position: {self.position})'
 
     def in_bounds(self, *args, **kwargs):
         return self.map.in_bounds(*args, **kwargs)
@@ -402,15 +461,15 @@ class MapNode:
         self._pathable = value
 
     @property
-    def walkable_adjacent(self) -> List[MapNode]:
-        return self.map.walkable_adjacent(*self.position)
+    def walkable_adjacent(self) -> Set[MapNode]:
+        return {n for n in self.adjacent_nodes if n.walkable}
 
     @property
-    def pathable_adjacent(self) -> List[MapNode]:
-        return self.map.pathable_adjacent(*self.position)
+    def pathable_adjacent(self) -> Set[MapNode]:
+        return {n for n in self.adjacent_nodes if n.pathable}
 
-    @property
-    def adjacent_nodes(self) -> List[MapNode]:
+    @cached_property
+    def adjacent_nodes(self) -> Set[MapNode]:
         return self.map.adjacent_nodes(*self.position)
 
     def __getstate__(self) -> Dict:
@@ -443,6 +502,9 @@ class WaypointsQueue:
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units
 
+    def __bool__(self):
+        return bool(self.units)
+
     def add_waypoint(self, x: int, y: int):
         x, y = normalize_position(x, y)
         if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
@@ -458,9 +520,11 @@ class WaypointsQueue:
             self.units_waypoints[unit].append(waypoints[i])
 
     def update(self):
-        for unit, waypoints in self.units_waypoints.items():
-            self.evaluate_unit_waypoints(unit, waypoints)
-        self.remove_finished()
+        for unit in self.units:
+            if waypoints := self.units_waypoints[unit]:
+                self.evaluate_unit_waypoints(unit, waypoints)
+            else:
+                self.units.remove(unit)
 
     def evaluate_unit_waypoints(self, unit, waypoints):
         destination = waypoints[-1]
@@ -470,11 +534,6 @@ class WaypointsQueue:
                 waypoints.insert(0, removed)
         elif not (unit.has_destination or unit.heading_to(destination)):
             unit.move_to(destination)
-
-    def remove_finished(self):
-        for unit in self.units_waypoints.copy():
-            if not self.units_waypoints[unit]:
-                del self.units_waypoints[unit]
 
     def start(self):
         self.active = True
@@ -504,6 +563,9 @@ class NavigatingUnitsGroup:
 
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units_paths.keys()
+
+    def __bool__(self):
+        return bool(self.units_paths)
 
     def discard(self, unit: Unit):
         try:
@@ -566,8 +628,10 @@ class NavigatingUnitsGroup:
     @staticmethod
     def find_next_path_for_unit(unit, steps):
         destination = steps[-1]
-        if unit.reached_destination(destination):  # or unit.nearby(destination)
+        if unit.reached_destination(destination):
             steps.pop()
+        # elif len(steps) > 1 and unit.nearby(destination):
+        #     steps.pop()
         elif not (unit.has_destination or unit.heading_to(destination)):
             unit.move_to(destination)
 
@@ -579,7 +643,8 @@ class NavigatingUnitsGroup:
 
 class Pathfinder(EventsCreator):
     """
-    A* algorithm implementation using PriorityQueue based on improved heapq.
+    This class manages finding and assigning paths for Units in game. It also
+    creates, updates and removes WaypointsQueues and NavigatingUnitsGroups.
     """
     instance: Optional[Pathfinder] = None
 
@@ -593,8 +658,6 @@ class Pathfinder(EventsCreator):
         self.waypoints_queues: List[WaypointsQueue] = []
         self.navigating_groups: List[NavigatingUnitsGroup] = []
         self.requests_for_paths: Deque[PathRequest] = deque()
-        self.path_requests_count = 0
-        self.paths_found = 0
         Pathfinder.instance = self
 
     def __bool__(self) -> bool:
@@ -634,30 +697,25 @@ class Pathfinder(EventsCreator):
         """
         if self.requests_for_paths:
             unit, start, destination = self.requests_for_paths.pop()
+            # to avoid infinite attempts to find path to the Node blocked by
+            # other Unit from the same navigating groups pathfinding to the
+            # same place TODO: find a better way to not mutually-block nodes
             if self.map.grid_to_node(destination).walkable:
                 if path := a_star(self.map, start, destination):
-                    self.paths_found += 1
-                    return unit.create_new_path(path)
+                    return unit.follow_new_path(path)
             self.request_path(unit, start, destination)
 
     def update_waypoints_queues(self):
         for queue in (q for q in self.waypoints_queues if q.active):
-            if queue.units_waypoints:
-                queue.update()
-            else:
-                self.waypoints_queues.remove(queue)
+            queue.update() if queue else self.waypoints_queues.remove(queue)
 
     def update_navigating_groups(self):
-        for nav_group in self.navigating_groups:
-            if nav_group.units_paths:
-                nav_group.update()
-            else:
-                self.navigating_groups.remove(nav_group)
+        for group in self.navigating_groups:
+            group.update() if group else self.navigating_groups.remove(group)
 
     def request_path(self, unit: Unit, start: GridPosition, destination: GridPosition):
         """Enqueue new path-request. It will be resolved when possible."""
         self.requests_for_paths.appendleft((unit, start, destination))
-        self.path_requests_count += 1
 
     def cancel_unit_path_requests(self, unit: Unit):
         for request in (r for r in self.requests_for_paths.copy() if r[0] is unit):
@@ -697,7 +755,7 @@ class Pathfinder(EventsCreator):
             adjacent = node.adjacent_nodes
             for adjacent_node in (n for n in adjacent if n.walkable):
                 return adjacent_node.position
-            node = random.choice(adjacent)
+            node = random.choice([n for n in adjacent])
             # TODO: potential infinite loop
 
 

@@ -236,7 +236,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                  id: Optional[int] = None,
                  produced_units: Optional[Tuple[str]] = None,
                  produced_resource: Optional[str] = None,
-                 research_facility: bool = False):
+                 research_facility: bool = False,
+                 garrison: int = 0):
         """
         :param building_name: str -- texture name
         :param player: Player -- which player controlls this building
@@ -265,6 +266,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         self.garrisoned_soldiers: List[Soldier] = []
         self.garrison_max_soldiers = 8
+
+        if garrison:
+            self.spawn_soldiers_for_garrison(garrison)
 
     @property
     def configs(self):
@@ -297,6 +301,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         [self.block_map_node(node) for node in occupied_nodes]
         return set(occupied_nodes)
 
+    def spawn_soldiers_for_garrison(self, garrison: int):
+        for _ in range(min(garrison, self.garrison_max_soldiers)):
+            soldier = self.game.spawn(
+                'soldier', self.player, self.map.random_walkable_node.position
+            )
+            soldier.enter_building(self)
+
     @property
     def moving(self) -> bool:
         return False  # this is rather obvious, this is a Building
@@ -315,12 +326,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
-        self.observed_nodes = nodes = self.calculate_observed_area()
-        if self.player.is_local_human_player:
-            self.game.fog_of_war.reveal_nodes({n.grid for n in nodes})
+        if not self.observed_nodes:  # Building need calculate it only once
+            self.observed_grids = grids = self.calculate_observed_area()
+            self.observed_nodes = {self.map[grid] for grid in grids}
 
     def fight_enemies(self):
-        if (enemy := self.targeted_enemy) is not None:
+        if (enemy := self._targeted_enemy) is not None:
             self.engage_enemy(enemy)
 
     def on_mouse_enter(self):

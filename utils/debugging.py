@@ -112,7 +112,7 @@ class GameDebugger:
         for unit in self.game.units:
             x, y = unit.position
             draw_text(str(unit.id), x, y + 40, color=GREEN)
-            if (target := unit.targeted_enemy) is not None:
+            if (target := unit._targeted_enemy) is not None:
                 draw_text(str(target.id), x, y - 40, color=RED)
 
     def draw_debug_paths(self):

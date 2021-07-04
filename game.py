@@ -22,7 +22,7 @@ from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 from dataclasses import dataclass
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite
 )
 from arcade.arcade_types import Color, Point
 
@@ -76,7 +76,7 @@ FPS = 60
 GAME_SPEED = 1.0
 
 PLAYER_UNITS = 30
-CPU_UNITS = 1
+CPU_UNITS = 0
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -384,7 +384,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = SelectiveSpriteList()
-        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=True)
         self.buildings = SelectiveSpriteList(is_static=True)
         self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
@@ -470,7 +470,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return {
             Unit: self.units,
             Building: self.buildings,
-            TerrainObject: self.terrain_tiles
+            Sprite: self.terrain_tiles,
+            TerrainObject: self.static_objects
         }[object_class].get_by_id(object_id)
 
     def create_user_interface(self) -> UiSpriteList:
@@ -610,22 +611,26 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_buildings_spawning(self):
         self.buildings.extend(
             (
-                self.spawn('medium_factory', self.players[2], (400, 600)),
-                self.spawn('medium_factory', self.players[4], (1000, 600), id=8888),
+                self.spawn('medium_factory', self.players[2], (400, 600), garrison=3),
+                self.spawn('medium_factory', self.players[4], (1000, 600), id=8888, garrison=1),
             )
         )
 
     def spawn(self,
               object_name: str,
-              player: Union[Player, int],
-              position: Point,
+              player: Optional[Union[Player, int]] = None,
+              position: Optional[Point] = None,
               id: Optional[int] = None,
               **kwargs) -> Optional[GameObject]:
-        if (player := self.get_player_instance(player)) is not None:
-            return self.spawner.spawn(object_name, player, position, id=id)
-        return None
+        if position is None:
+            position = random.choice(
+                [n.position for n in self.map.all_walkable_nodes]
+            )
+        if player is not None:
+            player = self.get_player_instance(player)
+        return self.spawner.spawn(object_name, player, position, id=id, **kwargs)
 
-    def get_player_instance(self, player: Union[Player, int]):
+    def get_player_instance(self, player: Union[Player, int, None]):
         if isinstance(player, int):
             return self.players.get(player, None)
         return player
@@ -641,20 +646,20 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_units_spawning(self):
         spawned_units = []
         unit_name = 'tank_medium'
-        walkable = [w for w in list(self.map.nodes.values()) if w.walkable]
+        walkable = list(self.map.all_walkable_nodes)
         for player in (self.players.values()):
             node = random.choice(walkable)
-            walkable.pop(walkable.index(node))
+            walkable.remove(node)
             amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
             names = [unit_name] * amount
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
-            node = random.choice(walkable)
-            soldier = self.spawn('soldier', player, node.position, id=None)
-            spawned_units.append(soldier)
-            if soldier.player is not self.local_human_player:
-                soldier.enter_building(self.find_gameobject(Building, 8888))
+            # node = random.choice(walkable)
+            # soldier = self.spawn('soldier', player, node.position, id=None)
+            # spawned_units.append(soldier)
+            # if soldier.player is not self.local_human_player:
+            #     soldier.enter_building(self.find_gameobject(Building, 8888))
         self.units.extend(spawned_units)
 
     def test_missions(self):
@@ -704,7 +709,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             else:
                 self.units.append(gameobject)
         else:
-            self.terrain_tiles.append(gameobject)
+            self.static_objects.append(gameobject)
 
     def attach_player_or_faction(self, attached: Union[Player, Faction]):
         if isinstance(attached, Player):
@@ -719,7 +724,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             else:
                 self.units.remove(gameobject)
         else:
-            self.terrain_tiles.remove(gameobject)
+            self.static_objects.remove(gameobject)
 
     def detach_player_or_faction(self, detached: Union[Player, Faction]):
         if isinstance(detached, Player):

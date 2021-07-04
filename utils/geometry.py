@@ -2,14 +2,14 @@
 
 from functools import lru_cache
 from math import atan2, degrees, hypot, radians, sin, cos, inf
-from typing import Optional, Sequence
+from typing import Optional, Sequence, List, Tuple
 
-import numba as nb
+import numpy as np
+
 from numba import njit
 from shapely.geometry import LineString, Polygon
 
 from utils.data_types import Point, Number
-
 
 ROTATIONS = 8  # how many directions our Sprites can rotate toward
 CIRCLE_SLICE = 360 / ROTATIONS  # angular width of a single rotation step
@@ -32,7 +32,7 @@ def precalculate_possible_sprites_angles(rotations=ROTATIONS,
     }
 
 
-@njit(nogil=True, fastmath=True)
+@njit(nogil=True, fastmath=True, cache=True)
 def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     """
     Calculate angle in direction from 'start' to the 'end' point in degrees.
@@ -47,13 +47,13 @@ def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
     return -degrees(rads) % 360
 
 
-@njit(nogil=True, fastmath=True)
+@njit(nogil=True, fastmath=True, cache=True)
 def distance_2d(coord_a: Point, coord_b: Point) -> float:
     """Calculate distance between two points in 2D space."""
     return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
 
 
-@njit(nogil=True, fastmath=True)
+@njit(nogil=True, fastmath=True, cache=True)
 def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
     """
     Calculate distance between two points in 2D space and find if distance
@@ -68,7 +68,7 @@ def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
 
 
 # @njit(nogil=True, fastmath=True)
-@njit(['float64, float64'], nogil=True, fastmath=True)
+@njit(['float64, float64'], nogil=True, fastmath=True, cache=True)
 def vector_2d(angle: float, scalar: float) -> Point:
     """
     Calculate x and y parts of the current vector.
@@ -101,7 +101,8 @@ def move_along_vector(start: Point,
     :return: tuple -- (optional)position of the vector end
     """
     if target is None and angle is None:
-        raise ValueError("You MUST pass current_waypoint position or vector angle!")
+        raise ValueError(
+            "You MUST pass current_waypoint position or vector angle!")
     p1 = (start[0], start[1])
     if target:
         p2 = (target[0], target[1])
@@ -130,11 +131,13 @@ def is_visible(position_a: Point,
         return False
     elif not obstacles:
         return True
-    return not any((Polygon(o.get_adjusted_hit_box()).crosses(line_of_sight) for o in obstacles))
+    return not any(
+        (Polygon(o.get_adjusted_hit_box()).crosses(line_of_sight) for o in
+         obstacles))
 
 
 @lru_cache(maxsize=None)
-@njit(['int64, int64, int64'], nogil=True, fastmath=True)
+# @njit(['int64, int64, int64'], nogil=True, fastmath=True, cache=True)
 def calculate_circular_area(grid_x, grid_y, max_distance):
     radius = max_distance * 1.6
     observable_area = []
@@ -149,7 +152,24 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
     return observable_area
 
 
-@njit(nogil=True, fastmath=True)
+def precalculate_visibility_matrix(max_distance: int):
+    radius = max_distance * 1.6
+    observable_area = []
+    for x in range(-max_distance, max_distance + 1):
+        dist_x = abs(x)
+        for y in range(-max_distance, max_distance + 1):
+            dist_y = abs(y)
+            total_distance = dist_x + dist_y
+            if total_distance < radius:
+                observable_area.append((x, y))
+    return np.array(observable_area)
+
+
+@lru_cache(maxsize=None)
+def find_area(x, y, matrix_: List[Tuple[int, int]] = None):
+    return [(pos[0] + x, pos[1] + y) for pos in matrix]
+
+
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will by larger than min and less than max."""
     return value if minimum < value < maximum else max(minimum, min(value, maximum))
@@ -168,3 +188,43 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
         sum_x += position[0]
         sum_y += position[1]
     return sum_x / positions_count, sum_y / positions_count
+
+
+matrix = [(-8, -4), (-8, -3), (-8, -2), (-8, -1), (-8, 0), (-8, 1), (-8, 2),
+          (-8, 3), (-8, 4), (-7, -5), (-7, -4), (-7, -3), (-7, -2), (-7, -1),
+          (-7, 0), (-7, 1), (-7, 2), (-7, 3), (-7, 4), (-7, 5), (-6, -6),
+          (-6, -5), (-6, -4), (-6, -3), (-6, -2), (-6, -1), (-6, 0), (-6, 1),
+          (-6, 2), (-6, 3), (-6, 4), (-6, 5), (-6, 6), (-5, -7), (-5, -6),
+          (-5, -5), (-5, -4), (-5, -3), (-5, -2), (-5, -1), (-5, 0), (-5, 1),
+          (-5, 2), (-5, 3), (-5, 4), (-5, 5), (-5, 6), (-5, 7), (-4, -8),
+          (-4, -7), (-4, -6), (-4, -5), (-4, -4), (-4, -3), (-4, -2), (-4, -1),
+          (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4), (-4, 5), (-4, 6),
+          (-4, 7), (-4, 8), (-3, -8), (-3, -7), (-3, -6), (-3, -5), (-3, -4),
+          (-3, -3), (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3),
+          (-3, 4), (-3, 5), (-3, 6), (-3, 7), (-3, 8), (-2, -8), (-2, -7),
+          (-2, -6), (-2, -5), (-2, -4), (-2, -3), (-2, -2), (-2, -1), (-2, 0),
+          (-2, 1), (-2, 2), (-2, 3), (-2, 4), (-2, 5), (-2, 6), (-2, 7),
+          (-2, 8), (-1, -8), (-1, -7), (-1, -6), (-1, -5), (-1, -4), (-1, -3),
+          (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2), (-1, 3), (-1, 4),
+          (-1, 5), (-1, 6), (-1, 7), (-1, 8), (0, -8), (0, -7), (0, -6),
+          (0, -5), (0, -4), (0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
+          (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8), (1, -8), (1, -7),
+          (1, -6), (1, -5), (1, -4), (1, -3), (1, -2), (1, -1), (1, 0), (1, 1),
+          (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (2, -8),
+          (2, -7), (2, -6), (2, -5), (2, -4), (2, -3), (2, -2), (2, -1),
+          (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
+          (2, 8), (3, -8), (3, -7), (3, -6), (3, -5), (3, -4), (3, -3),
+          (3, -2), (3, -1), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5),
+          (3, 6), (3, 7), (3, 8), (4, -8), (4, -7), (4, -6), (4, -5), (4, -4),
+          (4, -3), (4, -2), (4, -1), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
+          (4, 5), (4, 6), (4, 7), (4, 8), (5, -7), (5, -6), (5, -5), (5, -4),
+          (5, -3), (5, -2), (5, -1), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4),
+          (5, 5), (5, 6), (5, 7), (6, -6), (6, -5), (6, -4), (6, -3), (6, -2),
+          (6, -1), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6),
+          (7, -5), (7, -4), (7, -3), (7, -2), (7, -1), (7, 0), (7, 1), (7, 2),
+          (7, 3), (7, 4), (7, 5), (8, -4), (8, -3), (8, -2), (8, -1), (8, 0),
+          (8, 1), (8, 2), (8, 3), (8, 4)]
+
+
+# area = calculate_circular_area(0, 0, 8)
+# print(area)

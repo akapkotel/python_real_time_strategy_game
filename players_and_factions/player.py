@@ -17,12 +17,13 @@ from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
 from utils.classes import Observed, Observer
 from utils.colors import GREEN, RED
-from utils.data_types import FactionId, TechnologyId
+from utils.data_types import FactionId, TechnologyId, GridPosition
 from utils.logging import log
 from utils.functions import (
     ignore_in_editor_mode, new_id, add_player_color_to_name
 )
-from utils.geometry import distance_2d, is_visible, clamp, calculate_circular_area
+from utils.geometry import distance_2d, is_visible, clamp, \
+    calculate_circular_area, find_area
 from utils.scheduling import EventsCreator
 
 
@@ -131,6 +132,7 @@ class Faction(EventsCreator, Observer, Observed):
 
 
 class ResourcesManager:
+    game: Optional[Game] = None
     resources_names = FUEL, FOOD, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 
     def __init__(self):
@@ -349,7 +351,11 @@ class PlayerEntity(GameObject):
         # sees and updates this set each frame:
         self.known_enemies: Set[PlayerEntity] = set()
 
-        self.targeted_enemy: Optional[PlayerEntity] = None
+        # this enemy must be assigned by the Player (e.g. by mouse-click)
+        self._player_assigned_enemy: Optional[PlayerEntity] = None
+
+        # this enemy is currently targeted, can be obtained automatically:
+        self._targeted_enemy: Optional[PlayerEntity] = None
 
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
@@ -368,13 +374,10 @@ class PlayerEntity(GameObject):
         self.attack_radius = TILE_WIDTH * 5
 
         # area inside which all map-nodes are visible for this entity:
+        self.observed_grids: Set[GridPosition] = set()
         self.observed_nodes: Set[MapNode] = set()
         # area inside which every enemy unit could by attacked:
         self.fire_covered: Set[MapNode] = set()
-
-        # flag used to avoid enemy units revealing map for human player, only
-        # player's units and his allies units reveal map for him:
-        # self.should_reveal_map = self.faction is self.game.local_human_player.faction
 
         self._weapons: List[Weapon] = []
         # use this number to animate shot blast from weapon:
@@ -399,6 +402,8 @@ class PlayerEntity(GameObject):
 
     @property
     def should_reveal_map(self) -> bool:
+        # flag used to avoid enemy units revealing map for human player, only
+        # player's units and his allies units reveal map for him:
         return self.faction is self.game.local_human_player.faction
 
     @property
@@ -425,6 +430,18 @@ class PlayerEntity(GameObject):
     def ammunition(self) -> bool:
         return self._ammunition > 0
 
+    def assign_enemy(self, enemy: PlayerEntity):
+        # used when Player orders this Entity to attack the particular enemy
+        self._player_assigned_enemy = enemy
+
+    @property
+    def targeted_enemy(self) -> Optional[PlayerEntity]:
+        return self._targeted_enemy
+
+    @targeted_enemy.setter
+    def targeted_enemy(self, enemy: Optional[PlayerEntity]):
+        self._targeted_enemy = enemy
+
     @staticmethod
     @abstractmethod
     def unblock_map_node(node: MapNode):
@@ -439,7 +456,8 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        self.update_visibility()
+        if self.should_reveal_map:
+            self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         self.update_battle_behaviour()
         super().on_update(delta_time)
@@ -447,13 +465,6 @@ class PlayerEntity(GameObject):
     def draw(self):
         if self.is_rendered:
             super().draw()
-
-    def update_visibility(self):
-        if self.should_be_rendered:
-            if not self.is_rendered:
-                self.start_drawing()
-        elif self.is_rendered:
-            self.stop_drawing()
 
     @property
     def should_be_rendered(self) -> bool:
@@ -468,10 +479,10 @@ class PlayerEntity(GameObject):
         """
         raise NotImplementedError
 
-    def calculate_observed_area(self) -> Set[MapNode]:
+    def calculate_observed_area(self) -> Set[GridPosition]:
         position = position_to_map_grid(*self.position)
-        circular_area = calculate_circular_area(*position, 8)
-        return {self.map[id] for id in self.map.in_bounds(circular_area)}
+        circular_area = find_area(*position)
+        return set(self.map.in_bounds(circular_area))
 
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
@@ -479,30 +490,28 @@ class PlayerEntity(GameObject):
         self.known_enemies = enemies
 
     @ignore_in_editor_mode
+    def update_battle_behaviour(self):
+        if self.weapons and self.known_enemies:
+            self._targeted_enemy = self.update_targeted_enemy()
+            self.fight_enemies()
+        elif self.is_unit:
+            self.run_away()
+
     def update_targeted_enemy(self):
         """
         Set the random or weakest of the enemies in range of this entity
         weapons as the current hit to attack if not targeting any yet.
         """
-        if (enemies := self.known_enemies) and self.no_current_target:
-            if in_range := [e for e in enemies if e.in_range(self)]:
-                self.targeted_enemy = self.choice_new_enemy_to_target(in_range)
-            else:
-                self.targeted_enemy = None
+        if (assigned := self._player_assigned_enemy) is not None:
+            return assigned
+        elif self._targeted_enemy is None or self.enemy_out_of_range:
+            if in_range := [e for e in self.known_enemies if e.in_range(self)]:
+                return sorted(in_range, key=lambda e: e.health)[0]
+        return self._targeted_enemy
 
-    def choice_new_enemy_to_target(self, in_range: List[PlayerEntity]) -> PlayerEntity:
-        if self.experience > 35:
-            return sorted(in_range, key=lambda e: e.health)[0]
-        else:
-            return random.choice(in_range)
-
-    @ignore_in_editor_mode
-    def update_battle_behaviour(self):
-        if self.weapons:
-            self.update_targeted_enemy()
-            self.fight_enemies()
-        elif self.is_unit:
-            self.run_away()
+    @property
+    def enemy_out_of_range(self) -> bool:
+        return not self.in_range(self._targeted_enemy)
 
     @abstractmethod
     def fight_enemies(self):
@@ -529,15 +538,11 @@ class PlayerEntity(GameObject):
     def in_range(self, other: PlayerEntity) -> bool:
         return distance_2d(self.position, other.position) < self.attack_radius
 
-    @property
-    def no_current_target(self) -> bool:
-        return self.targeted_enemy is None or not self.in_range(self.targeted_enemy)
-
     def engage_enemy(self, enemy: PlayerEntity):
         if enemy.alive:
             self.attack(enemy)
         else:
-            self.targeted_enemy = None
+            self._targeted_enemy = None
 
     def attack(self, enemy):
         for weapon in (w for w in self._weapons if w.reloaded()):
@@ -548,7 +553,7 @@ class PlayerEntity(GameObject):
         if not enemy.alive:
             self.experience += enemy.kill_experience
             self.known_enemies.discard(enemy)
-            self.targeted_enemy = None
+            self._targeted_enemy = None
 
     @abstractmethod
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:

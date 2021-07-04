@@ -55,9 +55,10 @@ class GameObjectsSpawner(Singleton):
         # the textures spritesheet used for his units and buildings. But for
         # the configuration of his objects we still use 'raw' name:
         category = 'buildings'
-        uid = kwargs['id'] if 'id' in kwargs else None
-        kwargs = self.get_entity_configs(category, name)
-        return Building(name, player, position, id=uid, **kwargs)
+        print(kwargs)
+        # uid = kwargs['id'] if 'id' in kwargs else None
+        kwargs.update(self.get_entity_configs(category, name))
+        return Building(name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = 'units'
@@ -84,11 +85,13 @@ class GameObjectsSpawner(Singleton):
         if 'wreck' in name or 'corpse' in name:
             texture_index = args[0]
             return self._spawn_wreck_or_body(name, position, texture_index)
+        elif 'tree' in name:
+            return TerrainObject(name, 4, position)
         return GameObject(name, position=position)
 
     @staticmethod
     def _spawn_wreck_or_body(name, position, texture_index) -> GameObject:
-        wreck = Wreck(name, Robustness.INDESTRUCTIBLE, position)
+        wreck = Wreck(name, 0 if 'corpse' in name else 1, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
         try:  # for tanks with turrets

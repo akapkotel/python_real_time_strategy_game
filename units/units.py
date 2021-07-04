@@ -8,7 +8,8 @@ from abc import abstractmethod
 from collections import deque
 from typing import Deque, List, Dict, Optional, Set, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture
+from arcade import Sprite, load_textures, draw_circle_filled, Texture, \
+    draw_text
 from arcade.arcade_types import Point
 
 import utils.timing
@@ -19,7 +20,7 @@ from map.map import (
 )
 from players_and_factions.player import Player, PlayerEntity
 from utils.enums import UnitWeight
-from utils.colors import GREEN
+from utils.colors import GREEN, RED
 from utils.scheduling import ScheduledEvent
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.geometry import (
@@ -159,12 +160,10 @@ class Unit(PlayerEntity):
 
     def update_observed_area(self, new_current_node: MapNode):
         if self.observed_nodes and new_current_node == self.current_node:
-            observed = self.observed_nodes
+            pass
         else:
-            self.observed_nodes = observed = self.calculate_observed_area()
-            self.fire_covered = self.update_fire_covered_area(observed)
-        if self.should_reveal_map:
-            self.game.fog_of_war.reveal_nodes(n.grid for n in observed)
+            self.observed_grids = grids = self.calculate_observed_area()
+            self.observed_nodes = {self.map[grid] for grid in grids}
 
     def update_fire_covered_area(self, observed):
         x, y = self.current_node.grid
@@ -248,7 +247,7 @@ class Unit(PlayerEntity):
 
     def find_free_tile_to_unblock_way(self, path) -> bool:
         if adjacent := self.current_node.walkable_adjacent:
-            free_tile = random.choice(adjacent)
+            free_tile = random.choice([node for node in adjacent])
             self.move_to(free_tile.grid)
             return True
         return False
@@ -333,7 +332,7 @@ class Unit(PlayerEntity):
         start = position_to_map_grid(*self.position)
         self.game.pathfinder.request_path(self, start, destination)
 
-    def create_new_path(self, new_path: MapPath):
+    def follow_new_path(self, new_path: MapPath):
         self.path.clear()
         self.awaited_path = None
         self.path.extend(new_path[1:])
@@ -361,7 +360,7 @@ class Unit(PlayerEntity):
         return [self.current_sector] + self.current_sector.adjacent_sectors()
 
     def fight_enemies(self):
-        if (enemy := self.targeted_enemy) is not None:
+        if (enemy := self._targeted_enemy) is not None:
             self.engage_enemy(enemy)
         elif (enemies := self.known_enemies) and not self.is_building:
             self.move_towards_enemies_nearby(enemies)
@@ -382,17 +381,13 @@ class Unit(PlayerEntity):
                 pass
         self.permanent_units_group = index
 
-    def target_enemy(self, enemy: Optional[PlayerEntity] = None):
-        """Call this method with 'None' to cancel current targeted enemy."""
-        self.targeted_enemy = enemy
-
     def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
         """
         When Unit detected enemies but they are out of attack range, it can
         move closer to engage them.
         """
-        if (enemy := self.targeted_enemy) is not None and self.in_range(enemy):
-            self.stop()
+        if (enemy := self._targeted_enemy) is not None and self.in_range(enemy):
+            self.stop_completely()
         elif not self.has_destination:
             enemy_to_attack = random.choice([e for e in known_enemies])
             position = self.game.pathfinder.get_closest_walkable_position(
