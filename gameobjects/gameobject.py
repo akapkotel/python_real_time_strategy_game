@@ -9,9 +9,8 @@ from arcade.arcade_types import Point
 
 from utils.classes import Observed, Observer
 from utils.data_types import GridPosition
-from utils.enums import Robustness, UnitWeight
 from utils.functions import (
-    get_path_to_file, decolorised_name, name_with_extension
+    get_path_to_file, decolorised_name, add_extension
 )
 from utils.logging import log
 from utils.improved_spritelists import SelectiveSpriteList
@@ -26,17 +25,14 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     game = None
     total_objects_count = 0
 
-    def __init__(self,
-                 texture_name: str,
-                 robustness: Robustness = 0,
-                 position: Point = (0, 0),
-                 id: Optional[int] = None,
+    def __init__(self, texture_name: str, durability: int = 0,
+                 position: Point = (0, 0), id: Optional[int] = None,
                  observers: Optional[List[Observer]] = None):
         # raw name of the object without texture extension and Player color
         # used to query game.configs and as a basename to build other names
         self.object_name = decolorised_name(texture_name)
         # name with texture extension added used to find ant load texture
-        self.full_name = name_with_extension(texture_name)
+        self.full_name = add_extension(texture_name)
         self.filename_with_path = get_path_to_file(self.full_name)
         x, y = position
         super().__init__(self.filename_with_path, center_x=x, center_y=y)
@@ -49,7 +45,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         else:
             self.id = id
 
-        self._robustness = robustness  # used to determine if object makes a
+        self._durability = durability  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile
 
         self.is_updated = True
@@ -66,8 +62,8 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         left, right, bottom, top = self.game.viewport
         return left < self.right and right > self.left and bottom < self.top and top > self.bottom
 
-    def destructible(self, weight: UnitWeight = 0) -> bool:
-        return weight > self._robustness
+    def destructible(self, weight: int = 0) -> bool:
+        return weight > self._durability
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_visibility()
@@ -126,10 +122,10 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
 
 class TerrainObject(GameObject):
 
-    def __init__(self, filename: str, robustness: Robustness, position: Point):
-        GameObject.__init__(self, filename, robustness, position)
+    def __init__(self, filename: str, durability: int, position: Point):
+        GameObject.__init__(self, filename, durability, position)
         self.map_node = self.game.map.position_to_node(*self.position)
-        if robustness:
+        if durability:
             self.map_node.static_gameobject = self
         self.attach(observer=self.game)
 
@@ -140,8 +136,8 @@ class TerrainObject(GameObject):
 
 class Wreck(TerrainObject):
 
-    def __init__(self, filename: str, robustness: Robustness, position: Point):
-        super().__init__(filename, robustness, position)
+    def __init__(self, filename: str, durability: int, position: Point):
+        super().__init__(filename, durability, position)
         self.schedule_event(ScheduledEvent(self, 30, self.kill))
 
 

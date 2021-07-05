@@ -56,12 +56,12 @@ def get_object_name(filename: str) -> str:
     return name_with_extension.split('.', 1)[0]
 
 
-def remove_path_from_name(filename):
-    return filename.rsplit('/', 1)[1]
+def remove_path_from_name(filename: str):
+    return filename.rpartition('/')[-1]
 
 
-def name_with_extension(object_name: str) -> str:
-    return '.'.join((object_name, 'png'))
+def add_extension(object_name: str, extension: str = 'png') -> str:
+    return '.'.join((object_name, extension))
 
 
 def all_files_of_type_named(extension: str,

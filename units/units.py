@@ -19,13 +19,11 @@ from map.map import (
     position_to_map_grid
 )
 from players_and_factions.player import Player, PlayerEntity
-from utils.enums import UnitWeight
-from utils.colors import GREEN, RED
-from utils.scheduling import ScheduledEvent
+from utils.colors import GREEN
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
-    vector_2d, ROTATION_STEP, ROTATIONS
+    vector_2d, ROTATION_STEP, ROTATIONS, find_area
 )
 from .weapons import Weapon
 
@@ -39,7 +37,7 @@ class Unit(PlayerEntity):
     def __init__(self,
                  unit_name: str,
                  player: Player,
-                 weight: UnitWeight,
+                 weight: int,
                  position: Point,
                  id: Optional[int] = None):
         PlayerEntity.__init__(self, unit_name, player, position, id=id)
@@ -49,7 +47,7 @@ class Unit(PlayerEntity):
         self.facing_direction = random.randint(0, ROTATIONS - 1)
         self.virtual_angle = int(ROTATION_STEP * self.facing_direction) % 360
 
-        self.weight: UnitWeight = weight
+        self.weight = weight
         self.visibility_radius = 100
 
         # pathfinding and map-related:
@@ -164,10 +162,12 @@ class Unit(PlayerEntity):
         else:
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
+            if self.weapons:
+                self.update_fire_covered_area()
 
-    def update_fire_covered_area(self, observed):
-        x, y = self.current_node.grid
-        return {n for n in observed if abs(n.grid[0] - x) + abs(n.grid[1] - y) < 10}
+    def update_fire_covered_area(self):
+        area = find_area(*self.current_node.grid, self.attack_range_matrix)
+        self.fire_covered = {self.map[g] for g in self.map.in_bounds(area)}
 
     def update_blocked_map_nodes(self, new_current_node: MapNode):
         """
@@ -368,10 +368,10 @@ class Unit(PlayerEntity):
     def run_away(self):
         pass
 
-    def visible_for(self, other: PlayerEntity) -> bool:
-        if self.player.is_local_human_player and other.is_building:
-            return len(self.observed_nodes & other.occupied_nodes) > 0
-        return super().visible_for(other)
+    # def visible_for(self, other: PlayerEntity) -> bool:
+    #     if self.player.is_local_human_player and other.is_building:
+    #         return len(self.observed_nodes & other.occupied_nodes) > 0
+    #     return super().visible_for(other)
 
     def set_permanent_units_group(self, index: int = 0):
         if (cur_index := self.permanent_units_group) and cur_index != index:
@@ -443,7 +443,7 @@ class Unit(PlayerEntity):
 class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
 
-    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
+    def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
         thread_texture = ''.join((self.object_name, '_threads.png'))
@@ -510,7 +510,7 @@ class VehicleThreads(Sprite):
 
 class Tank(Vehicle):
 
-    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
+    def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
         # combine facing_direction with turret to obtain proper texture:
@@ -608,10 +608,9 @@ CRAWL = 3
 
 
 class Soldier(Unit):
-    _max_health = 100
     health_restoration = 0.003
 
-    def __init__(self, texture_name: str, player: Player, weight: UnitWeight,
+    def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: Optional[int] = None):
         super().__init__(texture_name, player, weight, position, id)
         self.last_step = 0

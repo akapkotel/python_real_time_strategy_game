@@ -11,8 +11,8 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
-from game import Game, UPDATE_RATE, BASIC_UI
-from gameobjects.gameobject import GameObject, Robustness
+from game import Game, BASIC_UI
+from gameobjects.gameobject import GameObject
 from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
 from missions.research import Technology
 from utils.classes import Observed, Observer
@@ -22,8 +22,9 @@ from utils.logging import log
 from utils.functions import (
     ignore_in_editor_mode, new_id, add_player_color_to_name
 )
-from utils.geometry import distance_2d, is_visible, clamp, \
-    calculate_circular_area, find_area
+from utils.geometry import (
+    is_visible, clamp, find_area, precalculate_circular_area_matrix
+)
 from utils.scheduling import EventsCreator
 
 
@@ -143,7 +144,7 @@ class ResourcesManager:
 
     def enough_resources_for(self, expense: str) -> bool:
         category = self._identify_expense_category(expense)
-        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
             required_amount = self.game.configs[category][expense][resource]
             if not self.has_resource(resource, required_amount):
                 self.notify_player_of_resource_deficit(resource)
@@ -222,11 +223,18 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
     def on_being_attached(self, attached: Observed):
         attached: Union[Unit, Building]
         if isinstance(attached, Unit):
-            self.units.add(attached)
-            self.faction.units.add(attached)
+            self._add_unit(attached)
         else:
-            self.buildings.add(attached)
-            self.faction.buildings.add(attached)
+            self._add_building(attached)
+
+    def _add_unit(self, unit: Unit):
+        self.units.add(unit)
+        self.faction.units.add(unit)
+
+    def _add_building(self, building: Building):
+        self.buildings.add(building)
+        self.faction.buildings.add(building)
+        self.consume_resource(ENERGY, building.configs['energy_consumption'])
 
     def notify(self, attribute: str, value: Any):
         pass
@@ -234,11 +242,18 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
     def on_being_detached(self, detached: Observed):
         detached: Union[Unit, Building]
         try:
-            self.units.remove(detached)
-            self.faction.units.remove(detached)
+            self._remove_unit(detached)
         except KeyError:
-            self.buildings.discard(detached)
-            self.faction.buildings.discard(detached)
+            self._remove_building(detached)
+
+    def _remove_unit(self, unit: Unit):
+        self.units.remove(unit)
+        self.faction.units.remove(unit)
+
+    def _remove_building(self, building: Building):
+        self.buildings.discard(building)
+        self.faction.buildings.discard(building)
+        self.add_resource(ENERGY, building.energy_consumption)
 
     def is_enemy(self, other: Player) -> bool:
         return self.faction.is_enemy(other.faction)
@@ -330,16 +345,12 @@ class PlayerEntity(GameObject):
     dict generated from CSV config file -> see ObjectsFactory class and it's
     'spawn' method.
     """
-    calculate_observed_area_time = 0
-    calculate_observed_area_count = 0
-    production_per_frame = UPDATE_RATE / 10  # 10 seconds to build
-    production_cost = {'steel': 0, 'conscripts': 0, 'energy': 0}
 
     def __init__(self,
                  texture_name: str,
                  player: Player,
                  position: Point,
-                 robustness: Robustness = 0,
+                 robustness: int = 0,
                  id: Optional[int] = None):
         self.colored_name = add_player_color_to_name(texture_name, player.color)
         super().__init__(self.colored_name, robustness, position, id)
@@ -364,18 +375,25 @@ class PlayerEntity(GameObject):
         self.is_unit = not self.is_building
         self.is_infantry = isinstance(self, Soldier)
 
-        category = 'units' if self.is_unit else 'buildings'
-        self._max_health = self.game.configs[category][self.object_name]['max_health']
+        self._max_health = self.configs['max_health']
         self._health = self._max_health
         self.armour = 0
         self.cover = 0
 
-        self.detection_radius = TILE_WIDTH * 8  # how far this Entity can see
-        self.attack_radius = TILE_WIDTH * 5
+        # visibility matrix is a list of tuples containing (x, y) indices to be
+        # later used in updating current visibility area by adding to the
+        # matrix current position
+        value = self.configs['visibility_radius']
+        self.visibility_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
         self.observed_nodes: Set[MapNode] = set()
+
+        # like the visibility matrix, but range should be smaller:
+        value = self.configs['attack_radius']
+        self.attack_range_matrix = precalculate_circular_area_matrix(value)
+
         # area inside which every enemy unit could by attacked:
         self.fire_covered: Set[MapNode] = set()
 
@@ -391,6 +409,11 @@ class PlayerEntity(GameObject):
 
     def __bool__(self) -> bool:
         return self.alive
+
+    @property
+    def configs(self):
+        category = 'units' if self.is_unit else 'buildings'
+        return self.game.configs[category][self.object_name]
 
     @property
     def alive(self) -> bool:
@@ -481,7 +504,7 @@ class PlayerEntity(GameObject):
 
     def calculate_observed_area(self) -> Set[GridPosition]:
         position = position_to_map_grid(*self.position)
-        circular_area = find_area(*position)
+        circular_area = find_area(*position, self.visibility_matrix)
         return set(self.map.in_bounds(circular_area))
 
     def update_known_enemies_set(self):
@@ -502,16 +525,13 @@ class PlayerEntity(GameObject):
         Set the random or weakest of the enemies in range of this entity
         weapons as the current hit to attack if not targeting any yet.
         """
-        if (assigned := self._player_assigned_enemy) is not None:
-            return assigned
-        elif self._targeted_enemy is None or self.enemy_out_of_range:
-            if in_range := [e for e in self.known_enemies if e.in_range(self)]:
+        in_range = self.in_range
+        for enemy in (self._player_assigned_enemy, self._targeted_enemy):
+            if enemy is not None and in_range(enemy):
+                return enemy
+        else:
+            if in_range := [e for e in self.known_enemies if in_range(e)]:
                 return sorted(in_range, key=lambda e: e.health)[0]
-        return self._targeted_enemy
-
-    @property
-    def enemy_out_of_range(self) -> bool:
-        return not self.in_range(self._targeted_enemy)
 
     @abstractmethod
     def fight_enemies(self):
@@ -527,16 +547,19 @@ class PlayerEntity(GameObject):
             for player_id, entities in sector.units_and_buildings.items():
                 if self.game.players[player_id].is_enemy(self.player):
                     enemies.extend(entities)
-        return {e for e in enemies if self.in_observed_area(e)}
+        return {e for e in enemies if self.inside_area(e, self.observed_nodes)}
 
-    def in_observed_area(self, other: Union[Unit, Building]) -> bool:
-        try:
+    def inside_area(self, other: Union[Unit, Building], area) -> bool:
+        if other.is_unit:
             return other.current_node in self.observed_nodes
-        except AttributeError:
+        else:
             return len(self.observed_nodes & other.occupied_nodes) > 0
 
-    def in_range(self, other: PlayerEntity) -> bool:
-        return distance_2d(self.position, other.position) < self.attack_radius
+    def in_range(self, other: Union[Unit, Building]) -> bool:
+        if other.is_unit:
+            return other.current_node in self.fire_covered
+        else:
+            return len(self.fire_covered & other.occupied_nodes) > 0
 
     def engage_enemy(self, enemy: PlayerEntity):
         if enemy.alive:

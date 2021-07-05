@@ -97,7 +97,7 @@ class GameDebugger:
             return
         draw_circle_outline(node.x, node.y, 10, RED, 2)
 
-        for adj in node.adjacent_nodes + [node]:
+        for adj in node.adjacent_nodes | {node,}:
             color = to_rgba(WHITE, 25) if adj.walkable else to_rgba(RED, 25)
             draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH, TILE_HEIGHT, color)
             draw_circle_outline(*adj.position, 5, color=WHITE, border_width=1)

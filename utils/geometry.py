@@ -152,7 +152,8 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
     return observable_area
 
 
-def precalculate_visibility_matrix(max_distance: int):
+@lru_cache()
+def precalculate_circular_area_matrix(max_distance: int) -> object:
     radius = max_distance * 1.6
     observable_area = []
     for x in range(-max_distance, max_distance + 1):
@@ -162,12 +163,12 @@ def precalculate_visibility_matrix(max_distance: int):
             total_distance = dist_x + dist_y
             if total_distance < radius:
                 observable_area.append((x, y))
-    return np.array(observable_area)
+    return tuple(observable_area)
 
 
 @lru_cache(maxsize=None)
-def find_area(x, y, matrix_: List[Tuple[int, int]] = None):
-    return [(pos[0] + x, pos[1] + y) for pos in matrix]
+def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None):
+    return [(pos[0] + x, pos[1] + y) for pos in matrix_]
 
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:

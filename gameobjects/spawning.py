@@ -13,66 +13,74 @@ from map.map import map_grid_to_position
 from players_and_factions.player import Player
 from units.units import Unit, Vehicle, Tank, Soldier
 from utils.classes import Singleton
-from utils.enums import UnitWeight, Robustness
-from utils.functions import get_path_to_file, decolorised_name
+from utils.functions import get_path_to_file
 
 from utils.logging import log
 from .gameobject import GameObject, TerrainObject, Wreck
+
+CLASS = 'class'
+
+TREE = 'tree'
+
+CORPSE = 'corpse'
+
+WRECK = 'wreck'
+
+UNITS = 'units'
+
+BUILDINGS = 'buildings'
 
 
 class GameObjectsSpawner(Singleton):
     game = None  # assigned by the Game instance automatically
 
     def __init__(self):
-        """
-        :param configs: Dict -- data read from the CSV files in configs dir.
-        """
         self.pathfinder = self.game.pathfinder
         self.configs: Dict[str, Dict[str, Dict[str, Any]]] = self.game.configs
         log(f'GameObjectsSpawner was initialized successfully...', console=True)
 
-    def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
-        if player is None:
-            return self._spawn_terrain_object(name, position, *args, **kwargs)
-        elif name in self.configs['buildings']:
-            return self._spawn_building(name, player, position, **kwargs)
-        elif name in self.configs['units']:
-            return self._spawn_unit(name, player, position, **kwargs)
-
     def spawn_group(self,
                     names: Sequence[str],
                     player: Player,
-                    position: Point, **kwargs) -> List[GameObject]:
+                    position: Point,
+                    **kwargs) -> List[GameObject]:
         positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
         spawned = []
         for i, name in enumerate(names):
             position = map_grid_to_position(positions[i])
-            spawned.append(self.spawn(name, player, position))
+            spawned.append(self.spawn(name, player, position, **kwargs))
         return spawned
 
+    def spawn(self, name: str, player: Player, position: Point, *args,
+              **kwargs):
+        if player is None:
+            return self._spawn_terrain_object(name, position, *args, **kwargs)
+        elif name in self.configs[BUILDINGS]:
+            return self._spawn_building(name, player, position, **kwargs)
+        elif name in self.configs[UNITS]:
+            return self._spawn_unit(name, player, position, **kwargs)
+
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
-        # since player can pick various Colors we need to 'colorize" name of
-        # the textures spritesheet used for his units and buildings. But for
-        # the configuration of his objects we still use 'raw' name:
-        category = 'buildings'
-        print(kwargs)
-        # uid = kwargs['id'] if 'id' in kwargs else None
-        kwargs.update(self.get_entity_configs(category, name))
+        category = BUILDINGS
+        # in case of Building we need to provide special *kwargs to the
+        # __init__ which values are retrieved from configs, these are boolean
+        # flags telling a Building if it is a UnitsProducer, ResourceExtractor,
+        # ResearchFacility etc.
+        kwargs.update(self.get_building_configs(category, name))
         return Building(name, player, position, **kwargs)
 
-    def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
-        category = 'units'
-        class_name = eval(self.configs[category][name]['class'])
-        uid = kwargs['id'] if 'id' in kwargs else None
-        unit = class_name(name, player, 1, position, id=uid)
-        return self._configure_spawned_attributes(category, name, unit)
-
-    def get_entity_configs(self, category, name) -> Dict:
+    def get_building_configs(self, category, name) -> Dict:
         config_data = self.configs[category][name]
         return {
-            key: value for i, (key, value) in enumerate(config_data.items()) if
-            value != name and 'class' not in key and i < 5
+            key: value for (key, value) in config_data.items() if
+            key in ('produced_units', 'produced_resource', 'research_facility')
         }
+
+    def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
+        category = UNITS
+        class_name = eval(self.configs[category][name][CLASS])
+        unit = class_name(name, player, 1, position, **kwargs)
+        return self._configure_spawned_attributes(category, name, unit)
 
     def _configure_spawned_attributes(self, category, name, spawned):
         config_data = self.configs[category][name]  # 'raw' not colorized name
@@ -82,16 +90,17 @@ class GameObjectsSpawner(Singleton):
         return spawned
 
     def _spawn_terrain_object(self, name, position, *args, **kwargs) -> GameObject:
-        if 'wreck' in name or 'corpse' in name:
+        if WRECK in name or CORPSE in name:
             texture_index = args[0]
             return self._spawn_wreck_or_body(name, position, texture_index)
-        elif 'tree' in name:
+        elif TREE in name:
             return TerrainObject(name, 4, position)
         return GameObject(name, position=position)
 
     @staticmethod
     def _spawn_wreck_or_body(name, position, texture_index) -> GameObject:
-        wreck = Wreck(name, 0 if 'corpse' in name else 1, position)
+        # TODO: replace Robustness IntEnum with something else, or remove it
+        wreck = Wreck(name, 0 if CORPSE in name else 1, position)
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
         try:  # for tanks with turrets

@@ -75,8 +75,8 @@ COLUMNS = 50
 FPS = 60
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 30
-CPU_UNITS = 0
+PLAYER_UNITS = 1
+CPU_UNITS = 1
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -592,6 +592,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.test_missions()
             if self.settings.editor_mode:
                 self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
+            print(self.local_human_player.units)
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )
@@ -612,7 +613,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.buildings.extend(
             (
                 self.spawn('medium_factory', self.players[2], (400, 600), garrison=3),
-                self.spawn('medium_factory', self.players[4], (1000, 600), id=8888, garrison=1),
+                self.spawn('capitol', self.players[4], (1000, 600), garrison=1),
             )
         )
 
@@ -626,22 +627,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             position = random.choice(
                 [n.position for n in self.map.all_walkable_nodes]
             )
-        if player is not None:
-            player = self.get_player_instance(player)
+        player = self.get_player_instance(player)
         return self.spawner.spawn(object_name, player, position, id=id, **kwargs)
 
-    def get_player_instance(self, player: Union[Player, int, None]):
-        if isinstance(player, int):
-            return self.players.get(player, None)
-        return player
+    def get_player_instance(self, player: Union[Player, int]):
+        try:
+            return self.players[player]
+        except KeyError:  # it's already a Player instance, or None
+            return player
 
     def spawn_group(self,
                     names: List[str],
                     player: Union[Player, int],
-                    position: Point):
-        if (player := self.get_player_instance(player)) is not None:
-            return self.spawner.spawn_group(names, player, position)
-        return None
+                    position: Point,
+                    **kwargs):
+        player = self.get_player_instance(player)
+        return self.spawner.spawn_group(names, player, position, **kwargs)
 
     def test_units_spawning(self):
         spawned_units = []
@@ -655,11 +656,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             spawned_units.extend(
                 self.spawn_group(names, player, node.position)
             )
-            # node = random.choice(walkable)
-            # soldier = self.spawn('soldier', player, node.position, id=None)
-            # spawned_units.append(soldier)
-            # if soldier.player is not self.local_human_player:
-            #     soldier.enter_building(self.find_gameobject(Building, 8888))
         self.units.extend(spawned_units)
 
     def test_missions(self):
@@ -707,6 +703,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             if gameobject.is_building:
                 self.buildings.append(gameobject)
             else:
+                print('attaching', gameobject)
                 self.units.append(gameobject)
         else:
             self.static_objects.append(gameobject)
@@ -823,7 +820,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.save_timer() if self.paused else self.load_timer(self.timer)
         self.window.toggle_mouse_and_keyboard(not self.paused, only_mouse=True)
 
-    def reset_dialog(self, text: str = None, color: Color = BLACK, txt_color: Color = WHITE):
+    def reset_dialog(self, text: str = None,
+                     color: Color = BLACK,
+                     txt_color: Color = WHITE):
         if text is None:
             self.dialog = None
         else:

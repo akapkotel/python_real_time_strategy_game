@@ -51,11 +51,11 @@ TreeID = int
 
 def position_to_map_grid(x: Number, y: Number) -> GridPosition:
     """Return map-grid-normalised position."""
-    return x // TILE_WIDTH, y // TILE_HEIGHT
+    return int(x // TILE_WIDTH), int(y // TILE_HEIGHT)
 
 
 def normalize_position(x: Number, y: Number) -> NormalizedPoint:
-    return map_grid_to_position((x // TILE_WIDTH, y // TILE_HEIGHT))
+    return map_grid_to_position((int(x // TILE_WIDTH), int(y // TILE_HEIGHT)))
 
 
 def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
@@ -158,8 +158,8 @@ class Map:
     def __contains__(self, item: GridPosition):
         return item in self.nodes
 
-    def in_bounds(self, grid: Collection[GridPosition]) -> List[GridPosition]:
-        return [g for g in grid if g in self.nodes]
+    def in_bounds(self, grid: Collection[GridPosition]) -> Set[GridPosition]:
+        return {g for g in grid if g in self.nodes}
 
     def on_map_area(self, x: Number, y: Number) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -384,7 +384,7 @@ class MapNode:
     map: Optional[Map] = None
 
     def __init__(self, x, y, sector):
-        self.grid = x, y
+        self.grid = int(x), int(y)
         self.sector = sector
         self.position = self.x, self.y = map_grid_to_position(self.grid)
         self.costs = None

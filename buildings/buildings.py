@@ -14,13 +14,15 @@ from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement
 )
 from missions.research import Technology
-from map.map import MapNode, Sector, normalize_position
+from map.map import MapNode, Sector, normalize_position, position_to_map_grid
 from players_and_factions.player import (
-    Player, PlayerEntity, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
+    Player, PlayerEntity, STEEL, ELECTRONICS, CONSCRIPTS
 )
-from utils.functions import add_player_color_to_name, get_texture_size, \
-    name_to_texture_name, get_path_to_file
-from utils.geometry import close_enough, is_visible
+from utils.functions import (
+    add_player_color_to_name, get_texture_size, name_to_texture_name,
+    get_path_to_file
+)
+from utils.geometry import close_enough, is_visible, find_area
 from controllers.constants import CURSOR_ENTER_TEXTURE
 
 
@@ -62,7 +64,7 @@ class UnitsProducer:
             self.game.window.sound_player.play_sound('production_started.wav')
 
     def consume_resources_from_the_pool(self, unit: str):
-        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
             required_amount = self.game.configs['units'][unit][resource]
             self.player.consume_resource(resource, required_amount)
 
@@ -92,7 +94,7 @@ class UnitsProducer:
         returned = 1
         if unit not in self.production_queue:
             returned = self.production_progress / self.production_time
-        for resource in (ENERGY, STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
             required_amount = self.game.configs['units'][unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
@@ -135,7 +137,7 @@ class UnitsProducer:
     def spawn_finished_unit(self, finished_unit: str):
         spawn_node = self.game.map.position_to_node(*self.spawn_point)
         if (unit := spawn_node.unit) is not None:
-            n = random.choice(spawn_node.walkable_adjacent)
+            n = random.choice(tuple(spawn_node.walkable_adjacent))
             unit.move_to(n.grid)
         unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
         if self.deployment_point is not None:
@@ -256,23 +258,17 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         elif research_facility:
             ResearchFacility.__init__(self, self.player)
 
-        # since buildings could be large, they must be visible for anyone
-        # who can see their boundaries, not just the center_xy:
-        self.detection_radius += self._get_collision_radius()
+        self.energy_consumption = self.configs['energy_consumption']
 
         self.position = self.place_building_properly_on_the_grid()
         self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
         self.garrisoned_soldiers: List[Soldier] = []
-        self.garrison_max_soldiers = 8
+        self.garrison_max_soldiers: int = self.configs['garrison']
 
         if garrison:
             self.spawn_soldiers_for_garrison(garrison)
-
-    @property
-    def configs(self):
-        return self.game.configs['buildings'][self.object_name]
 
     @property
     def is_selected(self) -> bool:
@@ -329,6 +325,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if not self.observed_nodes:  # Building need calculate it only once
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
+            if self.weapons:
+                self.update_fire_covered_area()
+
+    def update_fire_covered_area(self):
+        x, y = position_to_map_grid(*self.position)
+        area = find_area(x, y, self.attack_range_matrix)
+        self.fire_covered = {self.map[grid] for grid in area}
 
     def fight_enemies(self):
         if (enemy := self._targeted_enemy) is not None:
@@ -389,12 +392,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         )
         button.counter = len(self.garrisoned_soldiers)
         return button
-
-    def visible_for(self, other: PlayerEntity) -> bool:
-        obstacles = [b for b in self.game.buildings if b.id is not self.id]
-        if close_enough(self.position, other.position, self.detection_radius):
-            return is_visible(self.position, other.position, obstacles)
-        return False
 
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         sectors = set()
