@@ -8,8 +8,7 @@ from abc import abstractmethod
 from collections import deque
 from typing import Deque, List, Dict, Optional, Set, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture, \
-    draw_text
+from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
 import utils.timing
@@ -25,7 +24,7 @@ from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle, distance_2d,
     vector_2d, ROTATION_STEP, ROTATIONS, find_area
 )
-from .weapons import Weapon
+from units.weapons import Weapon
 
 
 class Unit(PlayerEntity):

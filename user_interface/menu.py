@@ -6,7 +6,7 @@ from functools import partial
 from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
-    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU
+    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
@@ -30,11 +30,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             functions=partial(switch_menu, MAIN_MENU)
         )
 
-        x, y = SCREEN_X, (i for i in range(150, SCREEN_HEIGHT, 125))
+        x, y = SCREEN_X * 0.25, (i for i in range(125, SCREEN_HEIGHT, 125))
         main_menu = UiElementsBundle(
-            index=0,
             name=MAIN_MENU,
             elements=[
+                # left row:
                 Button('menu_button_exit.png', x, next(y),
                        functions=window.close),
                 Button('menu_button_credits.png', x, next(y),
@@ -44,20 +44,32 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=partial(switch_menu, LOADING_MENU)),
                 Button('menu_button_newgame.png', x, next(y),
-                       functions=partial(switch_menu, 'new game menu')),
+                       functions=partial(switch_menu, NEW_GAME_MENU)),
                 Button('menu_button_continue.png', x, next(y),
                        name='continue button', active=False,
                        functions=window.start_new_game),
                 Button('menu_button_quit.png', x, next(y),
                        name='quit game button', active=False,
                        functions=window.quit_current_game),
+                Button('menu_button_savegame.png', x, next(y),
+                       name='save game button',
+                       functions=partial(switch_menu, SAVING_MENU),
+                       active=False),
+                # buttons in center:
+                Button('menu_button_skirmish.png', x * 4, SCREEN_HEIGHT * 0.75,
+                       functions=partial(switch_menu, SKIRMISH_MENU)),
+                Button('menu_button_campaign.png', x * 6, SCREEN_HEIGHT * 0.75,
+                       functions=partial(switch_menu, CAMPAIGN_MENU)),
+                Button('menu_button_multiplayer.png', x * 4, SCREEN_HEIGHT * 0.25,
+                       functions=partial(switch_menu, MULTIPLAYER_MENU)),
+                Button('menu_button_editor.png', x * 6, SCREEN_HEIGHT * 0.25,
+                       functions=partial(switch_menu, SCENARIO_EDITOR_MENU))
             ],
             register_to=self
         )
 
-        y = (i for i in range(300, SCREEN_HEIGHT, 75))
+        x, y = SCREEN_X, (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu = UiElementsBundle(
-            index=1,
             name=OPTIONS_SUBMENU,
             elements=[
                 back_to_menu_button,
@@ -118,13 +130,12 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
 
         loading_menu = UiElementsBundle(
-            index=2,
             name=LOADING_MENU,
             elements=[
                 back_to_menu_button,
                 # left column - ui-buttons:
                 Button('menu_button_loadgame.png', x, next(y),
-                       functions=window.load_game),
+                       functions=window.load_saved_game_or_scenario),
                 Button('menu_button_deletesave.png', x, next(y),
                        functions=window.delete_saved_game)
             ],
@@ -135,11 +146,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         y = (i for i in range(675, 300, -125))
         text_input = TextInputField('text_input_field.png', x, next(y), 'input')
         saving_menu = UiElementsBundle(
-            index=2,
             name=SAVING_MENU,
             elements=[
                 back_to_menu_button,
-                # left column - ui-buttons:
                 Button('menu_button_savegame.png', x, next(y),
                        functions=partial(window.save_game, text_input)),
                 text_input
@@ -148,9 +157,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             _on_load=partial(window.update_saved_games_list, SAVING_MENU)
         )
 
-        x, y = SCREEN_WIDTH // 4, SCREEN_Y
+        x, y = SCREEN_WIDTH * 0.25, SCREEN_Y
         new_game_menu = UiElementsBundle(
-            index=3,
             name=NEW_GAME_MENU,
             elements=[
                 back_to_menu_button,
@@ -165,7 +173,6 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         )
 
         credits = UiElementsBundle(
-            index=4,
             name='credits',
             elements=[
                 back_to_menu_button,
@@ -175,7 +182,6 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
         y = (i for i in range(300, 675, 75))
         skirmish_menu = UiElementsBundle(
-            index=5,
             name=SKIRMISH_MENU,
             elements=[
                 back_to_menu_button,
@@ -194,12 +200,22 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        variable=(window.settings, 'map_height'),
                        min_value=50, max_value=250, step=1),
             ],
-            register_to=self
+            register_to=self,
+            _on_load=partial(window.update_scenarios_list, SKIRMISH_MENU)
         )
 
         campaign_menu = UiElementsBundle(
-            index=6,
             name=CAMPAIGN_MENU,
+            elements=[
+                back_to_menu_button,
+                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
+            ],
+            register_to=self,
+            _on_load=partial(window.update_scenarios_list, CAMPAIGN_MENU)
+        )
+
+        multiplayer_menu = UiElementsBundle(
+            name=MULTIPLAYER_MENU,
             elements=[
                 back_to_menu_button,
                 UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
@@ -207,9 +223,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
-        multiplayer_menu = UiElementsBundle(
-            index=7,
-            name=MULTIPLAYER_MENU,
+        scenario_editor_menu = UiElementsBundle(
+            name=SCENARIO_EDITOR_MENU,
             elements=[
                 back_to_menu_button,
                 UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
@@ -228,9 +243,12 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
     def toggle_game_related_buttons(self):
         bundle = self.ui_elements_bundles['main menu']
-        buttons = ('continue button', 'quit game button')
+        buttons = ('continue button', 'quit game button', 'save game button')
         for button in buttons:
-            bundle.toggle_element(button, self.window.game_view is not None)
+            if self.window.game_view is not None:
+                bundle.activate_element(button)
+            else:
+                bundle.deactivate_element(button)
 
 
 if __name__:

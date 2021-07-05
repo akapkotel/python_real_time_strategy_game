@@ -16,19 +16,8 @@ from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
 from utils.logging import log
-from .gameobject import GameObject, TerrainObject, Wreck
-
-CLASS = 'class'
-
-TREE = 'tree'
-
-CORPSE = 'corpse'
-
-WRECK = 'wreck'
-
-UNITS = 'units'
-
-BUILDINGS = 'buildings'
+from gameobjects.constants import BUILDINGS, UNITS, CLASS, CORPSE, WRECK, TREE
+from gameobjects.gameobject import GameObject, TerrainObject, Wreck
 
 
 class GameObjectsSpawner(Singleton):

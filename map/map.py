@@ -4,8 +4,7 @@ from __future__ import annotations
 import random
 
 from collections import deque, defaultdict
-from frozendict import frozendict
-from functools import partial, cached_property, singledispatchmethod
+from functools import partial, cached_property
 from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
     DefaultDict

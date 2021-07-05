@@ -27,7 +27,7 @@ def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
 
 def read_single_file(filename: str) -> Dict[str, Dict[str, Any]]:
     category_dict = {}
-    with open(get_path_to_file(filename), newline='') as file:
+    with open(get_path_to_file(filename, 'csv'), newline='') as file:
         for row in csv.DictReader(file):
             category_dict[row['object_name']] = convert_csv_data(row)
     return category_dict

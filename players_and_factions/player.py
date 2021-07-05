@@ -11,10 +11,10 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
-from game import Game, BASIC_UI
+from user_interface.constants import BASIC_UI
 from gameobjects.gameobject import GameObject
-from map.map import MapNode, Sector, TILE_WIDTH, position_to_map_grid
-from missions.research import Technology
+from map.map import MapNode, Sector, position_to_map_grid
+from campaigns.research import Technology
 from utils.classes import Observed, Observer
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
@@ -44,7 +44,7 @@ class Faction(EventsCreator, Observer, Observed):
     Faction bundles several Players into one team of allies and helps tracking
     who is fighting against whom.
     """
-    game: Optional[Game] = None
+    game = None
 
     def __init__(self,
                  id: Optional[FactionId] = None,
@@ -133,7 +133,7 @@ class Faction(EventsCreator, Observer, Observed):
 
 
 class ResourcesManager:
-    game: Optional[Game] = None
+    game = None
     resources_names = FUEL, FOOD, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 
     def __init__(self):
@@ -185,8 +185,7 @@ class ResourcesManager:
 
 
 class Player(ResourcesManager, EventsCreator, Observer, Observed):
-
-    game: Optional[Game] = None
+    game = None
     cpu = False
 
     def __init__(self,

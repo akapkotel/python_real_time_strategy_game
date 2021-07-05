@@ -5,6 +5,7 @@ from typing import List, Tuple
 from arcade import Color
 
 from gameobjects.gameobject import PlaceableGameobject
+from gameobjects.constants import UNITS, BUILDINGS
 from user_interface.constants import EDITOR
 from user_interface.user_interface import (
     UiElementsBundle, Button, ScrollableContainer, EditorPlaceableObject,
@@ -65,20 +66,22 @@ class ScenarioEditor:
     def find_all_gameobjects(self) -> List[str]:
         gameobjects = []
         colors = RED, GREEN, YELLOW, BLUE
-        for category in ('units', 'buildings'):
+        for category in (UNITS, BUILDINGS):
+            objects = self.game.configs[category].keys()
             for color in colors:
                 gameobjects.extend(
-                    [add_player_color_to_name(name, color)
-                     for name in self.game.configs[category].keys()]
+                    [add_player_color_to_name(name, color) for name in objects]
                 )
-        gameobjects = [o for o in gameobjects if get_path_to_file(o) is not None]
+        # since some textures may be not existent yet:
+        gameobjects = [
+            o for o in gameobjects if get_path_to_file(o) is not None
+        ]
         return gameobjects
 
     def create_editor_ui_panel(self) -> UiElementsBundle:
         ui_x, ui_y = self.position
         editor_ui_elements = UiElementsBundle(
             name=EDITOR,
-            index=3,
             elements=[
                 ScrollableContainer('ui_scrollable_frame.png', ui_x, ui_y,
                                     'scrollable'),
@@ -88,10 +91,10 @@ class ScenarioEditor:
         editor_ui_elements.extend(
             [
                 EditorPlaceableObject(
-                    object_name, ui_x, 100 * i,
+                    name, ui_x, 100 * i,
                     parent=editor_ui_elements.elements[0],
-                    functions=partial(self.attach_gameobject_to_cursor, object_name)
-                ) for i, object_name in enumerate(self.find_all_gameobjects())
+                    functions=partial(self.attach_gameobject_to_cursor, name)
+                ) for i, name in enumerate(self.find_all_gameobjects())
             ]
         )
         return editor_ui_elements

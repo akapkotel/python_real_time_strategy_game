@@ -1,4 +1,5 @@
 EDITOR = 'editor'
+SCENARIO_EDITOR_MENU = 'scenario editor menu'
 NEW_GAME_MENU = 'new game menu'
 SKIRMISH_MENU = 'skirmish menu'
 CAMPAIGN_MENU ='campaign menu'
@@ -11,3 +12,6 @@ CONFIRMATION_DIALOG = 'Confirmaton dialog'
 
 PADDING_X = 5
 PADDING_Y = 30
+BASIC_UI = 'basic_ui'
+BUILDINGS_PANEL = 'building_panel'
+UNITS_PANEL = 'units_panel'

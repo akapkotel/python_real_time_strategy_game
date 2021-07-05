@@ -39,13 +39,14 @@ def get_objects_with_attribute(instance: object,
 
 
 @lru_cache
-def get_path_to_file(filename: str) -> str:
+def get_path_to_file(filename: str, extension: str = 'png') -> str:
     """
     Build full absolute path to the filename and return it + /filename.
     """
+    correct_filename = add_extension(filename, extension)
     for directory in os.walk(os.getcwd()):
-        if filename in directory[2]:
-            return f'{directory[0]}/{filename}'
+        if correct_filename in directory[2]:
+            return f'{directory[0]}/{correct_filename}'
 
 
 def get_object_name(filename: str) -> str:
@@ -61,7 +62,9 @@ def remove_path_from_name(filename: str):
 
 
 def add_extension(object_name: str, extension: str = 'png') -> str:
-    return '.'.join((object_name, extension))
+    if not object_name.endswith(extension):
+        return '.'.join((object_name, extension))
+    return object_name
 
 
 def all_files_of_type_named(extension: str,
@@ -164,7 +167,6 @@ def ignore_in_menu(func):
         if not self.window.is_game_running:
             return
         return func(self, *args, **kwargs)
-
     return wrapper
 
 
@@ -173,7 +175,6 @@ def ignore_in_game(func):
         if self.window.is_game_running:
             return
         return func(self, *args, **kwargs)
-
     return wrapper
 
 
@@ -185,8 +186,9 @@ def new_id(objects: Dict) -> int:
 
 
 def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
-    path_and_texture_name = get_path_to_file(texture_name)
-    image = PIL.Image.open(path_and_texture_name)
+    if '/' not in texture_name:
+        texture_name = get_path_to_file(texture_name)
+    image = PIL.Image.open(texture_name)
     return image.size[0] // columns, image.size[1] // rows
 
 

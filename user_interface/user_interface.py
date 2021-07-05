@@ -26,7 +26,8 @@ from utils.geometry import clamp
 from utils.improved_spritelists import UiSpriteList
 
 from utils.functions import (
-    make_texture, get_path_to_file, name_to_texture_name, to_rgba
+    make_texture, get_path_to_file, name_to_texture_name, to_rgba,
+    get_texture_size
 )
 from utils.logging import log
 
@@ -640,7 +641,8 @@ class EditorPlaceableObject(Button):
     def __init__(self, gameobject_name: str, x: int, y: int, parent, functions=None):
         super().__init__('small_button_none.png', x, y, parent=parent, functions=functions)
         self.gameobject_name = get_path_to_file(gameobject_name)
-        w, h = self.width, self.height
+        width, height = get_texture_size(self.gameobject_name)
+        w, h = min(self.width, width), min(self.height, height)
         self.gameobject_texture = load_texture(self.gameobject_name, 0, 0, w, h)
 
     def draw(self):
@@ -910,7 +912,6 @@ class UiElementsBundle(Observed):
     name: str \n
     elements: Optional[List[UiElement]]
     """
-    index: int
     name: str
     elements: List[UiElement]
     register_to: Observer
@@ -1040,7 +1041,7 @@ class UiBundlesHandler(Observer):
         # currently displayed UiElements of the chosen bundle/s:
         self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
         # set used to quickly check if a bundle is displayed or not:
-        self.active_bundles: Set[int] = set()
+        self.active_bundles: Set[str] = set()
         # selectable groups allow to group together a bunch of same-context
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
@@ -1058,7 +1059,6 @@ class UiBundlesHandler(Observer):
         x, y = position
         close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
         self.switch_to_bundle(UiElementsBundle(
-            index=8,
             name=CONFIRMATION_DIALOG,
             elements=[
                 UiTextLabel(x, y * 1.5, 'Are you sure?', 30),
@@ -1085,29 +1085,21 @@ class UiBundlesHandler(Observer):
 
     def switch_to_bundle(self,
                          bundle: UiElementsBundle = None,
-                         name: str = None,
-                         index: int = None):
+                         name: str = None):
         if bundle is not None:
             return self._switch_to_bundle(bundle)
         elif name in self.ui_elements_bundles:
             return self._switch_to_bundle(self.ui_elements_bundles[name])
-        elif index is not None:
-            return self.switch_to_bundle_of_index(index)
-
-    def switch_to_bundle_of_index(self, index: int = 0):
-        for bundle in self.ui_elements_bundles.values():
-            if bundle.index == index:
-                return self._switch_to_bundle(bundle)
 
     def switch_to_bundle_of_name(self, name: str):
         if name in self.ui_elements_bundles:
             self._switch_to_bundle(self.ui_elements_bundles[name])
 
     def _switch_to_bundle(self, bundle: UiElementsBundle):
-        log(f'Switched to submenu {bundle.name} of index: {bundle.index}')
+        log(f'Switched to submenu {bundle.name}')
         self._unload_all()
         self._load_bundle(bundle)
-        self.active_bundles.add(bundle.index)
+        self.active_bundles.add(bundle.name)
 
     def bind_ui_elements_with_ui_spritelist(self, elements):
         for ui_element in elements:
@@ -1163,7 +1155,7 @@ class UiBundlesHandler(Observer):
             bundle.elements.clear()
         bundle.on_load()
         bundle.displayed_in_manager = self
-        self.active_bundles.add(bundle.index)
+        self.active_bundles.add(bundle.name)
         self.ui_elements_spritelist.extend(bundle.elements)
         self.bind_ui_elements_with_ui_spritelist(bundle.elements)
 
@@ -1182,7 +1174,7 @@ class UiBundlesHandler(Observer):
         self.bind_ui_elements_with_ui_spritelist(element.elements)
 
     def _unload_bundle(self, bundle: UiElementsBundle):
-        self.active_bundles.discard(bundle.index)
+        self.active_bundles.discard(bundle.name)
         for element in self.ui_elements_spritelist[::-1]:
             if element.bundle == bundle:
                 bundle.displayed_in_manager = None
@@ -1199,6 +1191,7 @@ class UiBundlesHandler(Observer):
 
     @remove.register
     def _(self, element: UiElementsBundle):
+        self._unload_bundle(element)
         del self.ui_elements_bundles[element.name]
 
     def _unload_all(self,
@@ -1219,7 +1212,7 @@ class UiBundlesHandler(Observer):
 
     def update_not_displayed_bundles_positions(self, dx, dy):
         for bundle in self.ui_elements_bundles.values():
-            if bundle.index not in self.active_bundles:
+            if bundle.name not in self.active_bundles:
                 bundle.update_elements_positions(dx, dy)
 
 

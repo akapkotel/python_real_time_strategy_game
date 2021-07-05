@@ -4,7 +4,7 @@ import os
 import shelve
 import time
 
-from typing import Optional, List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
@@ -28,26 +28,31 @@ class SaveManager(Singleton):
     predefined scenarios stored in the same file-format, but in ./scenarios
     direction.
     """
-    game: Optional['Game'] = None
+    game = None
 
-    def __init__(self, saves_path: str, scenarios_path: str):
+    def __init__(self, saves_path: str, scenarios_path: str, window):
+        self.window = window
         self.scenarios_path = os.path.abspath(scenarios_path)
         self.saves_path = os.path.abspath(saves_path)
 
         self.scenarios: SavedGames = {}
         self.saved_games: SavedGames = {}
 
-        self.update_scenarios()
-        self.update_saves()
+        self.update_scenarios(SCENARIO_EXTENSION, self.scenarios_path)
+        self.update_saves(SAVE_EXTENSION, self.saves_path)
 
         log(f'Found {len(self.scenarios)} scenarios in {self.saves_path}.')
         log(f'Found {len(self.saved_games)} saved games in {self.saves_path}.')
 
-    def update_scenarios(self):
-        self.scenarios = self.find_all_files(SCENARIO_EXTENSION, self.scenarios_path)
+    def update_scenarios(self, extension: str, scenarios_path: str):
+        self.scenarios = self.find_all_files(extension, scenarios_path)
+        for name, path in self.scenarios.items():
+            full_scenario_path = os.path.join(scenarios_path, name)
+            with shelve.open(full_scenario_path, 'r') as scenario_file:
+                self.window.missions.append(scenario_file['mission_descriptor'])
 
-    def update_saves(self):
-        self.saved_games = self.find_all_files(SAVE_EXTENSION, self.saves_path)
+    def update_saves(self, extension: str, saves_path: str):
+        self.saved_games = self.find_all_files(extension, saves_path)
 
     @staticmethod
     def find_all_files(extension: str, path: str) -> SavedGames:
@@ -72,12 +77,13 @@ class SaveManager(Singleton):
             file['local_human_player'] = game.local_human_player.id
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
+            file['mission_descriptor'] = game.current_mission.get_descriptor
             file['mission'] = game.current_mission
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
             file['scheduled_events'] = self.game.events_scheduler.save()
-        self.update_saves()
+        self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
     def get_full_path_to_file_with_extension(self, save_name: str) -> str:
@@ -91,7 +97,7 @@ class SaveManager(Singleton):
         elif SCENARIO_EXTENSION in save_name:
             return os.path.join(self.scenarios_path, save_name)
         elif (full_name := save_name + SCENARIO_EXTENSION) in self.scenarios:
-            return os.path.join(self.saves_path, full_name)
+            return os.path.join(self.scenarios_path, full_name)
         else:
             return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
 

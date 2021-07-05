@@ -80,7 +80,7 @@ CPU_UNITS = 1
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = True
+PYPROFILER = False
 DEBUG = False
 
 
@@ -125,9 +125,12 @@ class GameWindow(Window, EventsCreator):
 
         self.settings = Settings()  # shared with Game
 
+        self.campaigns: Dict[str, Campaign] = load_campaigns()
+        self.missions: List[MissionDescriptor] = []
+
         self.sound_player = AudioPlayer()
 
-        self.save_manager = SaveManager('saved_games', 'scenarios')
+        self.save_manager = SaveManager('saved_games', 'scenarios', self)
 
         self._updated: List[Updateable] = []
 
@@ -183,6 +186,9 @@ class GameWindow(Window, EventsCreator):
         return self.current_view is self.game_view
 
     def start_new_game(self):
+        scenarios = self.menu_view.selectable_groups['scenarios']
+        if scenarios.currently_selected is not None:
+            self.load_saved_game_or_scenario(scenarios=scenarios)
         if self.game_view is None:
             self.game_view = Game(loader=None)
         self.show_view(self.game_view)
@@ -294,10 +300,17 @@ class GameWindow(Window, EventsCreator):
         # so no need for redundant call to the Window method
         return self.current_view.viewport
 
-    def update_scenarios_list(self):
-        campaing_menu = self.menu_view.get_bundle(CAMPAIGN_MENU)
+    def update_scenarios_list(self, menu: str):
+        campaing_menu = self.menu_view.get_bundle(menu)
         self.menu_view.selectable_groups['scenarios'] = group = SelectableGroup()
         campaing_menu.remove_subgroup(5)
+
+        x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, 60))
+        campaing_menu.extend(  # refresh saved-games list
+            GenericTextButton('blank_file_button.png', x, next(y), file,
+                              None, subgroup=5, selectable_group=group)
+            for file in self.save_manager.scenarios
+        )
 
     def update_saved_games_list(self, menu: str):
         loading_menu = self.menu_view.get_bundle(menu)
@@ -330,11 +343,11 @@ class GameWindow(Window, EventsCreator):
         scenario = self.settings.editor_mode
         self.save_manager.save_game(save_name, self.game_view, scenario)
 
-    def load_game(self):
+    def load_saved_game_or_scenario(self, scenarios=None):
         if self.game_view is not None:
             self.quit_current_game()
-        saves = self.menu_view.selectable_groups['saves']
-        if (selected_save := saves.currently_selected) is not None:
+        files = scenarios or self.menu_view.selectable_groups['saves']
+        if (selected_save := files.currently_selected) is not None:
             loader = self.save_manager.load_game(save_name=selected_save.name)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
@@ -482,7 +495,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         options_panel = UiElementsBundle(
             name=BASIC_UI,
-            index=0,
             elements=[
                 frame,
                 top_panel,
@@ -509,7 +521,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         units_panel = UiElementsBundle(
             name=UNITS_PANEL,
-            index=1,
             elements=[
                 Button('game_button_stop.png', ui_x - 100, 800,
                        functions=self.stop_all_units),
@@ -521,7 +532,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         buildings_panel = UiElementsBundle(
             name=BUILDINGS_PANEL,
-            index=2,
             elements=[],
             register_to=self
         )
@@ -877,11 +887,12 @@ if __name__ == '__main__':
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
-    from missions.missions import Mission
-    from missions.conditions import (
+    from campaigns.missions import Mission, load_campaigns, Campaign, \
+    MissionDescriptor
+    from campaigns.conditions import (
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )
-    from missions.consequences import Defeat, Victory
+    from campaigns.consequences import Defeat, Victory
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

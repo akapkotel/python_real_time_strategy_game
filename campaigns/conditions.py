@@ -4,9 +4,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Optional
 
-import utils.timing
 from players_and_factions.player import Player, Faction
-from missions.consequences import AddVictoryPoints, Consequence
+from campaigns.consequences import AddVictoryPoints, Consequence
 from utils.logging import log
 
 
@@ -182,4 +181,4 @@ class MinimumVictoryPoints(Condition):
 
 
 if __name__ == '__main__':
-    from missions.missions import Mission
+    from campaigns.missions import Mission

@@ -129,6 +129,11 @@ class TerrainObject(GameObject):
             self.map_node.static_gameobject = self
         self.attach(observer=self.game)
 
+    def draw(self):
+        # TerrainObjects are not updated, so we need check here if to render
+        if self.on_screen:
+            super().draw()
+
     def kill(self):
         self.map_node.static_gameobject = None
         super().kill()
@@ -138,7 +143,8 @@ class Wreck(TerrainObject):
 
     def __init__(self, filename: str, durability: int, position: Point):
         super().__init__(filename, durability, position)
-        self.schedule_event(ScheduledEvent(self, 30, self.kill))
+        lifetime = self.game.settings.remove_wrecks_after
+        self.schedule_event(ScheduledEvent(self, lifetime, self.kill))
 
 
 class PlaceableGameobject:
@@ -149,7 +155,9 @@ class PlaceableGameobject:
     """
 
     def __init__(self, gameobject_name: str):
+        self.game = GameObject.game
         self.gameobject_name = gameobject_name
 
     def emplace(self, position: GridPosition):
+        self.game.spawn(self.gameobject_name, )
         raise NotImplementedError

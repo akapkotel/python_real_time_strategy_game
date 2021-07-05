@@ -14,7 +14,7 @@ from game import PROFILING_LEVEL
 from map.map import (MapNode, MapPath, Map, VERTICAL_DIST, adjacent_distance)
 
 
-@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
+@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=True)
 def a_star(map: Map,
            start: GridPosition,
            end: GridPosition,
@@ -51,17 +51,17 @@ def a_star(map: Map,
         walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
         for adjacent in (a for a in walkable if a.grid not in explored):
             adj_grid = adjacent.grid
+            total = cost_so_far[current] + adjacent_distance(current, adj_grid)
             # TODO: implement Jump Point Search, for now, we resign from
             #  using real terrain costs and calculate fast heuristic for
             #  each waypoints pair, because it efficiently finds best
             #  path, but it ignores tiles-moving-costs:
-            total = cost_so_far[current] + adjacent_distance(current, adj_grid)
-            if total < cost_so_far[adj_grid]:
+            if total < cost_so_far[adj_grid] or adj_grid not in unexplored:
                 previous[adj_grid] = current
                 cost_so_far[adj_grid] = total
                 priority = total + heuristic(adj_grid, end)
                 put_to_unexplored(adj_grid, priority)
-        explored.update(walkable)
+        # explored.update(walkable)
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:

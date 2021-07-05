@@ -87,7 +87,7 @@ class LoadableWindowView(View):
     def is_loaded(self):
         return self.loading_progress >= 1.0
 
-    @logger(console=True)
+    @logger(console=False)
     def update_loading(self):
         if self.things_to_load:
             self.load(*self.things_to_load[0])

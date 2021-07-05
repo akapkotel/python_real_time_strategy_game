@@ -12,7 +12,7 @@ from arcade import (
 from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
-from utils.colors import CLEAR_GREEN, GREEN, WHITE, RED, BLACK
+from utils.colors import CLEAR_GREEN, GREEN
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import SelectiveSpriteList, UiSpriteList

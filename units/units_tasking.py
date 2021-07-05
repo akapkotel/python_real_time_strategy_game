@@ -86,7 +86,7 @@ class TaskEnterBuilding(UnitTask):
     def check_if_soldier_heading_to_target(self, soldier):
         if not soldier.has_destination:
             x, y = self.target.position
-            self.manager.game.pathfinder.navigate_units_to_destination(soldier, x, y)
+            self.manager.game_view.pathfinder.navigate_units_to_destination(soldier, x, y)
 
 
 class TaskEnterVehicle(TaskEnterBuilding):

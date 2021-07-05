@@ -13,16 +13,16 @@ from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement
 )
-from missions.research import Technology
+from campaigns.research import Technology
 from map.map import MapNode, Sector, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, CONSCRIPTS
 )
 from utils.functions import (
     add_player_color_to_name, get_texture_size, name_to_texture_name,
-    get_path_to_file
+    get_path_to_file, ignore_in_editor_mode
 )
-from utils.geometry import close_enough, is_visible, find_area
+from utils.geometry import find_area
 from controllers.constants import CURSOR_ENTER_TEXTURE
 
 
@@ -370,6 +370,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         elif self.is_research_facility:
             self.update_research()
 
+    @ignore_in_editor_mode
     def update_ui_buildings_panel(self):
         if self.player.is_local_human_player and self.is_selected:
             panel = self.game.get_bundle(BUILDINGS_PANEL)
@@ -517,4 +518,5 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
-    from game import Game, TILE_HEIGHT, TILE_WIDTH, BUILDINGS_PANEL
+    from game import Game, TILE_HEIGHT, TILE_WIDTH
+    from user_interface.constants import BUILDINGS_PANEL
