@@ -446,7 +446,7 @@ class PlayerEntity(GameObject):
 
     @property
     def weapons(self) -> bool:
-        return self._weapons and self.ammunition
+        return self._weapons and self._ammunition > 0
 
     @property
     def ammunition(self) -> bool:

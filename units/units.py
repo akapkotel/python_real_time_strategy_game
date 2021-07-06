@@ -82,6 +82,8 @@ class Unit(PlayerEntity):
         self.explosion_name = EXPLOSION
         self.update_explosions_pool()
 
+        self.layered_spritelist.swap_rendering_layers(self, 0, self.current_node.grid[1])
+
     @property
     def configs(self):
         return self.game.configs['units'][self.object_name]
@@ -150,14 +152,20 @@ class Unit(PlayerEntity):
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
-        new_current_node = self.map.position_to_node(*self.position)
+        new_current_node = self.update_current_node()
         self.update_observed_area(new_current_node)
         self.update_blocked_map_nodes(new_current_node)
         self.update_current_sector()
         self.update_pathfinding()
 
-    def update_observed_area(self, new_current_node: MapNode):
-        if self.observed_nodes and new_current_node == self.current_node:
+    def update_current_node(self):
+        current_node = self.map.position_to_node(*self.position)
+        if (old_y := self.current_node.grid[1]) != (new_y := current_node.grid[1]):
+            self.layered_spritelist.swap_rendering_layers(self, old_y, new_y)
+        return current_node
+
+    def update_observed_area(self, current_node: MapNode):
+        if self.observed_nodes and current_node == self.current_node:
             pass
         else:
             self.observed_grids = grids = self.calculate_observed_area()
@@ -525,8 +533,6 @@ class Tank(Vehicle):
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
 
-        self.threads_time = 0
-
     def _load_textures_and_reset_hitbox(self):
         """
         Create 8 lists of 8-texture spritesheets for each combination of hull
@@ -698,7 +704,6 @@ class Soldier(Unit):
 
 
 class Engineer(Soldier):
-    pass
 
     @classmethod
     def create_ui_buttons(cls, x, y):

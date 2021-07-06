@@ -272,6 +272,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if garrison:
             self.spawn_soldiers_for_garrison(garrison)
 
+        self.layered_spritelist.swap_rendering_layers(
+            self, 0, position_to_map_grid(*self.position)[1]
+        )
+
     @property
     def is_selected(self) -> bool:
         return self.game.units_manager.selected_building is self
@@ -299,9 +303,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         [self.block_map_node(node) for node in occupied_nodes]
         return set(occupied_nodes)
 
-    def spawn_soldiers_for_garrison(self, garrison: int):
+    def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
-        for _ in range(min(garrison, self.garrison_max_soldiers)):
+        for _ in range(min(number_of_soldiers, self.garrison_max_soldiers)):
             soldier: Soldier = self.game.spawn(
                 'soldier', self.player, self.map.random_walkable_node.position
             )

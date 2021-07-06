@@ -51,7 +51,7 @@ from utils.logging import log, logger
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
-    SelectiveSpriteList, SpriteListWithSwitch, UiSpriteList,
+    LayeredSpriteList, SpriteListWithSwitch, UiSpriteList,
 )
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
@@ -404,9 +404,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
-        self.units = SelectiveSpriteList()
+        self.units = LayeredSpriteList()
         self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
-        self.buildings = SelectiveSpriteList(is_static=True, use_spatial_hash=True)
+        self.buildings = LayeredSpriteList(is_static=True, use_spatial_hash=True)
         self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()

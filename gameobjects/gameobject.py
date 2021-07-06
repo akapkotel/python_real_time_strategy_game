@@ -13,7 +13,7 @@ from utils.functions import (
     get_path_to_file, decolorised_name, add_extension
 )
 from utils.logging import log
-from utils.improved_spritelists import SelectiveSpriteList
+from utils.improved_spritelists import LayeredSpriteList
 from utils.scheduling import EventsCreator, ScheduledEvent
 
 
@@ -51,7 +51,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         self.is_updated = True
         self.is_rendered = True
 
-        self.selective_spritelist: Optional[SelectiveSpriteList] = None
+        self.layered_spritelist: Optional[LayeredSpriteList] = None
 
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
@@ -115,7 +115,9 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     def kill(self):
         log(f'Destroying GameObject: {self}', True)
         try:
-            self.selective_spritelist.remove(self)
+            self.layered_spritelist.remove(self)
+        except (AttributeError, ValueError):
+            pass
         finally:
             self.detach_observers()
             super().kill()

@@ -58,11 +58,11 @@ class Weapon:
         return gauss(hit_chance, hit_chance * 0.20) < hit_chance
 
     def create_shot_audio_visual_effects(self):
-        self.owner.game.window.sound_player.play_sound(self.shot_sound)
         barrel_angle = 45 * self.owner.barrel_end
         x, y = self.owner.center_x, self.owner.center_y + 10
         blast_position = move_along_vector((x, y), 35.0, angle=barrel_angle)
         self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
+        self.owner.game.sound_player.play_sound(self.shot_sound)
 
     def can_penetrate(self, enemy: PlayerEntity) -> bool:
         """

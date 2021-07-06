@@ -31,8 +31,8 @@ class ExplosionsPool(Singleton):
     def __init__(self):
         super().__init__()
         self.explosions: Dict[str, Deque] = {
-            name: deque([Explosion(name, self) for _ in range(20)]) for name
-            in explosions
+            name: deque([Explosion(name, self, EXPLOSION in name)
+                         for _ in range(20)]) for name in explosions
         }
 
     def get(self, explosion_name, x, y) -> Explosion:
@@ -58,11 +58,11 @@ class Explosion(Sprite):
     """ This class creates an explosion animation."""
     game = None
 
-    def __init__(self, sprite_sheet_name: str, pool):
+    def __init__(self, sprite_sheet_name: str, pool, sound=True):
         super().__init__()
         self.name = sprite_sheet_name
         self.pool = pool
-        self.sound = self.name.lower().replace('png', 'wav')
+        self.sound = '.'.join((self.name.lower(), 'wav')) if sound else None
         self.textures = [t for t in explosions[sprite_sheet_name]]
         self.set_texture(0)
         self.exploding = False
@@ -71,7 +71,8 @@ class Explosion(Sprite):
         self.set_texture(0)
         self.cur_texture_index = 0  # Start at the first frame
         self.exploding = True
-        self.game.window.sound_player.play_sound(self.sound)
+        if self.sound is not None:
+            self.game.window.sound_player.play_sound(self.sound)
 
     def on_update(self, delta_time: float = 1/60):
         # Update to the next frame of the animation. If we are at the end
