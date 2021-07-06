@@ -6,12 +6,13 @@ import time
 
 from abc import abstractmethod
 from collections import deque
+from functools import cached_property
 from typing import Deque, List, Dict, Optional, Set, Union
 
 from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
-import utils.timing
+from effects.constants import SHOT_BLAST, EXPLOSION
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, MapNode, MapPath, Pathfinder, Sector, normalize_position,
@@ -78,7 +79,7 @@ class Unit(PlayerEntity):
 
         self.outside = True
 
-        self.explosion_name = 'EXPLOSION'
+        self.explosion_name = EXPLOSION
         self.update_explosions_pool()
 
     @property
@@ -92,7 +93,7 @@ class Unit(PlayerEntity):
         """
         name = self.explosion_name
         required = len([u for u in self.game.units if u.explosion_name == name])
-        self.game.explosions_pool.add("SHOTBLAST", required)
+        self.game.explosions_pool.add(SHOT_BLAST, required)
         self.game.explosions_pool.add(name, required)
 
     @abstractmethod
@@ -356,7 +357,7 @@ class Unit(PlayerEntity):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
 
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
-        return [self.current_sector] + self.current_sector.adjacent_sectors()
+        return [self.current_sector] + self.current_sector.adjacent_sectors
 
     def fight_enemies(self):
         if (enemy := self._targeted_enemy) is not None:
@@ -420,7 +421,7 @@ class Unit(PlayerEntity):
     def create_death_animation(self):
         if not self.is_infantry:  # particular Soldiers dying instead
             self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
-            self.game.window.sound_player.play_sound('explosion.wav')
+            # self.game.window.sound_player.play_sound('explosion.wav')
 
     def save(self) -> Dict:
         saved_unit = super().save()
@@ -446,11 +447,18 @@ class Vehicle(Unit):
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
         thread_texture = ''.join((self.object_name, '_threads.png'))
-        self.thread_texture = get_path_to_file(thread_texture)
+
+        # texture of the VehicleThreads left by this Vehicle
+        self.threads_texture = get_path_to_file(thread_texture)
+        # when this Vehicle left it's threads on the ground last time:
         self.threads_time = 0
 
         self.fuel = 100.0
         self.fuel_consumption = 0.0
+
+    @cached_property
+    def threads_frequency(self):
+        return 5 / self.max_speed
 
     def _load_textures_and_reset_hitbox(self):
         width, height = get_texture_size(self.full_name, columns=8)
@@ -463,20 +471,19 @@ class Vehicle(Unit):
         super().on_update(delta_time)
         if self.moving:
             self.consume_fuel()
-            if self.game.settings.vehicles_threads:
+            if self.is_rendered and self.game.settings.vehicles_threads:
                 self.leave_threads()
 
     def consume_fuel(self):
         self.fuel -= self.fuel_consumption
 
     def leave_threads(self):
-        if self.is_rendered and (time := utils.timing.timer['s'] - self.threads_time) >= 4:
-            self.threads_time = time
-            self.game.vehicles_threads.append(
-                VehicleThreads(self.thread_texture,
-                               self.cur_texture_index,
-                               *self.position),
-            )
+        if (t := self.timer['f']) - self.threads_time >= self.threads_frequency:
+            self.threads_time = t
+            self.game.vehicles_threads.append(self.create_threads())
+
+    def create_threads(self):
+        return VehicleThreads(self.threads_texture, self.cur_texture_index, *self.position),
 
     def kill(self):
         self.spawn_wreck()
@@ -484,9 +491,8 @@ class Vehicle(Unit):
 
     def spawn_wreck(self):
         wreck_name = f'{self.object_name.rstrip(".png")}_wreck.png'
-        wreck = self.game.spawner.spawn(
-            wreck_name, None, self.position, self.cur_texture_index
-        )
+        self.game.spawn(wreck_name, self.position, self.cur_texture_index)
+
 
 class VehicleThreads(Sprite):
 
@@ -578,14 +584,8 @@ class Tank(Vehicle):
         self.turret_aim_target = None
         super().on_update(delta_time)
 
-    def leave_threads(self):
-        if self.game.timer['f'] >= self.threads_time:
-            self.threads_time = self.game.timer['f'] + 4
-            self.game.vehicles_threads.append(
-                VehicleThreads(self.thread_texture,
-                               self.facing_direction,
-                               *self.position),
-            )
+    def create_threads(self):
+        return VehicleThreads(self.threads_texture, self.facing_direction, *self.position)
 
     def engage_enemy(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
@@ -694,9 +694,7 @@ class Soldier(Unit):
 
     def spawn_corpse(self):
         corpse_name = f'{self.colored_name}_corpse.png'
-        corpse = self.game.spawner.spawn(
-            corpse_name, None, self.position, self.facing_direction
-        )
+        self.game.spawn(corpse_name, self.position, self.facing_direction)
 
 
 class Engineer(Soldier):

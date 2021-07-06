@@ -15,3 +15,6 @@ PADDING_Y = 30
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
+QUIT_GAME_BUTTON = 'quit game button'
+CONTINUE_BUTTON = 'continue button'
+SAVE_GAME_BUTTON = 'save game button'

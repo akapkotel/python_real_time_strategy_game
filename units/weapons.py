@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import time
-
 from random import gauss
 
 from typing import List
 
 from arcade.texture import Texture
 
+from effects.constants import SHOT_BLAST
 from effects.sound import SOUNDS_EXTENSION
 from utils.geometry import move_along_vector
 from effects.explosions import Explosion
@@ -30,16 +29,16 @@ class Weapon:
         self.next_firing_time = 0
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
-        self.explosion_name = 'SHOTBLAST'
+        self.explosion_name = SHOT_BLAST
         self.owner.game.explosions_pool.add(self.explosion_name, 75)
         for attr_name, value in self.owner.game.configs['weapons'][name].items():
             setattr(self, attr_name, value)
 
     def reloaded(self) -> bool:
-        return time.time() >= self.next_firing_time
+        return self.owner.timer['total'] >= self.next_firing_time
 
     def shoot(self, target: PlayerEntity):
-        self.next_firing_time = time.time() + self.rate_of_fire
+        self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
         self.create_shot_audio_visual_effects()
         if self.can_penetrate(target) and self.hit_target(target):
             target.on_being_damaged(damage=self.damage)
@@ -63,7 +62,7 @@ class Weapon:
         barrel_angle = 45 * self.owner.barrel_end
         x, y = self.owner.center_x, self.owner.center_y + 10
         blast_position = move_along_vector((x, y), 35.0, angle=barrel_angle)
-        self.owner.game.create_effect(Explosion, 'SHOTBLAST', *blast_position)
+        self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
 
     def can_penetrate(self, enemy: PlayerEntity) -> bool:
         """

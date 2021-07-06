@@ -4,4 +4,6 @@ recruitment_center,Building,(soldier;saboteur;sniper;engineer),recruits,False,50
 barracks,Building,None,None,False,450,1,12,25,6,0,None
 medium_factory,Building,(tank_medium),None,False,1500,1,2,250,6,0,None
 small_bunker,Building,None,None,False,800,1.5,4,25,8,6,(machinegun)
-large_bunker,Building,NOne,None,False,1500,2,12,75,10,6,(machingun;light_tank_gun)
+large_bunker,Building,None,None,False,1500,2,12,75,10,6,(machingun;light_tank_gun)
+recycling_plant,Building,None,(electronics),False,1000,0.5,4,300,6,0,None
+steel_foundry,Building,None,(steel),False,1250,0.5,4,400,6,0,None

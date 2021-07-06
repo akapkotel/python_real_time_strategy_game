@@ -323,6 +323,13 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         super().deactivate()
 
 
+class Background(UiElement):
+    """Use this to put a static background wherever You need it."""
+
+    def __init__(self, texture_name: str, x: int, y: int, name: str = None):
+        super().__init__(texture_name, x, y, name, active=False)
+
+
 class Frame(UiElement):
     sound_on_mouse_enter = None
     sound_on_mouse_click = None

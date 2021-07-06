@@ -12,7 +12,7 @@ from arcade import (
 from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
-from utils.colors import CLEAR_GREEN, GREEN
+from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE
 from game import Game, UPDATE_RATE
 from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import SelectiveSpriteList, UiSpriteList
@@ -63,6 +63,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.pointed_gameobject: Optional[GameObject] = None
         self.pointed_scrollable: Optional[ScrollableContainer] = None
         self.bound_text_input_field: Optional[TextInputField] = None
+
+        self.show_hint = False
+        self.text_hint_delay = self.window.settings.hints_delays
 
         # player can select Units by dragging mouse cursor with left-button
         # pressed: all Units inside selection-rectangle will be added to the
@@ -245,9 +248,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.units_manager.update()
         self.update_cursor_pointed()
         self.update_cursor_texture()
-        self.update_animation()
+        self.update_animation(self.window.settings.update_rate)
 
-    def update_animation(self, delta_time: float = UPDATE_RATE):
+    def update_animation(self, delta_time: float = .1):
         """
         Logic for selecting the proper texture to use.
         """
@@ -270,14 +273,24 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.update_mouse_pointed_ui_element(pointed)
 
     def switch_selected_gameobject(self, pointed: Optional[GameObject]):
-        if self.pointed_gameobject is not pointed:
+        if pointed is not self.pointed_gameobject:
             if self.pointed_gameobject is not None:
                 self.pointed_gameobject.on_mouse_exit()
             if pointed is not None and pointed.is_rendered:
-                self.pointed_gameobject = pointed
-                pointed.on_mouse_enter()
+                self.set_pointed_gameobject(pointed)
             else:
-                self.pointed_gameobject = None
+                self.clear_pointed_gameobject()
+
+    def set_pointed_gameobject(self, pointed):
+        self.pointed_gameobject = pointed
+        self.text_hint_delay += self.game.timer['total']
+        self.show_hint = True
+        pointed.on_mouse_enter()
+
+    def clear_pointed_gameobject(self):
+        self.pointed_gameobject = None
+        self.text_hint_delay = self.window.settings.hints_delays
+        self.show_hint = False
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn_area in some
@@ -398,9 +411,18 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
+        if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
+            self.draw_text_hint(self.pointed_gameobject.text_hint)
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
         super().draw()
+
+    def draw_text_hint(self, text_hint: str):
+        x, y = self.right, self.bottom
+        right, top, bottom = x + 9 * len(text_hint), y + 10, y - 10
+        draw_lrtb_rectangle_filled(x, right, top, bottom, BLACK)
+        draw_lrtb_rectangle_outline(x, right, top, bottom, WHITE)
+        draw_text(text_hint, x + 5, y, WHITE, 11, anchor_y='center')
 
 
 class MouseDragSelection:

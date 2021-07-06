@@ -7,14 +7,13 @@ from collections import defaultdict
 from typing import Dict, Union
 
 from utils.data_types import GridPosition
-from utils.logging import log
 from utils.timing import timer
 from utils.classes import PriorityQueue
 from game import PROFILING_LEVEL
 from map.map import (MapNode, MapPath, Map, VERTICAL_DIST, adjacent_distance)
 
 
-@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=True)
+@timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
 def a_star(map: Map,
            start: GridPosition,
            end: GridPosition,
@@ -31,7 +30,6 @@ def a_star(map: Map,
     :return: Union[MapPath, bool] -- list of points or False if no path
     found
     """
-    log(f'Searching for path from {start} to {end}...')
     map_nodes = map.nodes
     unexplored = PriorityQueue(start, heuristic(start, end))
     explored = set()
@@ -56,12 +54,11 @@ def a_star(map: Map,
             #  using real terrain costs and calculate fast heuristic for
             #  each waypoints pair, because it efficiently finds best
             #  path, but it ignores tiles-moving-costs:
-            if total < cost_so_far[adj_grid] or adj_grid not in unexplored:
+            if total < cost_so_far[adj_grid]:
                 previous[adj_grid] = current
                 cost_so_far[adj_grid] = total
                 priority = total + heuristic(adj_grid, end)
                 put_to_unexplored(adj_grid, priority)
-        # explored.update(walkable)
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:

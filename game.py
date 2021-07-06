@@ -16,11 +16,14 @@ __credits__ = {'Coding': __author__,
 
 import random
 import time
+import pathlib
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 
 from functools import partial
 from dataclasses import dataclass
+
+import arcade
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite
 )
@@ -54,6 +57,8 @@ from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
+GAME_PATH = pathlib.Path(__file__).parent.absolute()
+
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
@@ -68,14 +73,14 @@ MINIMAP_HEIGHT = 197
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 40
-SECTOR_SIZE = 8
+SECTOR_SIZE = 10
 ROWS = 50
 COLUMNS = 50
 
-FPS = 60
+FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 1
+PLAYER_UNITS = 30
 CPU_UNITS = 1
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
@@ -92,6 +97,8 @@ class Settings:
     share many attributes between GameWindow and Game classes easily.
     """
     fps: int = FPS
+    game_speed: float = GAME_SPEED
+    update_rate = 1 / FPS
     full_screen: bool = FULL_SCREEN
     debug: bool = DEBUG
     debug_mouse: bool = True
@@ -99,14 +106,15 @@ class Settings:
     vehicles_threads: bool = True
     threads_fadeout: int = 2  # seconds
     shot_blasts: bool = True
-    game_speed: float = GAME_SPEED
     editor_mode: bool = False
+    remove_wrecks_after: int = 30  # seconds
     damage_randomness_factor = 0.25  # standard deviation
-    trees_density: float = 0.05  # percentage chance
+    trees_density: float = 0.05  # percentage chance of tree being spawned
     resources_abundance: float = 0.01
     starting_resources: float = 0.5
     map_width: int = 100
     map_height: int = 75
+    hints_delays: int = 1
 
 
 class GameWindow(Window, EventsCreator):
@@ -143,16 +151,16 @@ class GameWindow(Window, EventsCreator):
         self.menu_view: Menu = Menu()
         self.game_view: Optional[Game] = None
 
-        self.show_view(LoadingScreen(loaded_view=self.menu_view))
-
         # cursor-related:
         self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
         # store viewport data to avoid redundant get_viewport() calls and call
         # get_viewport only when viewport is actually changed:
-        self.current_viewport = self.get_viewport()
+        self.current_viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
 
         # keyboard-related:
         self.keyboard = KeyboardHandler(self, self.menu_view)
+
+        self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
     @property
     def screen_center(self) -> Point:
@@ -297,7 +305,7 @@ class GameWindow(Window, EventsCreator):
 
     def get_viewport(self) -> Viewport:
         # We cache viewport coordinates each time they are changed,
-        # so no need for redundant call to the Window method
+        # so there is no need for redundant call to the Window method
         return self.current_view.viewport
 
     def update_scenarios_list(self, menu: str):
@@ -397,8 +405,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = SelectiveSpriteList()
-        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=True)
-        self.buildings = SelectiveSpriteList(is_static=True)
+        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.buildings = SelectiveSpriteList(is_static=True, use_spatial_hash=True)
         self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()
@@ -407,6 +415,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.events_scheduler = EventsScheduler(game=self)
 
         self.map: Optional[Map] = None
+
         self.pathfinder: Optional[Pathfinder] = None
 
         self.fog_of_war: Optional[FogOfWar] = None
@@ -563,9 +572,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.get_bundle(BUILDINGS_PANEL).extend(buttons)
 
     @property
-    def get_ui_position(self):
+    def get_ui_position(self) -> Tuple[float, float]:
         left, _, bottom, _ = self.viewport
-        return left + SCREEN_WIDTH - UI_WIDTH // 2, bottom + SCREEN_Y
+        return left + SCREEN_WIDTH - UI_WIDTH / 2, bottom + SCREEN_Y
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
@@ -579,7 +588,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         Add animated sprite to the self.effects spritelist to display e.g.:
         explosions.
         """
-        if effect_type == Explosion:
+        if effect_type is Explosion:
             effect = self.explosions_pool.get(name, x, y)
         else:
             return
@@ -713,7 +722,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             if gameobject.is_building:
                 self.buildings.append(gameobject)
             else:
-                print('attaching', gameobject)
                 self.units.append(gameobject)
         else:
             self.static_objects.append(gameobject)

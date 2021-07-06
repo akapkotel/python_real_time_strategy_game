@@ -48,6 +48,7 @@ class SpriteListWithSwitch(SpriteList):
         self.draw_on = not self.draw_on
 
 
+# noinspection PyUnresolvedReferences
 class SelectiveSpriteList(SpriteList):
     """
     This SpriteList works with Sprites having attributes: 'id', 'updated' and
@@ -60,10 +61,17 @@ class SelectiveSpriteList(SpriteList):
     fast lookups by their 'id' attribute.
     """
 
-    def __init__(self, use_spatial_hash=False, spatial_hash_cell_size=128, is_static=False):
+    def __init__(self,
+                 use_spatial_hash=False,
+                 spatial_hash_cell_size=128,
+                 is_static=False,
+                 update_on=True,
+                 draw_on=True):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
         # to keep track of items in spritelist, fast lookups:
         self.registry: Dict[int, Sprite] = {}
+        self.update_on = update_on
+        self.draw_on = draw_on
 
     def get_by_id(self, sprite_id: int) -> Optional[Sprite]:
         """Return element with particular 'id' attribute value or None."""
@@ -124,12 +132,14 @@ class SelectiveSpriteList(SpriteList):
             log(f'Tried stop drawing Sprite instance without "drawn_area" attribute')
 
     def on_update(self, delta_time: float = 1/60):
-        for sprite in (s for s in self if s.is_updated):
-            sprite.on_update(delta_time)
+        if self.update_on:
+            for sprite in (s for s in self if s.is_updated):
+                sprite.on_update(delta_time)
 
     def draw(self):
-        for sprite in (s for s in self if s.is_rendered):
-            sprite.draw()
+        if self.draw_on:
+            for sprite in (s for s in self if s.is_rendered):
+                sprite.draw()
 
     def pop(self, index: int = -1) -> Sprite:
         sprite = super().pop(index)

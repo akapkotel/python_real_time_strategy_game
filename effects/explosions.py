@@ -6,16 +6,18 @@ from typing import Dict, Deque
 
 from arcade import Sprite, load_spritesheet
 
+from effects.constants import (
+    EXPLOSION_SMALL_5, HIT_BLAST, SHOT_BLAST, EXPLOSION
+)
 from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
 path = get_path_to_file
 explosions = {
-    "EXPLOSION": load_spritesheet(path('granade_blast.png'), 256, 256, 15, 75),
-    # 'EXPLOSION': load_spritesheet(path('explosion.png'), 96, 96, 21, 63),
-    'SHOTBLAST': load_spritesheet(path('shot_blast.png'), 256, 256, 4, 16),
-    'HITBLAST': load_spritesheet(path('hit_blast.png'), 256, 256, 8, 48),
-    'SMALL_EXPLOSION_5': load_spritesheet(path('explosion_small_5.png'), 256, 256, 15, 60)
+    EXPLOSION: load_spritesheet(path('explosion.png'), 256, 256, 15, 75),
+    SHOT_BLAST: load_spritesheet(path('shot_blast.png'), 256, 256, 4, 16),
+    HIT_BLAST: load_spritesheet(path('hit_blast.png'), 256, 256, 8, 48),
+    EXPLOSION_SMALL_5: load_spritesheet(path('explosion_small_5.png'), 256, 256, 15, 60)
 }
 
 
@@ -53,13 +55,15 @@ class ExplosionsPool(Singleton):
 
 
 class Explosion(Sprite):
-    """ This class creates an explosion animation """
+    """ This class creates an explosion animation."""
+    game = None
 
-    def __init__(self, spritesheet_name: str, pool):
+    def __init__(self, sprite_sheet_name: str, pool):
         super().__init__()
-        self.name = spritesheet_name
+        self.name = sprite_sheet_name
         self.pool = pool
-        self.textures = explosions[spritesheet_name]
+        self.sound = self.name.lower().replace('png', 'wav')
+        self.textures = [t for t in explosions[sprite_sheet_name]]
         self.set_texture(0)
         self.exploding = False
 
@@ -67,11 +71,13 @@ class Explosion(Sprite):
         self.set_texture(0)
         self.cur_texture_index = 0  # Start at the first frame
         self.exploding = True
+        self.game.window.sound_player.play_sound(self.sound)
 
     def on_update(self, delta_time: float = 1/60):
         # Update to the next frame of the animation. If we are at the end
         # of our frames, then put it back to the pool.
         if self.exploding:
+            self.update_animation(delta_time)
             self.cur_texture_index += 1
             if self.cur_texture_index < len(self.textures):
                 self.set_texture(self.cur_texture_index)

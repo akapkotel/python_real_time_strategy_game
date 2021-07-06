@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+
 from functools import lru_cache
 from typing import Any, Dict, List, Tuple
 
@@ -17,7 +18,7 @@ SEPARATOR = '-' * 20
 speedups.enable()
 
 
-def get_screen_size() -> Tuple:
+def get_screen_size() -> Tuple[int, int]:
     from PIL import ImageGrab
     screen = ImageGrab.grab()
     return int(screen.width), int(screen.height)

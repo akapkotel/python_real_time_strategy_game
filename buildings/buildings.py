@@ -8,6 +8,8 @@ from typing import Deque, List, Optional, Set, Tuple, Dict
 
 from arcade import load_texture
 from arcade.arcade_types import Point
+
+from gameobjects.constants import UNITS
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
@@ -65,7 +67,7 @@ class UnitsProducer:
 
     def consume_resources_from_the_pool(self, unit: str):
         for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
-            required_amount = self.game.configs['units'][unit][resource]
+            required_amount = self.game.configs[UNITS][unit][resource]
             self.player.consume_resource(resource, required_amount)
 
     def cancel_production(self, unit: str):
@@ -95,12 +97,12 @@ class UnitsProducer:
         if unit not in self.production_queue:
             returned = self.production_progress / self.production_time
         for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
-            required_amount = self.game.configs['units'][unit][resource]
+            required_amount = self.game.configs[UNITS][unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
-    def set_production_progress_and_speed(self, product: str):
+    def set_production_progress_and_speed(self, unit: str):
         self.production_progress = 0
-        production_time = self.game.configs['units'][product]['production_time']
+        production_time = self.game.configs[UNITS][unit]['production_time']
         self.production_time = production_time * self.game.settings.fps
 
     def _toggle_production(self, produced: Optional[str]):
@@ -298,8 +300,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return set(occupied_nodes)
 
     def spawn_soldiers_for_garrison(self, garrison: int):
+        """Called when Building is spawned with garrisoned Soldiers inside."""
         for _ in range(min(garrison, self.garrison_max_soldiers)):
-            soldier = self.game.spawn(
+            soldier: Soldier = self.game.spawn(
                 'soldier', self.player, self.map.random_walkable_node.position
             )
             soldier.enter_building(self)
@@ -379,13 +382,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             if self.garrisoned_soldiers:
                 pass
 
-    def create_ui_buttons(self, x, y) -> List[UiElement]:
+    def create_ui_buttons(self, x: float, y: float) -> List[UiElement]:
         buttons = [self.create_garrison_button(x, y)]
         if self.is_units_producer:
             buttons.extend(self.create_production_buttons(x, y))
         return buttons
 
-    def create_garrison_button(self, x, y) -> ProgressButton:
+    def create_garrison_button(self, x: float, y: float) -> ProgressButton:
         button = ProgressButton(
             'ui_leave_building_btn.png', x - 100, y + 200, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
@@ -397,7 +400,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
         sectors = set()
         for sector in self.occupied_sectors:
-            sectors.update(sector.adjacent_sectors())
+            sectors.update(sector.adjacent_sectors)
         return list(sectors)
 
     @property
@@ -513,6 +516,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             soldiers = [self.game.find_gameobject(Unit, s) for s in saved_soldiers]
             self.garrisoned_soldiers.clear()
             for soldier in soldiers:
+                soldier: Soldier
                 soldier.enter_building(self)
 
 

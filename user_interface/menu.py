@@ -6,11 +6,12 @@ from functools import partial
 from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
-    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU
+    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
+    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
-    UiTextLabel, Slider
+    UiTextLabel, Slider, Background, Frame
 )
 from utils.views import LoadableWindowView
 
@@ -46,13 +47,13 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_newgame.png', x, next(y),
                        functions=partial(switch_menu, NEW_GAME_MENU)),
                 Button('menu_button_continue.png', x, next(y),
-                       name='continue button', active=False,
+                       name=('%s' % CONTINUE_BUTTON), active=False,
                        functions=window.start_new_game),
                 Button('menu_button_quit.png', x, next(y),
-                       name='quit game button', active=False,
+                       name=('%s' % QUIT_GAME_BUTTON), active=False,
                        functions=window.quit_current_game),
                 Button('menu_button_savegame.png', x, next(y),
-                       name='save game button',
+                       name=('%s' % SAVE_GAME_BUTTON),
                        functions=partial(switch_menu, SAVING_MENU),
                        active=False),
                 # buttons in center:
@@ -184,6 +185,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         skirmish_menu = UiElementsBundle(
             name=SKIRMISH_MENU,
             elements=[
+                Background('background.png', SCREEN_X, SCREEN_Y),
                 back_to_menu_button,
                 Button('menu_button_play.png', SCREEN_X, next(y),
                        functions=window.start_new_game),
@@ -242,9 +244,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         self.window.sound_player.play_playlist('menu')
 
     def toggle_game_related_buttons(self):
-        bundle = self.ui_elements_bundles['main menu']
-        buttons = ('continue button', 'quit game button', 'save game button')
-        for button in buttons:
+        bundle = self.ui_elements_bundles[MAIN_MENU]
+        for button in (CONTINUE_BUTTON, QUIT_GAME_BUTTON, SAVE_GAME_BUTTON):
             if self.window.game_view is not None:
                 bundle.activate_element(button)
             else:

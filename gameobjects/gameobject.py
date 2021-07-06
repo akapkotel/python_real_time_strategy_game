@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import lru_cache, cached_property
 from typing import Optional, Dict, List
 
 from arcade import AnimatedTimeBasedSprite
@@ -53,14 +53,25 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
 
         self.selective_spritelist: Optional[SelectiveSpriteList] = None
 
-    @lru_cache
     def __repr__(self) -> str:
         return f'GameObject: {self.object_name} id: {self.id}'
 
     @property
+    def timer(self):
+        return self.game.timer
+
+    @cached_property
+    def text_hint(self) -> str:
+        """
+        Format and return string displayed when mouse cursor points at this
+        object for time greater than Settings.hints_delay.
+        """
+        return self.object_name.title().replace('_', ' ')
+
+    @property
     def on_screen(self) -> bool:
-        left, right, bottom, top = self.game.viewport
-        return left < self.right and right > self.left and bottom < self.top and top > self.bottom
+        l, r, b, t = self.game.viewport
+        return l < self.right and r > self.left and b < self.top and t > self.bottom
 
     def destructible(self, weight: int = 0) -> bool:
         return weight > self._durability
@@ -82,9 +93,6 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     @property
     def should_be_rendered(self) -> bool:
         return self.on_screen
-
-    def update_animation(self, delta_time: float = 1 / 60):
-        super().update_animation(delta_time)
 
     def start_drawing(self):
         self.is_rendered = True

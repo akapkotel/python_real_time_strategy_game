@@ -13,7 +13,7 @@ from typing import (
 from arcade import Sprite, Texture, load_spritesheet
 
 from game import PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
-from gameobjects.gameobject import TerrainObject, GameObject
+from gameobjects.gameobject import GameObject
 from utils.data_types import GridPosition, Number, SectorId
 from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
@@ -351,16 +351,18 @@ class Sector:
     def add_player_entity(self, entity: PlayerEntity):
         self.units_and_buildings[entity.player.id].add(entity)
 
+    @cached_property
     def adjacent_sectors(self) -> List[Sector]:
-        raw_grids = self.adjacent_grids(*self.grid)
-        return [self.map.sectors[g] for g in self.in_bounds(raw_grids)]
+        x, y = self.grid
+        raw_grids = {(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS}
+        return [self.map.sectors[g] for g in raw_grids if g in self.map.sectors]
 
     def in_bounds(self, grids: List[GridPosition]) -> Generator[GridPosition]:
         c, r = self.map.columns // SECTOR_SIZE, self.map.rows // SECTOR_SIZE
         return (p for p in grids if 0 <= p[0] <= c and 0 <= p[1] <= r)
 
-    def adjacent_grids(cls, x: Number, y: Number) -> List[GridPosition]:
-        return [(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS]
+    # def adjacent_grids(cls, x: Number, y: Number) -> Set[GridPosition]:
+    #     return {(x + p[0], y + p[1]) for p in ADJACENT_OFFSETS}
 
     def __getstate__(self) -> Dict:
         saved_sector = self.__dict__.copy()
