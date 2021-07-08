@@ -7,7 +7,8 @@ from arcade import (
     draw_rectangle_filled,
 )
 
-from game import TILE_HEIGHT, TILE_WIDTH, SCREEN_HEIGHT
+from game import SCREEN_HEIGHT
+from map.constants import TILE_WIDTH, TILE_HEIGHT
 from map.map import normalize_position, position_to_map_grid
 from utils.colors import RED, GREEN, WHITE, BLACK
 from utils.functions import to_rgba

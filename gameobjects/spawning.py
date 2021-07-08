@@ -5,7 +5,7 @@ import PIL
 
 from typing import Any, Dict, List, Sequence
 
-from arcade import load_texture
+from arcade import load_texture, Texture
 from arcade.arcade_types import Point
 
 from buildings.buildings import Building
@@ -17,7 +17,7 @@ from utils.functions import get_path_to_file
 
 from utils.logging import log
 from gameobjects.constants import BUILDINGS, UNITS, CLASS, CORPSE, WRECK, TREE
-from gameobjects.gameobject import GameObject, TerrainObject, Wreck
+from gameobjects.gameobject import GameObject, TerrainObject, Wreck, Tree
 
 
 class GameObjectsSpawner(Singleton):
@@ -50,28 +50,23 @@ class GameObjectsSpawner(Singleton):
             return self._spawn_unit(name, player, position, **kwargs)
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
-        category = BUILDINGS
-        # in case of Building we need to provide special *kwargs to the
-        # __init__ which values are retrieved from configs, these are boolean
+        # in case of Building we need to provide special **kwargs to the
+        # __init__ which values are retrieved from configs, these params are
         # flags telling a Building if it is a UnitsProducer, ResourceExtractor,
         # ResearchFacility etc.
-        kwargs.update(self.get_building_configs(category, name))
+        kwargs.update(
+            {k: v for (k, v) in self.configs[BUILDINGS][name].items() if
+             k in ('produced_units', 'produced_resource', 'research_facility')}
+        )
         return Building(name, player, position, **kwargs)
-
-    def get_building_configs(self, category, name) -> Dict:
-        config_data = self.configs[category][name]
-        return {
-            key: value for (key, value) in config_data.items() if
-            key in ('produced_units', 'produced_resource', 'research_facility')
-        }
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = UNITS
         class_name = eval(self.configs[category][name][CLASS])
         unit = class_name(name, player, 1, position, **kwargs)
-        return self._configure_spawned_attributes(category, name, unit)
+        return self._get_attributes_from_configs_file(category, name, unit)
 
-    def _configure_spawned_attributes(self, category, name, spawned):
+    def _get_attributes_from_configs_file(self, category, name, spawned):
         config_data = self.configs[category][name]  # 'raw' not colorized name
         for i, (key, value) in enumerate(config_data.items()):
             if i < 8 and value != name and 'class' not in key:
@@ -83,22 +78,26 @@ class GameObjectsSpawner(Singleton):
             texture_index = args[0]
             return self._spawn_wreck_or_body(name, position, texture_index)
         elif TREE in name:
-            return TerrainObject(name, 4, position)
+            return Tree(name, 4, position)
         return GameObject(name, position=position)
 
-    @staticmethod
-    def _spawn_wreck_or_body(name, position, texture_index) -> GameObject:
-        # TODO: replace Robustness IntEnum with something else, or remove it
+    def _spawn_wreck_or_body(self, name, position, texture_index) -> Wreck:
         wreck = Wreck(name, 0 if CORPSE in name else 1, position)
+        wreck.texture = self.get_proper_wreck_texture(name, texture_index)
+        return wreck
+
+    @staticmethod
+    def get_proper_wreck_texture(name, texture_index) -> Texture:
         texture_name = get_path_to_file(name)
         width, height = PIL.Image.open(texture_name).size
         try:  # for tanks with turrets
             i, j = texture_index  # Tuple
-            wreck.texture = load_texture(texture_name, j * (width // 8),
-                                         i * (height // 8), width // 8,
-                                         height // 8)
+            texture = load_texture(texture_name,
+                                   j * (width // 8),
+                                   i * (height // 8), width // 8,
+                                   height // 8)
         except TypeError:
-            wreck.texture = load_texture(texture_name,
-                                         texture_index * (width // 8),
-                                         0, width // 8, height)
-        return wreck
+            texture = load_texture(texture_name,
+                                   texture_index * (width // 8),
+                                   0, width // 8, height)
+        return texture

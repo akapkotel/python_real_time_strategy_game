@@ -1,6 +1,7 @@
-object_name,class,produced_units,produced_resource,research_facility,max_health,armour,garrison,energy_consumption,visibility_radius,attack_radius,weapons_names
+object_name,class,produced_units,produced_resource,research_facility,max_health,armour,garrison_size,energy_consumption,visibility_radius,attack_radius,weapons_names
 capitol,Building,None,None,False,1000,1,8,100,10,0,None
-recruitment_center,Building,(soldier;saboteur;sniper;engineer),recruits,False,500,1,4,50,6,0,None
+recruitment_center,Building,None,recruits,False,500,1,4,50,6,0,None
+garrison,Building,(soldier;saboteur;sniper;engineer),None,False,700,1,12,100,6,0,None
 barracks,Building,None,None,False,450,1,12,25,6,0,None
 medium_factory,Building,(tank_medium),None,False,1500,1,2,250,6,0,None
 small_bunker,Building,None,None,False,800,1.5,4,25,8,6,(machinegun)

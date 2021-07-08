@@ -8,7 +8,8 @@ from numba import njit
 
 from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
-from game import Game, TILE_HEIGHT, TILE_WIDTH
+from game import Game
+from map.constants import TILE_WIDTH, TILE_HEIGHT
 
 OFFSET_X = TILE_WIDTH // 2
 OFFSET_Y = TILE_HEIGHT // 2
@@ -60,7 +61,6 @@ class FogOfWar:
         for col in range(cols + 1):
             for row in range(rows + 1):
                 sprite_lists[(col, row)] = SpriteList(is_static=True)
-        print(sprite_lists)
 
         get_tile_position = self.get_tile_position
         for x, y in self.unexplored:

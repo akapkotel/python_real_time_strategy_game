@@ -134,11 +134,14 @@ class Faction(EventsCreator, Observer, Observed):
 
 class ResourcesManager:
     game = None
-    resources_names = FUEL, FOOD, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
+    resources = {
+        FUEL: 0, FOOD: 0, ENERGY: 750, STEEL: 200, ELECTRONICS: 100, CONSCRIPTS: 0
+    }
 
     def __init__(self):
-        for resource_name in self.resources_names:
-            setattr(self, resource_name, 1000)
+        for resource_name, start_value in self.resources.items():
+            amount = self.game.settings.starting_resources * start_value
+            setattr(self, resource_name, amount)
             setattr(self, f"{resource_name}_yield_per_frame", 0.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
 
@@ -172,7 +175,7 @@ class ResourcesManager:
         setattr(self, f"{resource}_yield_per_frame", old_yield + change)
 
     def _update_resources_stock(self):
-        for resource_name in self.resources_names:
+        for resource_name in self.resources.keys():
             stock = getattr(self, resource_name)
             change = getattr(self, f"{resource_name}_yield_per_frame")
             setattr(self, resource_name, stock + change)
@@ -316,7 +319,7 @@ class HumanPlayer(Player):
 
     def update_ui_resource_panel(self):
         bundle = self.game.get_bundle(BASIC_UI)
-        for resource in self.resources_names:
+        for resource in self.resources:
             label = bundle.find_by_name(name=resource)
             value = int(self.resource(resource))
             label.text = str(value)

@@ -149,6 +149,17 @@ class TerrainObject(GameObject):
         super().kill()
 
 
+class Tree(TerrainObject):
+
+    def __init__(self, filename: str, durability: int, position: Point):
+        super().__init__(filename, durability, position)
+        self.map_node.tree = self
+
+    def kill(self):
+        self.map_node.tree = None
+        super().kill()
+
+
 class Wreck(TerrainObject):
 
     def __init__(self, filename: str, durability: int, position: Point):

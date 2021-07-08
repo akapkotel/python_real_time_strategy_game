@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 from collections import deque
 from functools import partial
-from typing import Deque, List, Optional, Set, Tuple, Dict
+from typing import Deque, List, Optional, Set, Tuple, Dict, Union
 
 from arcade import load_texture
 from arcade.arcade_types import Point
@@ -162,7 +162,8 @@ class UnitsProducer:
         }
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        print('units producer __setstate__')
+        # TODO
 
 
 class ResourceProducer:
@@ -187,7 +188,8 @@ class ResourceProducer:
         return {}
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        print('resource extractor __setstate__')
+        # TODO
 
 
 class ResearchFacility:
@@ -224,6 +226,7 @@ class ResearchFacility:
         }
 
     def __setstate__(self, state: Dict):
+        print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
             self.researched_technology = self.owner.game.window.configs[
@@ -249,9 +252,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :param produces:
         """
         PlayerEntity.__init__(self, building_name, player, position, 4, id)
-        self.is_units_producer = produced_units is not None
-        self.is_resource_producer = produced_resource is not None
-        self.is_research_facility = research_facility
+        self.produced_units = produced_units
+        self.produced_resource = produced_resource
+        self.research_facility = research_facility
 
         if produced_units is not None:
             UnitsProducer.__init__(self, produced_units)
@@ -266,8 +269,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
         self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
-        self.garrisoned_soldiers: List[Soldier] = []
-        self.garrison_max_soldiers: int = self.configs['garrison']
+        self.garrisoned_soldiers: List[Union[Soldier, int]] = []
+        self.garrison_size: int = self.configs['garrison_size']
 
         if garrison:
             self.spawn_soldiers_for_garrison(garrison)
@@ -300,12 +303,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             range(min_x_grid, max_x_grid) for y in
             range(min_y_grid, max_y_grid - 1)
         }
-        [self.block_map_node(node) for node in occupied_nodes]
+        for node in occupied_nodes:
+            node.remove_tree()
+            self.block_map_node(node)
         return set(occupied_nodes)
 
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
-        for _ in range(min(number_of_soldiers, self.garrison_max_soldiers)):
+        for _ in range(min(number_of_soldiers, self.garrison_size)):
             soldier: Soldier = self.game.spawn(
                 'soldier', self.player, self.map.random_walkable_node.position
             )
@@ -352,7 +357,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def check_soldiers_garrisoning_possibility(self):
         friendly_building = self.player.is_local_human_player
-        free_space = len(self.garrisoned_soldiers) < self.garrison_max_soldiers
+        free_space = len(self.garrisoned_soldiers) < self.garrison_size
         if (friendly_building and free_space) or not friendly_building:
             self.game.cursor.force_cursor(index=CURSOR_ENTER_TEXTURE)
 
@@ -370,29 +375,29 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.update_ui_buildings_panel()
 
     def update_production(self):
-        if self.is_units_producer:
+        if self.produced_units is not None:
             self.update_units_production()
-        elif self.is_resource_producer:
+        elif self.produced_resource is not None:
             self.update_resource_production()
-        elif self.is_research_facility:
+        elif self.research_facility:
             self.update_research()
 
     @ignore_in_editor_mode
     def update_ui_buildings_panel(self):
         if self.player.is_local_human_player and self.is_selected:
             panel = self.game.get_bundle(BUILDINGS_PANEL)
-            if self.is_units_producer:
+            if self.produced_units is not None:
                 self.update_production_buttons(panel)
             if self.garrisoned_soldiers:
                 pass
 
-    def create_ui_buttons(self, x: float, y: float) -> List[UiElement]:
+    def create_ui_buttons(self, x, y) -> List[UiElement]:
         buttons = [self.create_garrison_button(x, y)]
-        if self.is_units_producer:
+        if self.produced_units is not None:
             buttons.extend(self.create_production_buttons(x, y))
         return buttons
 
-    def create_garrison_button(self, x: float, y: float) -> ProgressButton:
+    def create_garrison_button(self, x, y) -> ProgressButton:
         button = ProgressButton(
             'ui_leave_building_btn.png', x - 100, y + 200, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
@@ -410,7 +415,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @property
     def soldiers_slots_left(self) -> int:
         """Check if more Soldiers can enter this building."""
-        return self.garrison_max_soldiers - len(self.garrisoned_soldiers)
+        return self.garrison_size - len(self.garrisoned_soldiers)
 
     def on_soldier_enter(self, soldier: Soldier):
         if self.is_enemy(soldier):
@@ -499,32 +504,41 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def save(self) -> Dict:
         saved_building = super().save()
-        if self.is_units_producer:
+
+        if self.produced_units is not None:
             saved_building.update(UnitsProducer.__getstate__(self))
-        if self.is_resource_producer:
+        elif self.produced_resource is not None:
             saved_building.update(ResourceProducer.__getstate__(self))
-        if self.is_research_facility:
+        elif self.research_facility:
             saved_building.update(ResearchFacility.__getstate__(self))
+
         if self.garrisoned_soldiers:
             saved_building.update(self.save_garrison())
         return saved_building
 
     def save_garrison(self) -> Dict:
-        return {
-            'garrisoned_soldiers': [s.id for s in self.garrisoned_soldiers]
-        }
+        return {'garrisoned_soldiers': [s.id for s in self.garrisoned_soldiers]}
 
     def load(self, loaded_data: Dict):
         super().load(loaded_data)
-        if saved_soldiers := loaded_data.get('garrisoned_soldiers'):
-            soldiers = [self.game.find_gameobject(Unit, s) for s in saved_soldiers]
-            self.garrisoned_soldiers.clear()
-            for soldier in soldiers:
-                soldier: Soldier
-                soldier.enter_building(self)
+        if self.produced_units is not None:
+            UnitsProducer.__setstate__(self, loaded_data)
+        elif self.produced_resource is not None:
+            ResourceProducer.__setstate__(self, loaded_data)
+        elif self.research_facility:
+            ResearchFacility.__setstate__(self, loaded_data)
+        if self.garrisoned_soldiers:
+            self.load_garrison()
+
+    def load_garrison(self):
+        identifiers: List[int] = [s for s in self.garrisoned_soldiers]
+        self.garrisoned_soldiers.clear()
+        for soldier in (self.game.find_gameobject(Unit, s) for s in identifiers):
+            soldier.enter_building(self)
 
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
-    from game import Game, TILE_HEIGHT, TILE_WIDTH
+    from game import Game
+    from map.constants import TILE_WIDTH, TILE_HEIGHT
     from user_interface.constants import BUILDINGS_PANEL

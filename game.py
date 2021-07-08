@@ -23,17 +23,17 @@ from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 from dataclasses import dataclass
 
-import arcade
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens
 )
 from arcade.arcade_types import Color, Point
 
 from effects.sound import AudioPlayer
+from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor
 from user_interface.constants import (
-    EDITOR, MAIN_MENU, LOADING_MENU, SAVING_MENU, CAMPAIGN_MENU
+    EDITOR, MAIN_MENU, SAVING_MENU
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
@@ -44,7 +44,7 @@ from utils.classes import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE
 from utils.data_types import Viewport
 from utils.functions import (
-    get_path_to_file, get_screen_size, to_rgba, SEPARATOR,
+    get_path_to_file, to_rgba, SEPARATOR,
     ignore_in_editor_mode
 )
 from utils.logging import log, logger
@@ -63,17 +63,15 @@ BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
 
+screen = get_screens()[0]
+
 FULL_SCREEN = False
-SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size()
-SCREEN_X, SCREEN_Y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
-SCREEN_CENTER = SCREEN_X, SCREEN_Y
+SCREEN_WIDTH, SCREEN_HEIGHT = screen.width, screen.height
+SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 UI_WIDTH = SCREEN_WIDTH // 5
 MINIMAP_WIDTH = 388
 MINIMAP_HEIGHT = 197
 
-TILE_WIDTH = 60
-TILE_HEIGHT = 40
-SECTOR_SIZE = 10
 ROWS = 50
 COLUMNS = 50
 
@@ -114,6 +112,8 @@ class Settings:
     starting_resources: float = 0.5
     map_width: int = 100
     map_height: int = 75
+    tile_width: int = TILE_WIDTH
+    tile_height: int = TILE_HEIGHT
     hints_delays: int = 1
 
 
@@ -356,7 +356,7 @@ class GameWindow(Window, EventsCreator):
             self.quit_current_game()
         files = scenarios or self.menu_view.selectable_groups['saves']
         if (selected_save := files.currently_selected) is not None:
-            loader = self.save_manager.load_game(save_name=selected_save.name)
+            loader = self.save_manager.load_game(file_name=selected_save.name)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
 
@@ -392,9 +392,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.generate_random_entities = self.loader is None
 
-        self.cursor = self.window.cursor
-        self.configs = self.window.configs
-        self.settings = self.window.settings  # shared with Window class
         self.timer = {
             'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0
         }
@@ -461,6 +458,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
 
+    @property
+    def sound_player(self) -> AudioPlayer:
+        return self.window.sound_player
+
+    @property
+    def settings(self) -> Settings:
+        return self.window.settings
+
+    @property
+    def cursor(self) -> MouseCursor:
+        return self.window.cursor
+
+    @property
+    def configs(self):
+        return self.window.configs
+
     def assign_reference_to_self_for_all_classes(self):
         game = self.__class__.__name__.lower()
         for _class in (c for c in globals().values() if hasattr(c, game)):
@@ -524,7 +537,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         options_panel.extend(
             [
                 UiTextLabel(110 + 250 * i, y, '0', 15, WHITE, resource)
-                for i, resource in enumerate(Player.resources_names)
+                for i, resource in enumerate(Player.resources)
             ]
         )
 
@@ -568,11 +581,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @ignore_in_editor_mode
     def configure_building_interface(self, context_building: Building):
         self.load_bundle(name=BUILDINGS_PANEL, clear=True)
-        buttons = context_building.create_ui_buttons(*self.get_ui_position)
+        buttons = context_building.create_ui_buttons(*self.ui_position)
         self.get_bundle(BUILDINGS_PANEL).extend(buttons)
 
     @property
-    def get_ui_position(self) -> Tuple[float, float]:
+    def ui_position(self) -> Tuple[float, float]:
         left, _, bottom, _ = self.viewport
         return left + SCREEN_WIDTH - UI_WIDTH / 2, bottom + SCREEN_Y
 
@@ -581,7 +594,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.load_bundle(name=UNITS_PANEL)
         bundle = self.get_bundle(BUILDINGS_PANEL)
         if all(isinstance(u, Engineer) for u in context_units):
-            bundle.extend(Engineer.create_ui_buttons(*self.get_ui_position))
+            bundle.extend(Engineer.create_ui_buttons(*self.ui_position))
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -857,11 +870,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
         self.players.clear()
+        self.window.settings = Settings()
         self.window.game_view = None
-
-    @property
-    def sound_player(self) -> AudioPlayer:
-        return self.window.sound_player
 
 
 def run_profiled_game():
@@ -882,7 +892,7 @@ if __name__ == '__main__':
     total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (
-        PermanentUnitsGroup, SelectedEntityMarker, UnitsManager
+        UnitsManager, SelectedEntityMarker, PermanentUnitsGroup
     )
     from effects.explosions import Explosion, ExplosionsPool
     from players_and_factions.player import (
@@ -895,8 +905,9 @@ if __name__ == '__main__':
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building
-    from campaigns.missions import Mission, load_campaigns, Campaign, \
-    MissionDescriptor
+    from campaigns.missions import (
+        Mission, load_campaigns, Campaign, MissionDescriptor
+    )
     from campaigns.conditions import (
         NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
     )

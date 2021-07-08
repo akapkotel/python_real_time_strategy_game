@@ -130,7 +130,7 @@ class LoadableWindowView(View):
         self.after_load_functions.clear()
 
     def on_draw(self):
-        for obj in self.drawn:
+        for obj in (o for o in self.drawn if o is not None):
             obj.draw()
 
     def toggle_pause(self):

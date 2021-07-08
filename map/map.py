@@ -12,7 +12,8 @@ from typing import (
 
 from arcade import Sprite, Texture, load_spritesheet
 
-from game import PROFILING_LEVEL, SECTOR_SIZE, TILE_HEIGHT, TILE_WIDTH
+from game import PROFILING_LEVEL
+from map.constants import TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from gameobjects.gameobject import GameObject
 from utils.data_types import GridPosition, Number, SectorId
 from utils.enums import TerrainCost
@@ -244,8 +245,6 @@ class Map:
         for node in self.nodes.values():
             if (tree_type := trees.get(node.grid)) is not None:
                 self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
-                # TerrainObject(f'tree_leaf_{tree_type}', 4, node.position)
-                node.tree = tree_type
 
     def generate_random_trees(self) -> Dict[GridPosition, int]:
         trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
@@ -266,7 +265,6 @@ class Map:
 
     @cached_property
     def nonexistent_node(self) -> MapNode:
-        print('NONEXISTENT NODE')
         node = MapNode(-1, -1, None)
         node.pathable = False
         return node
@@ -415,6 +413,12 @@ class MapNode:
     @tree.setter
     def tree(self, value: Optional[TreeID]):
         self._static_gameobject = self._tree = value
+
+    def remove_tree(self):
+        if self._tree is not None:
+            for obj in self.map.game.static_objects:
+                if obj.map_node is self:
+                    obj.kill()
 
     @property
     def unit(self) -> Optional[Unit]:

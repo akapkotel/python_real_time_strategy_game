@@ -101,8 +101,8 @@ class SaveManager(Singleton):
         else:
             return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
 
-    def load_game(self, save_name: str):
-        full_save_path = self.get_full_path_to_file_with_extension(save_name)
+    def load_game(self, file_name: str):
+        full_save_path = self.get_full_path_to_file_with_extension(file_name)
         with shelve.open(full_save_path) as file:
             loaded = ('timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
@@ -114,7 +114,7 @@ class SaveManager(Singleton):
                 function = eval(f'self.load_{name}')
                 argument = file[name]
                 yield self.loading_step(function, argument, progress)
-        log(f'Game {save_name} loaded successfully!', console=True)
+        log(f'Game {file_name} loaded successfully!', console=True)
         yield progress
 
     @logger()
@@ -127,6 +127,14 @@ class SaveManager(Singleton):
 
     def load_settings(self, settings):
         self.game.window.settings = self.game.settings = settings
+        # recalculating rendering layers is required since settings changed and
+        # LayeredSpriteList instances where instantiated with settings values
+        # from the menu, not from the loaded file
+        for spritelist in self.game.updated:
+            try:
+                spritelist.rendering_layers = spritelist.create_rendering_layers()
+            except AttributeError:
+                pass
 
     def load_viewports(self, viewports):
         self.game.viewport = viewports[0]

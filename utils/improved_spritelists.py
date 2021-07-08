@@ -76,12 +76,13 @@ class LayeredSpriteList(SpriteList):
         # what allows rendering them in reversed way to avoid Sprites being
         # 'closer' to the player'spoint of view being obstructed by those which
         # are more distant
-        self.rendering_layers = [
-            [] for _ in range(self.game.settings.map_height)
-        ]
+        self.rendering_layers = self.create_rendering_layers()
 
         self.update_on = update_on
         self.draw_on = draw_on
+
+    def create_rendering_layers(self) -> List[List]:
+        return [[] for _ in range(self.game.settings.map_height)]
 
     def get_by_id(self, sprite_id: int) -> Optional[Sprite]:
         """Return element with particular 'id' attribute value or None."""
