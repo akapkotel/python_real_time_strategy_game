@@ -159,6 +159,9 @@ class Tree(TerrainObject):
         self.map_node.tree = None
         super().kill()
 
+    def save(self) -> int:
+        return int(self.object_name[-1])
+
 
 class Wreck(TerrainObject):
 

@@ -126,7 +126,7 @@ class SaveManager(Singleton):
         self.game.timer = loaded_timer
 
     def load_settings(self, settings):
-        self.game.window.settings = self.game.settings = settings
+        self.window.settings = settings
         # recalculating rendering layers is required since settings changed and
         # LayeredSpriteList instances where instantiated with settings values
         # from the menu, not from the loaded file

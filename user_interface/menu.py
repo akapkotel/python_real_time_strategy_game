@@ -185,7 +185,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         skirmish_menu = UiElementsBundle(
             name=SKIRMISH_MENU,
             elements=[
-                Background('background.png', SCREEN_X, SCREEN_Y),
+                # TODO: create background image
+                # Background('background.png', SCREEN_X, SCREEN_Y),
                 back_to_menu_button,
                 Button('menu_button_play.png', SCREEN_X, next(y),
                        functions=window.start_new_game),

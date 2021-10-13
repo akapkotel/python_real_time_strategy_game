@@ -811,12 +811,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         local Player's Faction, or are detected by his Faction.
         """
         self.local_drawn_units_and_buildings.clear()
-        local_faction = self.local_human_player.faction
-        self.local_drawn_units_and_buildings.update(
-            local_faction.units,
-            local_faction.buildings,
-            local_faction.known_enemies
-        )
+        if self.local_human_player is not None:
+            local_faction = self.local_human_player.faction
+            self.local_drawn_units_and_buildings.update(
+                local_faction.units,
+                local_faction.buildings,
+                local_faction.known_enemies
+            )
 
     def update_factions_and_players(self):
         for faction in self.factions.values():
@@ -825,7 +826,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
-        self.mini_map.draw()
+        if self.mini_map is not None:
+            self.mini_map.draw()
         self.draw_timer()
         if self.debugger is not None:
             self.debugger.draw()

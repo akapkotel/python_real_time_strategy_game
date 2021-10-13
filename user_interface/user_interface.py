@@ -281,7 +281,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         check if any child is pointed by cursor instead, otherwise, this
         UiElement is pointed.
         """
-        if self.children:
+        if self.children is not None:
             for child in self.children:
                 if check_for_collision(cursor, child):
                     return child

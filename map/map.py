@@ -110,10 +110,7 @@ class Map:
         self.width = self.columns * self.grid_width
         self.height = self.rows * self.grid_height
 
-        try:
-            self.nodes_data = map_settings['nodes']
-        except KeyError:
-            self.nodes_data = {}
+        self.nodes_data = map_settings.get('nodes', {})
 
         # map is divided for sectors containing 10x10 Nodes each to split
         # space for smaller chunks in order to make enemies-detection
@@ -143,7 +140,7 @@ class Map:
             'grid_width': self.grid_width,
             'grid_height': self.grid_height,
             'nodes_data': self.nodes_data,
-            'trees': {g: n.tree for (g, n) in self.nodes.items() if n.tree is not None}
+            'trees': {g: n.tree.save() for (g, n) in self.nodes.items() if n.tree is not None}
         }
 
     def __str__(self) -> str:

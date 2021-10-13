@@ -154,16 +154,18 @@ class UnitsProducer:
             production_buttons.append(b)
         return production_buttons
 
-    def __getstate__(self) -> Dict:
+    def save(self) -> Dict:
         return {
             'production_progress': self.production_progress,
             'currently_produced': self.currently_produced,
             'production_time': self.production_time,
         }
 
-    def __setstate__(self, state):
-        print('units producer __setstate__')
-        # TODO
+    def load(self, state: Dict):
+        print('units producer load()')
+        self.production_progress = state['production_progress']
+        self.currently_produced = state['currently_produced']
+        self.production_time = state['production_time']
 
 
 class ResourceProducer:
@@ -184,10 +186,10 @@ class ResourceProducer:
         if self.recipient is None:
             self.stockpile += self.yield_per_frame
 
-    def __getstate__(self) -> Dict:
+    def save(self) -> Dict:
         return {}
 
-    def __setstate__(self, state):
+    def load(self, state):
         print('resource extractor __setstate__')
         # TODO
 
@@ -217,7 +219,7 @@ class ResearchFacility:
         self.researched_technology = None
         self.owner.update_known_technologies(technology)
 
-    def __getstate__(self) -> Dict:
+    def save(self) -> Dict:
         if self.researched_technology is None:
             return {'funding': self.funding, 'researched_technology': None}
         return {
@@ -225,7 +227,7 @@ class ResearchFacility:
             'researched_technology': self.researched_technology.name
         }
 
-    def __setstate__(self, state: Dict):
+    def load(self, state: Dict):
         print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
@@ -506,11 +508,11 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         saved_building = super().save()
 
         if self.produced_units is not None:
-            saved_building.update(UnitsProducer.__getstate__(self))
+            saved_building.update(UnitsProducer.save(self))
         elif self.produced_resource is not None:
-            saved_building.update(ResourceProducer.__getstate__(self))
+            saved_building.update(ResourceProducer.save(self))
         elif self.research_facility:
-            saved_building.update(ResearchFacility.__getstate__(self))
+            saved_building.update(ResearchFacility.save(self))
 
         if self.garrisoned_soldiers:
             saved_building.update(self.save_garrison())
@@ -522,11 +524,11 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def load(self, loaded_data: Dict):
         super().load(loaded_data)
         if self.produced_units is not None:
-            UnitsProducer.__setstate__(self, loaded_data)
-        elif self.produced_resource is not None:
-            ResourceProducer.__setstate__(self, loaded_data)
-        elif self.research_facility:
-            ResearchFacility.__setstate__(self, loaded_data)
+            UnitsProducer.load(self, loaded_data)
+        if self.produced_resource is not None:
+            ResourceProducer.load(self, loaded_data)
+        if self.research_facility:
+            ResearchFacility.load(self, loaded_data)
         if self.garrisoned_soldiers:
             self.load_garrison()
 
