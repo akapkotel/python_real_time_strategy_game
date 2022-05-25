@@ -15,7 +15,7 @@ from units.units import Unit, Vehicle, Tank, Soldier
 from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
-from utils.logging import log
+from utils.game_logging import log
 from gameobjects.constants import BUILDINGS, UNITS, CLASS, CORPSE, WRECK, TREE
 from gameobjects.gameobject import GameObject, TerrainObject, Wreck, Tree
 

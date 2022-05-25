@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import random
@@ -18,18 +18,17 @@ from campaigns.research import Technology
 from utils.classes import Observed, Observer
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
-from utils.logging import log
+# from utils.game_logging import log
 from utils.functions import (
     ignore_in_editor_mode, new_id, add_player_color_to_name
 )
 from utils.geometry import (
     is_visible, clamp, find_area, precalculate_circular_area_matrix
 )
-from utils.scheduling import EventsCreator
+from utils.scheduling import EventsCreator, ScheduledEvent
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
-from utils.timing import timer
 
 FUEL = 'fuel'
 FOOD = 'food'
@@ -110,7 +109,7 @@ class Faction(EventsCreator, Observer, Observed):
         other.friendly_factions.add(self.id)
 
     def update(self):
-        log(f'Updating faction: {self.name} players: {self.players}')
+        # log(f'Updating faction: {self.name} players: {self.players}')
         self.known_enemies.clear()
         for player in self.players:
             player.update()
@@ -132,18 +131,20 @@ class Faction(EventsCreator, Observer, Observed):
         }
 
 
-class ResourcesManager:
+class ResourcesManager(EventsCreator):
     game = None
     resources = {
         FUEL: 0, FOOD: 0, ENERGY: 750, STEEL: 200, ELECTRONICS: 100, CONSCRIPTS: 0
     }
 
     def __init__(self):
+        super().__init__()
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}_yield_per_frame", 0.0)
+            setattr(self, f"{resource_name}_yield_per_second", 1.0)
             setattr(self, f"{resource_name}_production_efficiency", 1.0)
+        self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
     def enough_resources_for(self, expense: str) -> bool:
         category = self._identify_expense_category(expense)
@@ -167,17 +168,16 @@ class ResourcesManager:
         return self.resource(resource) >= amount
 
     def notify_player_of_resource_deficit(self, resource: str):
-        sound = f'not_enough_{resource}.wav'
-        self.game.window.sound_player.play_sound(sound)
+        self.game.window.sound_player.play_sound(f'not_enough_{resource}.wav')
 
-    def change_resource_yield_per_frame(self, resource: str, change: float):
-        old_yield = getattr(self, f"{resource}_yield_per_frame")
-        setattr(self, f"{resource}_yield_per_frame", old_yield + change)
+    def change_resource_yield_per_second(self, resource: str, change: float):
+        old_yield = getattr(self, f"{resource}_yield_per_second")
+        setattr(self, f"{resource}_yield_per_second", old_yield + change)
 
     def _update_resources_stock(self):
         for resource_name in self.resources.keys():
             stock = getattr(self, resource_name)
-            change = getattr(self, f"{resource_name}_yield_per_frame")
+            change = getattr(self, f"{resource_name}_yield_per_second")
             setattr(self, resource_name, stock + change)
 
     def consume_resource(self, resource_name: str, amount: float):
@@ -266,8 +266,6 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
 
     def update(self):
         self.known_enemies.clear()
-        self._update_resources_stock()
-        # print(self.buildings)
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
         self.known_enemies.update(enemies)
@@ -315,7 +313,7 @@ class HumanPlayer(Player):
 
     def update(self):
         super().update()
-        self.update_ui_resource_panel()
+        # self.update_ui_resource_panel()
 
     def update_ui_resource_panel(self):
         bundle = self.game.get_bundle(BASIC_UI)
@@ -324,6 +322,18 @@ class HumanPlayer(Player):
             value = int(self.resource(resource))
             label.text = str(value)
             label.text_color = RED if not value else GREEN
+
+    def consume_resource(self, resource_name: str, amount: float):
+        super().consume_resource(resource_name, amount)
+        self.update_ui_resource_panel()
+
+    def add_resource(self, resource_name: str, amount: float):
+        super().add_resource(resource_name, amount)
+        self.update_ui_resource_panel()
+
+    def _update_resources_stock(self):
+        super()._update_resources_stock()
+        self.update_ui_resource_panel()
 
 
 class CpuPlayer(Player):
@@ -637,7 +647,7 @@ class PlayerEntity(GameObject):
         )
         return saved_entity
 
-    def load(self, loaded_data: Dict):
+    def after_respawn(self, loaded_data: Dict):
         """
         After initializing Entity during loading saved game state, load all the
         attributes which were saved, but not passed to __init__ method.

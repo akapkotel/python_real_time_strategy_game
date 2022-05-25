@@ -29,7 +29,7 @@ from controllers.constants import CURSOR_ENTER_TEXTURE
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
-from utils.logging import logger
+from utils.game_logging import logger
 
 
 class UnitsProducer:
@@ -161,7 +161,7 @@ class UnitsProducer:
             'production_time': self.production_time,
         }
 
-    def load(self, state: Dict):
+    def after_respawn(self, state: Dict):
         print('units producer load()')
         self.production_progress = state['production_progress']
         self.currently_produced = state['currently_produced']
@@ -179,7 +179,7 @@ class ResourceProducer:
         self.reserves = 0.0
         self.stockpile = 0.0
         self.recipient: Optional[Player] = recipient
-        self.recipient.change_resource_yield_per_frame(self.resource, value)
+        self.recipient.change_resource_yield_per_second(self.resource, value)
 
     def update_resource_production(self):
         self.reserves -= self.yield_per_frame
@@ -189,7 +189,7 @@ class ResourceProducer:
     def save(self) -> Dict:
         return {}
 
-    def load(self, state):
+    def after_respawn(self, state):
         print('resource extractor __setstate__')
         # TODO
 
@@ -227,7 +227,7 @@ class ResearchFacility:
             'researched_technology': self.researched_technology.name
         }
 
-    def load(self, state: Dict):
+    def after_respawn(self, state: Dict):
         print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
@@ -441,7 +441,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         path_and_texture, size = self.find_proper_texture(soldier.player)
         self.change_building_texture(path_and_texture, size)
         self.reconfigure_building(soldier.player)
-        self.game.sound_player.play_sound('enemy_building_captured.vaw')
+        if soldier.player is self.game.local_human_player:
+            self.game.sound_player.play_sound('enemy_building_captured.vaw')
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)
@@ -521,20 +522,21 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def save_garrison(self) -> Dict:
         return {'garrisoned_soldiers': [s.id for s in self.garrisoned_soldiers]}
 
-    def load(self, loaded_data: Dict):
-        super().load(loaded_data)
+    def after_respawn(self, loaded_data: Dict):
+        super().after_respawn(loaded_data)
         if self.produced_units is not None:
-            UnitsProducer.load(self, loaded_data)
+            UnitsProducer.after_respawn(self, loaded_data)
         if self.produced_resource is not None:
-            ResourceProducer.load(self, loaded_data)
+            ResourceProducer.after_respawn(self, loaded_data)
         if self.research_facility:
-            ResearchFacility.load(self, loaded_data)
+            ResearchFacility.after_respawn(self, loaded_data)
         if self.garrisoned_soldiers:
             self.load_garrison()
 
     def load_garrison(self):
         identifiers: List[int] = [s for s in self.garrisoned_soldiers]
         self.garrisoned_soldiers.clear()
+        soldier: Soldier
         for soldier in (self.game.find_gameobject(Unit, s) for s in identifiers):
             soldier.enter_building(self)
 

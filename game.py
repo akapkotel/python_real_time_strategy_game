@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import annotations
 
 __title__ = 'Python Real Time Strategy Game'
@@ -19,7 +19,6 @@ import time
 import pathlib
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
-
 from functools import partial
 from dataclasses import dataclass
 
@@ -33,7 +32,7 @@ from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor
 from user_interface.constants import (
-    EDITOR, MAIN_MENU, SAVING_MENU
+    EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
@@ -47,7 +46,7 @@ from utils.functions import (
     get_path_to_file, to_rgba, SEPARATOR,
     ignore_in_editor_mode
 )
-from utils.logging import log, logger
+from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group
 from utils.improved_spritelists import (
@@ -90,7 +89,7 @@ DEBUG = False
 @dataclass
 class Settings:
     """
-    Just a simple data container for convenient storage and acces to bunch of
+    Just a simple data container for convenient storage and access to bunch of
     minor variables, which would overcrowd Window __init__. It also helps to
     share many attributes between GameWindow and Game classes easily.
     """
@@ -309,12 +308,12 @@ class GameWindow(Window, EventsCreator):
         return self.current_view.viewport
 
     def update_scenarios_list(self, menu: str):
-        campaing_menu = self.menu_view.get_bundle(menu)
+        campaign_menu = self.menu_view.get_bundle(menu)
         self.menu_view.selectable_groups['scenarios'] = group = SelectableGroup()
-        campaing_menu.remove_subgroup(5)
+        campaign_menu.remove_subgroup(5)
 
         x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, 60))
-        campaing_menu.extend(  # refresh saved-games list
+        campaign_menu.extend(  # refresh saved-games list
             GenericTextButton('blank_file_button.png', x, next(y), file,
                               None, subgroup=5, selectable_group=group)
             for file in self.save_manager.scenarios
@@ -345,7 +344,7 @@ class GameWindow(Window, EventsCreator):
         """
         saves = self.menu_view.selectable_groups['saves']
         if (selected_save := saves.currently_selected) is not None:
-            save_name = selected_save.name.rstrip('.sav')
+            save_name = selected_save.name
         elif not (save_name := text_input_field.get_text()):
             save_name = f'saved_game({time.asctime()})'
         scenario = self.settings.editor_mode
@@ -366,7 +365,7 @@ class GameWindow(Window, EventsCreator):
         self.show_view(self.menu_view)
         self.menu_view.toggle_game_related_buttons()
 
-    @ask_player_for_confirmation(SCREEN_CENTER, 'loading menu')
+    @ask_player_for_confirmation(SCREEN_CENTER, LOADING_MENU)
     def delete_saved_game(self):
         saves = self.menu_view.selectable_groups['saves']
         if (selected := saves.currently_selected) is not None:
@@ -645,7 +644,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.buildings.extend(
             (
                 self.spawn('medium_factory', self.players[2], (400, 600), garrison=3),
-                self.spawn('capitol', self.players[4], (1000, 600), garrison=1),
+                #TODO: loading saved Capitol building crashes game
+                self.spawn('medium_factory', self.players[4], (1000, 600), garrison=1),
             )
         )
 

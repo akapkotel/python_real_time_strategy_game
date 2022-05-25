@@ -9,7 +9,7 @@ from user_interface.user_interface import (
     ToggledElement, TextInputField, UiBundlesHandler
 )
 from utils.functions import ignore_in_menu, ignore_in_game
-from utils.logging import log
+from utils.game_logging import log
 
 
 class KeyboardHandler(ToggledElement):

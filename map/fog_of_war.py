@@ -4,7 +4,6 @@ from functools import lru_cache
 from typing import Dict, KeysView, Optional, Set
 
 from arcade import Sprite, SpriteList, make_circle_texture
-from numba import njit
 
 from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition

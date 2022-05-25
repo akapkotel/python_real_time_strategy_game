@@ -4,11 +4,11 @@ import os
 import shelve
 import time
 
-from typing import List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any, Generator
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
-from utils.logging import log, logger
+from utils.game_logging import log, logger
 from utils.data_types import SavedGames
 from players_and_factions.player import Faction
 from map.map import Map, Pathfinder
@@ -64,7 +64,7 @@ class SaveManager(Singleton):
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
         extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
         path = self.scenarios_path if scenario else self.saves_path
-        full_save_path = os.path.join(path, save_name + extension)
+        full_save_path = os.path.join(path, save_name if extension in save_name else save_name + extension)
         self.delete_file(save_name, scenario)  # to avoid 'adding' to existing file
         with shelve.open(full_save_path) as file:
             file['saved_date'] = time.localtime()
@@ -101,26 +101,24 @@ class SaveManager(Singleton):
         else:
             return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
 
-    def load_game(self, file_name: str):
+    def load_game(self, file_name: str) -> Generator[float, Any, None]:
         full_save_path = self.get_full_path_to_file_with_extension(file_name)
         with shelve.open(full_save_path) as file:
             loaded = ('timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
                       'mission', 'permanent_units_groups', 'fog_of_war',
                       'mini_map', 'scheduled_events')
-            progress = 1 / (len(loaded) + 1)
+            progress = 1 / len(loaded)
             for name in loaded:
                 log(f'Loading: {name}...', console=True)
-                function = eval(f'self.load_{name}')
-                argument = file[name]
-                yield self.loading_step(function, argument, progress)
-        log(f'Game {file_name} loaded successfully!', console=True)
-        yield progress
+                self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
+                log(f'Loaded {name} successfully!', console=True)
+                yield progress
+        # log(f'Game {file_name} loaded successfully!', console=True)
+        # yield progress
 
-    @logger()
-    def loading_step(self, function: Callable, argument: Any, progress: float):
+    def loading_step(self, function: Callable, argument: Any):
         function(argument)
-        return progress
 
     def load_timer(self, loaded_timer):
         self.game.timer = loaded_timer
@@ -162,15 +160,16 @@ class SaveManager(Singleton):
         return self.load_entities(buildings)
 
     def load_entities(self, entities):
-        """Respawn Units and Buildings."""
+        """
+        Respawn Units and Buildings. Respawning is executed in two steps. First a new GameObject is instantiated, and
+        then it's original state is retrieved and set by calling after_spawn method.
+        """
         if self.game.spawner is None:
             self.game.spawner = GameObjectsSpawner()
             self.game.explosions_pool = ExplosionsPool()
         for e in entities:
-            entity = self.game.spawn(
-                e['object_name'], e['player'], e['position'], id=e['id']
-            )
-            entity.load(e)
+            entity = self.game.spawn(e['object_name'], e['player'], e['position'], id=e['id'])
+            entity.after_respawn(e)
 
     def load_mission(self, mission):
         self.game.current_mission = mission

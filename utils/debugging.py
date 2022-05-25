@@ -12,7 +12,7 @@ from map.constants import TILE_WIDTH, TILE_HEIGHT
 from map.map import normalize_position, position_to_map_grid
 from utils.colors import RED, GREEN, WHITE, BLACK
 from utils.functions import to_rgba
-from utils.logging import log
+from utils.game_logging import log
 from units.units import Unit
 from players_and_factions.player import ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
 

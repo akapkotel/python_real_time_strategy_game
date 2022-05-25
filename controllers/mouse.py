@@ -26,7 +26,7 @@ from user_interface.user_interface import (
 )
 
 from utils.functions import get_path_to_file, ignore_in_menu
-from utils.logging import logger
+from utils.game_logging import logger
 
 DrawnAndUpdated = Union[SpriteList, LayeredSpriteList, 'MouseCursor']
 

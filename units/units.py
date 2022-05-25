@@ -27,6 +27,8 @@ from utils.geometry import (
 )
 from units.weapons import Weapon
 
+INFANTRY_STEPS_SPEED = 0.05
+
 
 class Unit(PlayerEntity):
     """
@@ -443,8 +445,8 @@ class Unit(PlayerEntity):
         )
         return saved_unit
 
-    def load(self, loaded_data: Dict):
-        super().load(loaded_data)
+    def after_respawn(self, loaded_data: Dict):
+        super().after_respawn(loaded_data)
         self.path = deque(loaded_data['path'])
 
 
@@ -670,7 +672,7 @@ class Soldier(Unit):
 
     def update_animation(self, delta_time: float = 1/60):
         self.last_step += delta_time
-        if self.last_step > 0.15:
+        if self.last_step > INFANTRY_STEPS_SPEED:
             self.last_step = 0
             if self.cur_texture_index < len(self.textures) - 1:
                 self.cur_texture_index += 1

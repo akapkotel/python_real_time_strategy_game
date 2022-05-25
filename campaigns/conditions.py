@@ -6,7 +6,7 @@ from typing import Optional
 
 from players_and_factions.player import Player, Faction
 from campaigns.consequences import AddVictoryPoints, Consequence
-from utils.logging import log
+from utils.game_logging import log
 
 
 class Condition:

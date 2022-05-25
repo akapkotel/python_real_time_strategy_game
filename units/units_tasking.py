@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from utils.logging import log
+from utils.game_logging import log
 from utils.scheduling import ScheduledEvent
 
 

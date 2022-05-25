@@ -12,7 +12,7 @@ from utils.data_types import GridPosition
 from utils.functions import (
     get_path_to_file, decolorised_name, add_extension
 )
-from utils.logging import log
+from utils.game_logging import log
 from utils.improved_spritelists import LayeredSpriteList
 from utils.scheduling import EventsCreator, ScheduledEvent
 
@@ -123,6 +123,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
             super().kill()
 
     def save(self) -> Dict:
+        """We save only simple data-types required to respawn original GameObject, instead of pickling it."""
         return {
             'id': self.id,
             'object_name': self.object_name,
@@ -160,6 +161,7 @@ class Tree(TerrainObject):
         super().kill()
 
     def save(self) -> int:
+        # Tree is saved as the integer ending it's texture name, to avoid saving weakref to the MapNode
         return int(self.object_name[-1])
 
 

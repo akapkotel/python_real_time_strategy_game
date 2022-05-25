@@ -116,13 +116,16 @@ class Observed:
 
     def __setattr__(self, key, value):
         try:
-            if key in (observed := self.observed_attributes):
-                for observer in observed[key]:
-                    observer.notify(key, value)
+            if key in self.observed_attributes:
+                self.notify_all_observers(key, value)
         except AttributeError:
-            pass
+            pass  # happens only once, during __init__ when observed_attributes is not initialized yet
         finally:
             super().__setattr__(key, value)
+
+    def notify_all_observers(self, key: str, value: Any):
+        for observer in self.observed_attributes[key]:
+            observer.notify(key, value)
 
     def attach_observers(self, observers: List[Observer], *attributes: str):
         for observer in observers:

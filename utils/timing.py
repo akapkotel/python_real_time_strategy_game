@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from time import perf_counter
 
-from utils.logging import log
+from utils.game_logging import log
 
 
 def timer(level=0, global_profiling_level=0, forced=False):

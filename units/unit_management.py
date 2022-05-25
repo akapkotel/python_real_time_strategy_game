@@ -292,6 +292,7 @@ class UnitsManager(EventsCreator):
 
     def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
         if clicked.is_building and self.only_soldiers_selected:
+            clicked: Building
             self.on_building_clicked(clicked)
         else:
             self.set_hostile_entity_as_units_target(clicked, units)
@@ -319,6 +320,7 @@ class UnitsManager(EventsCreator):
         return all(s.is_infantry for s in self.selected_units)
 
     def get_selected_soldiers(self) -> List[Soldier]:
+        s: Soldier
         return [s for s in self.selected_units if s.is_infantry]
 
     def send_soldiers_to_building(self, building: Building, soldiers: List[Soldier]):

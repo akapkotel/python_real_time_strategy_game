@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
-from utils.logging import log
+from utils.game_logging import log
 
 from arcade import load_sound, play_sound, stop_sound, Sound
 from pyglet.media import Player

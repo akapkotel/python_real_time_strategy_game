@@ -5,7 +5,7 @@ from functools import partial
 from typing import Tuple, Dict
 
 from utils.data_types import TechnologyId
-from utils.logging import log
+from utils.game_logging import log
 
 
 class Technology:

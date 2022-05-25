@@ -29,7 +29,7 @@ from utils.functions import (
     make_texture, get_path_to_file, name_to_texture_name, to_rgba,
     get_texture_size
 )
-from utils.logging import log
+from utils.game_logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
@@ -195,8 +195,10 @@ class ToggledElement:
 
 
 class Selectable:
-    """"""
-    # __slots__ = ['selectable_group', 'selected']
+    """
+    Selectable works with SelectableGroup class and should be grouped with other Selectable instances inside the group.
+    When one Selectable is toggled as 'selected', the rest of the group members are automatically unselected.
+    """
 
     def __init__(self, selectable_group: Optional[SelectableGroup] = None):
         self.selectable_group = selectable_group
@@ -210,13 +212,18 @@ class Selectable:
 
     def select(self):
         self.selected = True
-        self.selectable_group.select(self)
+        self.selectable_group.unselect_all_except_selected(self)
 
     def unselect(self):
         self.selected = False
 
 
 class SelectableGroup:
+    """
+    This class maintains Selectable elements, which are UiElements having 'selected' and 'selectable_group' attributes.
+    When one Selectable is toggled as 'selected', the rest of the group members are automatically unselected by this
+    class.
+    """
     __slots__ = ['selectable_elements']
 
     def __init__(self):
@@ -231,7 +238,7 @@ class SelectableGroup:
         self.selectable_elements.append(selectable)
         selectable.selectable_group = self
 
-    def select(self, selected: Selectable):
+    def unselect_all_except_selected(self, selected: Selectable):
         for element in (e for e in self.selectable_elements if e is not selected):
             element.unselect()
 

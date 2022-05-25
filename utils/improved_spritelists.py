@@ -5,7 +5,7 @@ from typing import Dict, Optional, Union
 
 from arcade import SpriteList, Sprite
 
-from utils.logging import log
+from utils.game_logging import log
 
 
 class SpriteListWithSwitch(SpriteList):

@@ -3,7 +3,7 @@ from __future__ import annotations
 from math import inf
 from typing import List, Tuple, Dict, Any, Optional, Callable, Union
 
-from utils.logging import log, logger
+from utils.game_logging import log, logger
 
 
 class ScheduledEvent:

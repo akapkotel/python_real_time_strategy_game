@@ -7,7 +7,7 @@ from arcade import (
 
 
 from utils.functions import get_objects_with_attribute
-from utils.logging import log, logger
+from utils.game_logging import log, logger
 from utils.improved_spritelists import LayeredSpriteList
 from utils.colors import WHITE, GREEN
 from utils.data_types import Viewport
