@@ -117,7 +117,8 @@ class SaveManager(Singleton):
         # log(f'Game {file_name} loaded successfully!', console=True)
         # yield progress
 
-    def loading_step(self, function: Callable, argument: Any):
+    @staticmethod
+    def loading_step(function: Callable, argument: Any):
         function(argument)
 
     def load_timer(self, loaded_timer):

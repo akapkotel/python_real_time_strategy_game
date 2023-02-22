@@ -119,7 +119,7 @@ class SelectedUnitMarker(SelectedEntityMarker):
     def __init__(self, selected: Unit):
         super().__init__(selected)
         # units selection marker has 10 versions, blank + 9 different numbers
-        # to show which PermanentUnitsGroup an Unit belongs to:
+        # to show which PermanentUnitsGroup a Unit belongs to:
         group_index = selected.permanent_units_group
         self.borders.texture = selection_textures[group_index]
 
@@ -131,7 +131,7 @@ class SelectedSoldierMarker(SelectedEntityMarker):
     def __init__(self, selected: Unit):
         super().__init__(selected)
         # units selection marker has 10 versions, blank + 9 different numbers
-        # to show which PermanentUnitsGroup an Unit belongs to:
+        # to show which PermanentUnitsGroup a Unit belongs to:
         group_index = selected.permanent_units_group
         self.borders.texture = soldier_selection_textures[group_index]
         self.update_health_bar(self.position[0])

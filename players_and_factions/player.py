@@ -304,17 +304,6 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
 class HumanPlayer(Player):
     cpu = False
 
-    def __init__(self,
-                 id: Optional[int] = None,
-                 name: Optional[str] = None,
-                 color: Optional[Color] = None,
-                 faction: Optional[Faction] = None):
-        super().__init__(id, name, color, faction)
-
-    def update(self):
-        super().update()
-        # self.update_ui_resource_panel()
-
     def update_ui_resource_panel(self):
         bundle = self.game.get_bundle(BASIC_UI)
         for resource in self.resources:
@@ -337,14 +326,10 @@ class HumanPlayer(Player):
 
 
 class CpuPlayer(Player):
+    """
+    CpuPlayer has more methods than normal Player since it must handle the AI.
+    """
     cpu = True
-
-    def __init__(self,
-                 id: Optional[int] = None,
-                 name: Optional[str] = None,
-                 color: Optional[Color] = None,
-                 faction: Optional[Faction] = None):
-        super().__init__(id, name, color, faction)
 
 
 class PlayerEntity(GameObject):

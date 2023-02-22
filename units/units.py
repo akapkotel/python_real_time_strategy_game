@@ -60,6 +60,9 @@ class Unit(PlayerEntity):
         self.current_sector: Optional[Sector] = None
         self.update_current_sector()
 
+        self.quadtree = None
+        self.game.map.quadtree.insert(self)
+
         self.path: Deque[GridPosition] = deque()
         self.path_wait_counter: int = 0
         self.awaited_path: Optional[MapPath] = None
@@ -158,6 +161,7 @@ class Unit(PlayerEntity):
         self.update_observed_area(new_current_node)
         self.update_blocked_map_nodes(new_current_node)
         self.update_current_sector()
+        self.update_in_quadtree()
         self.update_pathfinding()
 
     def update_current_node(self):
@@ -448,6 +452,14 @@ class Unit(PlayerEntity):
     def after_respawn(self, loaded_data: Dict):
         super().after_respawn(loaded_data)
         self.path = deque(loaded_data['path'])
+
+    def update_in_quadtree(self):
+        if self.quadtree is not None:
+            self.remove_from_quadtree()
+
+    def remove_from_quadtree(self):
+        self.map.quadtree.remove(entity=self)
+        self.quadtree = None
 
 
 class Vehicle(Unit):

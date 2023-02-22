@@ -21,12 +21,14 @@ from utils.scheduling import EventsCreator
 from utils.functions import (
     get_path_to_file, all_files_of_type_named
 )
+from utils.quadtree import QuadTree
 from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import distance_2d, calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
+TW, TH, SS = TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 
 PATH = 'PATH'
 VERTICAL_DIST = 10
@@ -61,8 +63,8 @@ def normalize_position(x: Number, y: Number) -> NormalizedPoint:
 def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
     """Return (x, y) position of the map-grid-normalised Node."""
     return (
-        int(grid[0] * TILE_WIDTH + TILE_WIDTH // 2),
-        int(grid[1] * TILE_HEIGHT + TILE_HEIGHT // 2)
+        int(grid[0] * TILE_WIDTH + (TILE_WIDTH // 2)),
+        int(grid[1] * TILE_HEIGHT + (TILE_HEIGHT // 2))
     )
 
 
@@ -119,6 +121,8 @@ class Map:
         self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.distances = {}
+
+        self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
 
         self.generate_sectors()
         self.generate_nodes()
@@ -586,18 +590,16 @@ class NavigatingUnitsGroup:
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
             self.slice_paths(units, destinations, path)
-        else:
-            self.navigate_straightly_to_destination(destinations, units)
+        self.add_destinations_to_units_paths(destinations, units)
         return destinations
 
     def slice_paths(self, units, destinations, path):
         for i in range(1, len(path) // OPTIMAL_PATH_LENGTH, OPTIMAL_PATH_LENGTH):
             step = path[i * OPTIMAL_PATH_LENGTH]
             units_steps = Pathfinder.instance.get_group_of_waypoints(*step, len(units))
-            self.navigate_straightly_to_destination(units_steps, units)
-        self.navigate_straightly_to_destination(destinations, units)
+            self.add_destinations_to_units_paths(units_steps, units)
 
-    def navigate_straightly_to_destination(self, destinations, units):
+    def add_destinations_to_units_paths(self, destinations, units):
         for unit, grid in zip(units, destinations):
             self.units_paths[unit].append(grid)
 
@@ -615,16 +617,13 @@ class NavigatingUnitsGroup:
         positions = [map_grid_to_position(g) for g in destinations]
         self.map.game.units_ordered_destinations.new_destinations(positions)
 
-    @staticmethod
-    def get_next_units_steps(amount: int, step: GridPosition):
-        destinations = Pathfinder.instance.get_group_of_waypoints(*step, amount)
-        return [d[0] for d in zip(destinations, range(amount))]
-
     def update(self):
         to_remove = []
-        remove = to_remove.append
         for unit, steps in self.units_paths.items():
-            self.find_next_path_for_unit(unit, steps) if steps else remove(unit)
+            if steps:
+                self.find_next_path_for_unit(unit, steps)
+            else:
+                to_remove.append(unit)
         self.remove_finished_paths(to_remove)
 
     @staticmethod
