@@ -4,6 +4,7 @@ from __future__ import annotations
 import random
 import time
 
+from math import dist
 from abc import abstractmethod
 from collections import deque
 from functools import cached_property
@@ -22,7 +23,7 @@ from players_and_factions.player import Player, PlayerEntity
 from utils.colors import GREEN
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.geometry import (
-    precalculate_possible_sprites_angles, calculate_angle, distance_2d,
+    precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS, find_area
 )
 from units.weapons import Weapon
@@ -50,7 +51,6 @@ class Unit(PlayerEntity):
         self.virtual_angle = int(ROTATION_STEP * self.facing_direction) % 360
 
         self.weight = weight
-        self.visibility_radius = 100
 
         # pathfinding and map-related:
         self.position = normalize_position(*self.position)
@@ -59,9 +59,6 @@ class Unit(PlayerEntity):
         self.block_map_node(self.current_node)
         self.current_sector: Optional[Sector] = None
         self.update_current_sector()
-
-        self.quadtree = None
-        self.game.map.quadtree.insert(self)
 
         self.path: Deque[GridPosition] = deque()
         self.path_wait_counter: int = 0
@@ -161,10 +158,16 @@ class Unit(PlayerEntity):
         self.update_observed_area(new_current_node)
         self.update_blocked_map_nodes(new_current_node)
         self.update_current_sector()
-        self.update_in_quadtree()
         self.update_pathfinding()
 
     def update_current_node(self):
+        current_node = self.get_current_node()
+        if current_node is not self.current_node:
+            if dist(self.position, self.quadtree.position) > self.quadtree.smaller_dimension:
+                self.update_in_quadtree()
+        return current_node
+
+    def get_current_node(self):
         current_node = self.map.position_to_node(*self.position)
         if (old_y := self.current_node.grid[1]) != (new_y := current_node.grid[1]):
             self.layered_spritelist.swap_rendering_layers(self, old_y, new_y)
@@ -306,7 +309,7 @@ class Unit(PlayerEntity):
             return self.rotate_towards_target(angle_to_target)
 
         speed = self.current_speed
-        if (distance_left := distance_2d(self.position, destination)) <= speed:
+        if (distance_left := dist(self.position, destination)) <= speed:
             self.move_to_next_waypoint()
         else:
             self.move_to_current_waypoint(destination, distance_left)
@@ -452,14 +455,6 @@ class Unit(PlayerEntity):
     def after_respawn(self, loaded_data: Dict):
         super().after_respawn(loaded_data)
         self.path = deque(loaded_data['path'])
-
-    def update_in_quadtree(self):
-        if self.quadtree is not None:
-            self.remove_from_quadtree()
-
-    def remove_from_quadtree(self):
-        self.map.quadtree.remove(entity=self)
-        self.quadtree = None
 
 
 class Vehicle(Unit):

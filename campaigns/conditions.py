@@ -19,7 +19,7 @@ class Condition:
         self.name = self.__class__.__name__
         self.player = player
         self.mission: Optional[Mission] = None
-        self.optional = False
+        self.optional = optional
         self.victory_points = 0
         self._consequences = []
 
@@ -56,7 +56,7 @@ class Condition:
         self._consequences.append(consequence)
 
     @abstractmethod
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         raise NotImplementedError
 
     def execute_consequences(self):
@@ -80,12 +80,12 @@ class TimePassed(Condition):
         super().__init__(player)
         self.required_time = required_time
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return self.mission.game.timer['m'] >= self.required_time
 
 
 class MapRevealed(Condition):
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return len(self.mission.game.fog_of_war.unexplored) == 0
 
 
@@ -102,10 +102,10 @@ class NoUnitsLeft(Condition):
         super().__init__(player)
         self.faction = faction
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         if self.faction is not None:
-            return len(self.faction.units) + len(self.faction.buildings) == 0
-        return len(self.player.units) + len(self.player.buildings) == 0
+            return not (self.faction.units or self.faction.buildings)
+        return not (self.player.units or self.player.buildings)
 
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -123,7 +123,7 @@ class HasUnitsOfType(Condition):
         self.unit_type = unit_type.strip('.png')
         self.amount = amount
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return sum(1 for u in self.player.units if self.unit_type in u.object_name) > self.amount
 
 
@@ -131,7 +131,7 @@ class HasBuildingsOfType(HasUnitsOfType):
     def __init__(self, player: Player, building_type, amount=0):
         super().__init__(player, building_type, amount)
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return sum(1 for u in self.player.buildings if self.unit_type in u.object_name) > self.amount
 
 
@@ -140,13 +140,13 @@ class ControlsBuilding(Condition):
         super().__init__(player)
         self.building_id = building_id
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return any(b.id == self.building_id for b in self.player.buildings)
 
 
 class ControlsArea(Condition):
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         pass
 
 
@@ -155,7 +155,7 @@ class HasTechnology(Condition):
         super().__init__(player)
         self.technology_id = technology_id
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return self.technology_id in self.player.known_technologies
 
 
@@ -166,7 +166,7 @@ class HasResource(Condition):
         self.resource = resource
         self.amount = amount
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return self.player.has_resource(self.resource, self.amount)
 
 
@@ -176,7 +176,7 @@ class MinimumVictoryPoints(Condition):
         super().__init__(player)
         self.required_vp = required_vp
 
-    def is_met(self) -> bool:
+    def fulfilled(self) -> bool:
         return self.mission.victory_points[self.player.id] >= self.required_vp
 
 

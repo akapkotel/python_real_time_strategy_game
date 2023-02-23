@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 from functools import lru_cache
-from math import atan2, degrees, hypot, radians, sin, cos, inf
-from typing import Optional, Sequence, List, Tuple
-
-import numpy as np
+from math import atan2, degrees, radians, sin, cos, inf, dist
+from typing import Optional, Sequence, Tuple
 
 from numba import njit
 from shapely.geometry import LineString, Polygon
@@ -48,12 +46,6 @@ def calculate_angle(sx: float, sy: float, ex: float, ey: float) -> float:
 
 
 @njit(nogil=True, fastmath=True, cache=True)
-def distance_2d(coord_a: Point, coord_b: Point) -> float:
-    """Calculate distance between two points in 2D space."""
-    return hypot(coord_b[0] - coord_a[0], coord_b[1] - coord_a[1])
-
-
-@njit(nogil=True, fastmath=True, cache=True)
 def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
     """
     Calculate distance between two points in 2D space and find if distance
@@ -64,7 +56,7 @@ def close_enough(coord_a: Point, coord_b: Point, distance: float) -> bool:
     :param distance: float -- minimal distance to check against
     :return: bool -- if distance is less than
     """
-    return distance_2d(coord_a, coord_b) <= distance
+    return dist(coord_a, coord_b) <= distance
 
 
 # @njit(nogil=True, fastmath=True)

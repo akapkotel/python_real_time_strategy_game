@@ -51,7 +51,7 @@ class Mission:
 
     @property
     def is_playable(self) -> bool:
-        if self.campaign_name:
+        if self.campaign_name is not None:
             return self.name in self.campaign.playable_missions
         return not self.campaign_name
 
@@ -112,7 +112,7 @@ class Mission:
         self.evaluate_conditions()
 
     def evaluate_conditions(self):
-        for condition in (c for c in self.conditions if c.is_met()):
+        for condition in (c for c in self.conditions if c.fulfilled()):
             condition.execute_consequences()
             self.conditions.remove(condition)
 
@@ -137,7 +137,7 @@ class Mission:
             self.game.toggle_pause(dialog='You have been defeated!', color=RED)
 
     def quit_mission(self):
-        if self.campaign_name and self.winner is self.game.local_human_player:
+        if self.campaign_name is not None and self.winner is self.game.local_human_player:
             campaign = self.game.window.campaigns[self.campaign_name]
             campaign.update(finished_mission=self)
         self.game.window.show_view(self.game.window.menu_view)
@@ -158,10 +158,10 @@ class Campaign:
         return [name for (name, status) in self.missions.values() if status]
 
     @property
-    def progress(self) -> float:
+    def progress(self) -> int:
         if self.playable_missions[1:]:
-            return 100 * (len(self.missions) / len(self.playable_missions))
-        return .0
+            return 100 * (len(self.missions) // len(self.playable_missions))
+        return 0
 
     def update(self, finished_mission: Mission):
         try:  # unblock next mission of campaign:

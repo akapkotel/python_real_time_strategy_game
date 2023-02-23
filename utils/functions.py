@@ -123,7 +123,7 @@ def get_enemies(war: int) -> Tuple[int, int]:
     index = 8589934592  # 2 to power of 32
     while index > 2:
         if war < index:
-            index = index >> 1
+            index >>= 1
         else:
             break
     return index, war - index

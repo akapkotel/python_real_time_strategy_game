@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import random
 
+from math import dist
 from collections import deque, defaultdict
 from functools import partial, cached_property
 from typing import (
@@ -24,7 +25,7 @@ from utils.functions import (
 from utils.quadtree import QuadTree
 from utils.game_logging import log, logger
 from utils.timing import timer
-from utils.geometry import distance_2d, calculate_circular_area
+from utils.geometry import calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -252,10 +253,10 @@ class Map:
         return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
                 if random.random() < self.game.settings.trees_density}
 
-    def get_nodes_row(self, row: int) -> List[MapNode]:
+    def get_nodes_by_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
 
-    def get_nodes_column(self, column: int) -> List[MapNode]:
+    def get_nodes_by_column(self, column: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[0] == column]
 
     def get_all_nodes(self) -> Generator[MapNode]:
@@ -743,7 +744,7 @@ class Pathfinder(EventsCreator):
             waypoints = [w for w in calculate_circular_area(*center, radius) if
                          w in nodes and nodes[w].walkable]
             radius += 1
-        waypoints.sort(key=lambda w: distance_2d(w, center))
+        waypoints.sort(key=lambda w: dist(w, center))
         return [d[0] for d in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self,

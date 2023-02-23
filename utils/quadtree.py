@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import random
+from math import dist
 from typing import Tuple, Union
 from dataclasses import dataclass
 
@@ -14,6 +14,8 @@ class Rect:
     height: Union[int, float]
 
     def __post_init__(self):
+        self.position = self.cx, self.cy
+        self.smaller_dimension = min(self.width, self.height)
         self.left = self.cx - self.width // 2
         self.right = self.left + self.width
         self.bottom = self.cy - self.height // 2
@@ -25,10 +27,8 @@ class Rect:
         )
 
     def intersects(self, other):
-        return not (other.left > self.left or
-                    other.right < self.right or
-                    other.top > self.top or
-                    other.bottom < self.bottom)
+        return not ((other.right < self.left or self.right < other.left) and
+                    (other.top < self.bottom or self.top < other.bottom))
 
 
 @dataclass
@@ -42,47 +42,50 @@ class QuadTree(Rect):
         self.entities = []
         self.children = []
 
-    def insert(self, entity) -> bool:
+    def insert(self, entity):
 
         if not self.in_bounds(entity):
             return False
 
         if len(self.entities) < self.max_entities:
-            return self.add_to_entities(entity)
+            self.add_to_entities(entity)
+            # print(f'Inserted {entity} to {self}')
+            return True
 
-        if not self.divided:
+        if not self.children:
             self.divide()
 
         for quadtree in self.children:
             if quadtree.insert(entity):
                 return True
 
-    def add_to_entities(self, entity) -> bool:
+    def add_to_entities(self, entity):
         self.entities.append(entity)
         try:
             entity.quadtree = self
         except AttributeError:
             setattr(entity, 'quadtree', self)
-        return True
 
     def remove(self, entity):
-        self.entities.remove(entity)
+        try:
+            self.entities.remove(entity)
+        except ValueError:
+            for quadtree in self.children:
+                quadtree.remove(entity)
+        # else:
+        #     print(f'Removed {entity} from {self}')
 
     def divide(self):
         cx, cy = self.cx, self.cy
         half_w, half_h = self.width / 2, self.height / 2
         quart_w, quart_h = half_w / 2, half_h / 2
         new_depth = self.depth + 1
-        # The boundaries of the four children nodes are "northwest",
-        # "northeast", "southeast" and "southwest" quadrants within the
-        # boundary of the current node.
         self.children = [
             QuadTree(cx - quart_w, cy - quart_h, half_w, half_h, self.max_entities, new_depth),
             QuadTree(cx + quart_w, cy - quart_h, half_w, half_h, self.max_entities, new_depth),
             QuadTree(cx + quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth),
             QuadTree(cx - quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth)
         ]
-        self.divided = True
 
     def query(self, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
@@ -93,12 +96,18 @@ class QuadTree(Rect):
             return found_entities
 
         # Search this node's points to see if they lie within boundary ...
-        for entity in self.entities:
-            if bounds.contains(entity):
-                found_entities.append(entity)
+        found_entities.extend(e for e in self.entities if bounds.in_bounds(e))
+
         for quadtree in self.children:
             quadtree.query(bounds, found_entities)
         return found_entities
+
+    def query_circle(self, circle_x, circle_y, radius):
+        diameter = radius + radius
+        rect = Rect(circle_x, circle_y, diameter, diameter)
+        possible_enemies = []
+        possible_enemies = self.query(rect, possible_enemies)
+        return [e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius]
 
     @property
     def empty(self):
@@ -110,32 +119,31 @@ class QuadTree(Rect):
         return not (self.children or self.entities)
 
     def clear(self):
-        if self.divided:
-            for quadtree in self.children:
-                quadtree.clear()
+        for quadtree in self.children:
+            quadtree.clear()
         self.entities.clear()
 
     def __len__(self, count=0) -> int:
-        if self.divided:
-            for quadtree in self.children:
-                count += len(quadtree)
+        for quadtree in self.children:
+            count += len(quadtree)
         return len(self.entities) + count
-
-
-@dataclass
-class Entity:
-    position: Tuple[int, int]
-
-    def __post_init__(self):
-        self.quadtree = None
-
-    def leave_quadtree(self):
-        self.quadtree.remove(self)
-        self.quadtree = None
 
 
 if __name__ == '__main__':
     import time
+    import random
+
+    @dataclass
+    class Entity:
+        position: Tuple[int, int]
+
+        def __post_init__(self):
+            self.quadtree = None
+
+        def leave_quadtree(self):
+            self.quadtree.remove(self)
+            self.quadtree = None
+
 
     entities = [Entity((random.randint(1, 600), random.randint(1, 600))) for _ in range(60)]
     tree = QuadTree(300, 300, 600, 600, max_entities=5)

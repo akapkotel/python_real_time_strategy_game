@@ -13,7 +13,7 @@ from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE
-from game import Game, UPDATE_RATE
+from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity

@@ -11,13 +11,13 @@ from arcade.arcade_types import Point
 from buildings.buildings import Building
 from map.map import map_grid_to_position
 from players_and_factions.player import Player
-from units.units import Unit, Vehicle, Tank, Soldier
+from units.units import Unit, Soldier, Tank
 from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
 from utils.game_logging import log
 from gameobjects.constants import BUILDINGS, UNITS, CLASS, CORPSE, WRECK, TREE
-from gameobjects.gameobject import GameObject, TerrainObject, Wreck, Tree
+from gameobjects.gameobject import GameObject, Wreck, Tree
 
 
 class GameObjectsSpawner(Singleton):

@@ -13,7 +13,7 @@ from arcade.arcade_types import Color, Point
 
 from user_interface.constants import BASIC_UI
 from gameobjects.gameobject import GameObject
-from map.map import MapNode, Sector, position_to_map_grid
+from map.map import MapNode, Sector, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
 from utils.classes import Observed, Observer
 from utils.colors import GREEN, RED
@@ -28,6 +28,7 @@ from utils.geometry import (
 from utils.scheduling import EventsCreator, ScheduledEvent
 
 
+
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 FUEL = 'fuel'
@@ -36,6 +37,8 @@ ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
+YIELD_PER_SECOND = "_yield_per_second"
+PRODUCTION_EFFICIENCY = "_production_efficiency"
 
 
 class Faction(EventsCreator, Observer, Observed):
@@ -142,8 +145,8 @@ class ResourcesManager(EventsCreator):
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}_yield_per_second", 1.0)
-            setattr(self, f"{resource_name}_production_efficiency", 1.0)
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0)
+            setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
     def enough_resources_for(self, expense: str) -> bool:
@@ -156,10 +159,12 @@ class ResourcesManager(EventsCreator):
         return True
 
     def _identify_expense_category(self, expense: str) -> str:
-        for category, items in self.game.configs.items():
-            if expense in items:
-                return category
-        raise KeyError(f'No such name ({expense}) in configs files!')
+        try:
+            for category, items in self.game.configs.items():
+                if expense in items:
+                    return category
+        except KeyError:
+            raise KeyError(f'No such name ({expense}) in configs files!')
 
     def resource(self, resource: str) -> int:
         return getattr(self, resource, 0)
@@ -171,13 +176,13 @@ class ResourcesManager(EventsCreator):
         self.game.window.sound_player.play_sound(f'not_enough_{resource}.wav')
 
     def change_resource_yield_per_second(self, resource: str, change: float):
-        old_yield = getattr(self, f"{resource}_yield_per_second")
-        setattr(self, f"{resource}_yield_per_second", old_yield + change)
+        old_yield = getattr(self, f"{resource}{YIELD_PER_SECOND}")
+        setattr(self, f"{resource}{YIELD_PER_SECOND}", old_yield + change)
 
     def _update_resources_stock(self):
         for resource_name in self.resources.keys():
             stock = getattr(self, resource_name)
-            change = getattr(self, f"{resource_name}_yield_per_second")
+            change = getattr(self, f"{resource_name}{YIELD_PER_SECOND}")
             setattr(self, resource_name, stock + change)
 
     def consume_resource(self, resource_name: str, amount: float):
@@ -377,10 +382,13 @@ class PlayerEntity(GameObject):
         self.armour = 0
         self.cover = 0
 
+        self.quadtree = None
+        self.game.map.quadtree.insert(self)
+
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
         # matrix current position
-        value = self.configs['visibility_radius']
+        self.visibility_radius = value = self.configs['visibility_radius']
         self.visibility_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which all map-nodes are visible for this entity:
@@ -388,7 +396,7 @@ class PlayerEntity(GameObject):
         self.observed_nodes: Set[MapNode] = set()
 
         # like the visibility matrix, but range should be smaller:
-        value = self.configs['attack_radius']
+        self.attack_radius = value = self.configs['attack_radius']
         self.attack_range_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which every enemy unit could by attacked:
@@ -490,6 +498,15 @@ class PlayerEntity(GameObject):
     def should_be_rendered(self) -> bool:
         return self in self.game.local_drawn_units_and_buildings and self.on_screen
 
+    def update_in_quadtree(self):
+        if self.quadtree is not None:
+            self.remove_from_quadtree()
+            self.map.quadtree.insert(entity=self)
+
+    def remove_from_quadtree(self):
+        self.map.quadtree.remove(entity=self)
+        self.quadtree = None
+
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
         """
@@ -539,12 +556,13 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        enemies = []
-        for sector in self.get_sectors_to_scan_for_enemies():
-            for player_id, entities in sector.units_and_buildings.items():
-                if self.game.players[player_id].is_enemy(self.player):
-                    enemies.extend(entities)
-        return {e for e in enemies if self.inside_area(e, self.observed_nodes)}
+        enemies = self.game.map.quadtree.query_circle(*self.position, self.visibility_radius * TILE_WIDTH)
+        return {e for e in enemies if e.is_enemy(self.player)}
+        # for sector in self.get_sectors_to_scan_for_enemies():
+        #     for player_id, entities in sector.units_and_buildings.items():
+        #         if self.game.players[player_id].is_enemy(self.player):
+        #             enemies.extend(entities)
+        # return {e for e in enemies if self.inside_area(e, self.observed_nodes)}
 
     def inside_area(self, other: Union[Unit, Building], area) -> bool:
         if other.is_unit:
@@ -619,6 +637,7 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(entity=self)
+        self.remove_from_quadtree()
         super().kill()
 
     def save(self) -> Dict:

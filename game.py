@@ -78,7 +78,7 @@ FPS = 30
 GAME_SPEED = 1.0
 
 PLAYER_UNITS = 30
-CPU_UNITS = 1
+CPU_UNITS = 20
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -456,6 +456,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
+
+
 
     @property
     def sound_player(self) -> AudioPlayer:
