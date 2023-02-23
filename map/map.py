@@ -115,17 +115,10 @@ class Map:
 
         self.nodes_data = map_settings.get('nodes', {})
 
-        # map is divided for sectors containing 10x10 Nodes each to split
-        # space for smaller chunks in order to make enemies-detection
-        # faster: since each Unit could only scan it's current Sector and
-        # adjacent ones instead of whole map for enemies:
-        self.sectors: Dict[SectorId, Sector] = {}
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.distances = {}
 
         self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
-
-        self.generate_sectors()
         self.generate_nodes()
         # self.calculate_distances_between_nodes()
         # TODO: find efficient way to use these costs in pathfinding
@@ -197,23 +190,12 @@ class Map:
     def all_walkable_nodes(self) -> Generator[MapNode]:
         return (node for node in self.nodes.values() if node.walkable)
 
-    def generate_sectors(self):
-        for x in range(self.columns):
-            sector_x = x // SECTOR_SIZE
-            for y in range(self.rows):
-                sector_y = y // SECTOR_SIZE
-                self.sectors[(sector_x, sector_y)] = Sector((sector_x, sector_y))
-        log(f'Created {len(self.sectors)} map sectors.', console=True)
-
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     @logger(console=True)
     def generate_nodes(self):
         for x in range(self.columns):
-            sector_x = x // SECTOR_SIZE
             for y in range(self.rows):
-                sector_y = y // SECTOR_SIZE
-                sector = self.sectors[(sector_x, sector_y)]
-                self.nodes[(x, y)] = node = MapNode(x, y, sector)
+                self.nodes[(x, y)] = node = MapNode(x, y)
                 self.create_map_sprite(*node.position)
         log(f'Generated {len(self.nodes)} map nodes.', console=True)
 
@@ -267,7 +249,7 @@ class Map:
 
     @cached_property
     def nonexistent_node(self) -> MapNode:
-        node = MapNode(-1, -1, None)
+        node = MapNode(-1, -1)
         node.pathable = False
         return node
 
@@ -384,9 +366,8 @@ class MapNode:
     """
     map: Optional[Map] = None
 
-    def __init__(self, x, y, sector):
+    def __init__(self, x, y):
         self.grid = int(x), int(y)
-        self.sector = sector
         self.position = self.x, self.y = map_grid_to_position(self.grid)
         self.costs = None
 

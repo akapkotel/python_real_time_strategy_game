@@ -39,7 +39,7 @@ class QuadTree(Rect):
 
     def __post_init__(self):
         super().__post_init__()
-        self.entities = []
+        self.entities = {}
         self.children = []
 
     def insert(self, entity):
@@ -60,7 +60,11 @@ class QuadTree(Rect):
                 return True
 
     def add_to_entities(self, entity):
-        self.entities.append(entity)
+        index = entity.faction.id
+        try:
+            self.entities[index].add(entity)
+        except KeyError:
+            self.entities[index] = {entity,}
         try:
             entity.quadtree = self
         except AttributeError:
@@ -68,12 +72,13 @@ class QuadTree(Rect):
 
     def remove(self, entity):
         try:
-            self.entities.remove(entity)
-        except ValueError:
+            self.entities[entity.faction.id].discard(entity)
+        except (KeyError, ValueError):
             for quadtree in self.children:
                 quadtree.remove(entity)
-        # else:
-        #     print(f'Removed {entity} from {self}')
+        else:
+            self.collapse()
+            # print(f'Removed {entity} from {self}')
 
     def divide(self):
         cx, cy = self.cx, self.cy
@@ -87,7 +92,7 @@ class QuadTree(Rect):
             QuadTree(cx - quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth)
         ]
 
-    def query(self, bounds, found_entities):
+    def query(self, entity_id, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
 
         if not self.intersects(bounds):
@@ -96,27 +101,28 @@ class QuadTree(Rect):
             return found_entities
 
         # Search this node's points to see if they lie within boundary ...
-        found_entities.extend(e for e in self.entities if bounds.in_bounds(e))
+        for id, entities in self.entities.items():
+            found_entities.extend(e for e in entities if id != entity_id and bounds.in_bounds(e))
 
         for quadtree in self.children:
-            quadtree.query(bounds, found_entities)
+            quadtree.query(entity_id, bounds, found_entities)
         return found_entities
 
-    def query_circle(self, circle_x, circle_y, radius):
+    def query_circle(self, circle_x, circle_y, radius, entity_id):
         diameter = radius + radius
         rect = Rect(circle_x, circle_y, diameter, diameter)
         possible_enemies = []
-        possible_enemies = self.query(rect, possible_enemies)
-        return [e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius]
+        possible_enemies = self.query(entity_id, rect, possible_enemies)
+        return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}
 
     @property
     def empty(self):
-        return not self.entities and all(child.empty() for child in self.children)
+        return not any(self.entities.values()) and all(child.empty() for child in self.children)
 
     def collapse(self) -> bool:
         if all(child.collapse() for child in self.children):
             self.children.clear()
-        return not (self.children or self.entities)
+        return not (self.children or any(self.entities.values()))
 
     def clear(self):
         for quadtree in self.children:
@@ -127,6 +133,16 @@ class QuadTree(Rect):
         for quadtree in self.children:
             count += len(quadtree)
         return len(self.entities) + count
+
+    def total_depth(self, depth=0) -> int:
+        for quadtree in self.children:
+            depth = quadtree.total_depth(depth)
+        return max(depth, self.depth)
+
+    def total_entities(self, count=0):
+        for quadtree in self.children:
+            count += quadtree.total_entities()
+        return sum(sum(e) for e in self.entities.values()) + count
 
 
 if __name__ == '__main__':

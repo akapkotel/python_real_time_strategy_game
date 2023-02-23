@@ -57,8 +57,6 @@ class Unit(PlayerEntity):
         self.reserved_node = None
         self.current_node = self.map.position_to_node(*self.position)
         self.block_map_node(self.current_node)
-        self.current_sector: Optional[Sector] = None
-        self.update_current_sector()
 
         self.path: Deque[GridPosition] = deque()
         self.path_wait_counter: int = 0
@@ -157,7 +155,6 @@ class Unit(PlayerEntity):
         new_current_node = self.update_current_node()
         self.update_observed_area(new_current_node)
         self.update_blocked_map_nodes(new_current_node)
-        self.update_current_sector()
         self.update_pathfinding()
 
     def update_current_node(self):
@@ -269,13 +266,6 @@ class Unit(PlayerEntity):
             return True
         return False
 
-    def update_current_sector(self):
-        if (sector := self.current_node.sector) != self.current_sector:
-            if (current_sector := self.current_sector) is not None:
-                current_sector.discard_entity(self)
-            self.current_sector = sector
-            sector.add_player_entity(self)
-
     def update_pathfinding(self):
         if self.awaited_path is not None:
             self.countdown_waiting(self.awaited_path)
@@ -373,9 +363,6 @@ class Unit(PlayerEntity):
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
 
-    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
-        return [self.current_sector] + self.current_sector.adjacent_sectors
-
     def fight_enemies(self):
         if (enemy := self._targeted_enemy) is not None:
             self.engage_enemy(enemy)
@@ -412,13 +399,12 @@ class Unit(PlayerEntity):
             self.move_to(position_to_map_grid(*position))
 
     def kill(self):
-        self.current_sector.discard_entity(self)
+        self.stop_completely()
         self.game.units_manager.unselect(self)
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
         if self.outside:
             self.create_death_animation()
-        self.stop_completely()
         super().kill()
 
     def cancel_tasks(self):
@@ -535,6 +521,7 @@ class Tank(Vehicle):
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
+
         # combine facing_direction with turret to obtain proper texture:
         self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
 
@@ -583,8 +570,7 @@ class Tank(Vehicle):
         first for the hull (which list of textures to use) and second for
         turret for actual texture to be chosen from the list.
         """
-        texture = self.textures[hull_texture_index][turret_texture_index]
-        if texture == self._texture:
+        if (texture := self.textures[hull_texture_index][turret_texture_index]) == self._texture:
             return
         self.clear_spatial_hashes()
         self._point_list_cache = None

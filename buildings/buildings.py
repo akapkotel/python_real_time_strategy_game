@@ -269,7 +269,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         self.position = self.place_building_properly_on_the_grid()
         self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
-        self.occupied_sectors: Set[Sector] = self.update_current_sector()
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
@@ -313,9 +312,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
         for _ in range(min(number_of_soldiers, self.garrison_size)):
-            soldier: Soldier = self.game.spawn(
-                'soldier', self.player, self.map.random_walkable_node.position
-            )
+            soldier: Soldier = self.game.spawn('soldier', self.player, self.map.random_walkable_node.position)
             soldier.enter_building(self)
 
     @property
@@ -328,12 +325,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def block_map_node(self, node: MapNode):
         node.building = self
-
-    def update_current_sector(self) -> Set[Sector]:
-        distinct_sectors = {node.sector for node in self.occupied_nodes}
-        for sector in distinct_sectors:
-            sector.units_and_buildings[self.player.id].add(self)
-        return distinct_sectors
 
     def update_observed_area(self, *args, **kwargs):
         if not self.observed_nodes:  # Building need calculate it only once
@@ -408,12 +399,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         button.counter = len(self.garrisoned_soldiers)
         return button
 
-    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
-        sectors = set()
-        for sector in self.occupied_sectors:
-            sectors.update(sector.adjacent_sectors)
-        return list(sectors)
-
     @property
     def soldiers_slots_left(self) -> int:
         """Check if more Soldiers can enter this building."""
@@ -456,15 +441,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.set_texture(0)
 
     def reconfigure_building(self, player: Player):
+        self.remove_from_quadtree()
         self.detach(self.player)
-        self.unblock_occupied_nodes()
-        self.leave_occupied_sectors()
-
-        self.player = player
-        self.faction = player.faction
         self.attach(player)
+        self.unblock_occupied_nodes()
         self.occupied_nodes = self.block_map_nodes()
-        self.occupied_sectors = self.update_current_sector()
+        self.update_in_quadtree()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
@@ -489,16 +471,11 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if self.garrisoned_soldiers:
             self.kill_garrisoned_soldiers()
         self.unblock_occupied_nodes()
-        self.leave_occupied_sectors()
         super().kill()
 
     def unblock_occupied_nodes(self):
         for node in self.occupied_nodes:
             self.unblock_map_node(node)
-
-    def leave_occupied_sectors(self):
-        for sector in self.occupied_sectors:
-            sector.discard_entity(self)
 
     def kill_garrisoned_soldiers(self):
         for soldier in self.garrisoned_soldiers:
@@ -514,7 +491,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             saved_building.update(ResourceProducer.save(self))
         elif self.research_facility:
             saved_building.update(ResearchFacility.save(self))
-
         if self.garrisoned_soldiers:
             saved_building.update(self.save_garrison())
         return saved_building

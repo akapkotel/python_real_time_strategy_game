@@ -77,8 +77,8 @@ COLUMNS = 50
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 30
-CPU_UNITS = 20
+PLAYER_UNITS = 5
+CPU_UNITS = 5
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -240,6 +240,8 @@ class GameWindow(Window, EventsCreator):
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
         if self.cursor.active:
+            if self.current_view is self.game_view and self.cursor.pointed_ui_element:
+                return
             left, _, bottom, _ = self.current_view.viewport
             self.cursor.on_mouse_motion(x, y, dx, dy)
             self.cursor.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
@@ -637,8 +639,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_factions_and_players_creation(self):
         faction = Faction(name='Freemen')
-        player = HumanPlayer(id=2, color=RED, faction=faction)
-        cpu_player = CpuPlayer(color=GREEN)
+        player = HumanPlayer(id=2, color=GREEN, faction=faction)
+        cpu_player = CpuPlayer(color=RED)
         self.local_human_player: Optional[Player] = self.players[2]
         player.start_war_with(cpu_player)
 

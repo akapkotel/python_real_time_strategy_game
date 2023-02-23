@@ -229,6 +229,8 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
 
     def on_being_attached(self, attached: Observed):
         attached: Union[Unit, Building]
+        attached.player = self
+        attached.faction = self.faction
         if isinstance(attached, Unit):
             self._add_unit(attached)
         else:
@@ -501,7 +503,7 @@ class PlayerEntity(GameObject):
     def update_in_quadtree(self):
         if self.quadtree is not None:
             self.remove_from_quadtree()
-            self.map.quadtree.insert(entity=self)
+        self.map.quadtree.insert(entity=self)
 
     def remove_from_quadtree(self):
         self.map.quadtree.remove(entity=self)
@@ -556,8 +558,14 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        enemies = self.game.map.quadtree.query_circle(*self.position, self.visibility_radius * TILE_WIDTH)
-        return {e for e in enemies if e.is_enemy(self.player)}
+        enemies = self.game.map.quadtree.query_circle(
+            *self.position,
+            self.visibility_radius * TILE_WIDTH,
+            self.faction.id
+        )
+        return enemies
+        # return {e for e in enemies if e.is_enemy(self.player)}
+
         # for sector in self.get_sectors_to_scan_for_enemies():
         #     for player_id, entities in sector.units_and_buildings.items():
         #         if self.game.players[player_id].is_enemy(self.player):
@@ -592,10 +600,6 @@ class PlayerEntity(GameObject):
             self.experience += enemy.kill_experience
             self.known_enemies.discard(enemy)
             self._targeted_enemy = None
-
-    @abstractmethod
-    def get_sectors_to_scan_for_enemies(self) -> List[Sector]:
-        raise NotImplementedError
 
     def visible_for(self, other: PlayerEntity) -> bool:
         obstacles = self.game.buildings
