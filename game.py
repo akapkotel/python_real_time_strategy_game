@@ -109,7 +109,7 @@ class Settings:
     trees_density: float = 0.05  # percentage chance of tree being spawned
     resources_abundance: float = 0.01
     starting_resources: float = 0.5
-    map_width: int = 100
+    map_width: int = 75
     map_height: int = 75
     tile_width: int = TILE_WIDTH
     tile_height: int = TILE_HEIGHT

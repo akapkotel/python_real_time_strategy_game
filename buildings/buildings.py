@@ -32,6 +32,10 @@ from controllers.constants import CURSOR_ENTER_TEXTURE
 from utils.game_logging import logger
 
 
+class _Building:
+    pass
+
+
 class UnitsProducer:
     """
     An interface for all Buildings which can produce Units in game.
@@ -413,8 +417,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def on_enemy_soldier_breach(self, soldier: Soldier):
         if garrison := self.garrisoned_soldiers:
-            garrison.pop().kill() if random.random() < 0.5 else soldier.kill()
-        if not garrison:
+            soldier.kill()
+            if random.random() > len(garrison) / self.garrison_size:
+                garrison.pop().kill()
+        else:
             self.takeover_building(soldier=soldier)
 
     def put_soldier_into_garrison(self, soldier: Soldier):
@@ -446,7 +452,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.attach(player)
         self.unblock_occupied_nodes()
         self.occupied_nodes = self.block_map_nodes()
-        self.update_in_quadtree()
+        self.insert_to_quadtree()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
@@ -463,7 +469,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         finally:
             self.update_garrison_button()
 
-    def on_being_damaged(self, damage: float) -> bool:
+    def on_being_damaged(self, damage: float, penetration: float = 0) -> bool:
         # TODO: killing personnel inside Building
         return super().on_being_damaged(damage)
 

@@ -1,8 +1,8 @@
 object_name,class,max_speed,rotation_speed,fuel_consumption,weapons_names,armour,kill_experience,production_time,conscripts,steel,electronics,max_health,visibility_radius,attack_radius
-tank_light,Tank,6,6,0.001,(light_tank_gun),1.0,5,15,4,100,100,100,7,5
-tank_medium,Tank,4,4,0.003,(medium_tank_gun),1.75,10,25,6,200,150,150,8,6
-heavy_tank,Tank,2,2,0.006,(heavy_tank_gun),2.25,20,45,8,350,200,250,9,7
-truck,Vehicle,4,5,0.0005,None,0.25,2,10,4,30,30,45,8,0
+tank_light,Tank,6,6,0.001,(light_tank_gun),0.15,5,15,4,100,100,100,7,5
+tank_medium,Tank,4,4,0.003,(medium_tank_gun),0.25,10,25,6,200,150,150,8,6
+heavy_tank,Tank,2,2,0.006,(heavy_tank_gun),0.45,20,45,8,350,200,250,9,7
+truck,Vehicle,4,5,0.0005,None,0,2,10,4,30,30,45,8,0
 soldier,Soldier,2,8,0,(sniper_rifle;granade),0,1,10,2,10,10,25,8,6
 saboteur,Soldier,3,8,0,(pistol),0,1,12,2,5,5,25,7,5
 engineer,Soldier,2,6,0,None,0,1,10,2,5,5,25,7,0

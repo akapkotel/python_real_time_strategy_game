@@ -40,8 +40,8 @@ class Weapon:
     def shoot(self, target: PlayerEntity):
         self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
         self.create_shot_audio_visual_effects()
-        if self.can_penetrate(target) and self.hit_target(target):
-            target.on_being_damaged(damage=self.damage)
+        if self.hit_target(target):
+            target.on_being_damaged(damage=self.damage, penetration=self.penetration)
 
     def hit_target(self, target: PlayerEntity) -> bool:
         hit_chance = sum(
@@ -64,12 +64,3 @@ class Weapon:
         self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
         self.owner.game.sound_player.play_sound(self.shot_sound)
 
-    def can_penetrate(self, enemy: PlayerEntity) -> bool:
-        """
-        Units and Buildings can have armour, so they can be invulnerable to
-        attack.
-
-        :param enemy: PlayerEntity
-        :return: bool -- if this Weapon can damage targeted enemy
-        """
-        return self.penetration >= enemy.armour

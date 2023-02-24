@@ -25,7 +25,7 @@ class LoadableWindowView(View):
 
         :param loader: Generator -- function yielding None but on each yield
         calling another function to retrieve from save-file next chunk of data
-        assosiated with loaded Game instance. Use it only for loading Game!
+        associated with loaded Game instance. Use it only for loading Game!
         """
         super().__init__()
         self.loading_progress = 0.0

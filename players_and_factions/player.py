@@ -384,8 +384,7 @@ class PlayerEntity(GameObject):
         self.armour = 0
         self.cover = 0
 
-        self.quadtree = None
-        self.game.map.quadtree.insert(self)
+        self.quadtree = self.map.quadtree.insert(self)
 
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
@@ -503,11 +502,13 @@ class PlayerEntity(GameObject):
     def update_in_quadtree(self):
         if self.quadtree is not None:
             self.remove_from_quadtree()
-        self.map.quadtree.insert(entity=self)
+        self.insert_to_quadtree()
+
+    def insert_to_quadtree(self):
+        self.quadtree = self.map.quadtree.insert(entity=self)
 
     def remove_from_quadtree(self):
-        self.map.quadtree.remove(entity=self)
-        self.quadtree = None
+        self.quadtree = self.map.quadtree.remove(entity=self)
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
@@ -558,19 +559,11 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        enemies = self.game.map.quadtree.query_circle(
+        return self.map.quadtree.find_visible_entities_in_circle(
             *self.position,
             self.visibility_radius * TILE_WIDTH,
             self.faction.id
         )
-        return enemies
-        # return {e for e in enemies if e.is_enemy(self.player)}
-
-        # for sector in self.get_sectors_to_scan_for_enemies():
-        #     for player_id, entities in sector.units_and_buildings.items():
-        #         if self.game.players[player_id].is_enemy(self.player):
-        #             enemies.extend(entities)
-        # return {e for e in enemies if self.inside_area(e, self.observed_nodes)}
 
     def inside_area(self, other: Union[Unit, Building], area) -> bool:
         if other.is_unit:
@@ -619,7 +612,7 @@ class PlayerEntity(GameObject):
     def damaged(self) -> bool:
         return self._health < self._max_health
 
-    def on_being_damaged(self, damage: float):
+    def on_being_damaged(self, damage: float, penetration: float = 0):
         """
         :param damage: float
         :return: bool -- if hit entity was destroyed/kiled or not,
@@ -627,7 +620,8 @@ class PlayerEntity(GameObject):
         """
         self.create_hit_audio_visual_effects()
         deviation = self.game.settings.damage_randomness_factor
-        self.health -= random.gauss(damage, damage * deviation)
+        effectiveness = 1 - max(self.armour - penetration, 0)
+        self.health -= random.gauss(damage, deviation) * effectiveness
         self.health_check()
 
     def health_check(self):

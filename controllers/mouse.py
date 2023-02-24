@@ -4,7 +4,7 @@ from typing import List, Optional, Set, Tuple, Type, Union
 from arcade import (
     AnimatedTimeBasedSprite, AnimationKeyframe, MOUSE_BUTTON_LEFT,
     MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT, Sprite,
-    SpriteList, Texture, Window, draw_lrtb_rectangle_filled,
+    SpriteList, Texture, Window, draw_lrtb_rectangle_filled, draw_line,
     draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
     load_textures
 )
@@ -12,7 +12,7 @@ from arcade import (
 from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
-from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE
+from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED
 from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
@@ -76,6 +76,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.units_manager: Optional[UnitsManager] = None
 
         self.forced_cursor: Optional[int] = None
+
+        # used to change cursor color when placed over objects if they are friends or foes
+        self.cross_cursor = True
+        self.cross_color = GREEN
 
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
@@ -292,6 +296,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.text_hint_delay = self.window.settings.hints_delays
         self.show_hint = False
 
+    def set_cursor_cross_color(self, pointed: PlayerEntity, color=None):
+        if color is not None:
+            self.cross_color = color
+        elif pointed.selectable:
+            self.cross_color = GREEN
+        else:
+            self.cross_color = RED
+
     def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
         # Since we have many spritelists which are drawn_area in some
         # hierarchical order, we must iterate over them catching
@@ -349,13 +361,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(forced)
         elif self.units_manager.selected_units:
             self.cursor_texture_with_units_selected()
-        elif entity := (self.pointed_unit or self.pointed_building):
+        elif (entity := self.pointed_unit or self.pointed_building) is not None:
             self.cursor_texture_on_pointing_at_entity(entity)
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
 
     def cursor_texture_with_units_selected(self):
-        if entity := (self.pointed_unit or self.pointed_building):
+        if (entity := self.pointed_unit or self.pointed_building) is not None:
             self.cursor_on_entity_with_selected_units(entity)
         else:
             self.cursor_on_terrain_with_selected_units()
@@ -411,11 +423,27 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
+        if self.cross_cursor:
+            self.draw_cross_cursor()
+
         if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
+
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
+
         super().draw()
+
+    def draw_cross_cursor(self):
+        color = self.cross_color
+        cx, cy = self.position
+        if self.game is not None and self.game.is_running:
+            x, width, y, height = self.game.viewport
+            draw_line(x, cy, x + width, cy, color=color, line_width=2)
+            draw_line(cx, y + height, cx, y, color=color, line_width=2)
+        else:
+            draw_line(0, cy, self.window.width, cy, color=color, line_width=2)
+            draw_line(cx, self.window.height, cx, 0, color=color, line_width=2)
 
     def draw_text_hint(self, text_hint: str):
         x, y = self.right, self.bottom
