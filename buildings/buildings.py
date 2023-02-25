@@ -33,10 +33,11 @@ from utils.game_logging import logger
 
 
 class _Building:
-    pass
+    player = None
+    game = None
 
 
-class UnitsProducer:
+class UnitsProducer(_Building):
     """
     An interface for all Buildings which can produce Units in game.
     """
@@ -139,16 +140,17 @@ class UnitsProducer:
         self.production_progress = 0
         self._toggle_production(produced=None)
         self.spawn_finished_unit(finished_unit)
-        self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
+        if self.player.is_local_human_player:
+            self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
 
     def spawn_finished_unit(self, finished_unit: str):
-        spawn_node = self.game.map.position_to_node(*self.spawn_point)
-        if (unit := spawn_node.unit) is not None:
-            n = random.choice(tuple(spawn_node.walkable_adjacent))
-            unit.move_to(n.grid)
-        unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
+        if (unit := self.game.map.position_to_node(*self.spawn_point).unit) is not None:
+            node = self.game.pathfinder.get_closest_walkable_node(*self.spawn_point)
+            unit.move_to(node.grid)
+
+        new_unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
         if self.deployment_point is not None:
-            unit.move_to(self.deployment_point)
+            new_unit.move_to(self.deployment_point)
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
@@ -335,8 +337,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if not self.observed_nodes:  # Building need calculate it only once
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
-            if self.weapons:
-                self.update_fire_covered_area()
+            # if self.weapons:
+            #     self.update_fire_covered_area()
 
     def update_fire_covered_area(self):
         x, y = position_to_map_grid(*self.position)

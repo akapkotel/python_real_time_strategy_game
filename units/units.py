@@ -58,6 +58,7 @@ class Unit(PlayerEntity):
         self.current_node = self.map.position_to_node(*self.position)
         self.block_map_node(self.current_node)
 
+        self.destination = None
         self.path: Deque[GridPosition] = deque()
         self.path_wait_counter: int = 0
         self.awaited_path: Optional[MapPath] = None
@@ -176,8 +177,8 @@ class Unit(PlayerEntity):
         else:
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
-            if self.weapons:
-                self.update_fire_covered_area()
+            # if self.weapons:
+            #     self.update_fire_covered_area()
 
     def update_fire_covered_area(self):
         area = find_area(*self.current_node.grid, self.attack_range_matrix)
@@ -353,6 +354,7 @@ class Unit(PlayerEntity):
         self.game.pathfinder.cancel_unit_path_requests(unit=self)
 
     def stop_completely(self):
+        self.destination = None
         self.set_navigating_group(navigating_group=None)
         self.leave_waypoints_queue()
         self.cancel_path_requests()
@@ -362,12 +364,6 @@ class Unit(PlayerEntity):
 
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
-
-    def fight_enemies(self):
-        if (enemy := self._targeted_enemy) is not None:
-            self.engage_enemy(enemy)
-        elif (enemies := self.known_enemies) and not self.is_building:
-            self.move_towards_enemies_nearby(enemies)
 
     def run_away(self):
         pass
@@ -380,18 +376,36 @@ class Unit(PlayerEntity):
                 pass
         self.permanent_units_group = index
 
-    def move_towards_enemies_nearby(self, known_enemies: Set[PlayerEntity]):
+    def engage_enemy(self, enemy: PlayerEntity):
+        if self.in_attack_range(enemy):
+            # TODO: unblocking movement when Unit gets move-order and has target
+            # if condition:
+            #     self.stop_completely()
+            self.fight_enemy(enemy)
+        else:
+            self.move_toward_enemy(enemy)
+
+    def move_toward_enemy(self, enemy: PlayerEntity):
+        self.move_to(enemy.current_node.grid)
+
+    def fight_enemy(self, enemy):
+        if enemy.alive:
+            self.attack(enemy)
+        else:
+            self.assign_enemy(None)
+
+    def move_towards_enemies_nearby(self):
         """
         When Unit detected enemies but they are out of attack range, it can
         move closer to engage them.
         """
-        if (enemy := self._targeted_enemy) is not None and self.in_range(enemy):
-            self.stop_completely()
+        if (enemy := self._targeted_enemy) is not None:
+            if self.in_attack_range(enemy):
+                self.stop_completely()
         elif not self.has_destination:
-            enemy_to_attack = random.choice([e for e in known_enemies])
-            position = self.game.pathfinder.get_closest_walkable_position(
-                *enemy_to_attack.position)
-            self.move_to(position_to_map_grid(*position))
+            enemy_to_attack = random.choice([e for e in self.known_enemies])
+            self.assign_enemy(enemy_to_attack)
+            self.move_to(position_to_map_grid(*enemy_to_attack.position))
 
     def kill(self):
         self.stop_completely()
@@ -642,7 +656,7 @@ class Soldier(Unit):
 
     @property
     def should_be_rendered(self) -> bool:
-        return super().should_be_rendered and self.outside
+        return self.on_screen and self.outside
 
     @property
     def selectable(self) -> bool:

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import random
 
+from math import dist
 from abc import abstractmethod
 from collections import defaultdict
 from functools import cached_property
@@ -145,7 +146,7 @@ class ResourcesManager(EventsCreator):
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0)
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 10.0)
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
@@ -370,6 +371,8 @@ class CpuPlayer(Player):
         """
         if self.construction_priorities:
             self.build_unit_or_building()
+        else:
+            self.make_building_plans()
         pass
 
     def build_unit_or_building(self):
@@ -392,6 +395,28 @@ class CpuPlayer(Player):
         for building in self.buildings:
             if entity in building.produced_units:
                 building.start_production(entity)
+
+    def make_building_plans(self):
+        if not self.faction.units < self.game.local_human_player.faction.units:
+            self.plan_production('tank_medium', high_priority=True)
+        else:
+            self.plan_production('tank_medium')
+
+    def plan_production(self, entity: str, medium_priority=False, high_priority=False):
+        """
+        Add Unit or Building to construction priority queue.
+
+        :param entity: str -- name of the entity
+        :param medium_priority: bool -- entity would be placed in the middle of priority queue
+        :param high_priority: bool -- entity would be placed on the top of priority queue
+        """
+        if medium_priority:
+            priority = len(self.construction_priorities) // 2
+        elif high_priority:
+            priority = len(self.construction_priorities) + 1
+        else:
+            priority = 0
+        self.construction_priorities.put(entity, priority)
 
 
 class PlayerEntity(GameObject):
@@ -444,16 +469,16 @@ class PlayerEntity(GameObject):
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
         # matrix current position
-        self.visibility_radius = value = self.configs['visibility_radius']
-        self.visibility_matrix = precalculate_circular_area_matrix(value)
+        self.visibility_radius = value = self.configs['visibility_radius'] * TILE_WIDTH
+        self.visibility_matrix = precalculate_circular_area_matrix(value // TILE_WIDTH)
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
         self.observed_nodes: Set[MapNode] = set()
 
         # like the visibility matrix, but range should be smaller:
-        self.attack_radius = value = self.configs['attack_radius']
-        self.attack_range_matrix = precalculate_circular_area_matrix(value)
+        self.attack_radius = self.configs['attack_radius'] * TILE_WIDTH
+        # self.attack_range_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which every enemy unit could by attacked:
         self.fire_covered: Set[MapNode] = set()
@@ -514,7 +539,7 @@ class PlayerEntity(GameObject):
     def ammunition(self) -> bool:
         return self._ammunition > 0
 
-    def assign_enemy(self, enemy: PlayerEntity):
+    def assign_enemy(self, enemy: Optional[PlayerEntity]):
         # used when Player orders this Entity to attack the particular enemy
         self._player_assigned_enemy = self._targeted_enemy = enemy
 
@@ -580,26 +605,32 @@ class PlayerEntity(GameObject):
             self.player.update_known_enemies(enemies)
         self.known_enemies = enemies
 
+    def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
+        return self.map.quadtree.find_visible_entities_in_circle(
+            *self.position,
+            self.visibility_radius,
+            self.faction.id
+        )
+
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
-        if self.weapons and self.known_enemies:
-            self._targeted_enemy = self.update_targeted_enemy()
-            self.fight_enemies()
-        elif self.is_unit:
-            self.run_away()
+        self._targeted_enemy = enemy = self.update_targeted_enemy()
+        if enemy is not None:
+            if self.weapons:
+                self.engage_enemy(enemy)
+            elif self.is_unit:
+                self.run_away()
 
-    def update_targeted_enemy(self):
+    def update_targeted_enemy(self) -> Optional[PlayerEntity]:
         """
         Set the random or weakest of the enemies in range of this entity
         weapons as the current hit to attack if not targeting any yet.
         """
-        in_range = self.in_range
-        for enemy in (self._player_assigned_enemy, self._targeted_enemy):
-            if enemy is not None and in_range(enemy):
-                return enemy
-        else:
-            if in_range := [e for e in self.known_enemies if in_range(e)]:
-                return sorted(in_range, key=lambda e: e.health)[0]
+        in_range = self.in_attack_range
+        if (enemy := (self._player_assigned_enemy or self._targeted_enemy)) is not None and in_range(enemy):
+            return enemy
+        if enemies_in_range := [e for e in self.known_enemies if in_range(e)]:
+            return sorted(enemies_in_range, key=lambda e: e.health)[0]
 
     @abstractmethod
     def fight_enemies(self):
@@ -609,30 +640,21 @@ class PlayerEntity(GameObject):
     def run_away(self):
         raise NotImplementedError
 
-    def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
-        return self.map.quadtree.find_visible_entities_in_circle(
-            *self.position,
-            self.visibility_radius * TILE_WIDTH,
-            self.faction.id
-        )
-
     def inside_area(self, other: Union[Unit, Building], area) -> bool:
         if other.is_unit:
             return other.current_node in self.observed_nodes
         else:
             return len(self.observed_nodes & other.occupied_nodes) > 0
 
-    def in_range(self, other: Union[Unit, Building]) -> bool:
+    def in_attack_range(self, other: PlayerEntity) -> bool:
         if other.is_unit:
-            return other.current_node in self.fire_covered
+            return dist(other.position, self.position) < self.attack_radius
         else:
-            return len(self.fire_covered & other.occupied_nodes) > 0
+            other: Building
+            return any(dist(n.position, self.position) < self.attack_radius for n in other.occupied_nodes)
 
     def engage_enemy(self, enemy: PlayerEntity):
-        if enemy.alive:
-            self.attack(enemy)
-        else:
-            self._targeted_enemy = None
+        raise NotImplementedError
 
     def attack(self, enemy):
         for weapon in (w for w in self._weapons if w.reloaded()):
