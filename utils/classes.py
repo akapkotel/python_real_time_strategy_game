@@ -95,7 +95,7 @@ class PriorityQueue:
         heapq.heappush(self.elements, (priority, item))
 
     def get(self):
-        return heapq.heappop(self.elements)[1]  # (priority, item)
+        return heapq.heappop(self.elements)  # (priority, item)
 
 
 class Observed:

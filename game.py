@@ -235,7 +235,7 @@ class GameWindow(Window, EventsCreator):
                          modifiers: int):
         if self.cursor.active:
             left, _, bottom, _ = self.current_view.viewport
-            self.cursor.on_mouse_release(x + left, y + bottom, button, modifiers)
+            self.cursor.on_mouse_release(x + left, y + bottom, button)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):

@@ -55,7 +55,7 @@ class Weapon:
                 -25 if target.is_infantry and not self.owner.is_infantry else 0
             )
         )
-        return gauss(hit_chance, hit_chance * 0.20) < hit_chance
+        return gauss(hit_chance, 0.1) < hit_chance
 
     def create_shot_audio_visual_effects(self):
         barrel_angle = 45 * self.owner.barrel_end
@@ -63,4 +63,3 @@ class Weapon:
         blast_position = move_along_vector((x, y), 35.0, angle=barrel_angle)
         self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
         self.owner.game.sound_player.play_sound(self.shot_sound)
-

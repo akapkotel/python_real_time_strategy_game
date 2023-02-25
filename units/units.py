@@ -161,7 +161,7 @@ class Unit(PlayerEntity):
         current_node = self.get_current_node()
         if current_node is not self.current_node:
             if dist(self.position, self.quadtree.position) > self.quadtree.smaller_dimension:
-                self.update_in_quadtree()
+                self.update_in_map_quadtree()
         return current_node
 
     def get_current_node(self):
@@ -371,11 +371,6 @@ class Unit(PlayerEntity):
 
     def run_away(self):
         pass
-
-    # def visible_for(self, other: PlayerEntity) -> bool:
-    #     if self.player.is_local_human_player and other.is_building:
-    #         return len(self.observed_nodes & other.occupied_nodes) > 0
-    #     return super().visible_for(other)
 
     def set_permanent_units_group(self, index: int = 0):
         if (cur_index := self.permanent_units_group) and cur_index != index:

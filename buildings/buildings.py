@@ -44,6 +44,7 @@ class UnitsProducer:
     def __init__(self, produced_units: Tuple[str]):
         # Units which are available to produce in this Building:
         self.produced_units = produced_units
+        self.player.units_possible_to_build.update(u for u in produced_units)
         # Queue of Units to be produced
         self.production_queue: Deque[str] = deque()
         # Name of the Unit, which is currently in production, if any:
@@ -447,12 +448,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.set_texture(0)
 
     def reconfigure_building(self, player: Player):
-        self.remove_from_quadtree()
+        self.remove_from_map_quadtree()
         self.detach(self.player)
         self.attach(player)
         self.unblock_occupied_nodes()
         self.occupied_nodes = self.block_map_nodes()
-        self.insert_to_quadtree()
+        self.insert_to_map_quadtree()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
@@ -521,6 +522,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         soldier: Soldier
         for soldier in (self.game.find_gameobject(Unit, s) for s in identifiers):
             soldier.enter_building(self)
+
+
+class ConstructionSite(Building):
+
+        def __init__(self, x, y, building_name: str, player: Player, position: Point):
+            super().__init__('construction_site', player, position)
+            self.constructed_building = building_name
 
 
 if __name__:

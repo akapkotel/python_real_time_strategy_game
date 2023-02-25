@@ -145,7 +145,7 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
 
 
 @lru_cache()
-def precalculate_circular_area_matrix(max_distance: int) -> object:
+def precalculate_circular_area_matrix(max_distance: int) -> Tuple[Tuple[int, int], ...]:
     radius = max_distance * 1.6
     observable_area = []
     for x in range(-max_distance, max_distance + 1):

@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/resources/configs/technologies.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/resources/configs/units.csv">
           <value>
             <Attribute>

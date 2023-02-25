@@ -42,7 +42,7 @@ def a_star(map: Map,
     cost_so_far[start] = 0
 
     while unexplored:
-        if (current := get_best_unexplored()) == end:
+        if (current := get_best_unexplored()[1]) == end:
             return reconstruct_path(map_nodes, previous, current)
         explored.add(current)
         node = map_nodes[current]

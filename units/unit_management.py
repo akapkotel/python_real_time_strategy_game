@@ -252,20 +252,17 @@ class UnitsManager(EventsCreator):
         return self.selected_units or self.selected_building is not None
 
     @ignore_in_menu
-    def on_left_click_no_selection(self, modifiers, x, y):
+    def on_left_click_no_selection(self, x, y):
         pointed = self.cursor.pointed_unit or self.cursor.pointed_building
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
         elif units := self.selected_units:
-            self.on_terrain_click_with_units(x, y, modifiers, units)
+            self.on_terrain_click_with_units(x, y, units)
 
     @ignore_in_menu
-    def on_terrain_click_with_units(self, x, y, modifiers, units):
-        if self.game.map.position_to_node(x, y).walkable:
-            self.create_movement_order(units, x, y)
-        else:
-            x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
-            self.on_terrain_click_with_units(x, y, modifiers, units)
+    def on_terrain_click_with_units(self, x, y, units):
+        x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
+        self.create_movement_order(units, x, y)
 
     def create_movement_order(self, units, x, y):
         if LCTRL in self.game.window.keyboard.keys_pressed:

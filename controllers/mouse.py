@@ -6,13 +6,13 @@ from arcade import (
     MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT, Sprite,
     SpriteList, Texture, Window, draw_lrtb_rectangle_filled, draw_line,
     draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
-    load_textures
+    load_textures, draw_lines
 )
 
 from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
-from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED
+from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED, MAP_GREEN
 from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameobject
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
@@ -78,8 +78,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.forced_cursor: Optional[int] = None
 
         # used to change cursor color when placed over objects if they are friends or foes
-        self.cross_cursor = True
-        self.cross_color = GREEN
+        self.cursor_default_color = MAP_GREEN
+        self.cross_color = self.cursor_default_color
 
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
@@ -159,7 +159,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         x, y = x + left, y + bottom
         if (position := self.game.mini_map.cursor_inside(x, y)) is not None:
             if units := self.units_manager.selected_units:
-                self.units_manager.on_terrain_click_with_units(*position, None, units)
+                self.units_manager.on_terrain_click_with_units(*position, units)
             else:
                 self.window.move_viewport_to_the_position(*position)
 
@@ -173,22 +173,21 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_middle_button_press(self, x: float, y: float, modifiers: int):
         pass
 
-    def on_mouse_release(self, x: float, y: float, button: int,
-                         modifiers: int):
+    def on_mouse_release(self, x: float, y: float, button: int):
         if button is MOUSE_BUTTON_LEFT:
-            self.on_left_button_release(x, y, modifiers)
+            self.on_left_button_release(x, y)
         elif button is MOUSE_BUTTON_RIGHT:
-            self.on_right_button_release(x, y, modifiers)
+            self.on_right_button_release()
 
-    def on_left_button_release(self, x: float, y: float, modifiers: int):
+    def on_left_button_release(self, x: float, y: float):
         self.dragged_ui_element = None
-        self.on_left_button_release_in_game(modifiers, x, y)
+        self.on_left_button_release_in_game(x, y)
 
     @ignore_in_menu
-    def on_left_button_release_in_game(self, modifiers, x, y):
+    def on_left_button_release_in_game(self, x, y):
         if self.mouse_drag_selection is None:
             if self.pointed_ui_element is None:
-                self.units_manager.on_left_click_no_selection(modifiers, x, y)
+                self.units_manager.on_left_click_no_selection(x, y)
         else:
             self.close_drag_selection()
 
@@ -200,7 +199,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.mouse_drag_selection = None
 
     @ignore_in_menu
-    def on_right_button_release(self, x: float, y: float, modifiers: int):
+    def on_right_button_release(self):
         if self.mouse_dragging:
             self.mouse_dragging = None
         elif self.pointed_ui_element is not None:
@@ -290,11 +289,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.text_hint_delay += self.game.timer['total']
         self.show_hint = True
         pointed.on_mouse_enter()
+        self.set_cursor_cross_color(pointed)
 
     def clear_pointed_gameobject(self):
         self.pointed_gameobject = None
         self.text_hint_delay = self.window.settings.hints_delays
         self.show_hint = False
+        self.cross_color = self.cursor_default_color
 
     def set_cursor_cross_color(self, pointed: PlayerEntity, color=None):
         if color is not None:
@@ -423,8 +424,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
-        if self.cross_cursor:
-            self.draw_cross_cursor()
+        self.draw_cross_cursor()
 
         if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
@@ -439,11 +439,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         cx, cy = self.position
         if self.game is not None and self.game.is_running:
             x, width, y, height = self.game.viewport
-            draw_line(x, cy, x + width, cy, color=color, line_width=2)
-            draw_line(cx, y + height, cx, y, color=color, line_width=2)
+            draw_lines([(x, cy), (x + width, cy), (cx, y + height), (cx, y)], color=color, line_width=2)
         else:
-            draw_line(0, cy, self.window.width, cy, color=color, line_width=2)
-            draw_line(cx, self.window.height, cx, 0, color=color, line_width=2)
+            draw_lines([(0, cy), (self.window.width, cy), (cx, self.window.height), (cx, 0)], color=color, line_width=2)
 
     def draw_text_hint(self, text_hint: str):
         x, y = self.right, self.bottom
@@ -454,14 +452,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
 
 class MouseDragSelection:
-    """Class for mouse-selected_units rectangle-areas."""
+    """Class for ectangle-area inside which every Unit would be selected."""
 
     __slots__ = ["game", "start", "end", "left", "right", "top", "bottom",
-                 "units"]
+                 "units", "all_selectable_units"]
 
     def __init__(self, game: Game, x: float, y: float):
         """
-        Initialize new Selection with empty list of selected_units Units.
+        Initialize new Selection with empty set of possibly_selected_units Units.
 
         :param x: float -- x coordinate of selection starting corner
         :param y: float -- y coordinate of selection starting corner
@@ -473,7 +471,8 @@ class MouseDragSelection:
         self.right = x
         self.top = y
         self.bottom = y
-        self.units: Set[PlayerEntity] = set()
+        self.units: Set[Unit] = set()
+        self.all_selectable_units = self.game.local_human_player.units
 
     def __contains__(self, item: PlayerEntity) -> bool:
         return item in self.units
@@ -491,8 +490,8 @@ class MouseDragSelection:
 
     def _calculate_selection_rectangle_bounds(self):
         corners = self.start, self.end
-        self.left, self.right = sorted([x[0] for x in corners])
-        self.bottom, self.top = sorted([x[1] for x in corners])
+        self.left, self.right = sorted(x[0] for x in corners)
+        self.bottom, self.top = sorted(x[1] for x in corners)
 
     def _update_units(self) -> Tuple[Set[Unit], Set[Unit]]:
         """
@@ -500,29 +499,17 @@ class MouseDragSelection:
         the selection rectangle: units inside the shape are considered as
         'selected' and units outside the shape are not selected.
         """
-        all_player_units = self.game.local_human_player.units
-        units_to_add = set()
-        units_to_discard = set()
-        # check units if they should be selected or not:
-        for unit in (u for u in all_player_units if u.selectable):
-            if self._inside_selection_rect(*unit.position):
-                if unit not in self.units:
-                    units_to_add.add(unit)
-            elif unit in self.units:
-                units_to_discard.add(unit)
-        # update selection units set:
-        self._remove_units_from_selection(units_to_discard)
-        self._add_units_to_selection(units_to_add)
-        return units_to_add, units_to_discard
+        new = {
+            u for u in self.all_selectable_units if u.selectable
+            and self._inside_selection_rect(*u.position)
+        }
+        added = new.difference(self.units)
+        old = self.units.difference(new)
+        self.units = new
+        return added, old
 
     def _inside_selection_rect(self, x: float, y: float) -> bool:
         return self.left < x < self.right and self.bottom < y < self.top
-
-    def _remove_units_from_selection(self, units: Set[Unit]):
-        self.units.difference_update(units)
-
-    def _add_units_to_selection(self, units: Set[Unit]):
-        self.units.update(units)
 
     def draw(self):
         """Draw rectangle showing borders of current selection."""

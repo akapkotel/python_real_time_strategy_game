@@ -92,11 +92,17 @@ class QuadTree(Rect):
 
         # Search this node's points to see if they lie within boundary ...
         for id, entities in self.entities.items():
-            found_entities.extend(e for e in entities if id != entity_faction_id and bounds.in_bounds(e))
+            if id != entity_faction_id:
+                found_entities.extend(e for e in entities if bounds.in_bounds(e))
 
         for quadtree in self.children:
-            quadtree.query(entity_faction_id, bounds, found_entities)
+            found_entities = quadtree.query(entity_faction_id, bounds, found_entities)
         return found_entities
+
+    def find_selectable_units(self, left, right, bottom, top, faction_id):
+        rect = Rect(left + right // 2, bottom + top // 2, right - left, top - bottom)
+        possible_units = []
+        return self.query(faction_id, rect, possible_units)
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, entity_faction_id):
         diameter = radius + radius

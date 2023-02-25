@@ -15,7 +15,7 @@ from user_interface.constants import BASIC_UI
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, Sector, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
-from utils.classes import Observed, Observer
+from utils.classes import Observed, Observer, PriorityQueue
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
 # from utils.game_logging import log
@@ -154,7 +154,8 @@ class ResourcesManager(EventsCreator):
         for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
             required_amount = self.game.configs[category][expense][resource]
             if not self.has_resource(resource, required_amount):
-                self.notify_player_of_resource_deficit(resource)
+                if self.is_local_human_player:
+                    self.notify_player_of_resource_deficit(resource)
                 return False
         return True
 
@@ -192,7 +193,7 @@ class ResourcesManager(EventsCreator):
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
 
-class Player(ResourcesManager, EventsCreator, Observer, Observed):
+class Player(ResourcesManager, Observer, Observed):
     game = None
     cpu = False
 
@@ -202,7 +203,6 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
                  color: Optional[Color] = None,
                  faction: Optional[Faction] = None):
         ResourcesManager.__init__(self)
-        EventsCreator.__init__(self)
         Observer.__init__(self)
         Observed.__init__(self)
         self.id = id or new_id(self.game.players)
@@ -210,6 +210,8 @@ class Player(ResourcesManager, EventsCreator, Observer, Observed):
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color
 
+        self.units_possible_to_build: Set[str] = set()
+        self.buildings_possible_to_build: Set[str] = set()
         self.known_technologies: Set[int] = set()
         self.current_research: Dict[int, float] = defaultdict()
 
@@ -338,6 +340,59 @@ class CpuPlayer(Player):
     """
     cpu = True
 
+    def __init__(self,
+                 id: Optional[int] = None,
+                 name: Optional[str] = None,
+                 color: Optional[Color] = None,
+                 faction: Optional[Faction] = None):
+        super().__init__(id, name, color, faction)
+        self.time_to_update_logic = self.game.settings.fps
+        self.current_strategy = None
+        self.construction_priorities = PriorityQueue(first_element='tank_medium', priority=5)
+
+    def update(self):
+        super().update()
+
+        if not self.time_to_update_logic:
+            self.update_logic()
+            self.time_to_update_logic = self.game.settings.fps
+        else:
+            self.time_to_update_logic -= 1
+
+    def update_logic(self):
+        """
+        TODO: #1 base building logic
+        TODO: #2 resources gathering logic
+        TODO: #3 units building logic
+        TODO: #4 map exploration logic
+        TODO: #5 base defending logic
+        TODO: #6 attacking enemies logic
+        """
+        if self.construction_priorities:
+            self.build_unit_or_building()
+        pass
+
+    def build_unit_or_building(self):
+        priority, entity = self.construction_priorities.get()
+        if self.enough_resources_for(entity):
+            if entity in self.buildings_possible_to_build:
+                if (space := self.enough_land_space_for(entity)) is not None:
+                    self.start_construction(entity, space)
+            elif entity in self.units_possible_to_build:
+                self.start_production_of_unit(entity)
+        self.construction_priorities.put(entity, priority)
+
+    def enough_land_space_for(self, highest_priority) -> Optional[List[List[GridPosition]]]:
+        return
+
+    def start_construction(self, highest_priority, space):
+        pass
+
+    def start_production_of_unit(self, entity):
+        for building in self.buildings:
+            if entity in building.produced_units:
+                building.start_production(entity)
+
 
 class PlayerEntity(GameObject):
     """
@@ -461,7 +516,7 @@ class PlayerEntity(GameObject):
 
     def assign_enemy(self, enemy: PlayerEntity):
         # used when Player orders this Entity to attack the particular enemy
-        self._player_assigned_enemy = enemy
+        self._player_assigned_enemy = self._targeted_enemy = enemy
 
     @property
     def targeted_enemy(self) -> Optional[PlayerEntity]:
@@ -480,10 +535,6 @@ class PlayerEntity(GameObject):
     def block_map_node(self, node: MapNode):
         raise NotImplementedError
 
-    @abstractmethod
-    def update_current_sector(self):
-        raise NotImplementedError
-
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
@@ -499,15 +550,15 @@ class PlayerEntity(GameObject):
     def should_be_rendered(self) -> bool:
         return self in self.game.local_drawn_units_and_buildings and self.on_screen
 
-    def update_in_quadtree(self):
+    def update_in_map_quadtree(self):
         if self.quadtree is not None:
-            self.remove_from_quadtree()
-        self.insert_to_quadtree()
+            self.remove_from_map_quadtree()
+        self.insert_to_map_quadtree()
 
-    def insert_to_quadtree(self):
+    def insert_to_map_quadtree(self):
         self.quadtree = self.map.quadtree.insert(entity=self)
 
-    def remove_from_quadtree(self):
+    def remove_from_map_quadtree(self):
         self.quadtree = self.map.quadtree.remove(entity=self)
 
     @abstractmethod
@@ -615,7 +666,8 @@ class PlayerEntity(GameObject):
     def on_being_damaged(self, damage: float, penetration: float = 0):
         """
         :param damage: float
-        :return: bool -- if hit entity was destroyed/kiled or not,
+        :param penetration: float -- value of attacker's weapon penetration
+        :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
         self.create_hit_audio_visual_effects()
@@ -635,7 +687,7 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(entity=self)
-        self.remove_from_quadtree()
+        self.remove_from_map_quadtree()
         super().kill()
 
     def save(self) -> Dict:
