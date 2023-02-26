@@ -14,7 +14,7 @@ from arcade.arcade_types import Color, Point
 
 from user_interface.constants import BASIC_UI
 from gameobjects.gameobject import GameObject
-from map.map import MapNode, Sector, position_to_map_grid, TILE_WIDTH
+from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
 from utils.classes import Observed, Observer, PriorityQueue
 from utils.colors import GREEN, RED
@@ -34,11 +34,13 @@ from utils.scheduling import EventsCreator, ScheduledEvent
 
 FUEL = 'fuel'
 FOOD = 'food'
+AMMUNITION = 'ammunition'
 ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
 YIELD_PER_SECOND = "_yield_per_second"
+CONSUMPTION_PER_SECOND = "_consumption_per_second"
 PRODUCTION_EFFICIENCY = "_production_efficiency"
 
 
@@ -138,7 +140,7 @@ class Faction(EventsCreator, Observer, Observed):
 class ResourcesManager(EventsCreator):
     game = None
     resources = {
-        FUEL: 0, FOOD: 0, ENERGY: 750, STEEL: 200, ELECTRONICS: 100, CONSCRIPTS: 0
+        FUEL: 0, ENERGY: 1500, AMMUNITION: 0, STEEL: 200, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0
     }
 
     def __init__(self):
@@ -146,8 +148,10 @@ class ResourcesManager(EventsCreator):
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 10.0)
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
+            if resource_name != ENERGY:
+                setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
     def enough_resources_for(self, expense: str) -> bool:
@@ -182,10 +186,10 @@ class ResourcesManager(EventsCreator):
         setattr(self, f"{resource}{YIELD_PER_SECOND}", old_yield + change)
 
     def _update_resources_stock(self):
-        for resource_name in self.resources.keys():
+        for resource_name in [k for k in self.resources.keys() if k is not ENERGY]:
             stock = getattr(self, resource_name)
-            change = getattr(self, f"{resource_name}{YIELD_PER_SECOND}")
-            setattr(self, resource_name, stock + change)
+            increase = getattr(self, f"{resource_name}{YIELD_PER_SECOND}")
+            setattr(self, resource_name, stock + increase)
 
     def consume_resource(self, resource_name: str, amount: float):
         setattr(self, resource_name, getattr(self, resource_name) - abs(amount))
@@ -349,16 +353,8 @@ class CpuPlayer(Player):
         super().__init__(id, name, color, faction)
         self.time_to_update_logic = self.game.settings.fps
         self.current_strategy = None
-        self.construction_priorities = PriorityQueue(first_element='tank_medium', priority=5)
-
-    def update(self):
-        super().update()
-
-        if not self.time_to_update_logic:
-            self.update_logic()
-            self.time_to_update_logic = self.game.settings.fps
-        else:
-            self.time_to_update_logic -= 1
+        self.construction_priorities = PriorityQueue()
+        self.schedule_event(ScheduledEvent(self, 1, self.update_logic, repeat=-1))
 
     def update_logic(self):
         """
@@ -373,7 +369,6 @@ class CpuPlayer(Player):
             self.build_unit_or_building()
         else:
             self.make_building_plans()
-        pass
 
     def build_unit_or_building(self):
         priority, entity = self.construction_priorities.get()
@@ -447,7 +442,7 @@ class PlayerEntity(GameObject):
         self.known_enemies: Set[PlayerEntity] = set()
 
         # this enemy must be assigned by the Player (e.g. by mouse-click)
-        self._player_assigned_enemy: Optional[PlayerEntity] = None
+        self._enemy_assigned_by_player: Optional[PlayerEntity] = None
 
         # this enemy is currently targeted, can be obtained automatically:
         self._targeted_enemy: Optional[PlayerEntity] = None
@@ -486,7 +481,7 @@ class PlayerEntity(GameObject):
         self._weapons: List[Weapon] = []
         # use this number to animate shot blast from weapon:
         self.barrel_end = self.cur_texture_index
-        self._ammunition = 100
+        self._ammunition = self.configs.get('ammunition', 0)
 
         self.experience = 0
         self.kill_experience = 0
@@ -541,7 +536,7 @@ class PlayerEntity(GameObject):
 
     def assign_enemy(self, enemy: Optional[PlayerEntity]):
         # used when Player orders this Entity to attack the particular enemy
-        self._player_assigned_enemy = self._targeted_enemy = enemy
+        self._enemy_assigned_by_player = self._targeted_enemy = enemy
 
     @property
     def targeted_enemy(self) -> Optional[PlayerEntity]:
@@ -600,6 +595,7 @@ class PlayerEntity(GameObject):
         circular_area = find_area(*position, self.visibility_matrix)
         return set(self.map.in_bounds(circular_area))
 
+    @ignore_in_editor_mode
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
@@ -612,33 +608,20 @@ class PlayerEntity(GameObject):
             self.faction.id
         )
 
+    @abstractmethod
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
-        self._targeted_enemy = enemy = self.update_targeted_enemy()
-        if enemy is not None:
-            if self.weapons:
-                self.engage_enemy(enemy)
-            elif self.is_unit:
-                self.run_away()
+        raise NotImplementedError
 
-    def update_targeted_enemy(self) -> Optional[PlayerEntity]:
-        """
-        Set the random or weakest of the enemies in range of this entity
-        weapons as the current hit to attack if not targeting any yet.
-        """
+    def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
+        if not self.known_enemies:
+            return None
         in_range = self.in_attack_range
-        if (enemy := (self._player_assigned_enemy or self._targeted_enemy)) is not None and in_range(enemy):
-            return enemy
-        if enemies_in_range := [e for e in self.known_enemies if in_range(e)]:
-            return sorted(enemies_in_range, key=lambda e: e.health)[0]
-
-    @abstractmethod
-    def fight_enemies(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def run_away(self):
-        raise NotImplementedError
+        sorted_by_health = sorted(self.known_enemies, key=lambda e: e.health)
+        if enemies_in_range := [e for e in sorted_by_health if in_range(e)]:
+            return enemies_in_range[0]
+        else:
+            return sorted_by_health[0]
 
     def inside_area(self, other: Union[Unit, Building], area) -> bool:
         if other.is_unit:
@@ -653,18 +636,18 @@ class PlayerEntity(GameObject):
             other: Building
             return any(dist(n.position, self.position) < self.attack_radius for n in other.occupied_nodes)
 
-    def engage_enemy(self, enemy: PlayerEntity):
-        raise NotImplementedError
-
     def attack(self, enemy):
-        for weapon in (w for w in self._weapons if w.reloaded()):
-            weapon.shoot(enemy)
-        self.check_if_enemy_destroyed(enemy)
+        if self.ammunition:
+            for weapon in (w for w in self._weapons if w.reloaded()):
+                weapon.shoot(enemy)
+            self.check_if_enemy_destroyed(enemy)
 
     def check_if_enemy_destroyed(self, enemy: PlayerEntity):
         if not enemy.alive:
             self.experience += enemy.kill_experience
             self.known_enemies.discard(enemy)
+            if self._enemy_assigned_by_player is enemy:
+                self._enemy_assigned_by_player = None
             self._targeted_enemy = None
 
     def visible_for(self, other: PlayerEntity) -> bool:

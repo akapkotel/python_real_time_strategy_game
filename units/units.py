@@ -8,9 +8,9 @@ from math import dist
 from abc import abstractmethod
 from collections import deque
 from functools import cached_property
-from typing import Deque, List, Dict, Optional, Set, Union
+from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture
+from arcade import Sprite, load_textures, draw_circle_filled, Texture, draw_text
 from arcade.arcade_types import Point
 
 from effects.constants import SHOT_BLAST, EXPLOSION
@@ -21,7 +21,7 @@ from map.map import (
 )
 from players_and_factions.player import Player, PlayerEntity
 from utils.colors import GREEN
-from utils.functions import (get_path_to_file, get_texture_size)
+from utils.functions import (get_path_to_file, get_texture_size, ignore_in_editor_mode)
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS, find_area
@@ -58,7 +58,7 @@ class Unit(PlayerEntity):
         self.current_node = self.map.position_to_node(*self.position)
         self.block_map_node(self.current_node)
 
-        self.destination = None
+        self.forced_destination = False
         self.path: Deque[GridPosition] = deque()
         self.path_wait_counter: int = 0
         self.awaited_path: Optional[MapPath] = None
@@ -158,6 +158,12 @@ class Unit(PlayerEntity):
         self.update_blocked_map_nodes(new_current_node)
         self.update_pathfinding()
 
+    def draw(self):
+        # draw_text(f'{self.id};{self._enemy_assigned_by_player is not None};'
+        #           f'{self.targeted_enemy is not None}',
+        #           self.right, self.bottom, (255, 255, 255), 14)
+        super().draw()
+
     def update_current_node(self):
         current_node = self.get_current_node()
         if current_node is not self.current_node:
@@ -177,8 +183,6 @@ class Unit(PlayerEntity):
         else:
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
-            # if self.weapons:
-            #     self.update_fire_covered_area()
 
     def update_fire_covered_area(self):
         area = find_area(*self.current_node.grid, self.attack_range_matrix)
@@ -335,8 +339,9 @@ class Unit(PlayerEntity):
         self.current_speed = speed = min(distance_left, self.max_speed)
         self.change_x, self.change_y = vector_2d(angle, speed)
 
-    def move_to(self, destination: GridPosition):
+    def move_to(self, destination: GridPosition, force_destination=True):
         self.cancel_path_requests()
+        self.forced_destination = force_destination
         start = position_to_map_grid(*self.position)
         self.game.pathfinder.request_path(self, start, destination)
 
@@ -344,6 +349,7 @@ class Unit(PlayerEntity):
         self.path.clear()
         self.awaited_path = None
         self.path.extend(new_path[1:])
+        self.forced_destination = True
         self.unschedule_earlier_move_orders()
 
     def unschedule_earlier_move_orders(self):
@@ -354,8 +360,8 @@ class Unit(PlayerEntity):
         self.game.pathfinder.cancel_unit_path_requests(unit=self)
 
     def stop_completely(self):
-        self.destination = None
         self.set_navigating_group(navigating_group=None)
+        self.forced_destination = False
         self.leave_waypoints_queue()
         self.cancel_path_requests()
         self.awaited_path = None
@@ -365,9 +371,6 @@ class Unit(PlayerEntity):
     def leave_waypoints_queue(self):
         self.game.pathfinder.remove_unit_from_waypoint_queue(unit=self)
 
-    def run_away(self):
-        pass
-
     def set_permanent_units_group(self, index: int = 0):
         if (cur_index := self.permanent_units_group) and cur_index != index:
             try:
@@ -376,36 +379,31 @@ class Unit(PlayerEntity):
                 pass
         self.permanent_units_group = index
 
-    def engage_enemy(self, enemy: PlayerEntity):
-        if self.in_attack_range(enemy):
-            # TODO: unblocking movement when Unit gets move-order and has target
-            # if condition:
-            #     self.stop_completely()
-            self.fight_enemy(enemy)
-        else:
-            self.move_toward_enemy(enemy)
+    @ignore_in_editor_mode
+    def update_battle_behaviour(self):
+        in_range = self.in_attack_range
+        for enemy in (self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()):
+            if enemy is not None:
+                if in_range(enemy):
+                    self._targeted_enemy = enemy
+                    self.fight_enemy(enemy)
 
     def move_toward_enemy(self, enemy: PlayerEntity):
-        self.move_to(enemy.current_node.grid)
+        self.move_to(position_to_map_grid(*enemy.position), False)
+
+    def run_away(self):
+        pass
 
     def fight_enemy(self, enemy):
         if enemy.alive:
             self.attack(enemy)
         else:
-            self.assign_enemy(None)
+            if self._enemy_assigned_by_player is enemy:
+                self._enemy_assigned_by_player = None
+            self.targeted_enemy = None
 
-    def move_towards_enemies_nearby(self):
-        """
-        When Unit detected enemies but they are out of attack range, it can
-        move closer to engage them.
-        """
-        if (enemy := self._targeted_enemy) is not None:
-            if self.in_attack_range(enemy):
-                self.stop_completely()
-        elif not self.has_destination:
-            enemy_to_attack = random.choice([e for e in self.known_enemies])
-            self.assign_enemy(enemy_to_attack)
-            self.move_to(position_to_map_grid(*enemy_to_attack.position))
+    def consume_ammunition(self, amount: float):
+        self._ammunition = max(0, self._ammunition - amount)
 
     def kill(self):
         self.stop_completely()
@@ -597,14 +595,14 @@ class Tank(Vehicle):
     def create_threads(self):
         return VehicleThreads(self.threads_texture, self.facing_direction, *self.position)
 
-    def engage_enemy(self, enemy: PlayerEntity):
+    def fight_enemy(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
         self.set_hull_and_turret_texture(enemy)
-        super().engage_enemy(enemy)
+        super().fight_enemy(enemy)
 
     def spawn_wreck(self):
         wreck_name = f'{self.object_name}_wreck.png'
-        wreck = self.game.spawner.spawn(
+        self.game.spawner.spawn(
             wreck_name, None, self.position,
             (self.facing_direction, self.turret_facing_direction)
         )
@@ -683,15 +681,17 @@ class Soldier(Unit):
             self.set_texture(self.cur_texture_index)
 
     def enter_building(self, building):
-        self.stop_completely()
-        self.game.units_manager.unselect(self)
         self.outside = False
-        self.targeted_enemy = None
+        self.stop_completely()
+        self.assign_enemy(None)
+        self.remove_from_map_quadtree()
+        self.game.units_manager.unselect(self)
         building.on_soldier_enter(soldier=self)
 
     def leave_building(self, building):
         x, y = building.position
         self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
+        self.insert_to_map_quadtree()
         self.outside = True
 
     def restore_health(self):

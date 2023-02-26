@@ -52,6 +52,7 @@ class UnitTask:
     def remove(self, unit):
         try:
             self.units.remove(unit)
+            unit.tasks.remove(self)
         except ValueError:
             pass
 
@@ -74,11 +75,12 @@ class TaskEnterBuilding(UnitTask):
         super().update()
 
     def condition(self) -> bool:
-        return self.units and self.target and self.target.soldiers_slots_left
+        return self.units and self.target and self.target.count_empty_garrison_slots
 
     def check_if_soldier_can_enter(self, soldier):
         if self.target.occupied_nodes.intersection(soldier.adjacent_nodes):
-            soldier.enter_building(self.target)
+            if self.target.is_enemy(soldier) or self.target.count_empty_garrison_slots:
+                soldier.enter_building(self.target)
             self.remove(soldier)
         else:
             self.check_if_soldier_heading_to_target(soldier)

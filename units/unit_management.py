@@ -261,8 +261,13 @@ class UnitsManager(EventsCreator):
 
     @ignore_in_menu
     def on_terrain_click_with_units(self, x, y, units):
+        self.clear_units_assigned_enemies(units)
         x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
         self.create_movement_order(units, x, y)
+
+    def clear_units_assigned_enemies(self, units):
+        for unit in units:
+            unit.assign_enemy(None)
 
     def create_movement_order(self, units, x, y):
         if LCTRL in self.game.window.keyboard.keys_pressed:
@@ -292,19 +297,20 @@ class UnitsManager(EventsCreator):
             clicked: Building
             self.on_building_clicked(clicked)
         else:
+            self.clear_units_assigned_enemies(units)
             self.set_hostile_entity_as_units_target(clicked, units)
             self.send_units_to_pointed_location(units, *clicked.position)
 
     def set_hostile_entity_as_units_target(self, target, units):
         for unit in units:
-            unit._targeted_enemy = target
+            unit._enemy_assigned_by_player = target
 
     def on_unit_clicked(self, clicked_unit: Unit):
         self.unselect_all_selected()
         self.select_units(clicked_unit)
 
     def on_building_clicked(self, clicked_building: Building):
-        if self.only_soldiers_selected:
+        if self.only_soldiers_selected and clicked_building.count_empty_garrison_slots:
             soldiers = self.get_selected_soldiers()
             self.send_soldiers_to_building(clicked_building, soldiers)
         else:

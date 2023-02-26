@@ -61,6 +61,8 @@ GAME_PATH = pathlib.Path(__file__).parent.absolute()
 BASIC_UI = 'basic_ui'
 BUILDINGS_PANEL = 'building_panel'
 UNITS_PANEL = 'units_panel'
+UNITS_CONSTRUCTION_PANEL = 'units_construction_panel'
+BUILDINGS_CONSTRUCTION_PANEL = 'buildingss_construction_panel'
 
 screen = get_screens()[0]
 
@@ -515,14 +517,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
         ui_size = UI_WIDTH, SCREEN_HEIGHT
-        top_panel = Frame('ui_top_panel.png', SCREEN_X - 190,
-                          SCREEN_HEIGHT+30, SCREEN_WIDTH - UI_WIDTH, 60)
         frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
         options_panel = UiElementsBundle(
             name=BASIC_UI,
             elements=[
                 frame,
-                top_panel,
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
@@ -532,24 +531,27 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                         parent=frame),
                  Button('game_button_pause.png', ui_x - 100, 120,
                         functions=partial(self.toggle_pause),
-                        parent=frame)
+                        parent=frame),
             ],
             register_to=self
         )
-        y = SCREEN_HEIGHT + 30
+        y = SCREEN_HEIGHT * 0.79075
+        x = SCREEN_WIDTH - UI_WIDTH + 90
+        resources = (r for r in Player.resources)
         options_panel.extend(
-            [
-                UiTextLabel(110 + 250 * i, y, '0', 15, WHITE, resource)
-                for i, resource in enumerate(Player.resources)
-            ]
+            [UiTextLabel(x, y, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources)),
+             UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources)),
+             UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources)),
+             UiTextLabel(x + 87, y - 120, '0', 17, WHITE, next(resources))
+             ],
         )
 
         units_panel = UiElementsBundle(
             name=UNITS_PANEL,
             elements=[
-                Button('game_button_stop.png', ui_x - 100, 800,
+                Button('game_button_stop.png', ui_x - 100, ui_y + 50,
                        functions=self.stop_all_units),
-                Button('game_button_attack.png', ui_x, 800,
+                Button('game_button_attack.png', ui_x, ui_y + 50,
                        functions=partial(self.window.cursor.force_cursor, 2))
             ],
             register_to=self
@@ -557,6 +559,18 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         buildings_panel = UiElementsBundle(
             name=BUILDINGS_PANEL,
+            elements=[],
+            register_to=self
+        )
+
+        units_construction_panel = UiElementsBundle(
+            name=UNITS_CONSTRUCTION_PANEL,
+            elements=[],
+            register_to=self
+        )
+
+        buildingss_construction_panel = UiElementsBundle(
+            name=BUILDINGS_CONSTRUCTION_PANEL,
             elements=[],
             register_to=self
         )
@@ -589,8 +603,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @property
     def ui_position(self) -> Tuple[float, float]:
-        left, _, bottom, _ = self.viewport
-        return left + SCREEN_WIDTH - UI_WIDTH / 2, bottom + SCREEN_Y
+        _, right, bottom, _ = self.viewport
+        return right - UI_WIDTH / 2, bottom + SCREEN_Y
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
@@ -840,7 +854,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def draw_timer(self):
         _, r, b, _ = self.viewport
-        x, y = r - 270, b + 800
+        x, y = r - 270, b + 840
         t = self.timer
         f = format
         formatted = f"{f(t['h'], '02')}:{f(t['m'], '02')}:{f(t['s'], '02')}"

@@ -26,6 +26,7 @@ class Weapon:
         self.accuracy: float = 75.0
         self.range: float = 200.0
         self.rate_of_fire: float = 4  # 4 seconds
+        self.ammo_per_shot = 1
         self.next_firing_time = 0
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
@@ -38,6 +39,7 @@ class Weapon:
         return self.owner.timer['total'] >= self.next_firing_time
 
     def shoot(self, target: PlayerEntity):
+        self.owner.consume_ammunition(self.ammo_per_shot)
         self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
         self.create_shot_audio_visual_effects()
         if self.hit_target(target):
@@ -48,6 +50,7 @@ class Weapon:
             (
                 self.accuracy,
                 self.owner.experience * 0.05,
+                -target.experience * 0.05,
                 25 if target.is_building else 0,
                 -target.cover,
                 -25 if self.owner.moving else 0,

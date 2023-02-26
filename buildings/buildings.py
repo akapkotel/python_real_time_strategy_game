@@ -18,7 +18,7 @@ from user_interface.user_interface import (
 from campaigns.research import Technology
 from map.map import MapNode, Sector, normalize_position, position_to_map_grid
 from players_and_factions.player import (
-    Player, PlayerEntity, STEEL, ELECTRONICS, CONSCRIPTS
+    Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS
 )
 from utils.functions import (
     add_player_color_to_name, get_texture_size, name_to_texture_name,
@@ -72,7 +72,7 @@ class UnitsProducer(_Building):
             self.game.window.sound_player.play_sound('production_started.wav')
 
     def consume_resources_from_the_pool(self, unit: str):
-        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS):
             required_amount = self.game.configs[UNITS][unit][resource]
             self.player.consume_resource(resource, required_amount)
 
@@ -154,8 +154,9 @@ class UnitsProducer(_Building):
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
+        left, bottom = x - 100, y - 300
         for i, unit in enumerate(self.produced_units):
-            b = ProgressButton(unit + '_icon.png', x, y + 105 * i, unit,
+            b = ProgressButton(unit + '_icon.png', left, bottom + 105 * i, unit,
                                functions=partial(self.start_production, unit))
             b.bind_function(partial(self.cancel_production, unit), 4)
             production_buttons.append(b)
@@ -345,9 +346,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         area = find_area(x, y, self.attack_range_matrix)
         self.fire_covered = {self.map[grid] for grid in area}
 
-    def fight_enemies(self):
-        if (enemy := self._targeted_enemy) is not None:
-            self.engage_enemy(enemy)
+    @ignore_in_editor_mode
+    def update_battle_behaviour(self):
+        pass
 
     def on_mouse_enter(self):
         if self.selection_marker is None:
@@ -392,6 +393,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 pass
 
     def create_ui_buttons(self, x, y) -> List[UiElement]:
+        """
+         Each time Building is clicked by the player, this method generates all icons and buttons required for player
+         to inspect and manage his Building.
+
+        :param x: float -- x component of user interface position
+        :param y: float -- y component of user interface position
+        :return: List[uiElement] -- buttons, icons and widgets available for this Building
+        """
         buttons = [self.create_garrison_button(x, y)]
         if self.produced_units is not None:
             buttons.extend(self.create_production_buttons(x, y))
@@ -399,7 +408,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_garrison_button(self, x, y) -> ProgressButton:
         button = ProgressButton(
-            'ui_leave_building_btn.png', x - 100, y + 200, 'leave',
+            'ui_leave_building_btn.png', x - 100, y, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
             functions=self.on_soldier_exit
         )
@@ -407,7 +416,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return button
 
     @property
-    def soldiers_slots_left(self) -> int:
+    def count_empty_garrison_slots(self) -> int:
         """Check if more Soldiers can enter this building."""
         return self.garrison_size - len(self.garrisoned_soldiers)
 
