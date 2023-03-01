@@ -40,11 +40,10 @@ from user_interface.user_interface import (
     UiElement
 )
 from utils.classes import Observed
-from utils.colors import BLACK, GREEN, RED, WHITE
+from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
 from utils.data_types import Viewport
 from utils.functions import (
-    get_path_to_file, to_rgba, SEPARATOR,
-    ignore_in_editor_mode
+    get_path_to_file, SEPARATOR, ignore_in_editor_mode
 )
 from utils.game_logging import log, logger
 from utils.timing import timer
@@ -511,7 +510,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             Unit: self.units,
             Building: self.buildings,
             Sprite: self.terrain_tiles,
-            TerrainObject: self.static_objects
+            TerrainObject: self.static_objects,
+            HumanPlayer: self.local_human_player
         }[object_class].get_by_id(object_id)
 
     def create_user_interface(self) -> UiSpriteList:
@@ -862,7 +862,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
-        draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, to_rgba(color, 150))
+        draw_rectangle_filled(x, y, SCREEN_WIDTH, 200, rgb_to_rgba(color, 150))
         draw_text(text, x, y, txt_color, 30, anchor_x='center', anchor_y='center')
 
     def toggle_pause(self, dialog: str = 'GAME PAUSED', color: Color = BLACK):
@@ -909,6 +909,7 @@ def run_game():
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
+    # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
     total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (

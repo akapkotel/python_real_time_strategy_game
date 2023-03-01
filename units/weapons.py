@@ -18,6 +18,8 @@ class Weapon:
     """Spawn a Weapon instance for each Unit you want to be able to fight."""
 
     def __init__(self, name: str, owner: PlayerEntity):
+        self.max_ammunition: int = 0
+        self.magazine_size = 0
         self.effective_against_infantry = False
         self.owner = owner
         self.name: str = name
@@ -32,20 +34,32 @@ class Weapon:
         self.projectile_sprites: List[Texture] = []
         self.explosion_name = SHOT_BLAST
         self.owner.game.explosions_pool.add(self.explosion_name, 75)
+
         for attr_name, value in self.owner.game.configs['weapons'][name].items():
             setattr(self, attr_name, value)
+
+        self.ammunition: int = self.max_ammunition
+        self.ammo_left_in_magazine = self.magazine_size
 
     def reloaded(self) -> bool:
         return self.owner.timer['total'] >= self.next_firing_time
 
     def shoot(self, target: PlayerEntity):
-        self.owner.consume_ammunition(self.ammo_per_shot)
         self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
         self.create_shot_audio_visual_effects()
-        if self.hit_target(target):
-            target.on_being_damaged(damage=self.damage, penetration=self.penetration)
+        self.consume_ammunition()
+        if self.check_if_target_was_hit(target):
+            target.on_being_damaged(self.damage, self.penetration)
 
-    def hit_target(self, target: PlayerEntity) -> bool:
+    def consume_ammunition(self):
+        if self.magazine_size:
+            self.ammo_left_in_magazine -= 1
+            if not self.ammo_left_in_magazine:
+                self.ammo_left_in_magazine = self.magazine_size
+                self.next_firing_time += (self.rate_of_fire * 4)
+        self.ammunition = max(0, self.ammunition - 1)
+
+    def check_if_target_was_hit(self, target: PlayerEntity) -> bool:
         hit_chance = sum(
             (
                 self.accuracy,
@@ -65,4 +79,4 @@ class Weapon:
         x, y = self.owner.center_x, self.owner.center_y + 10
         blast_position = move_along_vector((x, y), 35.0, angle=barrel_angle)
         self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
-        self.owner.game.sound_player.play_sound(self.shot_sound)
+        self.owner.game.sound_player.play_sound(self.shot_sound, sound_position=(x, y))

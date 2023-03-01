@@ -16,7 +16,7 @@ from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement
 )
 from campaigns.research import Technology
-from map.map import MapNode, Sector, normalize_position, position_to_map_grid
+from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS
 )
@@ -32,19 +32,14 @@ from controllers.constants import CURSOR_ENTER_TEXTURE
 from utils.game_logging import logger
 
 
-class _Building:
-    player = None
-    game = None
-
-
-class UnitsProducer(_Building):
+class UnitsProducer:
     """
     An interface for all Buildings which can produce Units in game.
     """
 
     def __init__(self, produced_units: Tuple[str]):
         # Units which are available to produce in this Building:
-        self.produced_units = produced_units
+        self.produced_units = self.build_units_productions_costsheet(produced_units)
         self.player.units_possible_to_build.update(u for u in produced_units)
         # Queue of Units to be produced
         self.production_queue: Deque[str] = deque()
@@ -73,7 +68,7 @@ class UnitsProducer(_Building):
 
     def consume_resources_from_the_pool(self, unit: str):
         for resource in (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS):
-            required_amount = self.game.configs[UNITS][unit][resource]
+            required_amount = self.produced_units[unit][resource]
             self.player.consume_resource(resource, required_amount)
 
     def cancel_production(self, unit: str):
@@ -174,6 +169,15 @@ class UnitsProducer(_Building):
         self.production_progress = state['production_progress']
         self.currently_produced = state['currently_produced']
         self.production_time = state['production_time']
+
+    def build_units_productions_costsheet(self, produced_units: List[str]) -> Dict[str, Dict[str: int]]:
+        configs = self.game.configs[UNITS]
+        resources = (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS)
+        units_production_costs = {
+            unit: {resource: configs[unit][resource] for resource in resources} for unit in produced_units
+        }
+        return units_production_costs
+
 
 
 class ResourceProducer:

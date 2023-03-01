@@ -10,8 +10,7 @@ from arcade import (
 from game import SCREEN_HEIGHT
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from map.map import normalize_position, position_to_map_grid
-from utils.colors import RED, GREEN, WHITE, BLACK
-from utils.functions import to_rgba
+from utils.colors import RED, GREEN, WHITE, BLACK, rgb_to_rgba
 from utils.game_logging import log
 from units.units import Unit
 from players_and_factions.player import ENERGY, STEEL, ELECTRONICS, CONSCRIPTS
@@ -99,7 +98,7 @@ class GameDebugger:
         draw_circle_outline(node.x, node.y, 10, RED, 2)
 
         for adj in node.adjacent_nodes | {node,}:
-            color = to_rgba(WHITE, 25) if adj.walkable else to_rgba(RED, 25)
+            color = rgb_to_rgba(WHITE, 25) if adj.walkable else rgb_to_rgba(RED, 25)
             draw_rectangle_filled(adj.x, adj.y, TILE_WIDTH, TILE_HEIGHT, color)
             draw_circle_outline(*adj.position, 5, color=WHITE, border_width=1)
 

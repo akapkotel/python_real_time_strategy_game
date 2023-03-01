@@ -21,7 +21,7 @@ from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
 # from utils.game_logging import log
 from utils.functions import (
-    ignore_in_editor_mode, new_id, add_player_color_to_name
+    ignore_in_editor_mode, add_player_color_to_name
 )
 from utils.geometry import (
     is_visible, clamp, find_area, precalculate_circular_area_matrix
@@ -42,6 +42,13 @@ CONSCRIPTS = 'conscripts'
 YIELD_PER_SECOND = "_yield_per_second"
 CONSUMPTION_PER_SECOND = "_consumption_per_second"
 PRODUCTION_EFFICIENCY = "_production_efficiency"
+
+
+def new_id(objects: Dict) -> int:
+    if objects:
+        return max(objects.keys()) << 1
+    else:
+        return 2
 
 
 class Faction(EventsCreator, Observer, Observed):
@@ -156,7 +163,7 @@ class ResourcesManager(EventsCreator):
 
     def enough_resources_for(self, expense: str) -> bool:
         category = self._identify_expense_category(expense)
-        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (r for r in self.resources.keys() if r in self.game.configs[category][expense]):
             required_amount = self.game.configs[category][expense][resource]
             if not self.has_resource(resource, required_amount):
                 if self.is_local_human_player:
@@ -197,6 +204,19 @@ class ResourcesManager(EventsCreator):
     def add_resource(self, resource_name: str, amount: float):
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
+    def __setstate__(self, state: Dict):
+        self.__dict__.update(state)
+        for resource_name in self.resources.keys():
+            setattr(self, resource_name, state[resource_name])
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
+            setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
+            if resource_name != ENERGY:
+                setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
+
+    def __getstate__(self) -> Dict:
+        resource_manager = {}
+        resource_manager.update(self.__dict__)
+        return resource_manager
 
 class Player(ResourcesManager, Observer, Observed):
     game = None
@@ -217,11 +237,12 @@ class Player(ResourcesManager, Observer, Observed):
 
         self.units_possible_to_build: Set[str] = set()
         self.buildings_possible_to_build: Set[str] = set()
-        self.known_technologies: Set[int] = set()
-        self.current_research: Dict[int, float] = defaultdict()
 
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
+
+        self.known_technologies: Set[int] = set()
+        self.current_research: Dict[int, float] = defaultdict()
 
         self.known_enemies: Set[PlayerEntity] = set()
 
@@ -481,7 +502,6 @@ class PlayerEntity(GameObject):
         self._weapons: List[Weapon] = []
         # use this number to animate shot blast from weapon:
         self.barrel_end = self.cur_texture_index
-        self._ammunition = self.configs.get('ammunition', 0)
 
         self.experience = 0
         self.kill_experience = 0
@@ -528,11 +548,11 @@ class PlayerEntity(GameObject):
 
     @property
     def weapons(self) -> bool:
-        return self._weapons and self._ammunition > 0
+        return not not self._weapons
 
     @property
     def ammunition(self) -> bool:
-        return self._ammunition > 0
+        return any(w.ammunition for w in self._weapons)
 
     def assign_enemy(self, enemy: Optional[PlayerEntity]):
         # used when Player orders this Entity to attack the particular enemy
@@ -559,7 +579,8 @@ class PlayerEntity(GameObject):
         if self.should_reveal_map:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
-        self.update_battle_behaviour()
+        if self.known_enemies or self._enemy_assigned_by_player:
+            self.update_battle_behaviour()
         super().on_update(delta_time)
 
     def draw(self):
@@ -616,12 +637,15 @@ class PlayerEntity(GameObject):
     def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
         if not self.known_enemies:
             return None
-        in_range = self.in_attack_range
-        sorted_by_health = sorted(self.known_enemies, key=lambda e: e.health)
-        if enemies_in_range := [e for e in sorted_by_health if in_range(e)]:
-            return enemies_in_range[0]
-        else:
+        if sorted_by_health := sorted(self.known_enemies, key=lambda e: e.health):
             return sorted_by_health[0]
+
+        # in_range = self.in_attack_range
+        # sorted_by_health = sorted(self.known_enemies, key=lambda e: e.health)
+        # if enemies_in_range := [e for e in sorted_by_health if in_range(e)]:
+        #     return enemies_in_range[0]
+        # else:
+        #     return sorted_by_health[0]
 
     def inside_area(self, other: Union[Unit, Building], area) -> bool:
         if other.is_unit:

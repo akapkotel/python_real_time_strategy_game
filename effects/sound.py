@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Optional
+from math import dist
+from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 
 from utils.classes import Singleton
@@ -22,6 +23,7 @@ UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
 
 
 class AudioPlayer(Singleton):
+    game = None
     instance = None
 
     def __init__(self,
@@ -53,6 +55,8 @@ class AudioPlayer(Singleton):
         self.playlists: Dict[str, List[str]] = self._setup_playlists()
         self.current_playlist: Optional[List[str]] = None
         self.playlist_index: int = 0
+
+        self.max_sound_distance: Optional[float] = None
 
         AudioPlayer.instance = self
 
@@ -111,6 +115,8 @@ class AudioPlayer(Singleton):
         self._sound_effects_on = value
 
     def on_update(self):
+        if self.max_sound_distance is None and self.game is not None and self.game.is_running:
+            self.max_sound_distance = dist((0, 0), (self.game.map.width, self.game.map.height))
         if self.current_music is not None and not self.current_music.playing:
             if (playlist := self.current_playlist) is not None:
                 self._next_playlist_index()
@@ -129,27 +135,40 @@ class AudioPlayer(Singleton):
             self.playlist_index = 0
             self.play_music(self.current_playlist[self.playlist_index], False)
 
-    def play_sound(self, name: str, volume: Optional[float] = None):
+    def play_sound(self, name: str, volume: Optional[float]=None, sound_position: Optional[Tuple[float, float]]=None):
         """Play a single sound. Use this for sound effects."""
         if name not in self.sounds:
             log(f'Sound: {name} not found!', console=True)
+            return
         elif self.is_music(name) and not self._music_on:
-            pass
+            return
         elif not self._sound_effects_on:
-            pass
-        else:
-            self._play_sound(name, loop=False, volume=volume)
+            return
 
-    def play_music(self, name: str, loop=True, volume: Optional[float] = None):
+        if volume is None and sound_position is not None:
+            volume = self.calculate_volume_based_on_distance(sound_position)
+
+        self._play_sound(name, loop=False, volume=volume)
+
+    def calculate_volume_based_on_distance(self, sound_position: Tuple[float, float]) -> float:
+        """
+        The loudest sounds are played when camera is positioned on the position, where sound was emitted in game-world.
+        As the distance of current player viewport from that position raises, sound volume drops.
+        """
+        viewport = self.game.viewport
+        player_position = (viewport[0] + viewport[1] / 2, viewport[2] + viewport[3] / 2)
+        return 1 - dist(sound_position, player_position) / self.max_sound_distance
+
+    def play_music(self, name: str, loop=True, volume: Optional[float]=None):
         """Use this for background sound-themes."""
         if self.current_music is not None:
             self._stop_music_track()
         if self._music_on:
             self._play_music_track(name, loop, volume)
 
-    def play_random(self, sounds_list: List[str], volume: Optional[float] = None):
+    def play_random(self, sounds_list: List[str], volume: Optional[float]=None):
         """Play sound randomly chosen from list of sounds names."""
-        self.play_sound(random.choice(sounds_list), volume)
+        self.play_sound(random.choice(sounds_list), volume or self.effects_volume)
 
     def _stop_music_track(self):
         try:
@@ -160,11 +179,13 @@ class AudioPlayer(Singleton):
             self.current_music = None
 
     def _play_music_track(self, name, loop, volume):
-        player = self._get_player(name, loop, volume or self.music_volume)
+        volume = self.music_volume * volume if volume is not None else self.music_volume
+        player = self._get_player(name, loop, volume)
         self.current_music = player
 
     def _play_sound(self, name, loop, volume):
-        player = self._get_player(name, loop, volume or self.effects_volume)
+        volume = self.effects_volume * volume if volume is not None else self.effects_volume
+        player = self._get_player(name, loop, volume)
         self.currently_played.append(player)
 
     def _get_player(self, name, loop, volume) -> Player:

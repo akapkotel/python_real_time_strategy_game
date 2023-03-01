@@ -12,7 +12,7 @@ from typing import (
 )
 
 from arcade import (
-    Sprite, load_texture, draw_rectangle_outline, draw_text,
+    Sprite, Texture, load_texture, draw_rectangle_outline, draw_text,
     draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision,
     draw_lrtb_rectangle_filled, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT
 )
@@ -23,15 +23,33 @@ from controllers.constants import HORIZONTAL, VERTICAL
 from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.classes import Observed, Observer
 from utils.geometry import clamp
+from utils.colors import rgb_to_rgba
 from utils.improved_spritelists import UiSpriteList
 
 from utils.functions import (
-    make_texture, get_path_to_file, name_to_texture_name, to_rgba,
-    get_texture_size
+    get_path_to_file, name_to_texture_name, get_texture_size
 )
 from utils.game_logging import log
 
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
+
+
+def make_texture(width: int, height: int, color: Color) -> Texture:
+    """
+    Return a :class:`Texture` of a square with the given diameter and color,
+    fading out at its edges.
+
+    :param int size: Diameter of the square and dimensions of the square
+    Texture returned.
+    :param Color color: Color of the square.
+    :param int center_alpha: Alpha value of the square at its center.
+    :param int outer_alpha: Alpha value of the square at its edges.
+
+    :returns: New :class:`Texture` object.
+    """
+    img = PIL.Image.new("RGBA", (width, height), color)
+    name = "{}:{}:{}:{}".format("texture_rect", width, height, color)
+    return Texture(name, img)
 
 
 class Hierarchical:
@@ -428,7 +446,7 @@ class ProgressButton(Button):
         super().draw()
         if self._progress:
             top = self.bottom + (self.height * 0.01) * self._progress
-            color = to_rgba(GREEN, alpha=150)
+            color = rgb_to_rgba(GREEN, alpha=150)
             draw_lrtb_rectangle_filled(self.left, self.right, top, self.bottom, color)
         if self._counter:
             draw_text(str(self._counter), self.left + 5, self.top - 20, RED, 15)

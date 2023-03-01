@@ -132,3 +132,4 @@ dmypy.json
 # real_time_strategy_game
 
 *.sav
+/resources/sounds/effects/źródła.txt

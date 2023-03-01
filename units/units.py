@@ -16,12 +16,13 @@ from arcade.arcade_types import Point
 from effects.constants import SHOT_BLAST, EXPLOSION
 from effects.explosions import Explosion
 from map.map import (
-    GridPosition, MapNode, MapPath, Pathfinder, Sector, normalize_position,
+    GridPosition, MapNode, MapPath, Pathfinder, normalize_position,
     position_to_map_grid
 )
 from players_and_factions.player import Player, PlayerEntity
 from utils.colors import GREEN
 from utils.functions import (get_path_to_file, get_texture_size, ignore_in_editor_mode)
+from utils.game_logging import log
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS, find_area
@@ -376,34 +377,36 @@ class Unit(PlayerEntity):
             try:
                 self.game.units_manager.permanent_units_groups[cur_index].discard(self)
             except KeyError:
-                pass
+                log(f'Unable to remove Unit from permanent groups due to KeyError: {cur_index}.')
         self.permanent_units_group = index
 
-    @ignore_in_editor_mode
     def update_battle_behaviour(self):
-        in_range = self.in_attack_range
-        for enemy in (self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()):
-            if enemy is not None:
-                if in_range(enemy):
-                    self._targeted_enemy = enemy
-                    self.fight_enemy(enemy)
+        if not self.weapons or not self.ammunition:
+            return self.run_away()
+        # we know that this method is called only if there is known_enemy or player-assigned enemy:
+        enemies = (e for e in [self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()] if e is not None)
+        for enemy in enemies:
+            if self.in_attack_range(enemy):
+                self.fight_enemy(enemy)
+                if enemy is self._enemy_assigned_by_player:
+                    self.stop_completely()
+            else:
+                self.move_toward_enemy(enemy)
 
     def move_toward_enemy(self, enemy: PlayerEntity):
-        self.move_to(position_to_map_grid(*enemy.position), False)
+        if not (enemy is self._enemy_assigned_by_player or self.has_destination):
+            self.game.pathfinder.navigate_units_to_destination([self], *enemy.position)
 
     def run_away(self):
         pass
 
     def fight_enemy(self, enemy):
-        if enemy.alive:
+        if enemy.alive and enemy.is_enemy(self):
             self.attack(enemy)
         else:
             if self._enemy_assigned_by_player is enemy:
                 self._enemy_assigned_by_player = None
             self.targeted_enemy = None
-
-    def consume_ammunition(self, amount: float):
-        self._ammunition = max(0, self._ammunition - amount)
 
     def kill(self):
         self.stop_completely()

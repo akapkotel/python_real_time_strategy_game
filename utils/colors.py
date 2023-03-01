@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
-from arcade.arcade_types import Color
+from arcade.arcade_types import Color, RGB, RGBA
 from arcade.color import SAND as ARCADE_SAND
+
+from utils.geometry import clamp
+
 
 # RGBA colors:
 RED: Color = (255, 0, 0, 255)
@@ -32,3 +35,7 @@ TRANSPARENT: Color = (0, 0, 0, 0)
 colors_names = {
     GREEN: 'green', RED: 'red', YELLOW: 'yellow', BLUE: 'blue'
 }
+
+
+def rgb_to_rgba(color: RGB, alpha: int) -> RGBA:
+    return color[0], color[1], color[2], clamp(alpha, 255, 0)

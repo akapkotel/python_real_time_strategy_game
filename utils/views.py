@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from typing import List, Set, Dict, Union, Optional, Any, Generator
+from typing import List, Tuple, Set, Dict, Union, Optional, Any, Generator
 from arcade import (
     Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
 )
 
 
-from utils.functions import get_objects_with_attribute
+# from utils.functions import get_objects_with_attribute
 from utils.game_logging import log, logger
 from utils.improved_spritelists import LayeredSpriteList
 from utils.colors import WHITE, GREEN
@@ -14,6 +14,21 @@ from utils.data_types import Viewport
 
 
 Updateable = Drawable = Union[SpriteList, LayeredSpriteList, Sprite]
+
+
+def get_objects_with_attribute(instance: object,
+                               name: str,
+                               ignore: Tuple = ()) -> List[Any]:
+    """
+    Search all attributes of <instance> to find all objects which have their
+    own attribute of <name> and return these objects as List. You can also add
+    a Tuple of class names to be ignored during query.
+    """
+    attributes = instance.__dict__.values()
+    return [
+        attr for attr in attributes if
+        hasattr(attr, name) and not isinstance(attr, ignore)
+    ]
 
 
 class LoadableWindowView(View):

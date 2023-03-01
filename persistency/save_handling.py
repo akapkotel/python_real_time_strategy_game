@@ -2,7 +2,9 @@
 
 import os
 import shelve
+import sys
 import time
+import pickle
 
 from typing import List, Dict, Callable, Any, Generator
 
@@ -17,6 +19,7 @@ from gameobjects.spawning import GameObjectsSpawner
 from effects.explosions import ExplosionsPool
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
+
 MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
@@ -27,6 +30,7 @@ class SaveManager(Singleton):
     This manager works not only with player-created saved games, but also with
     predefined scenarios stored in the same file-format, but in ./scenarios
     direction.
+    TODO: saving and loading saved files does not work on Windows, since shelve produces 3 files with different extensions (.bak, .dir, .dat) instead of a single one
     """
     game = None
 
@@ -58,7 +62,7 @@ class SaveManager(Singleton):
     def find_all_files(extension: str, path: str) -> SavedGames:
         names_to_paths = find_paths_to_all_files_of_type(extension, path)
         return {
-            name: os.path.join(path, name) for name, path in names_to_paths.items()
+            name: os.path.join(path, name).replace('.bak', '') for name, path in names_to_paths.items()
         }
 
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
@@ -103,18 +107,19 @@ class SaveManager(Singleton):
 
     def load_game(self, file_name: str) -> Generator[float, Any, None]:
         full_save_path = self.get_full_path_to_file_with_extension(file_name)
+
         with shelve.open(full_save_path) as file:
-            loaded = ('timer', 'settings', 'viewports', 'map', 'factions',
+            loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
                       'mission', 'permanent_units_groups', 'fog_of_war',
-                      'mini_map', 'scheduled_events')
+                      'mini_map', 'scheduled_events']
             progress = 1 / len(loaded)
             for name in loaded:
                 log(f'Loading: {name}...', console=True)
                 self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
                 log(f'Loaded {name} successfully!', console=True)
                 yield progress
-        # log(f'Game {file_name} loaded successfully!', console=True)
+        log(f'Game {file_name} loaded successfully!', console=True)
         # yield progress
 
     @staticmethod

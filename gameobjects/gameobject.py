@@ -9,12 +9,17 @@ from arcade.arcade_types import Point
 
 from utils.classes import Observed, Observer
 from utils.data_types import GridPosition
-from utils.functions import (
-    get_path_to_file, decolorised_name, add_extension
-)
+from utils.functions import get_path_to_file, add_extension
 from utils.game_logging import log
 from utils.improved_spritelists import LayeredSpriteList
 from utils.scheduling import EventsCreator, ScheduledEvent
+
+
+def name_without_color(name: str) -> str:
+    for color in ('_red', '_green', '_blue', '_yellow'):
+        if color in name:
+            return name.replace(color, '')
+    return name
 
 
 class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
@@ -30,7 +35,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
                  observers: Optional[List[Observer]] = None):
         # raw name of the object without texture extension and Player color
         # used to query game.configs and as a basename to build other names
-        self.object_name = decolorised_name(texture_name)
+        self.object_name = name_without_color(texture_name)
         # name with texture extension added used to find ant load texture
         self.full_name = add_extension(texture_name)
         self.filename_with_path = get_path_to_file(self.full_name)
