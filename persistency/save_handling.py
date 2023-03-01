@@ -22,6 +22,12 @@ MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
 
+saved_things_names = [
+    'saved_date', 'timer', 'settings', 'viewports', 'map', 'factions', 'players', 'local_human_player', 'units',
+    'buildings', 'mission_descriptor', 'mission', 'permanent_units_groups', 'fog_of_war', 'mini_map',
+    'scheduled_events'
+]
+
 
 class SaveManager(Singleton):
     """
@@ -69,22 +75,30 @@ class SaveManager(Singleton):
         full_save_path = os.path.join(path, save_name if extension in save_name else save_name + extension)
         self.delete_file(save_name, scenario)  # to avoid 'adding' to existing file
         with shelve.open(full_save_path) as file:
-            file['saved_date'] = time.localtime()
-            file['timer'] = game.save_timer()
-            file['settings'] = game.settings
-            file['viewports'] = game.viewport, game.window.menu_view.viewport
-            file['map'] = game.map.save()
-            file['factions'] = [f.save() for f in game.factions.values()]
-            file['players'] = game.players
-            file['local_human_player'] = game.local_human_player.id
-            file['units'] = [unit.save() for unit in game.units]
-            file['buildings'] = [building.save() for building in game.buildings]
-            file['mission_descriptor'] = game.current_mission.get_descriptor
-            file['mission'] = game.current_mission
-            file['permanent_units_groups'] = game.units_manager.permanent_units_groups
-            file['fog_of_war'] = game.fog_of_war
-            file['mini_map'] = game.mini_map.save()
-            file['scheduled_events'] = self.game.events_scheduler.save()
+            objects = [time.localtime(), game.save_timer(), (game.viewport, game.window.menu_view.viewport),
+                       game.map.save(), [f.save() for f in game.factions.values()], game.players,
+                       game.local_human_player.id, [unit.save() for unit in game.units],
+                       [building.save() for building in game.buildings], game.current_mission.get_descriptor,
+                       game.current_mission, game.units_manager.permanent_units_groups, game.fog_of_war,
+                       game.mini_map.save(), self.game.events_scheduler.save()]
+            for name, saved in zip(saved_things_names, objects):
+                file[name] = saved
+            # file['saved_date'] = time.localtime()
+            # file['timer'] = game.save_timer()
+            # file['settings'] = game.settings
+            # file['viewports'] = game.viewport, game.window.menu_view.viewport
+            # file['map'] = game.map.save()
+            # file['factions'] = [f.save() for f in game.factions.values()]
+            # file['players'] = game.players
+            # file['local_human_player'] = game.local_human_player.id
+            # file['units'] = [unit.save() for unit in game.units]
+            # file['buildings'] = [building.save() for building in game.buildings]
+            # file['mission_descriptor'] = game.current_mission.get_descriptor
+            # file['mission'] = game.current_mission
+            # file['permanent_units_groups'] = game.units_manager.permanent_units_groups
+            # file['fog_of_war'] = game.fog_of_war
+            # file['mini_map'] = game.mini_map.save()
+            # file['scheduled_events'] = self.game.events_scheduler.save()
         self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
@@ -118,7 +132,7 @@ class SaveManager(Singleton):
                 log(f'Loaded {name} successfully!', console=True)
                 yield progress
         log(f'Game {file_name} loaded successfully!', console=True)
-        # yield progress
+        yield progress
 
     @staticmethod
     def loading_step(function: Callable, argument: Any):

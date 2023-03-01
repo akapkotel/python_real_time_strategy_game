@@ -392,8 +392,8 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
-        print('FPS:', 1 / (self.total_delta_time / self.frames))
-        log('Terminating application...')
+        print(f'Average FPS: {round(1 / (self.total_delta_time / self.frames), 2)}')
+        log('Terminating application...', console=True)
         super().close()
 
 

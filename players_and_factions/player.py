@@ -719,6 +719,7 @@ class PlayerEntity(GameObject):
 
     @property
     def selectable(self) -> bool:
+        print(self.player)
         return self.player.is_local_human_player
 
     @property
@@ -785,4 +786,3 @@ if __name__:
     from units.units import Unit, Soldier
     from buildings.buildings import Building
     from units.unit_management import SelectedEntityMarker
-
