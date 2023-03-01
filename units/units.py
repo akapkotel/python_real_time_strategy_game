@@ -88,7 +88,8 @@ class Unit(PlayerEntity):
 
     @property
     def configs(self):
-        return self.game.configs['units'][self.object_name]
+        # return self.game.configs['units'][self.object_name]
+        return self.game.configs[self.object_name]
 
     def update_explosions_pool(self):
         """

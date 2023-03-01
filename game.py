@@ -475,7 +475,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
-
+        print('Game __init__ method worked')
 
 
     @property
@@ -503,9 +503,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def find_object_by_class_and_id(self,
                                     name_and_id: Union[str, Tuple[str, int]]):
         if isinstance(name_and_id, Tuple):
-            object_class = eval(name_and_id[0])
-            object_id = name_and_id[1]
-            self.find_gameobject(object_class, object_id)
+            obj_name, object_id = name_and_id
+            object_class = eval(obj_name)
+            if object_class in (CpuPlayer, HumanPlayer):
+                return self.players.get(object_id)
+            return self.find_gameobject(object_class, object_id)
         else:
             object_class = eval(name_and_id)
             return {Game: self, GameWindow: self.window,
@@ -523,12 +525,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         :return: Optional[GameObject]
         """
         return {
+            Soldier: self.units,
             Unit: self.units,
             Building: self.buildings,
             Sprite: self.terrain_tiles,
             TerrainObject: self.static_objects,
             Wreck: self.static_objects,
-            HumanPlayer: self.local_human_player
         }[object_class].get_by_id(object_id)
 
     def create_user_interface(self) -> UiSpriteList:
@@ -651,21 +653,20 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def generate_random_map_objects(self):
         if self.generate_random_entities:
-            self.test_scheduling_events()
+            # self.test_scheduling_events()
             self.test_factions_and_players_creation()
             self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
             if self.settings.editor_mode:
                 self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
-            print(self.local_human_player.units)
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )
             self.window.move_viewport_to_the_position(*position)
 
     def test_scheduling_events(self):
-        event = ScheduledEvent(self, 5, self.scheduling_test, repeat=True)
+        event = ScheduledEvent(self, 5, self.scheduling_test)
         self.schedule_event(event)
 
     def test_factions_and_players_creation(self):
@@ -927,6 +928,12 @@ def run_game():
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
+
+    with open('test_file.txt', 'w') as file:
+        txt = ''.join((str(i) for i in range(60000)))
+        file.write(txt)
+
+
     total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (
@@ -938,7 +945,7 @@ if __name__ == '__main__':
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit, UnitsOrderedDestinations, Engineer
+    from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier
     from gameobjects.gameobject import GameObject, TerrainObject, Wreck
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar

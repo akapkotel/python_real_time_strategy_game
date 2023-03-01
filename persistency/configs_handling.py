@@ -19,7 +19,8 @@ def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
     for file in os.listdir(configs_path):
         key = file.rsplit('.')[0]
         try:
-            configs[key] = read_single_file(file)
+            configs.update(read_single_file(file))
+            # configs[key] = read_single_file(file)
         except Exception as e:
             log(f'{str(e)}')
     return configs

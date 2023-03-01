@@ -25,7 +25,7 @@ class GameObjectsSpawner(Singleton):
 
     def __init__(self):
         self.pathfinder = self.game.pathfinder
-        self.configs: Dict[str, Dict[str, Dict[str, Any]]] = self.game.configs
+        self.configs: Dict[str, Dict[str, Any]] = self.game.configs
         log(f'GameObjectsSpawner was initialized successfully...', console=True)
 
     def spawn_group(self,
@@ -44,9 +44,11 @@ class GameObjectsSpawner(Singleton):
               **kwargs):
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
-        elif name in self.configs[BUILDINGS]:
+        # elif name in self.configs[BUILDINGS]:
+        elif self.configs[name]['class'] == 'Building':
             return self._spawn_building(name, player, position, **kwargs)
-        elif name in self.configs[UNITS]:
+        # elif name in self.configs[UNITS]:
+        elif self.configs[name]['class'] in ('Soldier', 'Vehicle', 'Tank'):
             return self._spawn_unit(name, player, position, **kwargs)
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
@@ -55,19 +57,20 @@ class GameObjectsSpawner(Singleton):
         # flags telling a Building if it is a UnitsProducer, ResourceExtractor,
         # ResearchFacility etc.
         kwargs.update(
-            {k: v for (k, v) in self.configs[BUILDINGS][name].items() if
+            {k: v for (k, v) in self.configs[name].items() if
              k in ('produced_units', 'produced_resource', 'research_facility')}
-        )
+        )  # [BUILDINGS]
         return Building(name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         category = UNITS
-        class_name = eval(self.configs[category][name][CLASS])
+        # class_name = eval(self.configs[category][name][CLASS])
+        class_name = eval(self.configs[name][CLASS])
         unit = class_name(name, player, 1, position, **kwargs)
         return self._get_attributes_from_configs_file(category, name, unit)
 
     def _get_attributes_from_configs_file(self, category, name, spawned):
-        config_data = self.configs[category][name]  # 'raw' not colorized name
+        config_data = self.configs[name]  # 'raw' not colorized name
         for i, (key, value) in enumerate(config_data.items()):
             if i < 8 and value != name and 'class' not in key:
                 setattr(spawned, key, value)

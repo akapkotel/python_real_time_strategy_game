@@ -83,6 +83,14 @@ class TimePassed(Condition):
     def fulfilled(self) -> bool:
         return self.mission.game.timer['m'] >= self.required_time
 
+    def __getstate__(self):
+        saved = super().__getstate__()
+        saved['required_time'] = self.required_time
+        return saved
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+
 
 class MapRevealed(Condition):
     def fulfilled(self) -> bool:

@@ -34,6 +34,7 @@ class ScheduledEvent:
         self.kwargs = kwargs or {}
         self.repeat = inf if repeat == -1 else repeat
         self.delay_left = delay_left
+        print(f'created new event {self}')
 
     def __repr__(self):
         return (f'Event scheduled by: {self.creator.__class__.__name__}, '
@@ -54,7 +55,7 @@ class ScheduledEvent:
             'function': self.function.__name__,
             'args': self.args,
             'kwargs': self.kwargs,
-            'repeat': self.repeat,
+            'repeat': -1 if self.repeat == inf else self.repeat,
             'delay left': EventsScheduler.instance.time_left_to_event_execution(self)
         }
 
@@ -98,18 +99,19 @@ class EventsScheduler:
             self.schedulers.pop(index)
             self.scheduled_events.pop(index)
             self.execution_times.pop(index)
-        except ValueError:
-            pass
+        except ValueError as e:
+            log(f'Failed to unschedule ScheduledEvent due to: {e}')
 
     def update(self):
         time = self.game.timer['total']
         for i, event in enumerate(self.scheduled_events):
             if time >= self.execution_times[i]:
                 event.execute()
-                self.unschedule(i)
                 if event.repeat:
                     event.repeat -= 1
-                    self.schedule(event)
+                    self.execution_times[i] = time + event.delay
+                else:
+                    self.unschedule(i)
 
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         index = self.scheduled_events.index(event)
@@ -126,7 +128,6 @@ class EventsScheduler:
 
     def unshelve_scheduled_events(self, shelved_events: List[Dict]):
         for shelved in shelved_events:
-            print(shelved)
             creator = self.game.find_object_by_class_and_id(shelved['creator'])
             delay = shelved['delay']
             function = getattr(creator, shelved['function'])

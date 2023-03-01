@@ -163,9 +163,9 @@ class ResourcesManager(EventsCreator):
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
     def enough_resources_for(self, expense: str) -> bool:
-        category = self._identify_expense_category(expense)
-        for resource in (r for r in self.resources.keys() if r in self.game.configs[category][expense]):
-            required_amount = self.game.configs[category][expense][resource]
+        # category = self._identify_expense_category(expense)
+        for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):  # [category]
+            required_amount = self.game.configs[expense][resource]  # [category]
             if not self.has_resource(resource, required_amount):
                 if self.is_local_human_player:
                     self.notify_player_of_resource_deficit(resource)
@@ -218,6 +218,7 @@ class ResourcesManager(EventsCreator):
         resource_manager = {}
         resource_manager.update(self.__dict__)
         return resource_manager
+
 
 class Player(ResourcesManager, Observer, Observed):
     game = None
@@ -540,8 +541,9 @@ class PlayerEntity(GameObject):
 
     @property
     def configs(self):
-        category = 'units' if self.is_unit else 'buildings'
-        return self.game.configs[category][self.object_name]
+        # category = 'units' if self.is_unit else 'buildings'
+        # return self.game.configs[self.object_name]
+        return self.game.configs[self.object_name]
 
     @property
     def alive(self) -> bool:
@@ -719,7 +721,6 @@ class PlayerEntity(GameObject):
 
     @property
     def selectable(self) -> bool:
-        print(self.player)
         return self.player.is_local_human_player
 
     @property

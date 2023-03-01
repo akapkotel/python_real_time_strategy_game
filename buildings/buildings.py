@@ -98,12 +98,14 @@ class UnitsProducer:
         if unit not in self.production_queue:
             returned = self.production_progress / self.production_time
         for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
-            required_amount = self.game.configs[UNITS][unit][resource]
+            # required_amount = self.game.configs[UNITS][unit][resource]
+            required_amount = self.game.configs[unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
     def set_production_progress_and_speed(self, unit: str):
         self.production_progress = 0
-        production_time = self.game.configs[UNITS][unit]['production_time']
+        # production_time = self.game.configs[UNITS][unit]['production_time']
+        production_time = self.game.configs[unit]['production_time']
         self.production_time = production_time * self.game.settings.fps
 
     def _toggle_production(self, produced: Optional[str]):
@@ -165,19 +167,18 @@ class UnitsProducer:
         }
 
     def after_respawn(self, state: Dict):
-        print('units producer load()')
         self.production_progress = state['production_progress']
         self.currently_produced = state['currently_produced']
         self.production_time = state['production_time']
 
     def build_units_productions_costsheet(self, produced_units: List[str]) -> Dict[str, Dict[str: int]]:
-        configs = self.game.configs[UNITS]
+        # configs = self.game.configs[UNITS]
+        configs = self.game.configs
         resources = (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS)
         units_production_costs = {
             unit: {resource: configs[unit][resource] for resource in resources} for unit in produced_units
         }
         return units_production_costs
-
 
 
 class ResourceProducer:
@@ -243,9 +244,9 @@ class ResearchFacility:
         print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
-            self.researched_technology = self.owner.game.window.configs[
-                'technologies'][tech_name]
-
+            # self.researched_technology = self.owner.game.window.configs[
+            #     'technologies'][tech_name]
+            self.researched_technology = self.owner.game.window.configs[tech_name]
 
 class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     game: Optional[Game] = None

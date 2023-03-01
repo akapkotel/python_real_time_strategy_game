@@ -66,12 +66,13 @@ class ScenarioEditor:
     def find_all_gameobjects(self) -> List[str]:
         gameobjects = []
         colors = RED, GREEN, YELLOW, BLUE
-        for category in (UNITS, BUILDINGS):
-            objects = self.game.configs[category].keys()
-            for color in colors:
-                gameobjects.extend(
-                    [add_player_color_to_name(name, color) for name in objects]
-                )
+        # for category in (UNITS, BUILDINGS):
+            # objects = self.game.configs[category].keys()
+        objects = (o for o in self.game.configs.keys() if self.game.configs[o]['game_id'].startswith(('U', 'B')))
+        for color in colors:
+            gameobjects.extend(
+                [add_player_color_to_name(name, color) for name in objects]
+            )
         # since some textures may be not existent yet:
         gameobjects = [
             o for o in gameobjects if get_path_to_file(o) is not None

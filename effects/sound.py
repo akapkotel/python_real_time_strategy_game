@@ -145,7 +145,7 @@ class AudioPlayer(Singleton):
         elif not self._sound_effects_on:
             return
 
-        if volume is None and sound_position is not None:
+        if volume is None and sound_position is not None and self.max_sound_distance is not None:
             volume = self.calculate_volume_based_on_distance(sound_position)
 
         self._play_sound(name, loop=False, volume=volume)

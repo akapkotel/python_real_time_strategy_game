@@ -71,9 +71,10 @@ class Mission:
 
     def unlock_technologies_for_player(self, player: Player, *technologies: str):
         for tech_name in technologies:
-            tech_data = self.game.configs['technologies'][tech_name]
-            _class = eval(tech_data['class'])
-            technology = _class(*[d for d in list(tech_data.values())[3:]])
+            # tech_data = self.game.configs['technologies'][tech_name]
+            tech_data = self.game.configs[tech_name]
+            # _class = eval(tech_data['class'])
+            technology = Technology(*[d for d in list(tech_data.values())[4:]])
             self.allowed_technologies[player.id][technology.id] = technology
 
     @singledispatchmethod
@@ -142,6 +143,10 @@ class Mission:
             campaign.update(finished_mission=self)
         self.game.window.show_view(self.game.window.menu_view)
         self.game.window.quit_current_game(ignore_confirmation=True)
+
+    def bind_conditions(self):
+        for condition in self.conditions:
+            condition.bind_mission(self)
 
 
 class Campaign:

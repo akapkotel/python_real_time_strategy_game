@@ -1,2 +1,2 @@
-object_name,class,id,name,description,required,unlock,difficulty,effect
-technology_1,Technology,1,Technology 1,This technology exists only for testing purposes,0,(2;17),100,kill
+object_name,game_id,class,id,name,description,required,unlock,difficulty,effect
+technology_1,T001,Technology,1,Technology 1,This technology exists only for testing purposes,0,(2;17),100,kill
