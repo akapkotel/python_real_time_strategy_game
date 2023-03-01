@@ -78,6 +78,7 @@ class Faction(EventsCreator, Observer, Observed):
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
         self.known_enemies: Set[PlayerEntity] = set()
+        # self.known_enemies: Set[PlayerEntity] = set()
 
         self.attach(observer=self.game)
 
@@ -246,6 +247,8 @@ class Player(ResourcesManager, Observer, Observed):
 
         self.known_enemies: Set[PlayerEntity] = set()
 
+        # self.known_enemies: Dict[PlayerEntity, Set[int, ...]] = {}
+
         self.attach_observers(observers=[self.game, self.faction])
 
     def __repr__(self) -> str:
@@ -301,10 +304,34 @@ class Player(ResourcesManager, Observer, Observed):
 
     def update(self):
         self.known_enemies.clear()
+        # self.faction.known_enemies.update(self.known_enemies.keys())
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
+        # if self.is_local_human_player and (new_enemies := enemies.difference(self.known_enemies)):
+        #     self.notify_player_of_new_enemies_detected()
         self.known_enemies.update(enemies)
         self.faction.known_enemies.update(enemies)
+
+    # def add_known_enemies(self, unit: int, enemies: Set[PlayerEntity]):
+    #     if new_enemies := enemies.difference(self.known_enemies):
+    #         for enemy in new_enemies:
+    #             self.known_enemies[enemy] = {unit,}
+    #         if self.is_local_human_player:
+    #             self.notify_player_of_new_enemies_detected()
+    #
+    #     if old_enemies := enemies.union(self.known_enemies):
+    #         for enemy in old_enemies:
+    #             self.known_enemies[enemy].add(unit)
+
+    def notify_player_of_new_enemies_detected(self):
+        # TODO: displaying circle notification on minimap
+        self.game.sound_player.play_sound('enemy_units_detected.vaw')
+
+    # def remove_known_enemies(self, unit: int, enemies: Set[PlayerEntity]):
+    #     for enemy in enemies:
+    #         self.known_enemies[enemy].discard(unit)
+    #         if not self.known_enemies[enemy]:
+    #             del self.known_enemies[enemy]
 
     @property
     def defeated(self) -> bool:
@@ -622,6 +649,15 @@ class PlayerEntity(GameObject):
             self.player.update_known_enemies(enemies)
         self.known_enemies = enemies
 
+    # @ignore_in_editor_mode
+    # def update_known_enemies(self):
+        # visible_enemies = self.scan_for_visible_enemies()
+        # if lost_enemies := self.known_enemies.difference(visible_enemies):
+        #     self.player.remove_known_enemies(self.id, lost_enemies)  # {e.id for e in lost_enemies}
+        # if new_enemies := visible_enemies.difference(self.known_enemies):
+        #     self.player.add_known_enemies(self.id, new_enemies)  # {e.id for e in new_enemies}
+        # self.known_enemies = visible_enemies
+
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(
             *self.position,
@@ -716,6 +752,8 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(entity=self)
+        # self.player.remove_known_enemies(self.id, self.known_enemies)
+        self.known_enemies.clear()
         self.remove_from_map_quadtree()
         super().kill()
 

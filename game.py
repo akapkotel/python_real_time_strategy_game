@@ -128,6 +128,7 @@ class GameWindow(Window, EventsCreator):
         EventsCreator.__init__(self)
         self.total_delta_time = 0
         self.frames = 0
+        self.current_fps = 0
         self.set_fullscreen(FULL_SCREEN)
         self.set_caption(__title__)
 
@@ -206,12 +207,19 @@ class GameWindow(Window, EventsCreator):
         self.frames += 1
         self.total_delta_time += delta_time
         log(f'Time: {delta_time}{SEPARATOR}', console=False)
+
+        self.current_fps = round(1 / delta_time, 2)
+
         self.current_view.on_update(delta_time)
+
         if (cursor := self.cursor).active:
             cursor.update()
+
         if (keyboard := self.keyboard).active:
             keyboard.update()
+
         self.sound_player.on_update()
+
         super().on_update(delta_time)
 
     def on_draw(self):
@@ -219,6 +227,14 @@ class GameWindow(Window, EventsCreator):
         self.current_view.on_draw()
         if (cursor := self.cursor).visible:
             cursor.draw()
+        self.draw_current_fps_on_screen()
+
+    def draw_current_fps_on_screen(self):
+        draw_text(f'FPS: {str(self.current_fps)}',
+                  self.current_view.viewport[0] + 30,
+                  self.current_view.viewport[3] - 30,
+                  WHITE
+        )
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         if self.cursor.active:
@@ -511,6 +527,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             Building: self.buildings,
             Sprite: self.terrain_tiles,
             TerrainObject: self.static_objects,
+            Wreck: self.static_objects,
             HumanPlayer: self.local_human_player
         }[object_class].get_by_id(object_id)
 
@@ -922,7 +939,7 @@ if __name__ == '__main__':
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
     from units.units import Unit, UnitsOrderedDestinations, Engineer
-    from gameobjects.gameobject import GameObject, TerrainObject
+    from gameobjects.gameobject import GameObject, TerrainObject, Wreck
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building

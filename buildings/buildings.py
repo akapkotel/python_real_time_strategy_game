@@ -444,11 +444,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         soldier.position = self.position
 
     def takeover_building(self, soldier: Soldier):
+        # TODO: when SOldier captures Building, updating visible enemies crashes
         self.put_soldier_into_garrison(soldier=soldier)
         path_and_texture, size = self.find_proper_texture(soldier.player)
         self.change_building_texture(path_and_texture, size)
         self.reconfigure_building(soldier.player)
-        if soldier.player is self.game.local_human_player:
+        if soldier.player.is_local_human_player:
             self.game.sound_player.play_sound('enemy_building_captured.vaw')
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
@@ -463,12 +464,23 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.set_texture(0)
 
     def reconfigure_building(self, player: Player):
+        self.clear_known_enemies()
         self.remove_from_map_quadtree()
+        self.change_player(player)
+        self.refresh_occupied_nodes()
+        self.insert_to_map_quadtree()
+
+    def clear_known_enemies(self):
+        # self.player.remove_known_enemies(self.id, self.known_enemies)
+        self.known_enemies.clear()
+
+    def change_player(self, player):
         self.detach(self.player)
         self.attach(player)
+
+    def refresh_occupied_nodes(self):
         self.unblock_occupied_nodes()
         self.occupied_nodes = self.block_map_nodes()
-        self.insert_to_map_quadtree()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
