@@ -10,7 +10,7 @@ from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture, draw_text
+from arcade import Sprite, load_textures, draw_circle_filled, Texture
 from arcade.arcade_types import Point
 
 from effects.constants import SHOT_BLAST, EXPLOSION
@@ -21,15 +21,13 @@ from map.map import (
 )
 from players_and_factions.player import Player, PlayerEntity
 from utils.colors import GREEN
-from utils.functions import (get_path_to_file, get_texture_size, ignore_in_editor_mode)
+from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS, find_area
 )
 from units.weapons import Weapon
-
-INFANTRY_STEPS_SPEED = 0.05
 
 
 class Unit(PlayerEntity):
@@ -86,10 +84,8 @@ class Unit(PlayerEntity):
 
         self.layered_spritelist.swap_rendering_layers(self, 0, self.current_node.grid[1])
 
-    @property
-    def configs(self):
-        # return self.game.configs['units'][self.object_name]
-        return self.game.configs[self.object_name]
+    def __repr__(self) -> str:
+        return f'{self.object_name}(id: {self.id}, player.id: {self.player.id})'
 
     def update_explosions_pool(self):
         """
@@ -160,16 +156,10 @@ class Unit(PlayerEntity):
         self.update_blocked_map_nodes(new_current_node)
         self.update_pathfinding()
 
-    def draw(self):
-        # draw_text(f'{self.id};{self._enemy_assigned_by_player is not None};'
-        #           f'{self.targeted_enemy is not None}',
-        #           self.right, self.bottom, (255, 255, 255), 14)
-        super().draw()
-
     def update_current_node(self):
         current_node = self.get_current_node()
         if current_node is not self.current_node:
-            if dist(self.position, self.quadtree.position) > self.quadtree.smaller_dimension:
+            if not self.quadtree.in_bounds(self):
                 self.update_in_map_quadtree()
         return current_node
 
@@ -404,14 +394,13 @@ class Unit(PlayerEntity):
     def fight_enemy(self, enemy):
         if enemy.alive and enemy.is_enemy(self):
             self.attack(enemy)
+        elif self._enemy_assigned_by_player is enemy:
+            self._enemy_assigned_by_player = self.targeted_enemy = None
         else:
-            if self._enemy_assigned_by_player is enemy:
-                self._enemy_assigned_by_player = None
             self.targeted_enemy = None
 
     def kill(self):
         self.stop_completely()
-        self.game.units_manager.unselect(self)
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
         if self.outside:
@@ -620,18 +609,17 @@ CRAWL = 3
 
 class Soldier(Unit):
     health_restoration = 0.003
+    infantry_steps_duration = 0.05
 
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: Optional[int] = None):
         super().__init__(texture_name, player, weight, position, id)
-        self.last_step = 0
+        self.last_step_time = 0
         self.stance = IDLE
+        self.outside = True
+        self.equipment = None
         self.all_textures: Dict[int, List[List[Texture]]] = {}
         self._load_textures_and_reset_hitbox()
-
-        self.equipment = None
-
-        self.outside = True
 
     def _load_textures_and_reset_hitbox(self):
         texture_name = get_path_to_file(self.full_name)
@@ -667,17 +655,17 @@ class Soldier(Unit):
     def on_update(self, delta_time=1/60):
         if self.outside:
             super().on_update(delta_time)
-        if self.on_screen and self.moving:
-            self.update_animation(delta_time)
+            if self.on_screen and self.moving:
+                self.update_animation(delta_time)
 
     def angle_to_texture(self, angle_to_target: float):
         index = self.angles[int(angle_to_target)]
         self.textures = self.all_textures[self.stance][index]
 
     def update_animation(self, delta_time: float = 1/60):
-        self.last_step += delta_time
-        if self.last_step > INFANTRY_STEPS_SPEED:
-            self.last_step = 0
+        self.last_step_time += delta_time
+        if self.last_step_time > self.infantry_steps_duration:
+            self.last_step_time = 0
             if self.cur_texture_index < len(self.textures) - 1:
                 self.cur_texture_index += 1
             else:
@@ -708,7 +696,7 @@ class Soldier(Unit):
 
     def spawn_corpse(self):
         corpse_name = f'{self.colored_name}_corpse.png'
-        self.game.spawn(corpse_name, self.position, self.facing_direction)
+        self.game.spawn(corpse_name, None, self.position, self.facing_direction)
 
 
 class Engineer(Soldier):

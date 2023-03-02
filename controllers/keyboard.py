@@ -11,6 +11,8 @@ from user_interface.user_interface import (
 from utils.functions import ignore_in_menu, ignore_in_game
 from utils.game_logging import log
 
+KEYBOARD_SCROLL_SPEED = 50
+
 
 class KeyboardHandler(ToggledElement):
     keys_pressed: Set[int] = set()
@@ -36,6 +38,8 @@ class KeyboardHandler(ToggledElement):
     def evaluate_pressed_key(self, symbol: int):
         if symbol == P and self.window.is_game_running:
             self.window.game_view.toggle_pause()
+        elif symbol == C and self.window.is_game_running:
+            pass  # for easy debugging everytime, TODO: remove it when game is released
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif (digit := chr(symbol)).isdigit():
@@ -71,7 +75,7 @@ class KeyboardHandler(ToggledElement):
         dx = (RIGHT in keys or D in keys) - (LEFT in keys or A in keys)
         dy = (UP in keys or W in keys) - (DOWN in keys or S in keys)
         if dx != 0 or dy != 0:
-            self.window.change_viewport(- dx * 50, - dy * 50)
+            self.window.change_viewport(- dx * KEYBOARD_SCROLL_SPEED, - dy * KEYBOARD_SCROLL_SPEED)
 
     @ignore_in_game
     def send_key_to_input_consumer(self, symbol: int):

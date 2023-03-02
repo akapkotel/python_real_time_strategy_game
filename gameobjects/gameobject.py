@@ -59,7 +59,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         self.layered_spritelist: Optional[LayeredSpriteList] = None
 
     def __repr__(self) -> str:
-        return f'GameObject: {self.object_name} id: {self.id}'
+        return f'{self.object_name} id: {self.id}'
 
     @property
     def timer(self):

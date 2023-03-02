@@ -22,7 +22,7 @@ from utils.scheduling import EventsCreator
 from utils.functions import (
     get_path_to_file, all_files_of_type_named
 )
-from utils.quadtree import QuadTree
+from map.quadtree import QuadTree
 from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import calculate_circular_area
@@ -119,6 +119,7 @@ class Map:
         self.distances = {}
 
         self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
+        log(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
         self.generate_nodes()
         # self.calculate_distances_between_nodes()
         # TODO: find efficient way to use these costs in pathfinding

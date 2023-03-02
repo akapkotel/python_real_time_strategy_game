@@ -78,8 +78,8 @@ COLUMNS = 50
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 5
-CPU_UNITS = 5
+PLAYER_UNITS = 0
+CPU_UNITS = 0
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -99,6 +99,7 @@ class Settings:
     update_rate = 1 / FPS
     full_screen: bool = FULL_SCREEN
     debug: bool = DEBUG
+    god_mode: bool = True
     debug_mouse: bool = True
     debug_map: bool = False
     vehicles_threads: bool = True
@@ -679,7 +680,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_buildings_spawning(self):
         self.buildings.extend(
             (
-                self.spawn('medium_factory', self.players[2], (400, 600), garrison=3),
+                self.spawn('medium_factory', self.players[2], (400, 600), garrison=2),
                 #TODO: loading saved Capitol building crashes game
                 self.spawn('medium_factory', self.players[4], (1000, 600), garrison=1),
             )
@@ -725,6 +726,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 self.spawn_group(names, player, node.position)
             )
         self.units.extend(spawned_units)
+        log(f'QuadTree depth after spawning Units and Buildings: {self.map.quadtree.total_depth()}', console=True)
 
     def test_missions(self):
         self.current_mission = mission = Mission('Test Mission', 'Map 1')
@@ -869,6 +871,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.debugger.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
+        if self.map is not None:
+            self.map.quadtree.draw()
 
     def draw_timer(self):
         _, r, b, _ = self.viewport

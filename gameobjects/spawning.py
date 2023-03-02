@@ -26,7 +26,7 @@ class GameObjectsSpawner(Singleton):
     def __init__(self):
         self.pathfinder = self.game.pathfinder
         self.configs: Dict[str, Dict[str, Any]] = self.game.configs
-        log(f'GameObjectsSpawner was initialized successfully...', console=True)
+        log(f'GameObjectsSpawner was initialized successfully. Found {len(self.configs)} entities in config file.', console=True)
 
     def spawn_group(self,
                     names: Sequence[str],
@@ -44,11 +44,9 @@ class GameObjectsSpawner(Singleton):
               **kwargs):
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
-        # elif name in self.configs[BUILDINGS]:
-        elif self.configs[name]['class'] == 'Building':
+        elif self.configs[name][CLASS] == 'Building':
             return self._spawn_building(name, player, position, **kwargs)
-        # elif name in self.configs[UNITS]:
-        elif self.configs[name]['class'] in ('Soldier', 'Vehicle', 'Tank'):
+        elif self.configs[name][CLASS] in ('Soldier', 'Vehicle', 'Tank'):
             return self._spawn_unit(name, player, position, **kwargs)
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
@@ -59,24 +57,23 @@ class GameObjectsSpawner(Singleton):
         kwargs.update(
             {k: v for (k, v) in self.configs[name].items() if
              k in ('produced_units', 'produced_resource', 'research_facility')}
-        )  # [BUILDINGS]
+        )
         return Building(name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
-        category = UNITS
-        # class_name = eval(self.configs[category][name][CLASS])
         class_name = eval(self.configs[name][CLASS])
         unit = class_name(name, player, 1, position, **kwargs)
-        return self._get_attributes_from_configs_file(category, name, unit)
+        return self._get_attributes_from_configs_file(name, unit)
 
-    def _get_attributes_from_configs_file(self, category, name, spawned):
+    def _get_attributes_from_configs_file(self, name, spawned):
         config_data = self.configs[name]  # 'raw' not colorized name
         for i, (key, value) in enumerate(config_data.items()):
-            if i < 8 and value != name and 'class' not in key:
+            if i < 8 and value != name and CLASS not in key:
                 setattr(spawned, key, value)
         return spawned
 
     def _spawn_terrain_object(self, name, position, *args, **kwargs) -> GameObject:
+        # TODO: issue with args when corpse is spawned
         if WRECK in name or CORPSE in name:
             texture_index = args[0]
             return self._spawn_wreck_or_body(name, position, texture_index)

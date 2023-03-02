@@ -3,6 +3,10 @@ from __future__ import annotations
 
 from math import dist
 
+from arcade import draw_rectangle_outline, draw_text
+
+from utils.colors import RED
+
 
 class Rect:
     __slots__ = ('cx', 'cy', 'position', 'width', 'height', 'smaller_dimension', 'left', 'right', 'bottom', 'top')
@@ -11,7 +15,7 @@ class Rect:
         self.cx, self.cy = cx, cy
         self.position = self.cx, self.cy
         self.width, self.height = width, height
-        self.smaller_dimension = min(self.width, self.height)
+        self.smaller_dimension = min(self.width, self.height) / 2
         self.left = self.cx - self.width // 2
         self.right = self.left + self.width
         self.bottom = self.cy - self.height // 2
@@ -28,22 +32,26 @@ class Rect:
 
 
 class QuadTree(Rect):
-    __slots__ = ('max_entities', 'depth', 'entities', 'children')
+    __slots__ = ('max_entities', 'true_max_entitites','depth', 'entities_count', 'entities', 'children', 'max_size')
 
-    def __init__(self, cx, cy, width, height, max_entities=10, depth=0):
+    def __init__(self, cx, cy, width, height, max_entities=5, depth=0):
         super().__init__(cx, cy, width, height)
         self.max_entities = max_entities
         self.depth = depth
+        self.entities_count = 0
         self.entities = {}
         self.children = []
+
+    def __repr__(self) -> str:
+        return f'QuadTree(depth: {self.depth}, position:{self.position})'
 
     def insert(self, entity):
         if not self.in_bounds(entity):
             return None
 
-        if len(self.entities) < self.max_entities:
+        if self.entities_count < self.max_entities:
             self.add_to_entities(entity)
-            # print(f'Inserted {entity} to {self}')
+            self.entities_count += 1
             return self
 
         if not self.children:
@@ -52,6 +60,7 @@ class QuadTree(Rect):
         for quadtree in self.children:
             if quadtree.insert(entity) is not None:
                 return quadtree
+        print('FAILURE!')
 
     def add_to_entities(self, entity):
         index = entity.faction.id
@@ -62,13 +71,13 @@ class QuadTree(Rect):
 
     def remove(self, entity):
         try:
-            self.entities[entity.faction.id].discard(entity)
+            self.entities[entity.faction.id].remove(entity)
+            self.entities_count -= 1
+            print(f'Removed {entity} from {self}')
+            self.collapse()
         except (KeyError, ValueError):
             for quadtree in self.children:
-                quadtree.remove(entity)
-        else:
-            self.collapse()
-            # print(f'Removed {entity} from {self}')
+                    quadtree.remove(entity)
 
     def divide(self):
         cx, cy = self.cx, self.cy
@@ -82,7 +91,7 @@ class QuadTree(Rect):
             QuadTree(cx - quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth)
         ]
 
-    def query(self, entity_faction_id, bounds, found_entities):
+    def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
 
         if not self.intersects(bounds):
@@ -92,11 +101,11 @@ class QuadTree(Rect):
 
         # Search this node's points to see if they lie within boundary ...
         for id, entities in self.entities.items():
-            if id != entity_faction_id:
+            if id in hostile_factions_ids:
                 found_entities.extend(e for e in entities if bounds.in_bounds(e))
 
         for quadtree in self.children:
-            found_entities = quadtree.query(entity_faction_id, bounds, found_entities)
+            found_entities = quadtree.query(hostile_factions_ids, bounds, found_entities)
         return found_entities
 
     def find_selectable_units(self, left, right, bottom, top, faction_id):
@@ -104,31 +113,26 @@ class QuadTree(Rect):
         possible_units = []
         return self.query(faction_id, rect, possible_units)
 
-    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, entity_faction_id):
+    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
         diameter = radius + radius
         rect = Rect(circle_x, circle_y, diameter, diameter)
         possible_enemies = []
-        possible_enemies = self.query(entity_faction_id, rect, possible_enemies)
+        possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
         return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}
 
     @property
     def empty(self):
-        return not any(self.entities.values()) and all(child.empty() for child in self.children)
+        return not self.entities and all(child.empty() for child in self.children)
 
     def collapse(self) -> bool:
         if all(child.collapse() for child in self.children):
             self.children.clear()
-        return not (self.children or any(self.entities.values()))
+        return self.entities_count == 0 and self.children
 
     def clear(self):
         for quadtree in self.children:
             quadtree.clear()
         self.entities.clear()
-
-    def __len__(self, count=0) -> int:
-        for quadtree in self.children:
-            count += len(quadtree)
-        return len(self.entities) + count
 
     def total_depth(self, depth=0) -> int:
         for quadtree in self.children:
@@ -138,4 +142,16 @@ class QuadTree(Rect):
     def total_entities(self, count=0):
         for quadtree in self.children:
             count += quadtree.total_entities()
-        return sum(sum(e) for e in self.entities.values()) + count
+        return self.entities_count + count
+
+    def get_entities(self):
+        entitites = []
+        for e in self.entities.values():
+            entitites.extend(e)
+        return [e.id for e in entitites]
+
+    def draw(self):
+        draw_rectangle_outline(*self.position, self.width, self.height, RED)
+        draw_text(str(self.get_entities()), *self.position, RED, 20)
+        for child in self.children:
+            child.draw()

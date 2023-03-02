@@ -9,7 +9,7 @@ from collections import defaultdict
 from functools import cached_property
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
-from arcade import rand_in_circle
+from arcade import rand_in_circle, draw_text
 from arcade.arcade_types import Color, Point
 
 from user_interface.constants import BASIC_UI
@@ -39,6 +39,9 @@ ENERGY = 'energy'
 STEEL = 'steel'
 ELECTRONICS = 'electronics'
 CONSCRIPTS = 'conscripts'
+
+RESOURCES = {FUEL: 0, ENERGY: 0, AMMUNITION: 0, STEEL: 0, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0}
+
 YIELD_PER_SECOND = "_yield_per_second"
 CONSUMPTION_PER_SECOND = "_consumption_per_second"
 PRODUCTION_EFFICIENCY = "_production_efficiency"
@@ -145,14 +148,36 @@ class Faction(EventsCreator, Observer, Observed):
         }
 
 
-class ResourcesManager(EventsCreator):
+class Player(EventsCreator, Observer, Observed):
     game = None
-    resources = {
-        FUEL: 0, ENERGY: 1500, AMMUNITION: 0, STEEL: 200, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0
-    }
+    cpu = False
+    resources = {FUEL: 0, ENERGY: 0, AMMUNITION: 0, STEEL: 0, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0}
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,
+                 id: Optional[int] = None,
+                 name: Optional[str] = None,
+                 color: Optional[Color] = None,
+                 faction: Optional[Faction] = None):
+        # ResourcesManager.__init__(self)
+        EventsCreator.__init__(self)
+        Observer.__init__(self)
+        Observed.__init__(self)
+        self.id = id or new_id(self.game.players)
+        self.faction: Faction = faction or Faction()
+        self.name = name or f'Player {self.id} of faction: {self.faction}'
+        self.color = color
+
+        self.units_possible_to_build: Set[str] = set()
+        self.buildings_possible_to_build: Set[str] = set()
+
+        self.units: Set[Unit] = set()
+        self.buildings: Set[Building] = set()
+
+        self.known_technologies: Set[int] = set()
+        self.current_research: Dict[int, float] = defaultdict()
+
+        self.known_enemies: Set[PlayerEntity] = set()
+
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
@@ -162,8 +187,85 @@ class ResourcesManager(EventsCreator):
                 setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
+        self.attach_observers(observers=[self.game, self.faction])
+
+    def __repr__(self) -> str:
+        return self.name
+
+    @cached_property
+    def is_local_human_player(self) -> bool:
+        return self is self.game.local_human_player
+
+    def on_being_attached(self, attached: Observed):
+        attached: Union[Unit, Building]
+        attached.player = self
+        attached.faction = self.faction
+        if isinstance(attached, Unit):
+            self._add_unit(attached)
+        else:
+            self._add_building(attached)
+
+    def _add_unit(self, unit: Unit):
+        self.units.add(unit)
+        self.faction.units.add(unit)
+
+    def _add_building(self, building: Building):
+        self.buildings.add(building)
+        self.faction.buildings.add(building)
+        self.update_energy_balance(building)
+
+    def notify(self, attribute: str, value: Any):
+        pass
+
+    def on_being_detached(self, detached: Observed):
+        detached: Union[Unit, Building]
+        try:
+            self._remove_unit(detached)
+        except KeyError:
+            self._remove_building(detached)
+
+    def _remove_unit(self, unit: Unit):
+        self.units.remove(unit)
+        self.faction.units.remove(unit)
+
+    def _remove_building(self, building: Building):
+        self.buildings.discard(building)
+        self.faction.buildings.discard(building)
+        self.update_energy_balance(building)
+
+    def is_enemy(self, other: Player) -> bool:
+        return self.faction.is_enemy(other.faction)
+
+    def start_war_with(self, other: Player):
+        if self.faction.leader is self:
+            self.faction.start_war_with(other.faction)
+
+    def update(self):
+        self.known_enemies.clear()
+
+    def update_known_enemies(self, enemies: Set[PlayerEntity]):
+        self.known_enemies.update(enemies)
+        self.faction.known_enemies.update(enemies)
+
+    def notify_player_of_new_enemies_detected(self):
+        # TODO: displaying circle notification on minimap
+        self.game.sound_player.play_sound('enemy_units_detected.vaw')
+
+    @property
+    def defeated(self) -> bool:
+        return not self.units and not self.buildings
+
+    def knows_all_required(self, required: Tuple[TechnologyId]):
+        return all(technology_id in self.known_technologies for technology_id in required)
+
+    def update_known_technologies(self, new_technology: Technology):
+        self.known_technologies.add(new_technology.id)
+        new_technology.gain_technology_effects(researcher=self)
+
+    def kill(self):
+        self.detach_observers()
+
     def enough_resources_for(self, expense: str) -> bool:
-        # category = self._identify_expense_category(expense)
         for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):  # [category]
             required_amount = self.game.configs[expense][resource]  # [category]
             if not self.has_resource(resource, required_amount):
@@ -194,159 +296,20 @@ class ResourcesManager(EventsCreator):
         setattr(self, f"{resource}{YIELD_PER_SECOND}", old_yield + change)
 
     def _update_resources_stock(self):
-        for resource_name in [k for k in self.resources.keys() if k is not ENERGY]:
+        for resource_name in [k for k in RESOURCES.keys() if k is not ENERGY]:
             stock = getattr(self, resource_name)
             increase = getattr(self, f"{resource_name}{YIELD_PER_SECOND}")
             setattr(self, resource_name, stock + increase)
 
     def consume_resource(self, resource_name: str, amount: float):
-        setattr(self, resource_name, getattr(self, resource_name) - abs(amount))
+        setattr(self, resource_name, max(0, getattr(self, resource_name) - abs(amount)))
 
     def add_resource(self, resource_name: str, amount: float):
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
-    def __setstate__(self, state: Dict):
-        self.__dict__.update(state)
-        for resource_name in self.resources.keys():
-            setattr(self, resource_name, state[resource_name])
-            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
-            setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
-            if resource_name != ENERGY:
-                setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
-
-    def __getstate__(self) -> Dict:
-        resource_manager = {}
-        resource_manager.update(self.__dict__)
-        return resource_manager
-
-
-class Player(ResourcesManager, Observer, Observed):
-    game = None
-    cpu = False
-
-    def __init__(self,
-                 id: Optional[int] = None,
-                 name: Optional[str] = None,
-                 color: Optional[Color] = None,
-                 faction: Optional[Faction] = None):
-        ResourcesManager.__init__(self)
-        Observer.__init__(self)
-        Observed.__init__(self)
-        self.id = id or new_id(self.game.players)
-        self.faction: Faction = faction or Faction()
-        self.name = name or f'Player {self.id} of faction: {self.faction}'
-        self.color = color
-
-        self.units_possible_to_build: Set[str] = set()
-        self.buildings_possible_to_build: Set[str] = set()
-
-        self.units: Set[Unit] = set()
-        self.buildings: Set[Building] = set()
-
-        self.known_technologies: Set[int] = set()
-        self.current_research: Dict[int, float] = defaultdict()
-
-        self.known_enemies: Set[PlayerEntity] = set()
-
-        # self.known_enemies: Dict[PlayerEntity, Set[int, ...]] = {}
-
-        self.attach_observers(observers=[self.game, self.faction])
-
-    def __repr__(self) -> str:
-        return self.name
-
-    @cached_property
-    def is_local_human_player(self) -> bool:
-        return self is self.game.local_human_player
-
-    def on_being_attached(self, attached: Observed):
-        attached: Union[Unit, Building]
-        attached.player = self
-        attached.faction = self.faction
-        if isinstance(attached, Unit):
-            self._add_unit(attached)
-        else:
-            self._add_building(attached)
-
-    def _add_unit(self, unit: Unit):
-        self.units.add(unit)
-        self.faction.units.add(unit)
-
-    def _add_building(self, building: Building):
-        self.buildings.add(building)
-        self.faction.buildings.add(building)
-        self.consume_resource(ENERGY, building.configs['energy_consumption'])
-
-    def notify(self, attribute: str, value: Any):
+    def update_energy_balance(self, building: Building):
+        # TODO
         pass
-
-    def on_being_detached(self, detached: Observed):
-        detached: Union[Unit, Building]
-        try:
-            self._remove_unit(detached)
-        except KeyError:
-            self._remove_building(detached)
-
-    def _remove_unit(self, unit: Unit):
-        self.units.remove(unit)
-        self.faction.units.remove(unit)
-
-    def _remove_building(self, building: Building):
-        self.buildings.discard(building)
-        self.faction.buildings.discard(building)
-        self.add_resource(ENERGY, building.energy_consumption)
-
-    def is_enemy(self, other: Player) -> bool:
-        return self.faction.is_enemy(other.faction)
-
-    def start_war_with(self, other: Player):
-        if self.faction.leader is self:
-            self.faction.start_war_with(other.faction)
-
-    def update(self):
-        self.known_enemies.clear()
-        # self.faction.known_enemies.update(self.known_enemies.keys())
-
-    def update_known_enemies(self, enemies: Set[PlayerEntity]):
-        # if self.is_local_human_player and (new_enemies := enemies.difference(self.known_enemies)):
-        #     self.notify_player_of_new_enemies_detected()
-        self.known_enemies.update(enemies)
-        self.faction.known_enemies.update(enemies)
-
-    # def add_known_enemies(self, unit: int, enemies: Set[PlayerEntity]):
-    #     if new_enemies := enemies.difference(self.known_enemies):
-    #         for enemy in new_enemies:
-    #             self.known_enemies[enemy] = {unit,}
-    #         if self.is_local_human_player:
-    #             self.notify_player_of_new_enemies_detected()
-    #
-    #     if old_enemies := enemies.union(self.known_enemies):
-    #         for enemy in old_enemies:
-    #             self.known_enemies[enemy].add(unit)
-
-    def notify_player_of_new_enemies_detected(self):
-        # TODO: displaying circle notification on minimap
-        self.game.sound_player.play_sound('enemy_units_detected.vaw')
-
-    # def remove_known_enemies(self, unit: int, enemies: Set[PlayerEntity]):
-    #     for enemy in enemies:
-    #         self.known_enemies[enemy].discard(unit)
-    #         if not self.known_enemies[enemy]:
-    #             del self.known_enemies[enemy]
-
-    @property
-    def defeated(self) -> bool:
-        return not self.units and not self.buildings
-
-    def knows_all_required(self, required: Tuple[TechnologyId]):
-        return all(technology_id in self.known_technologies for technology_id in required)
-
-    def update_known_technologies(self, new_technology: Technology):
-        self.known_technologies.add(new_technology.id)
-        new_technology.gain_technology_effects(researcher=self)
-
-    def kill(self):
-        self.detach_observers()
 
     def __getstate__(self) -> Dict:
         saved_player = {k: v for (k, v) in self.__dict__.items()}
@@ -361,6 +324,12 @@ class Player(ResourcesManager, Observer, Observed):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
         self.observed_attributes = defaultdict(list)
+        # for resource_name in RESOURCES.keys():
+        #     setattr(self, resource_name, state[resource_name])
+        #     setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
+        #     setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
+        #     if resource_name != ENERGY:
+        #         setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
         self.attach_observers(observers=[self.game, self.faction])
 
 
@@ -508,7 +477,8 @@ class PlayerEntity(GameObject):
         self.armour = 0
         self.cover = 0
 
-        self.quadtree = self.map.quadtree.insert(self)
+        self.quadtree = None
+        self.insert_to_map_quadtree()
 
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
@@ -541,8 +511,6 @@ class PlayerEntity(GameObject):
 
     @property
     def configs(self):
-        # category = 'units' if self.is_unit else 'buildings'
-        # return self.game.configs[self.object_name]
         return self.game.configs[self.object_name]
 
     @property
@@ -613,6 +581,7 @@ class PlayerEntity(GameObject):
         super().on_update(delta_time)
 
     def draw(self):
+        draw_text(str(self.id), self.right, self.center_y, RED, 20, bold=True)
         if self.is_rendered:
             super().draw()
 
@@ -621,15 +590,16 @@ class PlayerEntity(GameObject):
         return self in self.game.local_drawn_units_and_buildings and self.on_screen
 
     def update_in_map_quadtree(self):
-        if self.quadtree is not None:
-            self.remove_from_map_quadtree()
+        self.remove_from_map_quadtree()
         self.insert_to_map_quadtree()
 
     def insert_to_map_quadtree(self):
-        self.quadtree = self.map.quadtree.insert(entity=self)
+        self.quadtree = quadtree = self.map.quadtree.insert(entity=self)
+        print(f'Inserted {self} to {quadtree}, bottom: {quadtree.bottom}')
 
     def remove_from_map_quadtree(self):
-        self.quadtree = self.map.quadtree.remove(entity=self)
+        print(f'Removed {self} from {self.quadtree}')
+        self.quadtree = self.quadtree.remove(entity=self)
 
     @abstractmethod
     def update_observed_area(self, *args, **kwargs):
@@ -651,20 +621,11 @@ class PlayerEntity(GameObject):
             self.player.update_known_enemies(enemies)
         self.known_enemies = enemies
 
-    # @ignore_in_editor_mode
-    # def update_known_enemies(self):
-        # visible_enemies = self.scan_for_visible_enemies()
-        # if lost_enemies := self.known_enemies.difference(visible_enemies):
-        #     self.player.remove_known_enemies(self.id, lost_enemies)  # {e.id for e in lost_enemies}
-        # if new_enemies := visible_enemies.difference(self.known_enemies):
-        #     self.player.add_known_enemies(self.id, new_enemies)  # {e.id for e in new_enemies}
-        # self.known_enemies = visible_enemies
-
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(
             *self.position,
             self.visibility_radius,
-            self.faction.id
+            self.faction.enemy_factions
         )
 
     @abstractmethod
@@ -724,9 +685,11 @@ class PlayerEntity(GameObject):
         return self.player.is_local_human_player
 
     @property
+    @abstractmethod
     def is_selected(self) -> bool:
         raise NotImplementedError
 
+    @property
     def damaged(self) -> bool:
         return self._health < self._max_health
 
@@ -737,15 +700,18 @@ class PlayerEntity(GameObject):
         :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
+        if self.game.settings.god_mode and self.player.is_local_human_player:
+            return
         self.create_hit_audio_visual_effects()
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
         self.health -= random.gauss(damage, deviation) * effectiveness
-        self.health_check()
-
-    def health_check(self):
-        if self._health <= 0:
+        if self.should_entity_die:
             self.kill()
+
+    @property
+    def should_entity_die(self) -> bool:
+        return self._health <= 0
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)
@@ -753,7 +719,7 @@ class PlayerEntity(GameObject):
 
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
-            self.game.units_manager.unselect(entity=self)
+            self.game.units_manager.unselect(self)
         # self.player.remove_known_enemies(self.id, self.known_enemies)
         self.known_enemies.clear()
         self.remove_from_map_quadtree()

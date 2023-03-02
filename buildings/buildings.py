@@ -244,9 +244,8 @@ class ResearchFacility:
         print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
-            # self.researched_technology = self.owner.game.window.configs[
-            #     'technologies'][tech_name]
             self.researched_technology = self.owner.game.window.configs[tech_name]
+
 
 class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     game: Optional[Game] = None
@@ -445,13 +444,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         soldier.position = self.position
 
     def takeover_building(self, soldier: Soldier):
-        # TODO: when SOldier captures Building, updating visible enemies crashes
+        if soldier.player.is_local_human_player:
+            self.game.sound_player.play_sound('enemy_building_captured.vaw')
         self.put_soldier_into_garrison(soldier=soldier)
         path_and_texture, size = self.find_proper_texture(soldier.player)
         self.change_building_texture(path_and_texture, size)
         self.reconfigure_building(soldier.player)
-        if soldier.player.is_local_human_player:
-            self.game.sound_player.play_sound('enemy_building_captured.vaw')
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)
