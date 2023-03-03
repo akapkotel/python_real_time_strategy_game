@@ -78,6 +78,7 @@ class Mission:
             # _class = eval(tech_data['class'])
             technology = Technology(*[d for d in list(tech_data.values())[4:]])
             self.allowed_technologies[player.id][technology.id] = technology
+        return self
 
     def extend(self, *items):
         raise TypeError(f'Unknown items. Accepted are: Condition, Player')
