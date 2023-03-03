@@ -481,7 +481,7 @@ class Vehicle(Unit):
         self.fuel -= self.fuel_consumption
 
     def leave_threads(self):
-        if (t := self.timer['f']) - self.threads_time >= self.threads_frequency:
+        if (t := self.timer.frames) - self.threads_time >= self.threads_frequency:
             self.threads_time = t
             self.game.vehicles_threads.append(self.create_threads())
 
@@ -676,7 +676,6 @@ class Soldier(Unit):
         self.outside = False
         self.stop_completely()
         self.assign_enemy(None)
-        self.remove_from_map_quadtree()
         self.game.units_manager.unselect(self)
         building.on_soldier_enter(soldier=self)
 

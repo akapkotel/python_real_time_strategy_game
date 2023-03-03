@@ -286,7 +286,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def set_pointed_gameobject(self, pointed):
         self.pointed_gameobject = pointed
-        self.text_hint_delay += self.game.timer['total']
+        # self.text_hint_delay += self.game.timer['total']
+        self.text_hint_delay += self.game.timer.total
         self.show_hint = True
         pointed.on_mouse_enter()
         self.set_cursor_cross_color(pointed)
@@ -426,7 +427,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def draw(self):
         self.draw_cross_cursor()
 
-        if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
+        # if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
+        if self.show_hint and self.text_hint_delay <= self.game.timer.total:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
 
         if (selection := self.mouse_drag_selection) is not None:

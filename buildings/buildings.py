@@ -440,6 +440,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.takeover_building(soldier=soldier)
 
     def put_soldier_into_garrison(self, soldier: Soldier):
+        soldier.remove_from_map_quadtree()
         self.garrisoned_soldiers.append(soldier)
         soldier.position = self.position
 

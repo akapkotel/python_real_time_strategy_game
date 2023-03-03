@@ -43,10 +43,12 @@ class Weapon:
         self.ammo_left_in_magazine = self.magazine_size
 
     def reloaded(self) -> bool:
-        return self.owner.timer['total'] >= self.next_firing_time
+        # return self.owner.timer['total'] >= self.next_firing_time
+        return self.owner.timer.total >= self.next_firing_time
 
     def shoot(self, target: PlayerEntity):
-        self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
+        # self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
+        self.next_firing_time = self.owner.timer.total + self.rate_of_fire
         self.create_shot_audio_visual_effects()
         self.consume_ammunition()
         if self.check_if_target_was_hit(target):

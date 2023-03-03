@@ -174,7 +174,7 @@ class Wreck(TerrainObject):
 
     def __init__(self, filename: str, durability: int, position: Point):
         super().__init__(filename, durability, position)
-        lifetime = self.game.settings.remove_wrecks_after
+        lifetime = self.game.settings.remove_wrecks_after_seconds
         self.schedule_event(ScheduledEvent(self, lifetime, self.kill))
 
 

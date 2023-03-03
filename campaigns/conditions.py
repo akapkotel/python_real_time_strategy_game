@@ -81,7 +81,8 @@ class TimePassed(Condition):
         self.required_time = required_time
 
     def fulfilled(self) -> bool:
-        return self.mission.game.timer['m'] >= self.required_time
+        return self.mission.game.timer.minutes >= self.required_time
+        # return self.mission.game.timer['m'] >= self.required_time
 
     def __getstate__(self):
         saved = super().__getstate__()

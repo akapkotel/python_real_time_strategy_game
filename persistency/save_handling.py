@@ -136,7 +136,6 @@ class SaveManager(Singleton):
 
     def load_timer(self, loaded_timer):
         self.game.timer = loaded_timer
-        print('timer', self.game.timer['m'])
 
     def load_settings(self, settings):
         self.window.settings = settings

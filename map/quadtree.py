@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from math import dist
+from typing import Optional
 
 from arcade import draw_rectangle_outline, draw_text
 
@@ -43,24 +44,25 @@ class QuadTree(Rect):
         self.children = []
 
     def __repr__(self) -> str:
-        return f'QuadTree(depth: {self.depth}, position:{self.position})'
+        return f'QuadTree(depth: {self.depth}, l:{self.left}, r:{self.right}, b:{self.bottom}, t:{self.top})'
 
-    def insert(self, entity):
+    def insert(self, entity) -> Optional[QuadTree]:
         if not self.in_bounds(entity):
             return None
 
         if self.entities_count < self.max_entities:
             self.add_to_entities(entity)
-            self.entities_count += 1
             return self
 
         if not self.children:
             self.divide()
 
-        for quadtree in self.children:
-            if quadtree.insert(entity) is not None:
+        return self.insert_to_children(entity)
+
+    def insert_to_children(self, entity) -> Optional[QuadTree]:
+        for child in self.children:
+            if (quadtree := child.insert(entity)) is not None:
                 return quadtree
-        print('FAILURE!')
 
     def add_to_entities(self, entity):
         index = entity.faction.id
@@ -68,27 +70,29 @@ class QuadTree(Rect):
             self.entities[index].add(entity)
         except KeyError:
             self.entities[index] = {entity,}
+        finally:
+            self.entities_count += 1
 
     def remove(self, entity):
         try:
             self.entities[entity.faction.id].remove(entity)
-            self.entities_count -= 1
-            print(f'Removed {entity} from {self}')
-            self.collapse()
         except (KeyError, ValueError):
             for quadtree in self.children:
                     quadtree.remove(entity)
+        else:
+            self.entities_count -= 1
+            self.collapse()
 
     def divide(self):
         cx, cy = self.cx, self.cy
-        half_w, half_h = self.width / 2, self.height / 2
-        quart_w, quart_h = half_w / 2, half_h / 2
+        half_width, half_height = self.width / 2, self.height / 2
+        quart_width, quart_height = half_width / 2, half_height / 2
         new_depth = self.depth + 1
         self.children = [
-            QuadTree(cx - quart_w, cy - quart_h, half_w, half_h, self.max_entities, new_depth),
-            QuadTree(cx + quart_w, cy - quart_h, half_w, half_h, self.max_entities, new_depth),
-            QuadTree(cx + quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth),
-            QuadTree(cx - quart_w, cy + quart_h, half_w, half_h, self.max_entities, new_depth)
+            QuadTree(cx - quart_width, cy + quart_height, half_width, half_height, self.max_entities, new_depth),
+            QuadTree(cx + quart_width, cy + quart_height, half_width, half_height, self.max_entities, new_depth),
+            QuadTree(cx + quart_width, cy - quart_height, half_width, half_height, self.max_entities, new_depth),
+            QuadTree(cx - quart_width, cy - quart_height, half_width, half_height, self.max_entities, new_depth)
         ]
 
     def query(self, hostile_factions_ids, bounds, found_entities):
@@ -127,7 +131,7 @@ class QuadTree(Rect):
     def collapse(self) -> bool:
         if all(child.collapse() for child in self.children):
             self.children.clear()
-        return self.entities_count == 0 and self.children
+        return not (self.children or self.entities_count)
 
     def clear(self):
         for quadtree in self.children:

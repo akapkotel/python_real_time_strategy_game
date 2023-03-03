@@ -23,6 +23,7 @@ from utils.data_types import FactionId, TechnologyId, GridPosition
 from utils.functions import (
     ignore_in_editor_mode, add_player_color_to_name
 )
+from utils.game_logging import log
 from utils.geometry import (
     is_visible, clamp, find_area, precalculate_circular_area_matrix
 )
@@ -151,7 +152,7 @@ class Faction(EventsCreator, Observer, Observed):
 class Player(EventsCreator, Observer, Observed):
     game = None
     cpu = False
-    resources = {FUEL: 0, ENERGY: 0, AMMUNITION: 0, STEEL: 0, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0}
+    resources = {FUEL: 0, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 0, CONSCRIPTS: 10}
 
     def __init__(self,
                  id: Optional[int] = None,
@@ -383,6 +384,8 @@ class CpuPlayer(Player):
         TODO: #5 base defending logic
         TODO: #6 attacking enemies logic
         """
+        if self.game.settings.ai_sleep:
+            return
         if self.construction_priorities:
             self.build_unit_or_building()
         else:
@@ -581,7 +584,6 @@ class PlayerEntity(GameObject):
         super().on_update(delta_time)
 
     def draw(self):
-        draw_text(str(self.id), self.right, self.center_y, RED, 20, bold=True)
         if self.is_rendered:
             super().draw()
 
@@ -594,11 +596,9 @@ class PlayerEntity(GameObject):
         self.insert_to_map_quadtree()
 
     def insert_to_map_quadtree(self):
-        self.quadtree = quadtree = self.map.quadtree.insert(entity=self)
-        print(f'Inserted {self} to {quadtree}, bottom: {quadtree.bottom}')
+        self.quadtree = self.map.quadtree.insert(entity=self)
 
     def remove_from_map_quadtree(self):
-        print(f'Removed {self} from {self.quadtree}')
         self.quadtree = self.quadtree.remove(entity=self)
 
     @abstractmethod
@@ -720,9 +720,9 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(self)
-        # self.player.remove_known_enemies(self.id, self.known_enemies)
         self.known_enemies.clear()
-        self.remove_from_map_quadtree()
+        if self.quadtree is not None:
+            self.remove_from_map_quadtree()
         super().kill()
 
     def save(self) -> Dict:

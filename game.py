@@ -78,8 +78,8 @@ COLUMNS = 50
 FPS = 30
 GAME_SPEED = 1.0
 
-PLAYER_UNITS = 0
-CPU_UNITS = 0
+PLAYER_UNITS = 5
+CPU_UNITS = 1
 
 UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
@@ -99,14 +99,15 @@ class Settings:
     update_rate = 1 / FPS
     full_screen: bool = FULL_SCREEN
     debug: bool = DEBUG
-    god_mode: bool = True
+    god_mode: bool = False
+    ai_sleep: bool = False
     debug_mouse: bool = True
     debug_map: bool = False
     vehicles_threads: bool = True
-    threads_fadeout: int = 2  # seconds
+    threads_fadeout_seconds: int = 2  # seconds
     shot_blasts: bool = True
     editor_mode: bool = False
-    remove_wrecks_after: int = 30  # seconds
+    remove_wrecks_after_seconds: int = 30
     damage_randomness_factor = 0.25  # standard deviation
     trees_density: float = 0.05  # percentage chance of tree being spawned
     resources_abundance: float = 0.01
@@ -149,7 +150,6 @@ class GameWindow(Window, EventsCreator):
 
         # views:
         self._current_view: Optional[LoadableWindowView] = None
-
         self.menu_view: Menu = Menu()
         self.game_view: Optional[Game] = None
 
@@ -398,6 +398,36 @@ class GameWindow(Window, EventsCreator):
         super().close()
 
 
+class Timer:
+
+    def __init__(self):
+        self.start = time.time()
+        self.total = self.frames = self.seconds = self.minutes = self.hours = 0
+        self.formatted = None
+
+    def update(self):
+        self.total = seconds = time.time() - self.start
+        gmtime = time.gmtime(seconds)
+        self.frames += 1
+        self.seconds = s = gmtime.tm_sec
+        self.minutes = m = gmtime.tm_min
+        self.hours = h = gmtime.tm_hour
+        f = format
+        self.formatted = f"{f(h, '02')}:{f(m, '02')}:{f(s, '02')}"
+
+    def draw(self):
+        _, right, bottom, _ = Game.instance.viewport
+        x, y = right - 270, bottom + 840
+        draw_text(f"Time:{self.formatted}", x, y, GREEN, 15)
+
+    def save(self):
+        self.total = time.time() - self.start
+        return self
+
+    def load(self):
+        self.start = time.time() - self.total
+
+
 class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     """This is an actual Game-instance, created when player starts the game."""
     instance: Optional[Game] = None
@@ -411,9 +441,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.generate_random_entities = self.loader is None
 
-        self.timer = {
-            'start': time.time(), 'total': 0, 'f': 0, 's': 0, 'm': 0, 'h': 0
-        }
+        self.timer = Timer()
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
@@ -734,7 +762,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         human = self.local_human_player
         map_revealed = MapRevealed(human).set_vp(1)
         no_units = NoUnitsLeft(human).triggers(Defeat())
-        mission_timer = TimePassed(human, 10).set_vp(1).triggers(Victory())
+        mission_timer = TimePassed(human, 1).set_vp(1).triggers(Victory())
         unit_type = HasUnitsOfType(human, 'tank_medium').set_vp(1)
 
         cpu_player = self.players[4]
@@ -802,7 +830,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        self.update_timer()
+        self.timer.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players()
@@ -820,17 +848,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.generate_random_map_objects()
         self.update_interface_position(self.viewport[1], self.viewport[3])
 
-    def update_timer(self):
-        self.timer['total'] = seconds = time.time() - self.timer['start']
-        game_time = time.gmtime(seconds)
-        self.timer['f'] += 1
-        self.timer['s'] = game_time.tm_sec
-        self.timer['m'] = game_time.tm_min
-        self.timer['h'] = game_time.tm_hour
-
     def save_timer(self):
         """Before saving timer, recalculate total time game was played."""
-        self.timer['total'] = (time.time() - self.timer['start'])
+        self.timer.total = time.time() - self.timer.start
         return self.timer
 
     @logger()
@@ -841,7 +861,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         last time.
         """
         self.timer = loaded_timer
-        self.timer['start'] = time.time() - loaded_timer['total']
+        self.timer.start = time.time() - self.timer.total
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -866,21 +886,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         super().on_draw()
         if self.mini_map is not None:
             self.mini_map.draw()
-        self.draw_timer()
+        self.timer.draw()
         if self.debugger is not None:
             self.debugger.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
-        if self.map is not None:
+        if self.settings.debug_map and self.map is not None:
             self.map.quadtree.draw()
-
-    def draw_timer(self):
-        _, r, b, _ = self.viewport
-        x, y = r - 270, b + 840
-        t = self.timer
-        f = format
-        formatted = f"{f(t['h'], '02')}:{f(t['m'], '02')}:{f(t['s'], '02')}"
-        draw_text(f"Time:{formatted}", x, y, GREEN, 15)
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
