@@ -20,7 +20,7 @@ import pathlib
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
-from dataclasses import dataclass
+
 
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens
@@ -599,7 +599,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             [UiTextLabel(x, y, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources)),
              UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources)),
              UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources)),
-             UiTextLabel(x + 87, y - 120, '0', 17, WHITE, next(resources))
+             UiTextLabel(x + 100, y - 120, '0', 17, WHITE, next(resources))
              ],
         )
 
@@ -945,12 +945,6 @@ def run_game():
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
-
-    with open('test_file.txt', 'w') as file:
-        txt = ''.join((str(i) for i in range(60000)))
-        file.write(txt)
-
-
     total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (

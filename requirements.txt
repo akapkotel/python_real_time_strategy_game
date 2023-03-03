@@ -10,5 +10,4 @@ pyglet==1.5.8
 pymunk==5.7.0
 pytiled-parser==0.9.4a3
 PyYAML==5.3.1
-python-statemachine==0.8.0
-Shapely~=1.7.1
+Shapely>=1.7.1
