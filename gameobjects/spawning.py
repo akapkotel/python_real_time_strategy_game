@@ -19,6 +19,12 @@ from utils.game_logging import log
 from gameobjects.constants import BUILDINGS, UNITS, CLASS, CORPSE, WRECK, TREE
 from gameobjects.gameobject import GameObject, Wreck, Tree
 
+RESEARCH_FACILITY = 'research_facility'
+
+PRODUCED_RESOURCE = 'produced_resource'
+
+PRODUCED_UNITS = 'produced_units'
+
 
 class GameObjectsSpawner(Singleton):
     game = None  # assigned by the Game instance automatically
@@ -56,7 +62,7 @@ class GameObjectsSpawner(Singleton):
         # ResearchFacility etc.
         kwargs.update(
             {k: v for (k, v) in self.configs[name].items() if
-             k in ('produced_units', 'produced_resource', 'research_facility')}
+             k in (PRODUCED_UNITS, PRODUCED_RESOURCE, RESEARCH_FACILITY)}
         )
         return Building(name, player, position, **kwargs)
 

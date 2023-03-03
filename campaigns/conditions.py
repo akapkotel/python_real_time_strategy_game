@@ -45,15 +45,17 @@ class Condition:
             self.add_consequence(consequence)
         return self
 
-    def bind_mission(self, mission: Mission):
+    def bind_mission(self, mission: Mission) -> Condition:
         self.mission = mission
         for consequence in (c for c in self._consequences if c.mission is None):
             consequence.mission = mission
+        return self
 
-    def add_consequence(self, consequence: Consequence):
+    def add_consequence(self, consequence: Consequence) -> Condition:
         if consequence.player is None:
             consequence.player = self.player
         self._consequences.append(consequence)
+        return self
 
     @abstractmethod
     def fulfilled(self) -> bool:
@@ -74,7 +76,7 @@ class Condition:
         return state
 
 
-class TimePassed(Condition):
+class TimePassedCondition(Condition):
 
     def __init__(self, player: Player, required_time: int):
         super().__init__(player)
@@ -93,12 +95,12 @@ class TimePassed(Condition):
         super().__setstate__(state)
 
 
-class MapRevealed(Condition):
+class MapRevealedCondition(Condition):
     def fulfilled(self) -> bool:
         return len(self.mission.game.fog_of_war.unexplored) == 0
 
 
-class NoUnitsLeft(Condition):
+class NoUnitsLeftCondition(Condition):
     """Beware that this Condition checks bot against Units and Buildings!"""
 
     def __init__(self, player: Player = None, faction: Faction = None):
@@ -125,7 +127,7 @@ class NoUnitsLeft(Condition):
         return state
 
 
-class HasUnitsOfType(Condition):
+class HasUnitsOfTypeCondition(Condition):
 
     def __init__(self, player: Player, unit_type: str, amount=0):
         super().__init__(player)
@@ -136,7 +138,7 @@ class HasUnitsOfType(Condition):
         return sum(1 for u in self.player.units if self.unit_type in u.object_name) > self.amount
 
 
-class HasBuildingsOfType(HasUnitsOfType):
+class HasBuildingsOfTypeCondition(HasUnitsOfTypeCondition):
     def __init__(self, player: Player, building_type, amount=0):
         super().__init__(player, building_type, amount)
 
@@ -144,7 +146,7 @@ class HasBuildingsOfType(HasUnitsOfType):
         return sum(1 for u in self.player.buildings if self.unit_type in u.object_name) > self.amount
 
 
-class ControlsBuilding(Condition):
+class ControlsBuildingCondition(Condition):
     def __init__(self, player: Player, building_id: int):
         super().__init__(player)
         self.building_id = building_id
@@ -153,13 +155,13 @@ class ControlsBuilding(Condition):
         return any(b.id == self.building_id for b in self.player.buildings)
 
 
-class ControlsArea(Condition):
+class ControlsAreaCondition(Condition):
 
     def fulfilled(self) -> bool:
         pass
 
 
-class HasTechnology(Condition):
+class HasTechnologyCondition(Condition):
     def __init__(self, mission, player: Player, technology_id: int):
         super().__init__(player)
         self.technology_id = technology_id
@@ -168,7 +170,7 @@ class HasTechnology(Condition):
         return self.technology_id in self.player.known_technologies
 
 
-class HasResource(Condition):
+class HasResourceCondition(Condition):
 
     def __init__(self, player: Player, resource: str, amount: int):
         super().__init__(player)
@@ -179,7 +181,7 @@ class HasResource(Condition):
         return self.player.has_resource(self.resource, self.amount)
 
 
-class MinimumVictoryPoints(Condition):
+class VictoryPointsCondition(Condition):
 
     def __init__(self, player: Player, required_vp: int):
         super().__init__(player)

@@ -65,7 +65,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field: Optional[TextInputField] = None
 
         self.show_hint = False
-        self.text_hint_delay = self.window.settings.hints_delays
+        self.text_hint_delay = self.window.settings.hints_delay_seconds
 
         # player can select Units by dragging mouse cursor with left-button
         # pressed: all Units inside selection-rectangle will be added to the
@@ -294,7 +294,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def clear_pointed_gameobject(self):
         self.pointed_gameobject = None
-        self.text_hint_delay = self.window.settings.hints_delays
+        self.text_hint_delay = self.window.settings.hints_delay_seconds
         self.show_hint = False
         self.cross_color = self.cursor_default_color
 

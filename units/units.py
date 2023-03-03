@@ -695,7 +695,7 @@ class Soldier(Unit):
 
     def spawn_corpse(self):
         corpse_name = f'{self.colored_name}_corpse.png'
-        self.game.spawn(corpse_name, None, self.position, self.facing_direction)
+        self.game.spawn(corpse_name, self.position, self.facing_direction)
 
 
 class Engineer(Soldier):

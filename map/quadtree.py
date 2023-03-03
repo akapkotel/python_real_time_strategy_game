@@ -65,11 +65,11 @@ class QuadTree(Rect):
                 return quadtree
 
     def add_to_entities(self, entity):
-        index = entity.faction.id
+        faction_id = entity.faction.id
         try:
-            self.entities[index].add(entity)
+            self.entities[faction_id].add(entity)
         except KeyError:
-            self.entities[index] = {entity,}
+            self.entities[faction_id] = {entity,}
         finally:
             self.entities_count += 1
 
@@ -104,8 +104,8 @@ class QuadTree(Rect):
             return found_entities
 
         # Search this node's points to see if they lie within boundary ...
-        for id, entities in self.entities.items():
-            if id in hostile_factions_ids:
+        for faction_id, entities in self.entities.items():
+            if faction_id in hostile_factions_ids:
                 found_entities.extend(e for e in entities if bounds.in_bounds(e))
 
         for quadtree in self.children:
@@ -143,16 +143,14 @@ class QuadTree(Rect):
             depth = quadtree.total_depth(depth)
         return max(depth, self.depth)
 
-    def total_entities(self, count=0):
-        for quadtree in self.children:
-            count += quadtree.total_entities()
-        return self.entities_count + count
+    def total_entities(self):
+        return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
     def get_entities(self):
-        entitites = []
-        for e in self.entities.values():
-            entitites.extend(e)
-        return [e.id for e in entitites]
+        # for entities_list in self.entities.values():
+        #     for e in entities_list:
+        return [e.id for entities_list in self.entities.values() for e in entities_list]
+
 
     def draw(self):
         draw_rectangle_outline(*self.position, self.width, self.height, RED)

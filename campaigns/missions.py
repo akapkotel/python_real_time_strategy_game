@@ -11,6 +11,7 @@ from typing import List, Set, Dict
 from collections import namedtuple, defaultdict
 
 from utils.functions import find_paths_to_all_files_of_type
+from utils.scheduling import ScheduledEvent
 from campaigns.conditions import Condition
 from campaigns.research import Technology
 from players_and_factions.player import Player
@@ -48,6 +49,7 @@ class Mission:
         self.required_victory_points: Dict[int, int] = defaultdict(int)
         self.ended = False
         self.winner = None
+        self.game.schedule_event(ScheduledEvent(self, 1, self.evaluate_conditions, repeat=-1))
 
     @property
     def is_playable(self) -> bool:
@@ -77,25 +79,24 @@ class Mission:
             technology = Technology(*[d for d in list(tech_data.values())[4:]])
             self.allowed_technologies[player.id][technology.id] = technology
 
-    @singledispatchmethod
     def extend(self, *items):
         raise TypeError(f'Unknown items. Accepted are: Condition, Player')
 
-    @extend.register
-    def _(self, *items: Condition):
+    def add_conditions(self, *items: Condition):
         for condition in items:
             condition.bind_mission(self)
             self.conditions.append(condition)
             if not condition.optional and (points := condition.victory_points):
                 self.required_victory_points[condition.player.id] += points
+        return self
 
-    @extend.register
-    def _(self, *items: Player):
+    def add_players(self, *items: Player):
         for player in items:
             self.players.add(player.id)
             self.victory_points[player.id] = 0
             self.required_victory_points[player.id] = 0
             self.allowed_technologies[player.id] = {}
+        return self
 
     def remove_condition(self, condition: Condition):
         self.conditions.remove(condition)
@@ -107,10 +108,12 @@ class Mission:
 
     def check_for_last_survivor(self):
         if len(self.players) == 1:
-            self.end_mission(winner=self.game.players[self.players.pop()])
+            winner_id = self.players.pop()
+            self.end_mission(winner=self.game.players[winner_id])
 
     def update(self):
-        self.evaluate_conditions()
+        pass
+        # self.evaluate_conditions()
 
     def evaluate_conditions(self):
         for condition in (c for c in self.conditions if c.fulfilled()):

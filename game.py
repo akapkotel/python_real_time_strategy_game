@@ -53,6 +53,8 @@ from utils.improved_spritelists import (
 )
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
+
+BEFORE_INTERFACE_LAYER = -2
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
 GAME_PATH = pathlib.Path(__file__).parent.absolute()
@@ -87,36 +89,41 @@ PYPROFILER = False
 DEBUG = False
 
 
-@dataclass
 class Settings:
     """
     Just a simple data container for convenient storage and access to bunch of
     minor variables, which would overcrowd Window __init__. It also helps to
     share many attributes between GameWindow and Game classes easily.
     """
-    fps: int = FPS
-    game_speed: float = GAME_SPEED
-    update_rate = 1 / FPS
-    full_screen: bool = FULL_SCREEN
-    debug: bool = DEBUG
-    god_mode: bool = False
-    ai_sleep: bool = False
-    debug_mouse: bool = True
-    debug_map: bool = False
-    vehicles_threads: bool = True
-    threads_fadeout_seconds: int = 2  # seconds
-    shot_blasts: bool = True
-    editor_mode: bool = False
-    remove_wrecks_after_seconds: int = 30
-    damage_randomness_factor = 0.25  # standard deviation
-    trees_density: float = 0.05  # percentage chance of tree being spawned
-    resources_abundance: float = 0.01
-    starting_resources: float = 0.5
-    map_width: int = 75
-    map_height: int = 75
-    tile_width: int = TILE_WIDTH
-    tile_height: int = TILE_HEIGHT
-    hints_delays: int = 1
+    __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'debug', 'god_mode', 'ai_sleep','debug_mouse',
+                 'debug_map', 'vehicles_threads', 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode',
+                 'remove_wrecks_after_seconds', 'damage_randomness_factor', 'trees_density', 'resources_abundance',
+                 'starting_resources', 'map_width', 'map_height', 'tile_width', 'tile_height', 'hints_delay_seconds')
+
+    def __init__(self):
+        self.fps: int = FPS
+        self.game_speed: float = GAME_SPEED
+        self.update_rate = 1 / FPS
+        self.full_screen: bool = FULL_SCREEN
+        self.debug: bool = DEBUG
+        self.god_mode: bool = False
+        self.ai_sleep: bool = False
+        self.debug_mouse: bool = True
+        self.debug_map: bool = False
+        self.vehicles_threads: bool = True
+        self.threads_fadeout_seconds: int = 2  # seconds
+        self.shot_blasts: bool = True
+        self.editor_mode: bool = False
+        self.remove_wrecks_after_seconds: int = 30
+        self.damage_randomness_factor = 0.25  # standard deviation
+        self.trees_density: float = 0.05  # percentage chance of tree being spawned
+        self.resources_abundance: float = 0.01
+        self.starting_resources: float = 0.5
+        self.map_width: int = 75
+        self.map_height: int = 75
+        self.tile_width: int = TILE_WIDTH
+        self.tile_height: int = TILE_HEIGHT
+        self.hints_delay_seconds: int = 1
 
 
 class GameWindow(Window, EventsCreator):
@@ -213,11 +220,9 @@ class GameWindow(Window, EventsCreator):
 
         self.current_view.on_update(delta_time)
 
-        if (cursor := self.cursor).active:
-            cursor.update()
-
-        if (keyboard := self.keyboard).active:
-            keyboard.update()
+        for controller in (self.cursor, self.keyboard):
+            if controller.active:
+                controller.update()
 
         self.sound_player.on_update()
 
@@ -504,8 +509,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
+
         print('Game __init__ method worked')
 
+    @property
+    def things_to_update_each_frame(self):
+        return self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.current_mission, self.timer
 
     @property
     def sound_player(self) -> AudioPlayer:
@@ -680,9 +689,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.sound_player.play_playlist('game')
         self.update_interface_content()
 
-    def generate_random_map_objects(self):
+    def create_random_scenario(self):
         if self.generate_random_entities:
-            # self.test_scheduling_events()
+            self.test_scheduling_events()
             self.test_factions_and_players_creation()
             self.test_buildings_spawning()
             self.test_units_spawning()
@@ -757,21 +766,16 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         log(f'QuadTree depth after spawning Units and Buildings: {self.map.quadtree.total_depth()}', console=True)
 
     def test_missions(self):
-        self.current_mission = mission = Mission('Test Mission', 'Map 1')
-
         human = self.local_human_player
-        map_revealed = MapRevealed(human).set_vp(1)
-        no_units = NoUnitsLeft(human).triggers(Defeat())
-        mission_timer = TimePassed(human, 1).set_vp(1).triggers(Victory())
-        unit_type = HasUnitsOfType(human, 'tank_medium').set_vp(1)
-
         cpu_player = self.players[4]
-        cpu_no_units = NoUnitsLeft(cpu_player).triggers(Defeat())
-
-        mission.extend(human, cpu_player)
-        mission.extend(unit_type, mission_timer, no_units, cpu_no_units, map_revealed)
-
-        mission.unlock_technologies_for_player(human, 'technology_1')
+        conditions = (
+            MapRevealedCondition(human).set_vp(1),
+            NoUnitsLeftCondition(human).triggers(Defeat()),
+            TimePassedCondition(human, 10).set_vp(1).triggers(Victory()),
+            HasUnitsOfTypeCondition(human, 'tank_medium').set_vp(1),
+            NoUnitsLeftCondition(cpu_player).triggers(Defeat())
+        )
+        self.current_mission = Mission('Test Mission', 'Map 1').add_players(human, cpu_player).add_conditions(*conditions).unlock_technologies_for_player(human, 'technology_1')
 
     def on_being_attached(self, attached: Observed):
         if isinstance(attached, GameObject):
@@ -830,22 +834,19 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        self.timer.update()
+        for thing in (t for t in self.things_to_update_each_frame if t is not None):
+            thing.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players()
-        for updated in (self.events_scheduler, self.debugger, self.fog_of_war,
-                        self.pathfinder, self.mini_map, self.current_mission):
-            if updated is not None:
-                updated.update()
 
     def after_loading(self):
         self.window.show_view(self)
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
-        self.drawn.insert(-2, self.fog_of_war)
+        self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
         super().after_loading()
-        self.generate_random_map_objects()
+        self.create_random_scenario()
         self.update_interface_position(self.viewport[1], self.viewport[3])
 
     def save_timer(self):
@@ -927,7 +928,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.settings = Settings()
         self.window.game_view = None
 
-
 def run_profiled_game():
     from pyprofiler import start_profile, end_profile
     with start_profile() as profiler:
@@ -970,7 +970,7 @@ if __name__ == '__main__':
         Mission, load_campaigns, Campaign, MissionDescriptor
     )
     from campaigns.conditions import (
-        NoUnitsLeft, MapRevealed, TimePassed, HasUnitsOfType
+        NoUnitsLeftCondition, MapRevealedCondition, TimePassedCondition, HasUnitsOfTypeCondition
     )
     from campaigns.consequences import Defeat, Victory
     from user_interface.menu import Menu
