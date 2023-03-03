@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import (
-    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection, List
+    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection, List, Callable
 )
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
@@ -14,7 +14,6 @@ from effects.sound import (
     UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
 )
 from units.units_tasking import UnitTask, TaskEnterBuilding
-from utils.classes import HashedList
 from utils.colors import GREEN, RED, YELLOW
 from game import Game
 from players_and_factions.player import PlayerEntity
@@ -425,3 +424,54 @@ class UnitsManager(EventsCreator):
                 self.select_units(*group.units)
         except KeyError:
             pass
+
+
+class HashedList(list):
+    """
+    Wrapper for a list of currently selected Units. Adds fast look-up by using
+    of set containing items id's.
+    To work, it requires added items to have an unique 'id' attribute.
+    """
+
+    def __init__(self, iterable=None):
+        super().__init__()
+        self.elements_ids = set()
+        if iterable is not None:
+            self.extend(iterable)
+
+    def __contains__(self, item) -> bool:
+        return item.id in self.elements_ids
+
+    def append(self, item):
+        try:
+            self.elements_ids.add(item.id)
+            super().append(item)
+        except AttributeError:
+            print("Item must have 'id' attribute which is hashable.")
+
+    def remove(self, item):
+        self.elements_ids.discard(item.id)
+        try:
+            super().remove(item)
+        except ValueError:
+            pass
+
+    def pop(self, index=-1):
+        popped = super().pop(index)
+        self.elements_ids.discard(popped.id)
+        return popped
+
+    def extend(self, iterable) -> None:
+        self.elements_ids.update(i.id for i in iterable)
+        super().extend(iterable)
+
+    def insert(self, index, item) -> None:
+        self.elements_ids.add(item.id)
+        super().insert(index, item)
+
+    def clear(self) -> None:
+        self.elements_ids.clear()
+        super().clear()
+
+    def where(self, condition: Callable):
+        return HashedList([e for e in self if condition(e)])

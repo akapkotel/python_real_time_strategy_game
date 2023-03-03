@@ -6,7 +6,6 @@ from math import dist
 from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 
-from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log
 
@@ -22,7 +21,7 @@ UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
 UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
 
 
-class AudioPlayer(Singleton):
+class AudioPlayer:
     game = None
     instance = None
 

@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union, Tuple
 
-from arcade import AnimatedTimeBasedSprite
+from PIL import Image
+
+from arcade import AnimatedTimeBasedSprite, load_texture, Texture
 from arcade.arcade_types import Point
 
-from utils.classes import Observed, Observer
+from utils.observer import Observed, Observer
 from utils.data_types import GridPosition
 from utils.functions import get_path_to_file, add_extension
 from utils.game_logging import log
@@ -172,10 +174,26 @@ class Tree(TerrainObject):
 
 class Wreck(TerrainObject):
 
-    def __init__(self, filename: str, durability: int, position: Point):
+    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
         super().__init__(filename, durability, position)
         lifetime = self.game.settings.remove_wrecks_after_seconds
+        self.set_proper_wreck_or_body_texture(filename, texture_index)
         self.schedule_event(ScheduledEvent(self, lifetime, self.kill))
+
+
+    def set_proper_wreck_or_body_texture(self, name, texture_index):
+        texture_name = get_path_to_file(name)
+        width, height = Image.open(texture_name).size
+        try:  # for tanks with turrets
+            i, j = texture_index  # Tuple
+            self.texture = load_texture(texture_name,
+                                   j * (width // 8),
+                                   i * (height // 8), width // 8,
+                                   height // 8)
+        except TypeError:
+            self.texture = load_texture(texture_name,
+                                   texture_index * (width // 8),
+                                   0, width // 8, height)
 
 
 class PlaceableGameobject:

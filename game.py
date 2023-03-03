@@ -39,7 +39,7 @@ from user_interface.user_interface import (
     SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel,
     UiElement
 )
-from utils.classes import Observed
+from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
 from utils.data_types import Viewport
 from utils.functions import (
@@ -727,16 +727,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
               object_name: str,
               player: Optional[Union[Player, int]] = None,
               position: Optional[Point] = None,
-              id: Optional[int] = None,
+              # id: Optional[int] = None,
+              *args,
               **kwargs) -> Optional[GameObject]:
         if position is None:
             position = random.choice(
                 [n.position for n in self.map.all_walkable_nodes]
             )
         player = self.get_player_instance(player)
-        return self.spawner.spawn(object_name, player, position, id=id, **kwargs)
+        return self.spawner.spawn(object_name, player, position, *args, **kwargs)
 
-    def get_player_instance(self, player: Union[Player, int]):
+    def get_player_instance(self, player: Union[Player, int]) -> Optional[Player]:
         try:
             return self.players[player]
         except KeyError:  # it's already a Player instance, or None

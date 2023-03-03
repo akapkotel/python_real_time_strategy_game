@@ -9,7 +9,6 @@ from arcade import Sprite, load_spritesheet
 from effects.constants import (
     EXPLOSION_SMALL_5, HIT_BLAST, SHOT_BLAST, EXPLOSION
 )
-from utils.classes import Singleton
 from utils.functions import get_path_to_file
 
 path = get_path_to_file
@@ -21,7 +20,7 @@ explosions = {
 }
 
 
-class ExplosionsPool(Singleton):
+class ExplosionsPool:
     """
     Pooling allows to avoid initializing many, often-used objects lowering
     CPU load. Number of pooled Explosions is dynamically adjusted to number of

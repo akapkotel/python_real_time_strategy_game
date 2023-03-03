@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import random
+from enum import IntEnum
 
 from math import dist
 from collections import deque, defaultdict
@@ -17,7 +18,6 @@ from game import PROFILING_LEVEL
 from map.constants import TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from gameobjects.gameobject import GameObject
 from utils.data_types import GridPosition, Number, SectorId
-from utils.enums import TerrainCost
 from utils.scheduling import EventsCreator
 from utils.functions import (
     get_path_to_file, all_files_of_type_named
@@ -751,3 +751,11 @@ if __name__:
     from units.units import Unit
     from map.pathfinding import a_star
     from buildings.buildings import Building
+
+
+class TerrainCost(IntEnum):
+    ASPHALT = 1
+    GROUND = 2
+    GRASS = 3
+    SAND = 4
+    MUD = 5

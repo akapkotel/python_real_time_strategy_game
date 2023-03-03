@@ -21,7 +21,7 @@ from arcade.key import BACKSPACE, ENTER
 
 from controllers.constants import HORIZONTAL, VERTICAL
 from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
-from utils.classes import Observed, Observer
+from utils.observer import Observed, Observer
 from utils.geometry import clamp
 from utils.colors import rgb_to_rgba
 from utils.improved_spritelists import UiSpriteList

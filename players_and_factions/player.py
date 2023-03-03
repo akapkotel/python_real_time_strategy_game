@@ -16,7 +16,8 @@ from user_interface.constants import BASIC_UI
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
-from utils.classes import Observed, Observer, PriorityQueue
+from utils.observer import Observed, Observer
+from utils.priority_queue import PriorityQueue
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
 # from utils.game_logging import log

@@ -6,7 +6,6 @@ import time
 
 from typing import List, Dict, Callable, Any, Generator
 
-from utils.classes import Singleton
 from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log, logger
 from utils.data_types import SavedGames
@@ -23,7 +22,7 @@ SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
 
 
-class SaveManager(Singleton):
+class SaveManager:
     """
     This manager works not only with player-created saved games, but also with
     predefined scenarios stored in the same file-format, but in ./scenarios

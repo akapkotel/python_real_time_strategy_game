@@ -493,7 +493,7 @@ class Vehicle(Unit):
         super().kill()
 
     def spawn_wreck(self):
-        wreck_name = f'{self.object_name.rstrip(".png")}_wreck.png'
+        wreck_name = self.object_name.replace(".png", "_wreck.png")
         self.game.spawn(wreck_name, self.position, self.cur_texture_index)
 
 
@@ -694,8 +694,9 @@ class Soldier(Unit):
         self.spawn_corpse()
 
     def spawn_corpse(self):
-        corpse_name = f'{self.colored_name}_corpse.png'
-        self.game.spawn(corpse_name, self.position, self.facing_direction)
+        corpse_name = self.colored_name + "_corpse.png"
+        self.game.spawn(corpse_name, None, self.position, self.facing_direction)
+
 
 
 class Engineer(Soldier):
