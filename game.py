@@ -54,8 +54,9 @@ from utils.improved_spritelists import (
 from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
-BEFORE_INTERFACE_LAYER = -2
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
+BEFORE_INTERFACE_LAYER = -2
 
 GAME_PATH = pathlib.Path(__file__).parent.absolute()
 
@@ -548,23 +549,24 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             return self.find_gameobject(object_class, object_id)
         else:
             object_class = eval(name_and_id)
-            return {Game: self, GameWindow: self.window,
+            return {Game: self, GameWindow: self.window, Mission: self.current_mission,
                     UnitsManager: self.units_manager}[object_class]
 
     def find_gameobject(self,
                         object_class: Union[type(Unit), type(Building), type(TerrainObject)],
                         object_id: int) -> Optional[GameObject]:
         """
-        Find any GameObject existing in game by providing it's type and id.
+        Find any GameObject existing in game by providing its type and id.
 
         :param object_class: type -- class of the object, possible are: Unit,
         Building, TerrainObject
-        :param object_id: int -- an unique integer identifier of the GameObject
+        :param object_id: int -- a unique integer identifier of the GameObject
         :return: Optional[GameObject]
         """
         return {
             Soldier: self.units,
             Unit: self.units,
+            Tank: self.units,
             Building: self.buildings,
             Sprite: self.terrain_tiles,
             TerrainObject: self.static_objects,
@@ -735,7 +737,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 [n.position for n in self.map.all_walkable_nodes]
             )
         player = self.get_player_instance(player)
-        return self.spawner.spawn(object_name, player, position, *args, **kwargs)
+        spawned = self.spawner.spawn(object_name, player, position, *args, **kwargs)
+        return spawned
 
     def get_player_instance(self, player: Union[Player, int]) -> Optional[Player]:
         try:
@@ -769,14 +772,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_missions(self):
         human = self.local_human_player
         cpu_player = self.players[4]
-        conditions = (
-            MapRevealedCondition(human).set_vp(1),
-            NoUnitsLeftCondition(human).triggers(Defeat()),
-            TimePassedCondition(human, 10).set_vp(1).triggers(Victory()),
-            HasUnitsOfTypeCondition(human, 'tank_medium').set_vp(1),
-            NoUnitsLeftCondition(cpu_player).triggers(Defeat())
+        triggers = (
+            MapRevealedTrigger(human).set_vp(1),
+            NoUnitsLeftTrigger(human).triggers(Defeat()),
+            TimePassedTrigger(human, 10).set_vp(1).triggers(Victory()),
+            HasUnitsOfTypeTrigger(human, 'tank_medium').set_vp(1),
+            NoUnitsLeftTrigger(cpu_player).triggers(Defeat())
         )
-        self.current_mission = Mission('Test Mission', 'Map 1').add_players(human, cpu_player).add_conditions(*conditions).unlock_technologies_for_player(human, 'technology_1')
+        self.current_mission = Mission('Test Mission', 'Map 1')\
+            .add_players(human, cpu_player)\
+            .add_triggers(*triggers)\
+            .unlock_technologies_for_player(human, 'technology_1')
 
     def on_being_attached(self, attached: Observed):
         if isinstance(attached, GameObject):
@@ -871,8 +877,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         local Player's Faction, or are detected by his Faction.
         """
         self.local_drawn_units_and_buildings.clear()
-        if self.local_human_player is not None:
-            local_faction = self.local_human_player.faction
+        if (local_faction := self.local_human_player.faction) is not None:
             self.local_drawn_units_and_buildings.update(
                 local_faction.units,
                 local_faction.buildings,
@@ -956,7 +961,7 @@ if __name__ == '__main__':
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier
+    from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier, Tank
     from gameobjects.gameobject import GameObject, TerrainObject, Wreck
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
@@ -964,10 +969,10 @@ if __name__ == '__main__':
     from campaigns.missions import (
         Mission, load_campaigns, Campaign, MissionDescriptor
     )
-    from campaigns.conditions import (
-        NoUnitsLeftCondition, MapRevealedCondition, TimePassedCondition, HasUnitsOfTypeCondition
+    from campaigns.triggers import (
+        NoUnitsLeftTrigger, MapRevealedTrigger, TimePassedTrigger, HasUnitsOfTypeTrigger
     )
-    from campaigns.consequences import Defeat, Victory
+    from campaigns.triggered_events import Defeat, Victory
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

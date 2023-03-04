@@ -246,6 +246,9 @@ class UnitsManager(EventsCreator):
         # updated to check the task status, if Unit finished it's task etc.
         self.units_tasks: List[UnitTask] = []
 
+    def __contains__(self, unit) -> bool:
+        return unit in self.selected_units or unit is self.selected_building
+
     @property
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
@@ -429,8 +432,8 @@ class UnitsManager(EventsCreator):
 class HashedList(list):
     """
     Wrapper for a list of currently selected Units. Adds fast look-up by using
-    of set containing items id's.
-    To work, it requires added items to have an unique 'id' attribute.
+    of set containing triggers id's.
+    To work, it requires added triggers to have an unique 'id' attribute.
     """
 
     def __init__(self, iterable=None):

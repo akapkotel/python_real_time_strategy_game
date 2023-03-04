@@ -69,7 +69,7 @@ class LayeredSpriteList(SpriteList):
                  update_on=True,
                  draw_on=True):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
-        # to keep track of items in spritelist, fast lookups:
+        # to keep track of triggers in spritelist, fast lookups:
         self.registry: Dict[int, Sprite] = {}
 
         # layers are ordering Sprites spatially from top of the map to bottom
@@ -143,29 +143,29 @@ class LayeredSpriteList(SpriteList):
     def start_updating(sprite):
         try:
             sprite.is_updated = True
-        except AttributeError:
-            log(f'Sprite {sprite} has no "is_updated" attribute.')
+        except AttributeError as e:
+            log(e)
 
     @staticmethod
     def stop_updating(sprite):
         try:
             sprite.is_updated = False
-        except AttributeError:
-            log(f'Sprite {sprite} has no "is_updated" attribute.')
+        except AttributeError as e:
+            log(e)
 
     @staticmethod
     def start_drawing(sprite):
         try:
             sprite.is_rendered = True
-        except AttributeError:
-            log(f'Sprite {sprite} has no "is_rendered" attribute.')
+        except AttributeError as e:
+            log(e)
 
     @staticmethod
     def stop_drawing(sprite):
         try:
             sprite.is_rendered = False
-        except AttributeError:
-            log(f'Sprite {sprite} has no "is_rendered" attribute.')
+        except AttributeError as e:
+            log(e)
 
     def on_update(self, delta_time: float = 1/60):
         if self.update_on:

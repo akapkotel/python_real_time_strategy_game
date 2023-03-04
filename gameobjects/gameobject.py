@@ -46,11 +46,12 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         Observed.__init__(self, observers)
         EventsCreator.__init__(self)
 
-        GameObject.total_objects_count += 1
         if id is None:
+            GameObject.total_objects_count += 1
             self.id = GameObject.total_objects_count
         else:
             self.id = id
+            GameObject.total_objects_count = max(GameObject.total_objects_count, id)
 
         self._durability = durability  # used to determine if object makes a
         # tile not-walkable or can be destroyed by vehicle entering the MapTile

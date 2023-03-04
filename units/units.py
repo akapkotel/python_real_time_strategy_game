@@ -43,7 +43,7 @@ class Unit(PlayerEntity):
                  position: Point,
                  id: Optional[int] = None):
         PlayerEntity.__init__(self, unit_name, player, position, id=id)
-        # Since we do not rotate actual Sprite, but change it's texture to show
+        # Since we do not rotate actual Sprite, but change its texture to show
         # the correctly rotated Units on the screen, use 'virtual' rotation to
         # keep track of the Unit rotation angle without rotating actual Sprite:
         self.facing_direction = random.randint(0, ROTATIONS - 1)

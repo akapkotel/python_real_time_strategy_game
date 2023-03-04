@@ -12,7 +12,7 @@ from collections import namedtuple, defaultdict
 
 from utils.functions import find_paths_to_all_files_of_type
 from utils.scheduling import ScheduledEvent
-from campaigns.conditions import Condition
+from campaigns.triggers import Trigger
 from campaigns.research import Technology
 from players_and_factions.player import Player
 
@@ -20,14 +20,14 @@ MissionDescriptor = namedtuple('MissionDescriptor',
                                ['name',
                                 'campaign_name',
                                 'map_name',
-                                'conditions',
+                                'triggers',
                                 'description'])
 
 
 class Mission:
     """
     Mission keeps track of the scenario-objectives and evaluates if Players
-    achieved their objectives and checks win and fail conditions. It allows to
+    achieved their objectives and checks win and fail triggers. It allows to
     control when the current game ends and what is the result of a game.
     """
     game = None
@@ -42,14 +42,14 @@ class Mission:
         self.name = name
         self.description = ''
         self.map_name = map_name
-        self.conditions: List[Condition] = []
+        self.triggers: List[Trigger] = []
         self.players: Set[int] = set()
         self.allowed_technologies: Dict[int, Dict[int, Technology]] = {}
         self.victory_points: Dict[int, int] = defaultdict(int)
         self.required_victory_points: Dict[int, int] = defaultdict(int)
         self.ended = False
         self.winner = None
-        self.game.schedule_event(ScheduledEvent(self, 1, self.evaluate_conditions, repeat=-1))
+        self.game.schedule_event(ScheduledEvent(self, 1, self.evaluate_triggers, repeat=-1))
 
     @property
     def is_playable(self) -> bool:
@@ -67,15 +67,13 @@ class Mission:
             self.name,
             self.campaign_name,
             self.map_name,
-            [],  # self.conditions
+            [],  # self.triggers
             self.description
         )
 
     def unlock_technologies_for_player(self, player: Player, *technologies: str):
         for tech_name in technologies:
-            # tech_data = self.game.configs['technologies'][tech_name]
             tech_data = self.game.configs[tech_name]
-            # _class = eval(tech_data['class'])
             technology = Technology(*[d for d in list(tech_data.values())[4:]])
             self.allowed_technologies[player.id][technology.id] = technology
         return self
@@ -83,12 +81,12 @@ class Mission:
     def extend(self, *items):
         raise TypeError(f'Unknown items. Accepted are: Condition, Player')
 
-    def add_conditions(self, *items: Condition):
-        for condition in items:
-            condition.bind_mission(self)
-            self.conditions.append(condition)
-            if not condition.optional and (points := condition.victory_points):
-                self.required_victory_points[condition.player.id] += points
+    def add_triggers(self, *triggers: Trigger):
+        for trigger in triggers:
+            trigger.bind_mission(self)
+            self.triggers.append(trigger)
+            if not trigger.optional and (points := trigger.victory_points):
+                self.required_victory_points[trigger.player.id] += points
         return self
 
     def add_players(self, *items: Player):
@@ -99,8 +97,8 @@ class Mission:
             self.allowed_technologies[player.id] = {}
         return self
 
-    def remove_condition(self, condition: Condition):
-        self.conditions.remove(condition)
+    def remove_trigger(self, trigger: Trigger):
+        self.triggers.remove(trigger)
 
     def eliminate_player(self, player: Player):
         player.kill()
@@ -114,12 +112,12 @@ class Mission:
 
     def update(self):
         pass
-        # self.evaluate_conditions()
+        # self.evaluate_triggers()
 
-    def evaluate_conditions(self):
-        for condition in (c for c in self.conditions if c.fulfilled()):
-            condition.execute_consequences()
-            self.conditions.remove(condition)
+    def evaluate_triggers(self):
+        for trigger in (c for c in self.triggers if c.fulfilled()):
+            trigger.execute_triggered_events()
+            self.triggers.remove(trigger)
 
     def add_victory_points(self, player: Player, points: int):
         self.victory_points[player.id] += points
@@ -148,9 +146,9 @@ class Mission:
         self.game.window.show_view(self.game.window.menu_view)
         self.game.window.quit_current_game(ignore_confirmation=True)
 
-    def bind_conditions(self):
-        for condition in self.conditions:
-            condition.bind_mission(self)
+    def bind_triggers(self):
+        for trigger in self.triggers:
+            trigger.bind_mission(self)
 
 
 class Campaign:

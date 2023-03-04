@@ -5,19 +5,19 @@ from typing import Optional
 from players_and_factions.player import Player
 
 
-class Consequence:
+class TriggeredEvent:
     """
-    Consequence is an event executed when a Condition to which it is bound, is
+    TriggeredEvent is an event executed when a Trigger to which it is bound, is
     met.
     """
 
     def __init__(self, player: Optional[Player] = None):
         """
-        Attach the Consequence to the Condition by calling it's triggers()
-        method and passing the Consequence object as th argument.
+        Attach the TriggeredEvent to the Trigger by calling it's triggers()
+        method and passing the TriggeredEvent object as th argument.
 
         :param player: Optional[Player] -- if this argument is not provided,
-        then the Player of the Condition is used. The Consequence will apply to
+        then the Player of the Trigger is used. The TriggeredEvent will apply to
         this player.
         """
         self.player = player
@@ -37,7 +37,7 @@ class Consequence:
         return state
 
 
-class AddVictoryPoints(Consequence):
+class AddVictoryPoints(TriggeredEvent):
 
     def __init__(self, player: Optional[Player] = None, amount: int = 1):
         super().__init__(player)
@@ -47,9 +47,9 @@ class AddVictoryPoints(Consequence):
         self.mission.add_victory_points(self.player, self.amount)
 
 
-class Defeat(Consequence):
+class Defeat(TriggeredEvent):
     """
-    Set it as a consequence of a Condition to trigger player defeat. The player
+    Set it as a consequence of a Trigger to trigger player defeat. The player
     would be removed from the current game.
     """
 
@@ -57,8 +57,8 @@ class Defeat(Consequence):
         self.mission.eliminate_player(self.player)
 
 
-class Victory(Consequence):
-    """Set it as a consequence of a Condition to trigger player's victory."""
+class Victory(TriggeredEvent):
+    """Set it as a consequence of a Trigger to trigger player's victory."""
     def __init__(self, player: Optional[Player] = None):
         super().__init__(player)
 
