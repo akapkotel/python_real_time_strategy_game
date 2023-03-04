@@ -24,7 +24,7 @@ class KeyboardHandler(ToggledElement):
         text_input_consumer.set_keyboard_handler(handler=self)
 
     def on_key_press(self, symbol: int):
-        log(f'Pressed key: {symbol} other pressed keys: {self.keys_pressed}')
+        log(f'Pressed key: {symbol}, other pressed keys: {self.keys_pressed}')
         self.keys_pressed.add(symbol)
         self.evaluate_pressed_key(symbol)
         if self.keyboard_input_consumer is not None:
@@ -38,8 +38,13 @@ class KeyboardHandler(ToggledElement):
     def evaluate_pressed_key(self, symbol: int):
         if symbol == P and self.window.is_game_running:
             self.window.game_view.toggle_pause()
-        elif symbol == C and self.window.is_game_running:
-            pass  # for easy debugging everytime, TODO: remove it when game is released
+        elif symbol == U and self.window.is_game_running:
+            self.window.game_view.show_units_construction_options()
+        elif symbol == B and self.window.is_game_running:
+            self.window.game_view.show_buildings_construction_options()
+        elif symbol == C:
+            if self.window.settings.developer_mode:
+                breakpoint()
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif (digit := chr(symbol)).isdigit():

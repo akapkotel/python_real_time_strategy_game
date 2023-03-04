@@ -6,7 +6,7 @@ from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union
 
-from arcade import load_texture
+from arcade import load_texture, MOUSE_BUTTON_RIGHT
 from arcade.arcade_types import Point
 
 from gameobjects.constants import UNITS
@@ -51,6 +51,8 @@ class UnitsProducer:
         self.spawn_point = self.center_x, self.center_y - 3 * TILE_HEIGHT
         # Point on the Map for finished Units to go after being spawned:
         self.deployment_point = None
+        # used to pick one building to produce new units if player has more such factories:
+        self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
     @logger()
     def start_production(self, unit: str):
@@ -63,7 +65,7 @@ class UnitsProducer:
     def _start_production(self, unit: str, confirmation=False):
         self.set_production_progress_and_speed(unit)
         self._toggle_production(produced=unit)
-        if confirmation:
+        if self.player.is_local_human_player and confirmation:
             self.game.window.sound_player.play_sound('production_started.wav')
 
     def consume_resources_from_the_pool(self, unit: str):
@@ -114,21 +116,25 @@ class UnitsProducer:
     def update_units_production(self):
         if self.currently_produced is not None:
             self.production_progress += 0.01 * self.health_percentage
+            self.update_ui_units_construction_section()
             if int(self.production_progress) == self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
             self._start_production(unit=self.production_queue[-1])
 
-    def update_production_buttons(self, panel: UiElementsBundle):
-        for produced in self.produced_units:
-            progress = self.production_progress
-            button = panel.find_by_name(produced)
-            self.update_single_button(button, produced, progress)
+    def update_ui_units_construction_section(self):
+        if  (ui_panel := self.game.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)).elements:
+            self.update_production_buttons(ui_panel)
 
-    def update_single_button(self, button, produced, progress):
+    def update_production_buttons(self, ui_panel: UiElementsBundle):
+        for produced in self.produced_units:
+            button = ui_panel.find_by_name(produced)
+            self.update_single_button(button, produced)
+
+    def update_single_button(self, button: ProgressButton, produced: str):
         button.counter = self.production_queue.count(produced)
         if produced == self.currently_produced:
-            button.progress = (progress / self.production_time) * 100
+            button.progress = (self.production_progress / self.production_time) * 100
         else:
             button.progress = 0
 
@@ -137,6 +143,7 @@ class UnitsProducer:
         self.production_progress = 0
         self._toggle_production(produced=None)
         self.spawn_finished_unit(finished_unit)
+        self.update_ui_units_construction_section()
         if self.player.is_local_human_player:
             self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
 
@@ -155,7 +162,7 @@ class UnitsProducer:
         for i, unit in enumerate(self.produced_units):
             b = ProgressButton(unit + '_icon.png', left, bottom + 105 * i, unit,
                                functions=partial(self.start_production, unit))
-            b.bind_function(partial(self.cancel_production, unit), 4)
+            b.bind_function(partial(self.cancel_production, unit), MOUSE_BUTTON_RIGHT)
             production_buttons.append(b)
         return production_buttons
 
@@ -562,4 +569,4 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from game import Game
     from map.constants import TILE_WIDTH, TILE_HEIGHT
-    from user_interface.constants import UI_BUILDINGS_PANEL
+    from user_interface.constants import UI_BUILDINGS_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL

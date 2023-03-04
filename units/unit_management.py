@@ -337,7 +337,7 @@ class UnitsManager(EventsCreator):
         self.unselect_all_selected()
         self.selected_building = building
         self.create_selection_markers(building=building)
-        self.game.update_interface_content(context=building)
+        self.game.change_interface_content(context=building)
 
     def update_selection_markers_set(self, new, lost):
         discarded = {m for m in self.selection_markers if m.selected in lost}
@@ -348,7 +348,7 @@ class UnitsManager(EventsCreator):
     def select_units(self, *units: Unit):
         self.selected_units.extend(units)
         self.create_selection_markers(units)
-        self.game.update_interface_content(context=units)
+        self.game.change_interface_content(context=units)
         self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
 
     def create_selection_markers(self, units=None, building=None):
@@ -386,14 +386,14 @@ class UnitsManager(EventsCreator):
 
     def update_interface_on_selection_change(self):
         if not self.selected_units and self.selected_building is None:
-            self.game.update_interface_content(context=None)
+            self.game.change_interface_content(context=None)
 
     @ignore_in_menu
     def unselect_all_selected(self):
         self.selected_units.clear()
         self.selected_building = None
         self.clear_selection_markers()
-        self.game.update_interface_content(context=None)
+        self.game.change_interface_content(context=None)
 
     def clear_selection_markers(self,
                                 killed: Set[SelectedUnitMarker] = None):

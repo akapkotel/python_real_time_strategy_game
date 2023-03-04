@@ -23,7 +23,7 @@ from functools import partial
 
 
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
 )
 from arcade.arcade_types import Color, Point
 
@@ -38,7 +38,7 @@ from user_interface.constants import (
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
     SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel,
-    UiElement
+    UiElement, ProgressButton
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
@@ -79,9 +79,10 @@ class Settings:
                  'debug_map', 'vehicles_threads', 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode',
                  'remove_wrecks_after_seconds', 'damage_randomness_factor', 'trees_density', 'resources_abundance',
                  'starting_resources', 'screen_width', 'screen_height', 'map_width', 'map_height', 'tile_width',
-                 'tile_height', 'hints_delay_seconds', 'pyprofiler')
+                 'tile_height', 'hints_delay_seconds', 'pyprofiler', 'developer_mode')
 
     def __init__(self):
+        self.developer_mode = True
         self.fps: int = 30
         self.game_speed: float = 1.0
         self.update_rate = 1 / (self.fps * self.game_speed)
@@ -566,6 +567,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             name=UI_OPTIONS_PANEL,
             elements=[
                 right_panel,
+                Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
+                       functions=self.show_buildings_construction_options),
+                Button('ui_units_construction_options.png', ui_x + 90, ui_y + 153,
+                       functions=self.show_units_construction_options),
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
@@ -632,7 +637,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.update_not_displayed_bundles_positions(diff_x, diff_y)
         self.mini_map.update_position(diff_x, diff_y)
 
-    def update_interface_content(self, context=None):
+    def change_interface_content(self, context=None):
         """
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
@@ -662,6 +667,27 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if all(isinstance(u, Engineer) for u in context_units):
             bundle.extend(Engineer.create_ui_buttons(*self.ui_position))
 
+    def show_buildings_construction_options(self):
+        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
+        for building_name in self.local_human_player.buildings_possible_to_build:
+            log(building_name, True)  # TODO: real logic instead of test log
+
+    def show_units_construction_options(self):
+        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
+        units_construction_bundle = self.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+        if not units_construction_bundle.elements:
+            self.create_units_constructions_options(units_construction_bundle)
+        self.load_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+
+    def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
+        x, y = self.ui_position
+        for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
+            producer = self.local_human_player.get_default_producer_of_unit(unit_name)
+            b = ProgressButton(unit_name + '_icon.png', x - 135, y + 25 - (75 * i), unit_name,
+                               functions=partial(producer.start_production, unit_name))
+            b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
+            units_construction_bundle.elements.append(b)
+
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
         Add animated sprite to the self.effects spritelist to display e.g.:
@@ -679,7 +705,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.load_timer(self.timer)
         self.window.toggle_mouse_and_keyboard(True)
         self.window.sound_player.play_playlist('game')
-        self.update_interface_content()
+        self.change_interface_content()
 
     def create_random_scenario(self):
         if self.generate_random_entities:

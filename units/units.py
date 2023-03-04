@@ -84,9 +84,6 @@ class Unit(PlayerEntity):
 
         self.layered_spritelist.swap_rendering_layers(self, 0, self.current_node.grid[1])
 
-    def __repr__(self) -> str:
-        return f'{self.object_name}(id: {self.id}, player.id: {self.player.id})'
-
     def update_explosions_pool(self):
         """
         Assure that there would be enough Explosion instances in the pool to
@@ -100,7 +97,7 @@ class Unit(PlayerEntity):
     @abstractmethod
     def _load_textures_and_reset_hitbox(self):
         """
-        Since we can have many different spritesheets representing our Unit.
+        Since we can have many spritesheets representing our Unit.
         Some units have rotating turrets, so above the normal 8-texture
         spritesheets, they require 8 textures for each hull direction x8
         turret directions, what makes 8x8 spritesheet, whereas other Units

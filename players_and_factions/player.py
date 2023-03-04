@@ -198,6 +198,11 @@ class Player(EventsCreator, Observer, Observed):
     def is_local_human_player(self) -> bool:
         return self is self.game.local_human_player
 
+    def get_default_producer_of_unit(self, unit_name: str) -> Optional[Building]:
+        for producer in (b for b in self.buildings if b.produced_units is not None and unit_name in b.produced_units):
+            if producer.default_producer:
+                return producer
+
     def on_being_attached(self, attached: Observed):
         attached: Union[Unit, Building]
         attached.player = self
@@ -509,6 +514,9 @@ class PlayerEntity(GameObject):
         self.kill_experience = 0
 
         self.attach_observers(observers=[self.game, self.player])
+
+    def __repr__(self) -> str:
+        return f'{self.object_name}(id: {self.id}, player.id: {self.player.id})'
 
     def __bool__(self) -> bool:
         return self.alive
