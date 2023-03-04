@@ -7,7 +7,7 @@ from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
     CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
-    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON
+    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
@@ -145,7 +145,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         )
 
         y = (i for i in range(675, 300, -125))
-        text_input = TextInputField('text_input_field.png', x, next(y), 'input')
+        text_input = TextInputField('text_input_field.png', x, next(y), 'input_field')
         saving_menu = UiElementsBundle(
             name=SAVING_MENU,
             elements=[
@@ -191,7 +191,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_play.png', SCREEN_X, next(y),
                        functions=window.start_new_game),
                 Slider('slider.png', SCREEN_X, next(y), 'Trees density:', 200,
-                       variable=(window.settings, 'trees_density'),
+                       variable=(window.settings, 'percent_chance_for_spawning_tree'),
                        min_value=0.01, max_value=0.1),
                 Slider('slider.png', SCREEN_X, next(y), 'Start resources:', 200,
                        variable=(window.settings, 'starting_resources'),
@@ -211,7 +211,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=CAMPAIGN_MENU,
             elements=[
                 back_to_menu_button,
-                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
+                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self,
             _on_load=partial(window.update_scenarios_list, CAMPAIGN_MENU)
@@ -221,7 +221,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=MULTIPLAYER_MENU,
             elements=[
                 back_to_menu_button,
-                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
+                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self
         )
@@ -230,7 +230,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=SCENARIO_EDITOR_MENU,
             elements=[
                 back_to_menu_button,
-                UiTextLabel(SCREEN_X, SCREEN_Y, 'Not available yet...', 20)
+                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self
         )

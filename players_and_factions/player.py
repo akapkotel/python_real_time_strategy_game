@@ -414,9 +414,8 @@ class CpuPlayer(Player):
         pass
 
     def start_production_of_unit(self, entity):
-        for building in self.buildings:
-            if entity in building.produced_units:
-                building.start_production(entity)
+        producer = self.get_default_producer_of_unit(entity)
+        producer.start_production(entity)
 
     def make_building_plans(self):
         if not self.faction.units < self.game.local_human_player.faction.units:

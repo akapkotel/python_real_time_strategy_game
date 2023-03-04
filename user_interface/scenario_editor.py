@@ -77,6 +77,7 @@ class ScenarioEditor:
         gameobjects = [
             o for o in gameobjects if get_path_to_file(o) is not None
         ]
+        print(gameobjects)
         return gameobjects
 
     def create_editor_ui_panel(self) -> UiElementsBundle:

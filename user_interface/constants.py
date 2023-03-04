@@ -1,4 +1,6 @@
 EDITOR = 'editor'
+SCENARIOS = 'scenarios'
+SAVED_GAMES = 'saves'
 SCENARIO_EDITOR_MENU = 'scenario editor menu'
 NEW_GAME_MENU = 'new game menu'
 SKIRMISH_MENU = 'skirmish menu'
@@ -9,6 +11,8 @@ MAIN_MENU = 'main menu'
 OPTIONS_SUBMENU = 'options'
 CREDITS_SUBMENU = 'credits'
 CONFIRMATION_DIALOG = 'Confirmaton dialog'
+NOT_AVAILABLE_NOTIFICATION = 'Not available yet...'
+
 
 PADDING_X = 5
 PADDING_Y = 30

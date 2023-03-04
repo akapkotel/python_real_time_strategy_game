@@ -256,8 +256,8 @@ class SelectableGroup:
         self.selectable_elements.append(selectable)
         selectable.selectable_group = self
 
-    def unselect_all_except_selected(self, selected: Selectable):
-        for element in (e for e in self.selectable_elements if e is not selected):
+    def unselect_all_except_selected(self, excepted: Selectable):
+        for element in (e for e in self.selectable_elements if e is not excepted):
             element.unselect()
 
 
@@ -1215,7 +1215,7 @@ class UiBundlesHandler(Observer):
 
     @singledispatchmethod
     def remove(self, element):
-        raise TypeError('Bad argument. Accepted: UiELement, UiElementsBundle')
+        raise TypeError('Bad argument. Accepted: UiElement, UiElementsBundle')
 
     @remove.register
     def _(self, element: UiElement):

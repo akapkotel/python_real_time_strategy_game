@@ -30,10 +30,11 @@ from arcade.arcade_types import Color, Point
 from effects.sound import AudioPlayer
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
-from user_interface.editor import ScenarioEditor
+from user_interface.scenario_editor import ScenarioEditor
 from user_interface.constants import (
     EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU, UI_RESOURCES_SECTION, UI_UNITS_PANEL, UI_BUILDINGS_PANEL,
     UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_OPTIONS_PANEL, MINIMAP_WIDTH, MINIMAP_HEIGHT,
+    SCENARIOS, SAVED_GAMES,
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
@@ -77,37 +78,47 @@ class Settings:
     """This class will serve for permanently saving user-defined settings and restore them between games."""
     __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'debug', 'god_mode', 'ai_sleep','debug_mouse',
                  'debug_map', 'vehicles_threads', 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode',
-                 'remove_wrecks_after_seconds', 'damage_randomness_factor', 'trees_density', 'resources_abundance',
+                 'remove_wrecks_after_seconds', 'damage_randomness_factor', 'percent_chance_for_spawning_tree', 'resources_abundance',
                  'starting_resources', 'screen_width', 'screen_height', 'map_width', 'map_height', 'tile_width',
                  'tile_height', 'hints_delay_seconds', 'pyprofiler', 'developer_mode')
 
     def __init__(self):
-        self.developer_mode = True
+        self.developer_mode: bool = True
+        self.editor_mode: bool = False
+
         self.fps: int = 30
         self.game_speed: float = 1.0
         self.update_rate = 1 / (self.fps * self.game_speed)
+
         self.full_screen: bool = False
+
         self.debug: bool = False
-        self.pyprofiler: bool = False
-        self.god_mode: bool = False
-        self.ai_sleep: bool = False
         self.debug_mouse: bool = True
         self.debug_map: bool = False
+
+        self.pyprofiler: bool = False
+
+        self.god_mode: bool = False
+        self.ai_sleep: bool = False
+
         self.vehicles_threads: bool = True
-        self.threads_fadeout_seconds: int = 2  # seconds
+        self.threads_fadeout_seconds: int = 2
+
         self.shot_blasts: bool = True
-        self.editor_mode: bool = False
         self.remove_wrecks_after_seconds: int = 30
         self.damage_randomness_factor = 0.25  # standard deviation
-        self.trees_density: float = 0.05  # percentage chance of tree being spawned
+        self.percent_chance_for_spawning_tree: float = 0.05  # percentage chance of tree being spawned
+
         self.resources_abundance: float = 0.01
         self.starting_resources: float = 0.5
+
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
         self.map_width: int = 75
         self.map_height: int = 75
         self.tile_width: int = TILE_WIDTH
         self.tile_height: int = TILE_HEIGHT
+
         self.hints_delay_seconds: int = 1
 
 
@@ -190,12 +201,17 @@ class GameWindow(Window, EventsCreator):
         return self.current_view is self.game_view
 
     def start_new_game(self):
-        scenarios = self.menu_view.selectable_groups['scenarios']
+        scenarios = self.menu_view.selectable_groups[SCENARIOS]
         if scenarios.currently_selected is not None:
             self.load_saved_game_or_scenario(scenarios=scenarios)
         if self.game_view is None:
             self.game_view = Game(loader=None)
         self.show_view(self.game_view)
+
+    def open_scenario_editor(self):
+        self.settings.editor_mode = True
+        # TODO: starting new Game in editor mode
+        # self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
 
     # @timer(level=1, global_profiling_level=PROFILING_LEVEL, forced=False)
     def on_update(self, delta_time: float):
@@ -321,7 +337,7 @@ class GameWindow(Window, EventsCreator):
 
     def update_scenarios_list(self, menu: str):
         campaign_menu = self.menu_view.get_bundle(menu)
-        self.menu_view.selectable_groups['scenarios'] = group = SelectableGroup()
+        self.menu_view.selectable_groups[SCENARIOS] = group = SelectableGroup()
         campaign_menu.remove_subgroup(5)
 
         x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, 60))
@@ -335,7 +351,7 @@ class GameWindow(Window, EventsCreator):
         loading_menu = self.menu_view.get_bundle(menu)
         loading_menu.remove_subgroup(4)
         x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
-        self.menu_view.selectable_groups['saves'] = group = SelectableGroup()
+        self.menu_view.selectable_groups[SAVED_GAMES] = group = SelectableGroup()
         loading_menu.extend(
             GenericTextButton('blank_file_button.png', x, next(y), file,
                               None, subgroup=4, selectable_group=group)
@@ -354,18 +370,17 @@ class GameWindow(Window, EventsCreator):
         new saved-game file should be read. If field is empty, automatic save
         name would be generated
         """
-        saves = self.menu_view.selectable_groups['saves']
+        saves = self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected_save := saves.currently_selected) is not None:
             save_name = selected_save.name
         elif not (save_name := text_input_field.get_text()):
             save_name = f'saved_game({time.asctime()})'
-        scenario = self.settings.editor_mode
-        self.save_manager.save_game(save_name, self.game_view, scenario)
+        self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
 
     def load_saved_game_or_scenario(self, scenarios=None):
         if self.game_view is not None:
             self.quit_current_game()
-        files = scenarios or self.menu_view.selectable_groups['saves']
+        files = scenarios or self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected_save := files.currently_selected) is not None:
             loader = self.save_manager.load_game(file_name=selected_save.name)
             self.game_view = game = Game(loader=loader)
@@ -379,7 +394,7 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, LOADING_MENU)
     def delete_saved_game(self):
-        saves = self.menu_view.selectable_groups['saves']
+        saves = self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected := saves.currently_selected) is not None:
             self.save_manager.delete_file(selected.name, False)
 
@@ -681,6 +696,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
         x, y = self.ui_position
+        units_construction_bundle.elements.clear()
         for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
             b = ProgressButton(unit_name + '_icon.png', x - 135, y + 25 - (75 * i), unit_name,
@@ -714,8 +730,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
-            if self.settings.editor_mode:
-                self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )

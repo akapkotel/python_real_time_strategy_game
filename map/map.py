@@ -234,7 +234,7 @@ class Map:
     def generate_random_trees(self) -> Dict[GridPosition, int]:
         trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
         return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
-                if random.random() < self.game.settings.trees_density}
+                if random.random() < self.game.settings.percent_chance_for_spawning_tree}
 
     def get_nodes_by_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]

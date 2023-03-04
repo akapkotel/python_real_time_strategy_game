@@ -54,6 +54,14 @@ class UnitsProducer:
         # used to pick one building to produce new units if player has more such factories:
         self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
+        if self.player.is_local_human_player:
+            self.recreate_ui_units_construction_section()
+
+    def recreate_ui_units_construction_section(self):
+        """"""
+        units_construction_bundle = self.game.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+        self.game.create_units_constructions_options(units_construction_bundle)
+
     @logger()
     def start_production(self, unit: str):
         if self.player.enough_resources_for(expense=unit):
@@ -158,9 +166,9 @@ class UnitsProducer:
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
-        left, bottom = x - 100, y - 300
+        # left, bottom = x - 100, y - 300
         for i, unit in enumerate(self.produced_units):
-            b = ProgressButton(unit + '_icon.png', left, bottom + 105 * i, unit,
+            b = ProgressButton(unit + '_icon.png', x - 135, y - 75 - (75 * i), unit,
                                functions=partial(self.start_production, unit))
             b.bind_function(partial(self.cancel_production, unit), MOUSE_BUTTON_RIGHT)
             production_buttons.append(b)
@@ -419,7 +427,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_garrison_button(self, x, y) -> ProgressButton:
         button = ProgressButton(
-            'ui_leave_building_btn.png', x - 100, y, 'leave',
+            'ui_leave_building_btn.png', x - 135, y + 25, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
             functions=self.on_soldier_exit
         )
