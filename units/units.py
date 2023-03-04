@@ -403,8 +403,10 @@ class Unit(PlayerEntity):
         self.stop_completely()
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
-        if self.outside:
+        if self.outside and self.is_rendered:
             self.create_death_animation()
+        if self.player.is_local_human_player:
+            self.game.sound_player.play_sound('unit_lost.vaw')
         super().kill()
 
     def cancel_tasks(self):

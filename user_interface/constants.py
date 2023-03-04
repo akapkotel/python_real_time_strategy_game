@@ -12,9 +12,17 @@ CONFIRMATION_DIALOG = 'Confirmaton dialog'
 
 PADDING_X = 5
 PADDING_Y = 30
-BASIC_UI = 'basic_ui'
-BUILDINGS_PANEL = 'building_panel'
-UNITS_PANEL = 'units_panel'
+
+MINIMAP_WIDTH = 388
+MINIMAP_HEIGHT = 197
+
+UI_OPTIONS_PANEL = 'ui_options_panel'
+UI_RESOURCES_SECTION = 'ui_resources_section'
+UI_BUILDINGS_PANEL = 'ui_building_panel'
+UI_UNITS_PANEL = 'ui_units_panel'
+UI_UNITS_CONSTRUCTION_PANEL = 'ui_units_construction_panel'
+UI_BUILDINGS_CONSTRUCTION_PANEL = 'ui_buildings_construction_panel'
+
 QUIT_GAME_BUTTON = 'quit game button'
 CONTINUE_BUTTON = 'continue button'
 SAVE_GAME_BUTTON = 'save game button'

@@ -277,7 +277,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def switch_selected_gameobject(self, pointed: Optional[GameObject]):
         if pointed is not self.pointed_gameobject:
-            print(pointed)
             if self.pointed_gameobject is not None:
                 self.pointed_gameobject.on_mouse_exit()
             if pointed is not None and pointed.is_rendered:

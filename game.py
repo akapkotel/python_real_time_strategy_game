@@ -32,7 +32,8 @@ from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from user_interface.editor import ScenarioEditor
 from user_interface.constants import (
-    EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU
+    EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU, UI_RESOURCES_SECTION, UI_UNITS_PANEL, UI_BUILDINGS_PANEL,
+    UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_OPTIONS_PANEL, MINIMAP_WIDTH, MINIMAP_HEIGHT,
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
@@ -60,53 +61,33 @@ BEFORE_INTERFACE_LAYER = -2
 
 GAME_PATH = pathlib.Path(__file__).parent.absolute()
 
-BASIC_UI = 'basic_ui'
-BUILDINGS_PANEL = 'building_panel'
-UNITS_PANEL = 'units_panel'
-UNITS_CONSTRUCTION_PANEL = 'units_construction_panel'
-BUILDINGS_CONSTRUCTION_PANEL = 'buildingss_construction_panel'
-
-screen = get_screens()[0]
-
-FULL_SCREEN = False
-SCREEN_WIDTH, SCREEN_HEIGHT = screen.width, screen.height
+SCREEN = get_screens()[0]
+SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.width, SCREEN.height
 SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+
 UI_WIDTH = SCREEN_WIDTH // 5
-MINIMAP_WIDTH = 388
-MINIMAP_HEIGHT = 197
-
-ROWS = 50
-COLUMNS = 50
-
-FPS = 30
-GAME_SPEED = 1.0
 
 PLAYER_UNITS = 5
 CPU_UNITS = 1
 
-UPDATE_RATE = 1 / (FPS * GAME_SPEED)
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
-PYPROFILER = False
-DEBUG = False
 
 
 class Settings:
-    """
-    Just a simple data container for convenient storage and access to bunch of
-    minor variables, which would overcrowd Window __init__. It also helps to
-    share many attributes between GameWindow and Game classes easily.
-    """
+    """This class will serve for permanently saving user-defined settings and restore them between games."""
     __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'debug', 'god_mode', 'ai_sleep','debug_mouse',
                  'debug_map', 'vehicles_threads', 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode',
                  'remove_wrecks_after_seconds', 'damage_randomness_factor', 'trees_density', 'resources_abundance',
-                 'starting_resources', 'map_width', 'map_height', 'tile_width', 'tile_height', 'hints_delay_seconds')
+                 'starting_resources', 'screen_width', 'screen_height', 'map_width', 'map_height', 'tile_width',
+                 'tile_height', 'hints_delay_seconds', 'pyprofiler')
 
     def __init__(self):
-        self.fps: int = FPS
-        self.game_speed: float = GAME_SPEED
-        self.update_rate = 1 / FPS
-        self.full_screen: bool = FULL_SCREEN
-        self.debug: bool = DEBUG
+        self.fps: int = 30
+        self.game_speed: float = 1.0
+        self.update_rate = 1 / (self.fps * self.game_speed)
+        self.full_screen: bool = False
+        self.debug: bool = False
+        self.pyprofiler: bool = False
         self.god_mode: bool = False
         self.ai_sleep: bool = False
         self.debug_mouse: bool = True
@@ -120,6 +101,8 @@ class Settings:
         self.trees_density: float = 0.05  # percentage chance of tree being spawned
         self.resources_abundance: float = 0.01
         self.starting_resources: float = 0.5
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
         self.map_width: int = 75
         self.map_height: int = 75
         self.tile_width: int = TILE_WIDTH
@@ -133,14 +116,16 @@ class GameWindow(Window, EventsCreator):
     manage his saved games, start new games, change settings etc.
     """
 
-    def __init__(self, width: int, height: int, update_rate: float):
-        Window.__init__(self, width, height, update_rate=update_rate)
+    def __init__(self, settings: Settings):
+        Window.__init__(self, settings.screen_width, settings.screen_height, update_rate=settings.update_rate)
         EventsCreator.__init__(self)
+
         self.total_delta_time = 0
         self.frames = 0
         self.current_fps = 0
-        self.set_fullscreen(FULL_SCREEN)
+
         self.set_caption(__title__)
+        self.set_fullscreen(settings.full_screen)
 
         self.settings = Settings()  # shared with Game
 
@@ -576,37 +561,42 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
         ui_size = UI_WIDTH, SCREEN_HEIGHT
-        frame = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
-        options_panel = UiElementsBundle(
-            name=BASIC_UI,
+        right_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
+        ui_options_section = UiElementsBundle(
+            name=UI_OPTIONS_PANEL,
             elements=[
-                frame,
+                right_panel,
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
-                        parent=frame),
+                        parent=right_panel),
                  Button('game_button_save.png', ui_x, 120,
                         functions=self.window.open_saving_menu,
-                        parent=frame),
+                        parent=right_panel),
                  Button('game_button_pause.png', ui_x - 100, 120,
                         functions=partial(self.toggle_pause),
-                        parent=frame),
+                        parent=right_panel),
             ],
             register_to=self
         )
         y = SCREEN_HEIGHT * 0.79075
         x = SCREEN_WIDTH - UI_WIDTH + 90
         resources = (r for r in Player.resources)
-        options_panel.extend(
-            [UiTextLabel(x, y, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources)),
-             UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources)),
-             UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources)), UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources)),
-             UiTextLabel(x + 100, y - 120, '0', 17, WHITE, next(resources))
-             ],
+        ui_resources_section = UiElementsBundle(
+            name=UI_RESOURCES_SECTION,
+            elements=[
+                UiTextLabel(x, y, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources)),
+                UiTextLabel(x + 100, y - 120, '0', 17, WHITE, next(resources))
+            ],
+            register_to=self
         )
-
-        units_panel = UiElementsBundle(
-            name=UNITS_PANEL,
+        ui_units_panel = UiElementsBundle(
+            name=UI_UNITS_PANEL,
             elements=[
                 Button('game_button_stop.png', ui_x - 100, ui_y + 50,
                        functions=self.stop_all_units),
@@ -616,20 +606,20 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             register_to=self
         )
 
-        buildings_panel = UiElementsBundle(
-            name=BUILDINGS_PANEL,
+        ui_buildings_panel = UiElementsBundle(
+            name=UI_BUILDINGS_PANEL,
             elements=[],
             register_to=self
         )
 
-        units_construction_panel = UiElementsBundle(
-            name=UNITS_CONSTRUCTION_PANEL,
+        ui_units_construction_panel = UiElementsBundle(
+            name=UI_UNITS_CONSTRUCTION_PANEL,
             elements=[],
             register_to=self
         )
 
-        buildingss_construction_panel = UiElementsBundle(
-            name=BUILDINGS_CONSTRUCTION_PANEL,
+        ui_buildingss_construction_panel = UiElementsBundle(
+            name=UI_BUILDINGS_CONSTRUCTION_PANEL,
             elements=[],
             register_to=self
         )
@@ -647,7 +637,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
         """
-        self._unload_all(exceptions=[BASIC_UI, EDITOR])
+        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
         if context:
             if isinstance(context, Building):
                 self.configure_building_interface(context)
@@ -656,9 +646,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @ignore_in_editor_mode
     def configure_building_interface(self, context_building: Building):
-        self.load_bundle(name=BUILDINGS_PANEL, clear=True)
+        self.load_bundle(name=UI_BUILDINGS_PANEL, clear=True)
         buttons = context_building.create_ui_buttons(*self.ui_position)
-        self.get_bundle(BUILDINGS_PANEL).extend(buttons)
+        self.get_bundle(UI_BUILDINGS_PANEL).extend(buttons)
 
     @property
     def ui_position(self) -> Tuple[float, float]:
@@ -667,8 +657,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
-        self.load_bundle(name=UNITS_PANEL)
-        bundle = self.get_bundle(BUILDINGS_PANEL)
+        self.load_bundle(name=UI_UNITS_PANEL)
+        bundle = self.get_bundle(UI_BUILDINGS_PANEL)
         if all(isinstance(u, Engineer) for u in context_units):
             bundle.extend(Engineer.create_ui_buttons(*self.ui_position))
 
@@ -934,23 +924,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.settings = Settings()
         self.window.game_view = None
 
-def run_profiled_game():
+def run_profiled_game(settings: Settings):
     from pyprofiler import start_profile, end_profile
     with start_profile() as profiler:
-        GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+        GameWindow(settings)
         run()
     end_profile(profiler, 35, True)
 
 
-def run_game():
-    GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, UPDATE_RATE)
+def run_game(settings: Settings):
+    GameWindow(settings)
     run()
 
 
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
-    total_delta_time = 0
     from map.map import Map, Pathfinder
     from units.unit_management import (
         UnitsManager, SelectedEntityMarker, PermanentUnitsGroup
@@ -978,7 +967,9 @@ if __name__ == '__main__':
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager
 
-    if __status__ == 'development' and PYPROFILER:
-        run_profiled_game()
+    settings = Settings()
+
+    if __status__ == 'development' and settings.pyprofiler:
+        run_profiled_game(settings)
     else:
-        run_game()
+        run_game(settings)

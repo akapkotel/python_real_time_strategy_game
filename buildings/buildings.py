@@ -390,7 +390,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @ignore_in_editor_mode
     def update_ui_buildings_panel(self):
         if self.player.is_local_human_player and self.is_selected:
-            panel = self.game.get_bundle(BUILDINGS_PANEL)
+            panel = self.game.get_bundle(UI_BUILDINGS_PANEL)
             if self.produced_units is not None:
                 self.update_production_buttons(panel)
             if self.garrisoned_soldiers:
@@ -484,7 +484,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
-            button = self.game.get_bundle(BUILDINGS_PANEL).find_by_name('leave')
+            button = self.game.get_bundle(UI_BUILDINGS_PANEL).find_by_name('leave')
             button.counter = soldiers_count = len(self.garrisoned_soldiers)
             button.toggle(state=soldiers_count > 0)
 
@@ -562,4 +562,4 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from game import Game
     from map.constants import TILE_WIDTH, TILE_HEIGHT
-    from user_interface.constants import BUILDINGS_PANEL
+    from user_interface.constants import UI_BUILDINGS_PANEL

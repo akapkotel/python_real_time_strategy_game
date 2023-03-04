@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from arcade import rand_in_circle, draw_text
 from arcade.arcade_types import Color, Point
 
-from user_interface.constants import BASIC_UI
+from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
@@ -339,7 +339,7 @@ class HumanPlayer(Player):
     cpu = False
 
     def update_ui_resource_panel(self):
-        bundle = self.game.get_bundle(BASIC_UI)
+        bundle = self.game.get_bundle(UI_RESOURCES_SECTION)
         for resource in self.resources:
             label = bundle.find_by_name(name=resource)
             value = int(self.resource(resource))
