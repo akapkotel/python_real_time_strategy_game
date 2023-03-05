@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import time
 from collections import defaultdict
 from functools import partial, singledispatchmethod
 
@@ -289,6 +290,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         Selectable.__init__(self, selectable_group=selectable_group)
         self.name = name
         self._bundle = None
+        self.hint = None
         self.subgroup = subgroup
         self.ui_spritelist = None
 
@@ -299,6 +301,14 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
     @bundle.setter
     def bundle(self, bundle: UiElementsBundle):
         self._bundle = bundle
+
+    def add_hint(self, hint: Hint) -> UiElement:
+        self.hint = hint
+        return self
+
+    def remove_hint(self) -> UiElement:
+        self.hint = None
+        return self
 
     def this_or_child(self, cursor) -> UiElement:
         """
@@ -323,8 +333,17 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
 
     def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
         super().on_mouse_enter(cursor)
+        if self.hint is not None:
+            self.hint.set_position(self.left - self.hint.width // 2, self.center_y)
+            self.hint.reset_delay()
+            self.hint.show()
         if (sound := self.sound_on_mouse_enter) is not None and self._active:
             cursor.window.sound_player.play_sound(sound)
+
+    def on_mouse_exit(self):
+        super().on_mouse_exit()
+        if self.hint is not None and self.hint.active:
+            self.hint.hide()
 
     def _func_on_mouse_enter(self, cursor):
         if self._active:
@@ -335,9 +354,13 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
             self.set_texture(0)
 
     def draw(self):
-        super().draw()
         if self._active and (self.pointed or self.selected):
             self.draw_highlight_around_element()
+
+        super().draw()
+
+        if self.hint is not None and self.hint.should_show:
+            self.hint.draw()
 
     def draw_highlight_around_element(self):
         color = RED if 'exit' in self.textures[-1].name else GREEN
@@ -904,33 +927,31 @@ class Slider(UiElement):
         draw_text(str(self._value), x, self.center_y, WHITE, 20, anchor_y='center')
 
 
-def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
-    """
-    Use this function to decorate method you want, to be preceded by display of
-    simple confirm-or-cancel dialog for the player. The dialog would be shown
-    first, and after player clicks 'confirm' decorated method would be called.
-    If player clicks 'cancel', method would be ignored and a UiElementsBundle
-    of name provided in after_switch_to_bundle param is loaded.\n
-    To IGNORE this prompt, pass special argument ignore_confirmation=True to
-    the called decorated method - it will be digested by the internal wrapper,
-    and will cause aborting of the dialog procedure, and decorated method is
-    going to be executed instead.
+class Hint(Sprite, ToggledElement):
 
-    :param position: Tuple[x, y] -- position on which dialog will be centered
-    :param after_switch_to_bundle: str -- name of the UiElementsBundle to be
-    displayed after player makes choice.
-    :return: Callable
-    """
-    def decorator(function):
-        def wrapper(self, ignore_confirmation=False):
-            if ignore_confirmation:
-                return function(self)
-            function_on_yes = partial(function, self)
-            return self.menu_view.open_confirmation_dialog(
-                position, after_switch_to_bundle, function_on_yes
-            )
-        return wrapper
-    return decorator
+    def __init__(self, texture_name: str, text: str=None, x=0, y=0, text_position: Tuple[int, int]=None,
+                 text_color: Color=WHITE, text_size: int=10, text_align: str='left', required_delay: float=0):
+        super().__init__(get_path_to_file(name_to_texture_name(texture_name)), center_x=x, center_y=y)
+        ToggledElement.__init__(self, visible=False, active=True)
+        self.required_delay = required_delay
+        self.text = text
+        self.text_x, self.text_y = text_position or 0, 0
+        self.text_attributes = (text_color, text_size, text_align)
+        self.delay = 0
+
+    def reset_delay(self):
+        self.delay = time.time() + self.required_delay
+
+    @property
+    def should_show(self) -> bool:
+        return time.time() >= self.delay
+
+    def draw(self):
+        if self._visible:
+            super().draw()
+            x, y = self.position[0] + self.text_x, self.position[1] + self.text_y
+            if self.text is not None:
+                draw_text(self.text, x, y, *self.text_attributes)
 
 
 @dataclass

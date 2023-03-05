@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, inf, dist
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple, List
 
 from numba import njit
 from shapely.geometry import LineString, Polygon
@@ -217,6 +217,18 @@ matrix = [(-8, -4), (-8, -3), (-8, -2), (-8, -1), (-8, 0), (-8, 1), (-8, 2),
           (7, -5), (7, -4), (7, -3), (7, -2), (7, -1), (7, 0), (7, 1), (7, 2),
           (7, 3), (7, 4), (7, 5), (8, -4), (8, -3), (8, -2), (8, -1), (8, 0),
           (8, 1), (8, 2), (8, 3), (8, 4)]
+
+def generate_2d_grid(start_x, start_y, rows, columns, item_width, item_height) -> List[Tuple[Number, Number]]:
+    # grid = [
+    #     (start_x - (column // rows) * item_width, start_y - (row % rows) * item_height) for column in range(columns) for row in range(rows)
+    # ]  # works perfectly fine, but is unreadable
+    grid = []
+    for column in range(columns):
+        shift_x = (column // rows) * item_width
+        for row in range(rows):
+            shift_y = (row % rows) * item_height
+            grid.append((start_x - shift_x, start_y - shift_y))
+    return grid
 
 
 # area = calculate_circular_area(0, 0, 8)

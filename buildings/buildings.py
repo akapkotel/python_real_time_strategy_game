@@ -13,7 +13,7 @@ from gameobjects.constants import UNITS
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
-    ProgressButton, UiElementsBundle, UiElement
+    ProgressButton, UiElementsBundle, UiElement, Hint
 )
 from campaigns.research import Technology
 from map.map import MapNode, normalize_position, position_to_map_grid
@@ -24,7 +24,7 @@ from utils.functions import (
     add_player_color_to_name, get_texture_size, name_to_texture_name,
     get_path_to_file, ignore_in_editor_mode
 )
-from utils.geometry import find_area
+from utils.geometry import find_area, generate_2d_grid
 from controllers.constants import CURSOR_ENTER_TEXTURE
 
 
@@ -34,13 +34,19 @@ from utils.game_logging import logger
 
 class UnitsProducer:
     """
-    An interface for all Buildings which can produce Units in game.
+    An interface for all Buildings which can produce Units in game. Ignore 'Unresolved attribute reference' warnings for
+    Player, Game, center_x and center_y attributes - this class would be inherited by Building instance and inheritor
+    would provide these attributes for UnitsProducer instance.
     """
+    game: Game
+    player: Player
+    center_x: float
+    center_y: float
 
     def __init__(self, produced_units: Tuple[str]):
-        # Units which are available to produce in this Building:
-        self.produced_units = self.build_units_productions_costsheet(produced_units)
-        self.player.units_possible_to_build.update(u for u in produced_units)
+        # Units which are available to produce in this Building and their costs in resources:
+        self.produced_units: Dict[str, Dict[str: int]] = self.build_units_productions_costs_dict(produced_units)
+        self.player.units_possible_to_build.update(produced_units)
         # Queue of Units to be produced
         self.production_queue: Deque[str] = deque()
         # Name of the Unit, which is currently in production, if any:
@@ -58,7 +64,10 @@ class UnitsProducer:
             self.recreate_ui_units_construction_section()
 
     def recreate_ui_units_construction_section(self):
-        """"""
+        """
+        Each time a new UnitsProducer enters the game, UI panel with Units-available for plaer to build must be
+        refreshed to contain any new Unit this new Building produces.
+        """
         units_construction_bundle = self.game.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
         self.game.create_units_constructions_options(units_construction_bundle)
 
@@ -166,10 +175,12 @@ class UnitsProducer:
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
-        # left, bottom = x - 100, y - 300
+        positions = generate_2d_grid(x - 135, y - 75, 4, 4, 75, 75)
         for i, unit in enumerate(self.produced_units):
-            b = ProgressButton(unit + '_icon.png', x - 135, y - 75 - (75 * i), unit,
-                               functions=partial(self.start_production, unit))
+            column, row = positions[i]
+            b = ProgressButton(unit + '_icon.png', column, row, unit,
+                               functions=partial(self.start_production, unit)).\
+                add_hint(Hint(unit + '_production_hint.png', required_delay=0.5))
             b.bind_function(partial(self.cancel_production, unit), MOUSE_BUTTON_RIGHT)
             production_buttons.append(b)
         return production_buttons
@@ -186,7 +197,7 @@ class UnitsProducer:
         self.currently_produced = state['currently_produced']
         self.production_time = state['production_time']
 
-    def build_units_productions_costsheet(self, produced_units: List[str]) -> Dict[str, Dict[str: int]]:
+    def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
         # configs = self.game.configs[UNITS]
         configs = self.game.configs
         resources = (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS)

@@ -38,18 +38,18 @@ from user_interface.constants import (
 )
 from user_interface.user_interface import (
     Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
-    SelectableGroup, ask_player_for_confirmation, TextInputField, UiTextLabel,
-    UiElement, ProgressButton
+    SelectableGroup, TextInputField, UiTextLabel,
+    UiElement, ProgressButton, Hint
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
-from utils.data_types import Viewport
+from utils.data_types import Viewport, Number
 from utils.functions import (
     get_path_to_file, SEPARATOR, ignore_in_editor_mode
 )
 from utils.game_logging import log, logger
 from utils.timing import timer
-from utils.geometry import clamp, average_position_of_points_group
+from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
 from utils.improved_spritelists import (
     LayeredSpriteList, SpriteListWithSwitch, UiSpriteList,
 )
@@ -72,6 +72,35 @@ PLAYER_UNITS = 5
 CPU_UNITS = 1
 
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
+
+
+def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
+    """
+    Use this function to decorate method you want, to be preceded by display of
+    simple confirm-or-cancel dialog for the player. The dialog would be shown
+    first, and after player clicks 'confirm' decorated method would be called.
+    If player clicks 'cancel', method would be ignored and a UiElementsBundle
+    of name provided in after_switch_to_bundle param is loaded.\n
+    To IGNORE this prompt, pass special argument ignore_confirmation=True to
+    the called decorated method - it will be digested by the internal wrapper,
+    and will cause aborting of the dialog procedure, and decorated method is
+    going to be executed instead.
+
+    :param position: Tuple[x, y] -- position on which dialog will be centered
+    :param after_switch_to_bundle: str -- name of the UiElementsBundle to be
+    displayed after player makes choice.
+    :return: Callable
+    """
+    def decorator(function):
+        def wrapper(self, ignore_confirmation=False):
+            if ignore_confirmation:
+                return function(self)
+            function_on_yes = partial(function, self)
+            return self.menu_view.open_confirmation_dialog(
+                position, after_switch_to_bundle, function_on_yes
+            )
+        return wrapper
+    return decorator
 
 
 class Settings:
@@ -516,7 +545,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @property
     def things_to_update_each_frame(self):
-        return self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.current_mission, self.timer
+        return (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer,
+                self.current_mission)
 
     @property
     def sound_player(self) -> AudioPlayer:
@@ -697,10 +727,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
         x, y = self.ui_position
         units_construction_bundle.elements.clear()
+        positions = generate_2d_grid(x - 135, y + 92, 6, 4, 75, 75)
         for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
+            column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-            b = ProgressButton(unit_name + '_icon.png', x - 135, y + 25 - (75 * i), unit_name,
-                               functions=partial(producer.start_production, unit_name))
+            b = ProgressButton(unit_name + '_icon.png', column, row, unit_name,
+                               functions=partial(producer.start_production, unit_name))\
+                .add_hint(Hint(unit_name + '_production_hint.png', required_delay=0.5))
             b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
             units_construction_bundle.elements.append(b)
 

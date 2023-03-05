@@ -153,7 +153,7 @@ class Faction(EventsCreator, Observer, Observed):
 class Player(EventsCreator, Observer, Observed):
     game = None
     cpu = False
-    resources = {FUEL: 0, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 0, CONSCRIPTS: 10}
+    resources = {FUEL: 50, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 75, CONSCRIPTS: 15}
 
     def __init__(self,
                  id: Optional[int] = None,
@@ -183,7 +183,7 @@ class Player(EventsCreator, Observer, Observed):
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 0.0 if resource_name is not ENERGY else 0.0)
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
             if resource_name != ENERGY:
                 setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
