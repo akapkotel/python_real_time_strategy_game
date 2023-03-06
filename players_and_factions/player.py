@@ -689,7 +689,7 @@ class PlayerEntity(GameObject):
         return self.faction.is_enemy(other.faction)
 
     @property
-    def selectable(self) -> bool:
+    def is_selectable(self) -> bool:
         return self.player.is_local_human_player
 
     @property
@@ -698,28 +698,27 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     @property
-    def damaged(self) -> bool:
+    def is_damaged(self) -> bool:
         return self._health < self._max_health
 
     def on_being_damaged(self, damage: float, penetration: float = 0):
         """
-        :param damage: float
+        :param damage: float -- damage dealt by the attacker
         :param penetration: float -- value of attacker's weapon penetration
         :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
         if self.game.settings.god_mode and self.player.is_local_human_player:
             return
-        self.create_hit_audio_visual_effects()
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
         self.health -= random.gauss(damage, deviation) * effectiveness
-        if self.should_entity_die:
-            self.kill()
+        self.create_hit_audio_visual_effects()
+        self.check_id_should_entity_die()
 
-    @property
-    def should_entity_die(self) -> bool:
-        return self._health <= 0
+    def check_id_should_entity_die(self):
+        if self._health <= 0:
+            self.kill()
 
     def create_hit_audio_visual_effects(self):
         position = rand_in_circle(self.position, self.collision_radius // 3)

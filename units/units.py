@@ -648,7 +648,7 @@ class Soldier(Unit):
         return self.on_screen and self.outside
 
     @property
-    def selectable(self) -> bool:
+    def is_selectable(self) -> bool:
         return self.player.is_local_human_player and self.outside
 
     def on_update(self, delta_time=1/60):

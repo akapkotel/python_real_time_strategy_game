@@ -301,7 +301,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def set_cursor_cross_color(self, pointed: PlayerEntity, color=None):
         if color is not None:
             self.cross_color = color
-        elif pointed.selectable:
+        elif pointed.is_selectable:
             self.cross_color = GREEN
         else:
             self.cross_color = RED
@@ -375,7 +375,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.cursor_on_terrain_with_selected_units()
 
     def cursor_on_entity_with_selected_units(self, entity):
-        if entity.selectable:
+        if entity.is_selectable:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         elif entity.is_enemy(self.units_manager.selected_units[0]):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
@@ -388,7 +388,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
-        if entity.selectable:
+        if entity.is_selectable:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
@@ -502,7 +502,7 @@ class MouseDragSelection:
         'selected' and units outside the shape are not selected.
         """
         new = {
-            u for u in self.all_selectable_units if u.selectable
+            u for u in self.all_selectable_units if u.is_selectable
             and self._inside_selection_rect(*u.position)
         }
         added = new.difference(self.units)

@@ -23,10 +23,10 @@ class Weapon:
         self.effective_against_infantry = False
         self.owner = owner
         self.name: str = name
-        self.damage: float = 10.0
-        self.penetration: float = 2.0
-        self.accuracy: float = 75.0
-        self.range: float = 200.0
+        self.damage: float = 0
+        self.penetration: float = 0
+        self.accuracy: float = 0
+        self.range: float = 0
         self.rate_of_fire: float = 4  # 4 seconds
         self.ammo_per_shot = 1
         self.next_firing_time = 0
@@ -35,7 +35,6 @@ class Weapon:
         self.explosion_name = SHOT_BLAST
         self.owner.game.explosions_pool.add(self.explosion_name, 75)
 
-        # for attr_name, value in self.owner.game.configs['weapons'][name].triggers():
         for attr_name, value in self.owner.game.configs[name].items():
             setattr(self, attr_name, value)
 
@@ -43,16 +42,14 @@ class Weapon:
         self.ammo_left_in_magazine = self.magazine_size
 
     def reloaded(self) -> bool:
-        # return self.owner.timer['total'] >= self.next_firing_time
-        return self.owner.timer.total >= self.next_firing_time
+        return self.owner.timer.total >= self.next_firing_time and self.ammunition
 
     def shoot(self, target: PlayerEntity):
-        # self.next_firing_time = self.owner.timer['total'] + self.rate_of_fire
         self.next_firing_time = self.owner.timer.total + self.rate_of_fire
-        self.create_shot_audio_visual_effects()
         self.consume_ammunition()
         if self.check_if_target_was_hit(target):
             target.on_being_damaged(self.damage, self.penetration)
+        self.create_shot_audio_visual_effects()
 
     def consume_ammunition(self):
         if self.magazine_size:

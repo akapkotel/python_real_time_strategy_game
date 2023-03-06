@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from map.map import GridHandler
+from map.map import normalize_position
 
 
 class TestGridHandler(TestCase):
@@ -11,7 +11,7 @@ class TestGridHandler(TestCase):
         for i, position in enumerate(positions):
             x, y = position
             self.assertEqual(
-                GridHandler.normalize_position(x, y), normalized[i]
+                normalize_position(x, y), normalized[i]
             )
 
 

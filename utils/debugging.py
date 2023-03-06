@@ -67,7 +67,7 @@ class GameDebugger:
         grid = ShapeElementList()
         h_offset = TILE_HEIGHT // 2
         w_offset = TILE_WIDTH // 2
-        # horizontal lines:
+        # diagonal lines:
         for i in range(self.game.map.rows):
             y = i * TILE_HEIGHT
             h_line = create_line(0, y, self.game.map.width, y, BLACK)

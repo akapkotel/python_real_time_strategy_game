@@ -33,13 +33,14 @@ class Rect:
 
 
 class QuadTree(Rect):
-    __slots__ = ('max_entities', 'true_max_entitites','depth', 'entities_count', 'entities', 'children', 'max_size')
+    """This class provides fast and efficient way to detect Units which could see each other."""
+    __slots__ = ('max_entities', 'true_max_entities','depth', 'entities_count', 'entities', 'children', 'max_size')
 
     def __init__(self, cx, cy, width, height, max_entities=5, depth=0):
         super().__init__(cx, cy, width, height)
         self.max_entities = max_entities
-        self.depth = depth
         self.entities_count = 0
+        self.depth = depth
         self.entities = {}
         self.children = []
 
@@ -97,25 +98,14 @@ class QuadTree(Rect):
 
     def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
-
         if not self.intersects(bounds):
-            # If the domain of this node does not intersect the search
-            # region, we don't need to look in it for points.
             return found_entities
-
-        # Search this node's points to see if they lie within boundary ...
         for faction_id, entities in self.entities.items():
             if faction_id in hostile_factions_ids:
                 found_entities.extend(e for e in entities if bounds.in_bounds(e))
-
         for quadtree in self.children:
             found_entities = quadtree.query(hostile_factions_ids, bounds, found_entities)
         return found_entities
-
-    def find_selectable_units(self, left, right, bottom, top, faction_id):
-        rect = Rect(left + right // 2, bottom + top // 2, right - left, top - bottom)
-        possible_units = []
-        return self.query(faction_id, rect, possible_units)
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
         diameter = radius + radius
@@ -147,8 +137,6 @@ class QuadTree(Rect):
         return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
     def get_entities(self):
-        # for entities_list in self.entities.values():
-        #     for e in entities_list:
         return [e.id for entities_list in self.entities.values() for e in entities_list]
 
 

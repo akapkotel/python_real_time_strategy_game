@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import heapq
+from typing import Tuple, Any
+
+from utils.data_types import Number
 
 
 class PriorityQueue:
@@ -27,5 +30,7 @@ class PriorityQueue:
         self._contains.add(item)
         heapq.heappush(self.elements, (priority, item))
 
-    def get(self):
-        return heapq.heappop(self.elements)  # (priority, item)
+    def get(self) -> Tuple[Number, Any]:
+        item = heapq.heappop(self.elements)  # (priority, item)
+        return item
+        # return heapq.heappop(self.elements)  # (priority, item)

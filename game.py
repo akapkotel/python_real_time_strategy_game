@@ -782,9 +782,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_buildings_spawning(self):
         self.buildings.extend(
             (
-                self.spawn('medium_factory', self.players[2], (400, 600), garrison=2),
+                self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=2),
                 #TODO: loading saved Capitol building crashes game
-                self.spawn('medium_factory', self.players[4], (1000, 600), garrison=1),
+                self.spawn('medium_vehicles_factory', self.players[4], (1000, 600), garrison=1),
             )
         )
 

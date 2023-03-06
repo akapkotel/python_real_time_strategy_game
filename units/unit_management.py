@@ -282,7 +282,7 @@ class UnitsManager(EventsCreator):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if clicked.selectable:
+        if clicked.is_selectable:
             self.on_friendly_player_entity_clicked(clicked)
         elif units := self.selected_units:
             self.on_hostile_player_entity_clicked(clicked, units)

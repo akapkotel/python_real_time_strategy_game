@@ -151,8 +151,8 @@ class SaveManager:
         self.game.viewport = viewports[0]
         self.game.window.menu_view.viewport = viewports[1]
 
-    def load_map(self, map_file):
-        self.game.map = game_map = Map(map_settings=map_file)
+    def load_map(self, map_settings):
+        self.game.map = game_map = Map(map_settings=map_settings)
         self.game.pathfinder = Pathfinder(game_map)
 
     def load_factions(self, factions):

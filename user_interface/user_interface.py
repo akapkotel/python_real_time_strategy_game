@@ -1095,7 +1095,7 @@ class UiBundlesHandler(Observer):
         self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
         # set used to quickly check if a bundle is displayed or not:
         self.active_bundles: Set[str] = set()
-        # selectable groups allow to group together a bunch of same-context
+        # is_selectable groups allow to group together a bunch of same-context
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
 
