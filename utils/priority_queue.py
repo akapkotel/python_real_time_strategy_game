@@ -31,6 +31,4 @@ class PriorityQueue:
         heapq.heappush(self.elements, (priority, item))
 
     def get(self) -> Tuple[Number, Any]:
-        item = heapq.heappop(self.elements)  # (priority, item)
-        return item
-        # return heapq.heappop(self.elements)  # (priority, item)
+        return heapq.heappop(self.elements)  # (priority, item)

@@ -83,7 +83,6 @@ class Faction(EventsCreator, Observer, Observed):
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
         self.known_enemies: Set[PlayerEntity] = set()
-        # self.known_enemies: Set[PlayerEntity] = set()
 
         self.attach(observer=self.game)
 
@@ -94,7 +93,7 @@ class Faction(EventsCreator, Observer, Observed):
         attached: Player
         self.players.add(attached)
         if self.leader is None:
-            self.new_leader(attached)
+            self.set_the_new_leader(attached)
 
     def notify(self, attribute: str, value: Any):
         pass
@@ -103,29 +102,30 @@ class Faction(EventsCreator, Observer, Observed):
         detached: Player
         self.players.discard(detached)
         if detached is self.leader and self.players:
-            self.new_leader()
+            self.set_the_new_leader(leader=None)
 
-    def new_leader(self, leader: Optional[Player] = None):
+    def set_the_new_leader(self, leader: Optional[Player] = None):
         self.leader = leader or sorted(self.players, key=lambda x: x.id)[-1]
 
-    def is_enemy(self, other: Faction) -> bool:
-        return other.id in self.enemy_factions
+    def is_enemy(self, other_faction: Faction) -> bool:
+        return other_faction.id in self.enemy_factions
 
-    def start_war_with(self, other: Faction):
-        self.friendly_factions.discard(other.id)
-        self.enemy_factions.add(other.id)
-        other.friendly_factions.discard(self.id)
-        other.enemy_factions.add(self.id)
+    def start_war_with(self, other_faction: Faction, propagate=True):
+        self.friendly_factions.discard(other_faction.id)
+        self.enemy_factions.add(other_faction.id)
+        if propagate:
+            other_faction.start_war_with(self, propagate=False)
 
-    def cease_fire(self, other: Faction):
+    def cease_fire(self, other: Faction, propagate=True):
         self.enemy_factions.discard(other.id)
-        other.enemy_factions.discard(self.id)
+        if propagate:
+            other.cease_fire(self, propagate=False)
 
-    def start_alliance(self, other: Faction):
+    def start_alliance(self, other: Faction, propagate=True):
         self.cease_fire(other)
         self.friendly_factions.add(other.id)
-        other.cease_fire(self)
-        other.friendly_factions.add(self.id)
+        if propagate:
+            other.start_alliance(self, propagate=False)
 
     def update(self):
         # log(f'Updating faction: {self.name} players: {self.players}')

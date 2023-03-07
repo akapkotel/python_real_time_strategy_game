@@ -408,7 +408,7 @@ class GameWindow(Window, EventsCreator):
 
     def load_saved_game_or_scenario(self, scenarios=None):
         if self.game_view is not None:
-            self.quit_current_game()
+            self.quit_current_game(self)
         files = scenarios or self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected_save := files.currently_selected) is not None:
             loader = self.save_manager.load_game(file_name=selected_save.name)
@@ -783,8 +783,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.buildings.extend(
             (
                 self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=2),
+                self.spawn('garrison', self.players[2], (900, 600), garrison=2),
                 #TODO: loading saved Capitol building crashes game
-                self.spawn('medium_vehicles_factory', self.players[4], (1000, 600), garrison=1),
+                self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1),
             )
         )
 

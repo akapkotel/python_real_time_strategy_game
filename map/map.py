@@ -17,7 +17,7 @@ from arcade import Sprite, Texture, load_spritesheet
 from game import PROFILING_LEVEL
 from map.constants import TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from gameobjects.gameobject import GameObject
-from utils.data_types import GridPosition, Number, SectorId
+from utils.data_types import GridPosition, Number
 from utils.priority_queue import PriorityQueue
 from utils.scheduling import EventsCreator
 from utils.functions import (
@@ -33,8 +33,8 @@ from utils.geometry import calculate_circular_area
 TW, TH, SS = TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 
 PATH = 'PATH'
-VERTICAL_DIST = 1
-DIAGONAL_DIST = 1.4  # approx square root of 2
+VERTICAL_DIST = 10
+DIAGONAL_DIST = 14  # approx square root of 2
 MAP_TEXTURES = {
     'mud': load_spritesheet(
         get_path_to_file('mud_tileset_6x6.png'), 60, 45, 4, 16, 0)
@@ -81,7 +81,7 @@ def adjacent_distance(this: GridPosition, adjacent: GridPosition) -> int:
 
 
 def diagonal(first_grid: GridPosition, second_grid: GridPosition) -> bool:
-    return first_grid[0] != second_grid[0] or first_grid[1] != second_grid[1]
+    return first_grid[0] != second_grid[0] and first_grid[1] != second_grid[1]
 
 
 def random_terrain_texture() -> Texture:
@@ -107,7 +107,7 @@ def a_star(map: Map,
            end: GridPosition,
            pathable: bool = False) -> Union[MapPath, bool]:
     """
-    Find shortest path from <start> to <end> position using A* algorithm.
+    Find the shortest path from <start> to <end> position using A* algorithm.
 
     :param start: GridPosition -- (int, int) path-start point.
     :param end: GridPosition -- (int, int) path-destination point.
@@ -131,22 +131,17 @@ def a_star(map: Map,
     while unexplored:
         if (current := get_best_unexplored()[1]) == end:
             return reconstruct_path(map_nodes, previous, current)
-        explored.add(current)
         node = map_nodes[current]
         walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
         for adjacent in (a for a in walkable if a.grid not in explored):
             adj_grid = adjacent.grid
-            # total = cost_so_far[current] + adjacent_distance(current, adj_grid)
-            total = cost_so_far[current] + node.costs[adj_grid]
-            # TODO: implement Jump Point Search, for now, we resign from
-            #  using real terrain costs and calculate fast heuristic for
-            #  each waypoints pair, because it efficiently finds best
-            #  path, but it ignores tiles-moving-costs:
+            total = cost_so_far[current] + adjacent_distance(current, adj_grid)
             if total < cost_so_far[adj_grid]:
                 previous[adj_grid] = current
                 cost_so_far[adj_grid] = total
                 priority = total + heuristic(adj_grid, end)
                 put_to_unexplored(adj_grid, priority)
+            explored.add(current)
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:
@@ -155,7 +150,9 @@ def a_star(map: Map,
 
 
 def heuristic(start: GridPosition, end: GridPosition) -> int:
-    return (abs(end[0] - start[0]) + abs(end[1] - start[1])) * TerrainCost.GROUND
+    dx = abs(start[0] - end[0])
+    dy = abs(start[1] - end[1])
+    return DIAGONAL_DIST * min(dx, dy) + VERTICAL_DIST * max(dx, dy)
 
 
 def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
@@ -167,6 +164,14 @@ def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
         path.append(map_nodes[current_node])
     return [node.position for node in path[::-1]]
 
+
+class TerrainCost(IntEnum):
+    ASPHALT = 1
+    GROUND = 2
+    GRASS = 2
+    GRAVEL = 3
+    SAND = 4
+    MUD = 5
 
 
 class Map:
@@ -191,7 +196,8 @@ class Map:
         log(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
 
         self.generate_nodes()
-        self.calculate_distances_between_nodes() #  TODO: find efficient way to use these costs in pathfinding
+        #  TODO: find efficient way to use these costs in pathfinding
+        # self.calculate_distances_between_nodes()
 
         try:
             trees = map_settings['trees']
@@ -287,8 +293,8 @@ class Map:
             for grid in self.in_bounds(adjacent_map_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = adjacent_distance(grid, adjacent_node.grid)
-                terrain_cost = node.terrain_cost + adjacent_node.terrain_cost
-                node.costs[grid] = distance * terrain_cost
+                # terrain_cost = node.terrain_cost + adjacent_node.terrain_cost
+                node.costs[grid] = distance #  * terrain_cost
             self.distances[node.grid] = costs_dict
 
     @logger()
@@ -320,55 +326,6 @@ class Map:
         node = MapNode(-1, -1)
         node.pathable = False
         return node
-
-
-class Map2:
-
-    def __init(self):
-        self._pathable: Dict[GridPosition, bool] = {}
-        self._walkable: Dict[GridPosition, bool] = {}
-        self._adjacent: Dict[GridPosition, Set[GridPosition]] = {}
-        self._units: Dict[GridPosition, Unit] = {}
-        self._buildings: Dict[GridPosition, Building] = {}
-        self._static: Dict[GridPosition, GameObject] = {}
-        self._trees: Dict[GridPosition, TreeID] = {}
-
-    def unit(self, grid) -> Optional[Unit]:
-        try:
-            return self._units[grid]
-        except KeyError:
-            return self._units.get(position_to_map_grid(*grid))
-
-    def building(self, grid) -> Optional[Building]:
-        try:
-            return self._buildings[grid]
-        except KeyError:
-            return self._buildings.get(position_to_map_grid(*grid))
-
-    def adjacent(self, grid) -> Optional[Set[GridPosition]]:
-        try:
-            return self._adjacent[grid]
-        except KeyError:
-            return self._adjacent.get(position_to_map_grid(*grid))
-
-    def is_walkable(self, grid) -> bool:
-        try:
-            return self._walkable[grid]
-        except KeyError:
-            return self._walkable.get(position_to_map_grid(*grid))
-
-    def is_pathable(self, grid) -> bool:
-        try:
-            return self._pathable[grid]
-        except KeyError:
-            return self._pathable.get(position_to_map_grid(*grid))
-
-    def walkable_adjacent(self, grid):
-        try:
-            return {n for n in self._adjacent[grid] if self._walkable[n]}
-        except KeyError:
-            grid = position_to_map_grid(*grid)
-            return {n for n in self._adjacent[grid] if self._walkable[n]}
 
 
 class MapNode:
@@ -762,13 +719,3 @@ if __name__:
     from players_and_factions.player import PlayerEntity
     from units.units import Unit
     from buildings.buildings import Building
-
-
-class TerrainCost(IntEnum):
-    ASPHALT = 1
-    GROUND = 2
-    GRASS = 2
-    GRAVEL = 3
-    SAND = 4
-    MUD = 5
-
