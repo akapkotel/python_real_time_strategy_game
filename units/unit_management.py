@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import (
-    Optional, Sequence, Set, Tuple, Dict, Iterator, Union, Collection, List, Callable
+    Optional, Sequence, Set, Dict, Iterator, Union, Collection, List, Callable
 )
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
@@ -13,6 +13,7 @@ from buildings.buildings import Building
 from effects.sound import (
     UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
 )
+from gameobjects.spawning import BUILDING
 from units.units_tasking import UnitTask, TaskEnterBuilding
 from utils.colors import GREEN, RED, YELLOW
 from game import Game
@@ -22,24 +23,36 @@ from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
 from utils.scheduling import EventsCreator
 
-UNIT_HEALTH_BAR_WIDTH = 5
-SOLDIER_HEALTH_BAR_WIDTH = 4
-BUILDING_HEALTH_BAR_WIDTH = 10
-UNIT_HEALTH_BAR_LENGTH_RATIO = 0.6
-SOLDIER_HEALTH_BAR_LENGTH_RATIO = 0.4
-BUILDING_HEALTH_BAR_LENGTH_RATIO = 1.8
+UNIT_HEALTH_BARS_HEIGHT = 5
+SOLDIER_HEALTH_BARS_HEIGHT = 3
+BUILDING_HEALTH_BARS_HEIGHT = 10
+
+UNIT_SELECTION_MARKER_SIZE = 60
+SOLDIER_SELECTION_MARKER_SIZE = 40
+BUILDING_SELECTION_MARKER_SIZE = 180
+
+UNIT_SINGLE_BAR_WIDTH = 4
+SOLDIER_SINGLE_BAR_WIDTH = 3
+BUILDING_SINGLE_BAR_WIDTH = 8
+
+UNIT_BARS_DISTANCE = 2
+SOLDIER_BARS_DISTANCE = 1
+BUILDING_BARS_DISTANCE = 1
+
+UNIT_BARS_COUNT = 10
+BUILDING_BARS_COUNT = 5
 
 selection_textures = load_textures(
     get_path_to_file('unit_selection_marker.png'),
-    [(i * 60, 0, 60, 60) for i in range(10)]
+    [(i * UNIT_SELECTION_MARKER_SIZE, 0, UNIT_SELECTION_MARKER_SIZE, UNIT_SELECTION_MARKER_SIZE) for i in range(10)]
 )
 soldier_selection_textures = load_textures(
     get_path_to_file('soldier_selection_marker.png'),
-    [(i * 40, 0, 40, 40) for i in range(10)]
+    [(i * SOLDIER_SELECTION_MARKER_SIZE, 0, SOLDIER_SELECTION_MARKER_SIZE, SOLDIER_SELECTION_MARKER_SIZE) for i in range(10)]
     # get_path_to_file('soldier_selection_marker.png'), 0, 0, 40, 40
 )
 building_selection_texture = load_texture(
-    get_path_to_file('building_selection_marker.png'), 0, 0, 180, 180
+    get_path_to_file('building_selection_marker.png'), 0, 0, BUILDING_SELECTION_MARKER_SIZE, BUILDING_SELECTION_MARKER_SIZE
 )
 
 
@@ -54,8 +67,10 @@ class SelectedEntityMarker:
     Sprites in SpriteLists.
     """
     game: Optional[Game] = None
-    health_bar_width = 0
-    health_bar_length_ratio = 1
+    health_bar_height = 0
+    single_bar_width = 0
+    bars_distance = 0
+    bars_count = 0
 
     def __init__(self, selected: PlayerEntity):
         selected.selection_marker = self
@@ -66,43 +81,51 @@ class SelectedEntityMarker:
         # killed after it's Entity was unselected:
         self.sprites = []
 
-        self.health = health = selected.health_percentage
-        width, height, color = self.health_to_color_and_size(health)
-        self.health_bar = health_bar = SpriteSolidColor(width, height, color)
+        # self.pause = pause = (self.health_bar_length / 30)
 
-        self.sprites = sprites = [self.borders, health_bar]
+        self.health = selected.health_percentage
+
+        self.health_bars = health_bars = self.generate_health_bars()
+
+        self.sprites = sprites = [self.borders] + health_bars
         self.game.selection_markers_sprites.extend(sprites)
 
-    def health_to_color_and_size(self, health: float) -> Tuple[int, int, Color]:
-        length = int(self.health_bar_length_ratio * health)
-        if health > 66:
-            return length, self.health_bar_width, GREEN
-        elif health > 33:
-            return length, self.health_bar_width, YELLOW
-        return length, self.health_bar_width, RED
+    def generate_health_bars(self):
+        color = self.health_to_color()
+        return [
+            SpriteSolidColor(self.single_bar_width, self.health_bar_height, color)
+            for _ in range(self.selected.health_percentage // self.bars_count)
+        ]
+
+    def health_to_color(self) -> Color:
+        if self.health > 66:
+            return GREEN
+        return YELLOW if self.health > 33 else RED
 
     def update(self):
-        self.position = x, y = self.selected.position
-        for sprite in self.sprites[:-1]:
-            sprite.position = x, y
-        self.update_health_bar(x)
+        if self.selected.alive:
+            self.position = x, y = self.selected.position
+            for sprite in self.sprites[:len(self.health_bars)]:
+                sprite.position = x, y
+            if self.health_bars:
+                self.update_health_bars()
 
-    def update_health_bar(self, x):
+    def update_health_bars(self):
         if (health := self.selected.health_percentage) != self.health:
-            width, height, color = self.health_to_color_and_size(health)
-            if color != self.health_bar.color:
-                self.replace_health_bar_with_new_color(color, height, width)
-            else:
-                self.health_bar.width = width
+            color = self.health_to_color()
+            if color != self.health_bars[0].color:
+                self.replace_health_bar_with_new_color()
             self.health = health
-        ratio = self.health_bar_length_ratio * 0.5
-        self.health_bar.position = x - (100 - health) * ratio, self.borders.top
+        shift = self.single_bar_width / 2
+        for i, bar in enumerate(self.health_bars):
+            bar.position =  self.borders.left + shift + (self.single_bar_width * i) + (self.bars_distance * (i + 1)), self.borders.top
 
-    def replace_health_bar_with_new_color(self, color, height, width):
-        self.health_bar.kill()
-        self.health_bar = bar = SpriteSolidColor(width, height, color)
-        self.sprites.append(self.health_bar)
-        self.game.selection_markers_sprites.append(bar)
+    def replace_health_bar_with_new_color(self):
+        for bar in self.health_bars:
+            bar.kill()
+        self.health_bars = self.generate_health_bars()
+        self.sprites.extend(self.health_bars)
+        self.game.selection_markers_sprites.extend(self.health_bars)
 
     def kill(self):
         self.selected.selection_marker = None
@@ -112,8 +135,11 @@ class SelectedEntityMarker:
 
 
 class SelectedUnitMarker(SelectedEntityMarker):
-    health_bar_width = UNIT_HEALTH_BAR_WIDTH
-    health_bar_length_ratio = UNIT_HEALTH_BAR_LENGTH_RATIO
+    health_bar_height = UNIT_HEALTH_BARS_HEIGHT
+    health_bar_length = UNIT_SELECTION_MARKER_SIZE
+    single_bar_width =  UNIT_SINGLE_BAR_WIDTH
+    bars_distance = UNIT_BARS_DISTANCE
+    bars_count = UNIT_BARS_COUNT
 
     def __init__(self, selected: Unit):
         super().__init__(selected)
@@ -124,8 +150,10 @@ class SelectedUnitMarker(SelectedEntityMarker):
 
 
 class SelectedSoldierMarker(SelectedEntityMarker):
-    health_bar_width = SOLDIER_HEALTH_BAR_WIDTH
-    health_bar_length_ratio = SOLDIER_HEALTH_BAR_LENGTH_RATIO
+    health_bar_height = SOLDIER_HEALTH_BARS_HEIGHT
+    single_bar_width =  SOLDIER_SINGLE_BAR_WIDTH
+    bars_distance = SOLDIER_BARS_DISTANCE
+    bars_count = UNIT_BARS_COUNT
 
     def __init__(self, selected: Unit):
         super().__init__(selected)
@@ -133,7 +161,7 @@ class SelectedSoldierMarker(SelectedEntityMarker):
         # to show which PermanentUnitsGroup a Unit belongs to:
         group_index = selected.permanent_units_group
         self.borders.texture = soldier_selection_textures[group_index]
-        self.update_health_bar(self.position[0])
+        self.update_health_bars()
 
 
 class SelectedVehicleMarker(SelectedUnitMarker):
@@ -144,19 +172,19 @@ class SelectedVehicleMarker(SelectedUnitMarker):
         self.fuel_bar = None
         
     def update(self):
+        super().update()
         self.position = x, y = self.selected.position
-        self.update_health_bar(x)
         self.update_fuel_bar(x)
-        for sprite in self.sprites[:-1]:
-            sprite.position = x, y
 
     def update_fuel_bar(self, x):
         pass
 
 
 class SelectedBuildingMarker(SelectedEntityMarker):
-    health_bar_width = BUILDING_HEALTH_BAR_WIDTH
-    health_bar_length_ratio = BUILDING_HEALTH_BAR_LENGTH_RATIO
+    health_bar_height = BUILDING_HEALTH_BARS_HEIGHT
+    single_bar_width =  BUILDING_SINGLE_BAR_WIDTH
+    bars_distance = BUILDING_BARS_DISTANCE
+    bars_count = BUILDING_BARS_COUNT
 
     def __init__(self, building: PlayerEntity):
         super().__init__(building)
