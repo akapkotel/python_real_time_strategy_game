@@ -332,7 +332,6 @@ class UnitsManager(EventsCreator):
             elif units:
                 self.send_units_to_attack_target(clicked, units)
             else:
-                print('2')
                 self.on_building_clicked(clicked)
         else:
             self.send_units_to_attack_target(clicked, units)
@@ -351,7 +350,6 @@ class UnitsManager(EventsCreator):
         if self.only_soldiers_selected and clicked_building.count_empty_garrison_slots:
             self.send_soldiers_to_building(clicked_building)
         else:
-            print('3')
             self.select_building(clicked_building)
 
     @property
