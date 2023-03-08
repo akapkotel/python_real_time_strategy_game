@@ -697,8 +697,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @ignore_in_editor_mode
     def configure_building_interface(self, context_building: Building):
         self.load_bundle(name=UI_BUILDINGS_PANEL, clear=True)
-        buttons = context_building.create_ui_buttons(*self.ui_position)
-        self.get_bundle(UI_BUILDINGS_PANEL).extend(buttons)
+        ui_elements = context_building.create_ui_elements(*self.ui_position)
+        self.get_bundle(UI_BUILDINGS_PANEL).extend(ui_elements)
 
     @property
     def ui_position(self) -> Tuple[float, float]:
@@ -792,14 +792,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
               object_name: str,
               player: Optional[Union[Player, int]] = None,
               position: Optional[Point] = None,
-              # id: Optional[int] = None,
               *args,
               **kwargs) -> Optional[GameObject]:
-        if position is None:
-            position = random.choice(
-                [n.position for n in self.map.all_walkable_nodes]
-            )
         player = self.get_player_instance(player)
+        if position is None:
+            position = self.map.get_random_position()
         spawned = self.spawner.spawn(object_name, player, position, *args, **kwargs)
         return spawned
 

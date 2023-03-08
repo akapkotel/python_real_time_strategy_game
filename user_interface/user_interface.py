@@ -611,15 +611,15 @@ class UiTextLabel(UiElement):
     sound_on_mouse_enter = None
     sound_on_mouse_click = None
 
-    def __init__(self, x: int, y: int, text: str,
-                 font_size: int = 10, text_color: Color = WHITE,
-                 name: Optional[str] = None, active: bool = False,
-                 visible: bool = True, parent: Optional[Hierarchical] = None,
-                 subgroup: Optional[int] = None):
+    def __init__(self, x: int, y: int, text: str, font_size: int = 10, text_color: Color = WHITE,
+                 name: Optional[str] = None, active: bool = False, align_x: str = 'left', align_y: str = 'baseline',
+                 visible: bool = True, parent: Optional[Hierarchical] = None, subgroup: Optional[int] = None):
         super().__init__('', x, y, name, active, visible, parent, subgroup)
         self.text = text
         self.size = font_size
         self.text_color = text_color
+        self.align_text_x = align_x
+        self.align_text_y = align_y
         self.textures = [
             make_texture(int(len(text) * font_size * 0.725), font_size * 2, (1, 1, 1, 1))
         ]
@@ -629,7 +629,7 @@ class UiTextLabel(UiElement):
         super().draw()
         draw_text(
             self.text, self.left, self.bottom + self.size // 2,
-            self.text_color, self.size)
+            self.text_color, self.size, anchor_x=self.align_text_x, anchor_y=self.align_text_y)
 
     def draw_highlight_around_element(self):
         pass
@@ -1095,7 +1095,7 @@ class UiBundlesHandler(Observer):
         self.ui_elements_spritelist = UiSpriteList(use_spatial_hash)
         # set used to quickly check if a bundle is displayed or not:
         self.active_bundles: Set[str] = set()
-        # is_selectable groups allow to group together a bunch of same-context
+        # is_controlled_by_player groups allow to group together a bunch of same-context
         # UiElements and provide a convenient way to communicate between them:
         self.selectable_groups: Dict[str, SelectableGroup] = {}
 

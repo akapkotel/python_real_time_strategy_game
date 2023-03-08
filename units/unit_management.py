@@ -23,6 +23,7 @@ from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
 from utils.scheduling import EventsCreator
 
+
 UNIT_HEALTH_BARS_HEIGHT = 5
 SOLDIER_HEALTH_BARS_HEIGHT = 3
 BUILDING_HEALTH_BARS_HEIGHT = 10
@@ -40,7 +41,8 @@ SOLDIER_BARS_DISTANCE = 1
 BUILDING_BARS_DISTANCE = 1
 
 UNIT_BARS_COUNT = 10
-BUILDING_BARS_COUNT = 5
+BUILDING_BARS_COUNT = 20
+
 
 selection_textures = load_textures(
     get_path_to_file('unit_selection_marker.png'),
@@ -70,31 +72,27 @@ class SelectedEntityMarker:
     health_bar_height = 0
     single_bar_width = 0
     bars_distance = 0
-    bars_count = 0
+    bars_count = 10
 
     def __init__(self, selected: PlayerEntity):
-        selected.selection_marker = self
-        self.position = x, y = selected.position
         self.selected = selected
+        self.position = x, y = selected.position
+        self.health = selected.health_percentage
+        self.bars_ratio = 100 // self.bars_count
         self.borders = Sprite(center_x=x, center_y=y)
         # store our own references to Sprites to kill them when marker is
         # killed after it's Entity was unselected:
-        self.sprites = []
-
-        # self.pause = pause = (self.health_bar_length / 30)
-
-        self.health = selected.health_percentage
-
-        self.health_bars = health_bars = self.generate_health_bars()
-
-        self.sprites = sprites = [self.borders] + health_bars
+        self.health_bars = self.generate_health_bars()
+        self.sprites = sprites = [self.borders] + self.health_bars
         self.game.selection_markers_sprites.extend(sprites)
+
+        selected.selection_marker = self
 
     def generate_health_bars(self):
         color = self.health_to_color()
         return [
             SpriteSolidColor(self.single_bar_width, self.health_bar_height, color)
-            for _ in range(self.selected.health_percentage // self.bars_count)
+            for _ in range(self.selected.health_percentage // self.bars_ratio)
         ]
 
     def health_to_color(self) -> Color:
@@ -103,22 +101,25 @@ class SelectedEntityMarker:
         return YELLOW if self.health > 33 else RED
 
     def update(self):
-        if self.selected.alive:
-            self.position = x, y = self.selected.position
-            for sprite in self.sprites[:len(self.health_bars)]:
-                sprite.position = x, y
-            if self.health_bars:
-                self.update_health_bars()
+        self.position = x, y = self.selected.position
+        for sprite in (s for s in self.sprites if s not in self.health_bars):
+            sprite.position = x, y
+        if self.health_bars:
+            self.update_health_bars()
 
     def update_health_bars(self):
         if (health := self.selected.health_percentage) != self.health:
-            color = self.health_to_color()
-            if color != self.health_bars[0].color:
+            if self.health_to_color() != self.health_bars[0].color:
                 self.replace_health_bar_with_new_color()
             self.health = health
+
         shift = self.single_bar_width / 2
+        left = self.borders.left + shift
+        width = self.single_bar_width
+        distance = self.bars_distance
+        y = self.borders.top
         for i, bar in enumerate(self.health_bars):
-            bar.position =  self.borders.left + shift + (self.single_bar_width * i) + (self.bars_distance * (i + 1)), self.borders.top
+            bar.position =  left + (width * i) + (distance * (i + 1)), y
 
     def replace_health_bar_with_new_color(self):
         for bar in self.health_bars:
@@ -310,10 +311,10 @@ class UnitsManager(EventsCreator):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if clicked.is_selectable:
+        if clicked.is_controlled_by_player:
             self.on_friendly_player_entity_clicked(clicked)
-        elif units := self.selected_units:
-            self.on_hostile_player_entity_clicked(clicked, units)
+        else:
+            self.on_hostile_player_entity_clicked(clicked)
 
     def on_friendly_player_entity_clicked(self, clicked: PlayerEntity):
         clicked: Union[Unit, Building]
@@ -322,16 +323,22 @@ class UnitsManager(EventsCreator):
         else:
             self.on_unit_clicked(clicked)
 
-    def on_hostile_player_entity_clicked(self, clicked: PlayerEntity, units):
-        if clicked.is_building and self.only_soldiers_selected:
+    def on_hostile_player_entity_clicked(self, clicked: PlayerEntity):
+        units = self.selected_units
+        if clicked.is_building:
             clicked: Building
-            self.on_building_clicked(clicked)
+            if self.only_soldiers_selected:
+                self.send_soldiers_to_building(clicked)
+            elif units:
+                self.send_units_to_attack_target(clicked, units)
+            else:
+                print('2')
+                self.on_building_clicked(clicked)
         else:
-            self.clear_units_assigned_enemies(units)
             self.send_units_to_attack_target(clicked, units)
 
-
     def send_units_to_attack_target(self, target, units):
+        self.clear_units_assigned_enemies(units)
         for unit in units:
             unit._enemy_assigned_by_player = target
         self.send_units_to_pointed_location(units, *target.position)
@@ -342,9 +349,9 @@ class UnitsManager(EventsCreator):
 
     def on_building_clicked(self, clicked_building: Building):
         if self.only_soldiers_selected and clicked_building.count_empty_garrison_slots:
-            soldiers = self.get_selected_soldiers()
-            self.send_soldiers_to_building(clicked_building, soldiers)
+            self.send_soldiers_to_building(clicked_building)
         else:
+            print('3')
             self.select_building(clicked_building)
 
     @property
@@ -357,7 +364,8 @@ class UnitsManager(EventsCreator):
         s: Soldier
         return [s for s in self.selected_units if s.is_infantry]
 
-    def send_soldiers_to_building(self, building: Building, soldiers: List[Soldier]):
+    def send_soldiers_to_building(self, building: Building):
+        soldiers = self.get_selected_soldiers()
         self.send_units_to_pointed_location(soldiers, *building.position)
         self.units_tasks.append(TaskEnterBuilding(self, soldiers, building))
 

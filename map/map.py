@@ -318,6 +318,9 @@ class Map:
     def get_all_nodes(self) -> Generator[MapNode]:
         return (n for n in self.nodes.values())
 
+    def get_random_position(self) -> NormalizedPoint:
+        return random.choice([n.position for n in self.all_walkable_nodes])
+
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes.get(grid, default=self.nonexistent_node)
 

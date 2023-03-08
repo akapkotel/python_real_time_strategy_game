@@ -13,13 +13,14 @@ from gameobjects.constants import UNITS
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
-    ProgressButton, UiElementsBundle, UiElement, Hint
+    ProgressButton, UiElementsBundle, UiElement, Hint, Button, UiTextLabel
 )
 from campaigns.research import Technology
 from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS
 )
+from utils.colors import GREEN, RED
 from utils.functions import (
     add_player_color_to_name, get_texture_size, name_to_texture_name,
     get_path_to_file, ignore_in_editor_mode
@@ -175,7 +176,7 @@ class UnitsProducer:
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
-        positions = generate_2d_grid(x - 135, y - 75, 4, 4, 75, 75)
+        positions = generate_2d_grid(x - 135, y - 120, 4, 4, 75, 75)
         for i, unit in enumerate(self.produced_units):
             column, row = positions[i]
             b = ProgressButton(unit + '_icon.png', column, row, unit,
@@ -387,7 +388,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.check_soldiers_garrisoning_possibility()
 
     def check_soldiers_garrisoning_possibility(self):
-        friendly_building = self.player.is_local_human_player
+        friendly_building = self.is_controlled_by_player
         free_space = len(self.garrisoned_soldiers) < self.garrison_size
         if (friendly_building and free_space) or not friendly_building:
             self.game.cursor.force_cursor(index=CURSOR_ENTER_TEXTURE)
@@ -415,14 +416,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     @ignore_in_editor_mode
     def update_ui_buildings_panel(self):
-        if self.player.is_local_human_player and self.is_selected:
+        if self.is_selected:
             panel = self.game.get_bundle(UI_BUILDINGS_PANEL)
-            if self.produced_units is not None:
-                self.update_production_buttons(panel)
-            if self.garrisoned_soldiers:
-                pass
+            panel.find_by_name('health').text = f'HP: {round(self.health)} / {self.max_health}'
 
-    def create_ui_buttons(self, x, y) -> List[UiElement]:
+            if self.is_controlled_by_player and self.produced_units is not None:
+                self.update_production_buttons(panel)
+
+    def create_ui_elements(self, x, y) -> List[UiElement]:
         """
          Each time Building is clicked by the player, this method generates all icons and buttons required for player
          to inspect and manage his Building.
@@ -431,6 +432,20 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :param y: float -- y component of user interface position
         :return: List[uiElement] -- buttons, icons and widgets available for this Building
         """
+        ui_elements = self.create_building_ui_information(x, y)
+        if self.is_controlled_by_player:
+            buttons = self.create_ui_buttons(x, y)
+            ui_elements.extend(buttons)
+        return ui_elements
+
+    def create_building_ui_information(self, x, y) -> List[UiElement]:
+        text_color = GREEN if self.is_controlled_by_player else RED
+        return [
+            UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
+            UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
+        ]
+
+    def create_ui_buttons(self, x, y) -> List[Button]:
         buttons = [self.create_garrison_button(x, y)]
         if self.produced_units is not None:
             buttons.extend(self.create_production_buttons(x, y))
@@ -438,7 +453,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_garrison_button(self, x, y) -> ProgressButton:
         button = ProgressButton(
-            'ui_leave_building_btn.png', x - 135, y + 25, 'leave',
+            'ui_leave_building_btn.png', x - 135, y - 45, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
             functions=self.on_soldier_exit
         )

@@ -689,7 +689,7 @@ class PlayerEntity(GameObject):
         return self.faction.is_enemy(other.faction)
 
     @property
-    def is_selectable(self) -> bool:
+    def is_controlled_by_player(self) -> bool:
         return self.player.is_local_human_player
 
     @property
