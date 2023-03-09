@@ -30,8 +30,6 @@ from utils.geometry import calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
-TW, TH, SS = TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
-
 PATH = 'PATH'
 VERTICAL_DIST = 10
 DIAGONAL_DIST = 14  # approx square root of 2

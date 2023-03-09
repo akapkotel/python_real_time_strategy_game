@@ -441,8 +441,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def create_building_ui_information(self, x, y) -> List[UiElement]:
         text_color = GREEN if self.is_controlled_by_player else RED
         return [
-            UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
-            UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
+            UiTextLabel(x + 25, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
+            UiTextLabel(x + 5, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
         ]
 
     def create_ui_buttons(self, x, y) -> List[Button]:

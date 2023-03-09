@@ -783,51 +783,6 @@ class ScrollBar(UiElement):
     ...
 
 
-class _SliderHandle(UiElement):
-    """Used internally by the Slider class."""
-
-    def __init__(self, texture_name: str, x: int, y: int, axis, parent):
-        super().__init__(texture_name, x, y, parent=parent, can_be_dragged=True)
-        self.min_x = self.parent.left if axis == HORIZONTAL else self.parent.center_x
-        self.max_x = self.parent.right if axis == HORIZONTAL else self.parent.center_x
-        self.min_y = self.parent.bottom if axis == VERTICAL else self.parent.center_y
-        self.max_y = self.parent.top if axis == VERTICAL else self.parent.center_y
-        self.range_x = self.max_x - self.min_x
-        self.range_y = self.max_y - self.min_y
-
-    def on_mouse_drag(self, x: float = None, y: float = None):
-        self.center_x = clamp(x, self.max_x, self.min_x)
-        self.center_y = clamp(y, self.max_y, self.min_y)
-        self.update_value()
-
-    def update_value(self):
-        if self.range_x:
-            self.parent.value = (self.center_x - self.min_x) / self.range_x
-        else:
-            self.parent.value = (self.center_y - self.min_y) / self.range_y
-
-    @singledispatchmethod
-    def value_to_position(self, value):
-        pass
-
-    @value_to_position.register
-    def _(self, value: float):
-        if self.range_x:
-            self.center_x = self.min_x + self.range_x * value
-        else:
-            self.center_y = self.min_y + self.range_y * value
-
-    @value_to_position.register
-    def _(self, value: int):
-        value_range = (self.parent.max_value - self.parent.min_value)
-        if self.range_x:
-            unit = self.range_x / value_range
-            self.center_x = self.min_x + unit * value
-        else:
-            unit = self.range_y / value_range
-            self.center_y = self.min_y + unit * value
-
-
 class Slider(UiElement):
     """
     Slider allows user to manipulate some assigned value by increasing and
@@ -851,14 +806,14 @@ class Slider(UiElement):
         self.step = step
         self.variable = variable
         if variable is not None:
-            self._value = getattr(variable[0], variable[1])
+            _object, attribute = variable
+            self._value = getattr(_object, attribute)
         else:
             self.value = 0.5
 
         self.show_value = show_value
 
         self.handle = _SliderHandle('slider_handle.png', x, y, axis, self)
-        self.handle.value_to_position(self._value)
 
     @property
     def value(self):
@@ -876,7 +831,7 @@ class Slider(UiElement):
             value = min_value + (max_value - min_value) * value
             if step is not None:
                 value = int((value // step) * step)
-        return value
+        return round(value, 2)
 
     @property
     def active(self):
@@ -925,6 +880,55 @@ class Slider(UiElement):
     def draw_value(self):
         x = self.right + PADDING_Y
         draw_text(str(self._value), x, self.center_y, WHITE, 20, anchor_y='center')
+
+
+
+class _SliderHandle(UiElement):
+    """Used internally by the Slider class."""
+
+    def __init__(self, texture_name: str, x: int, y: int, axis, parent: Slider):
+        super().__init__(texture_name, x, y, parent=parent, can_be_dragged=True)
+        self.min_x = self.parent.left if axis == HORIZONTAL else self.parent.center_x
+        self.max_x = self.parent.right if axis == HORIZONTAL else self.parent.center_x
+        self.min_y = self.parent.bottom if axis == VERTICAL else self.parent.center_y
+        self.max_y = self.parent.top if axis == VERTICAL else self.parent.center_y
+        self.range_x = self.max_x - self.min_x
+        self.range_y = self.max_y - self.min_y
+        self.value_to_position(self.parent.value)
+
+    def on_mouse_drag(self, x: float = None, y: float = None):
+        self.center_x = clamp(x, self.max_x, self.min_x)
+        self.center_y = clamp(y, self.max_y, self.min_y)
+        self.update_value()
+
+    def update_value(self):
+        if self.range_x:
+            self.parent.value = (self.center_x - self.min_x) / self.range_x
+        else:
+            self.parent.value = (self.center_y - self.min_y) / self.range_y
+        if self.parent.step:
+            self.value_to_position(self.parent.value)
+
+    @singledispatchmethod
+    def value_to_position(self, value):
+        pass
+
+    @value_to_position.register
+    def _(self, value: float):
+        if self.range_x:
+            self.center_x = self.min_x + self.range_x * value
+        else:
+            self.center_y = self.min_y + self.range_y * value
+
+    @value_to_position.register
+    def _(self, value: int):
+        value_range = (self.parent.max_value - self.parent.min_value)
+        if self.range_x:
+            unit = self.range_x / value_range
+            self.center_x = clamp(self.min_x + unit * (value - self.parent.min_value), self.max_x, self.min_x)
+        else:
+            unit = self.range_y / value_range
+            self.center_y = clamp(self.min_y + unit * (value - self.parent.min_value), self.max_y, self.min_y)
 
 
 class Hint(Sprite, ToggledElement):

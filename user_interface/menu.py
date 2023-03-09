@@ -198,10 +198,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        min_value=0.25, max_value=1.0),
                 Slider('slider.png', SCREEN_X, next(y), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
-                       min_value=50, max_value=250, step=1),
+                       min_value=60, max_value=260, step=20),
                 Slider('slider.png', SCREEN_X, next(y), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
-                       min_value=50, max_value=250, step=1),
+                       min_value=60, max_value=260, step=20),
             ],
             register_to=self,
             _on_load=partial(window.update_scenarios_list, SKIRMISH_MENU)

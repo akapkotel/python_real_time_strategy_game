@@ -143,8 +143,8 @@ class Settings:
 
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
-        self.map_width: int = 75
-        self.map_height: int = 75
+        self.map_width: int = 100
+        self.map_height: int = 100
         self.tile_width: int = TILE_WIDTH
         self.tile_height: int = TILE_HEIGHT
 

@@ -9,6 +9,7 @@ from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
 from game import Game
 from map.constants import TILE_WIDTH, TILE_HEIGHT
+from map.quadtree import Rect
 
 OFFSET_X = TILE_WIDTH // 2
 OFFSET_Y = TILE_HEIGHT // 2
@@ -26,13 +27,19 @@ class FogSprite(Sprite):
         self.texture = texture
 
 
-class FogOfWar:
+class FogOfWar(Rect):
     """
     TODO: merge this class with MiniMap (they use same GridPosition set)
     """
     game: Optional[Game] = None
 
-    def __init__(self):
+    def __init__(self, cx=0, cy=0, width=0, height=0):
+        width = self.game.map.width // self.game.map.grid_width
+        height = self.game.map.height  // self.game.map.grid_height
+        x = width // 2
+        y = height // 2
+        super().__init__(x, y, width, height)
+
         # grid-data of the game-map:
         self.map_grids: KeysView[GridPosition] = self.game.map.nodes.keys()
         # Tiles which have not been revealed yet:
@@ -49,6 +56,9 @@ class FogOfWar:
         # width normal SpriteLists. We divide map for smaller areas with
         # distinct spritelists to avoid updating too large sets each frame:
         self.fog_sprite_lists = self.create_dark_sprites()
+
+    def in_bounds(self, item) -> bool:
+        return self.left <= item[0] <= self.right and self.bottom <= item[1] <= self.top
 
     def create_dark_sprites(self):
         """
