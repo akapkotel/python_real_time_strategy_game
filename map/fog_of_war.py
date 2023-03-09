@@ -111,16 +111,17 @@ class FogOfWar(Rect):
 
     @staticmethod
     @lru_cache()
-    # @njit(["int64, int64"], nogil=True, fastmath=True)
     def get_tile_position(x, y):
         return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
 
     def draw(self):
         left, right, bottom, top = self.game.viewport
-        for key, sprite_list in self.fog_sprite_lists.items():
-            s_left, s_right = key[0] * 3000, (key[0] + 1) * 3000
-            s_bottom, s_top = key[1] * 2000, (key[1] +1) * 3000
-            if left < s_right and right > s_left and bottom < s_top and top > s_bottom:
+        screen_width, screen_height = left - right, top - bottom
+
+        for grid, sprite_list in self.fog_sprite_lists.items():
+            s_left, s_right = grid[0] * screen_width, (grid[0] + 1) * screen_width,
+            s_bottom, s_top = grid[1] * screen_height, (grid[1] +1) * screen_height
+            if (left < s_right or right > s_left) and (bottom < s_top or top > s_bottom):
                 sprite_list.draw()
 
     def __getstate__(self) -> Dict:

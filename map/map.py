@@ -7,7 +7,7 @@ from enum import IntEnum
 
 from math import dist
 from collections import deque, defaultdict
-from functools import partial, cached_property
+from functools import partial, cached_property, lru_cache
 from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
 )
@@ -60,6 +60,7 @@ def normalize_position(x: Number, y: Number) -> NormalizedPoint:
     return map_grid_to_position((int(x // TILE_WIDTH), int(y // TILE_HEIGHT)))
 
 
+@lru_cache()
 def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
     """Return (x, y) position of the map-grid-normalised Node."""
     return (
