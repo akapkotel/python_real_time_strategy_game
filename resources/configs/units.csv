@@ -3,6 +3,7 @@ soldier,U001,Soldier,2,8,0,(infantry_rifle;granade),0,1,10,1,10,10,7,0,25,10,6
 saboteur,U002,Soldier,3,8,0,(pistol),0,1,12,1,5,5,5,0,25,7,4
 engineer,U003,Soldier,2,6,0,(machine_pistol),0,1,10,1,5,5,3,0,25,7,6
 crewman,U012,Soldier,2,6,0,(machine_pistol),0,1,12,1,5,5,3,0,25,7,6
+machinegunner,U013,Soldier,2,5,0,(machinegun),0,2,12,1,12,10,10,0,25,10,6
 sniper,U004,Soldier,3,8,0,(sniper_rifle),0,10,20,1,5,15,6,0,25,15,13
 at_specialist,U005,Soldier,3,7,0,(at_spg),0,12,20,1,15,20,10,0,25,10,6
 scout_car,U006,Vehicle,8,8,0.00025,(machinegun),0.15,2,7,2,50,35,20,40,35,10,5

@@ -118,13 +118,11 @@ class UnitsProducer:
         if unit not in self.production_queue:
             returned = self.production_progress / self.production_time
         for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
-            # required_amount = self.game.configs[UNITS][unit][resource]
             required_amount = self.game.configs[unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
     def set_production_progress_and_speed(self, unit: str):
         self.production_progress = 0
-        # production_time = self.game.configs[UNITS][unit]['production_time']
         production_time = self.game.configs[unit]['production_time']
         self.production_time = production_time * self.game.settings.fps
 
@@ -210,10 +208,10 @@ class UnitsProducer:
 
 class ResourceProducer:
     def __init__(self,
-                 extracted_resource: str,
+                 produced_resource: str,
                  require_transport: bool = False,
                  recipient: Optional[Player] = None):
-        self.resource: str = extracted_resource
+        self.resource: str = produced_resource
         self.require_transport = require_transport
         self.yield_per_frame = value = 0.033
         self.reserves = 0.0
@@ -315,6 +313,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if garrison:
             self.spawn_soldiers_for_garrison(garrison)
 
+        if (buildings := self.configs.get('allows_construction')) is not None:
+            self.player.buildings_possible_to_build.update(buildings)
+
         self.layered_spritelist.swap_rendering_layers(
             self, 0, position_to_map_grid(*self.position)[1]
         )
@@ -329,8 +330,14 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         width and height so they occupy minimum MapNodes.
         """
         self.position = normalize_position(*self.position)
-        offset_x = 0 if not (self.width // TILE_WIDTH) % 3 else TILE_WIDTH // 2
-        offset_y = 0 if not (self.height // TILE_HEIGHT) % 3 else TILE_HEIGHT // 2
+
+        grid_width, grid_height = self.configs['size']
+
+        offset_x = (grid_width % 3) * (TILE_WIDTH // 2)
+        offset_y = (grid_height % 3) * (TILE_HEIGHT // 2)
+
+        # offset_x = 0 if not (self.width // TILE_WIDTH) % 3 else TILE_WIDTH // 2
+        # offset_y = 0 if not (self.height // TILE_HEIGHT) % 3 else TILE_HEIGHT // 2
         return self.center_x + offset_x, self.center_y + offset_y
 
     def block_map_nodes(self) -> Set[MapNode]:

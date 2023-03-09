@@ -697,7 +697,6 @@ class Soldier(Unit):
         self.game.spawn(corpse_name, None, self.position, self.facing_direction)
 
 
-
 class Engineer(Soldier):
 
     @classmethod

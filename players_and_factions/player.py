@@ -447,7 +447,7 @@ class PlayerEntity(GameObject):
     classes, which inherit from PlayerEntity.
     Many attributes are initialized with null values (0, 0.0, etc.) because
     they are set just after spawn with data queried from self.game.config
-    dict generated from CSV config file -> see ObjectsFactory class and it's
+    dict generated from CSV config file -> see ObjectsFactory class, and it's
     'spawn' method.
     """
 
