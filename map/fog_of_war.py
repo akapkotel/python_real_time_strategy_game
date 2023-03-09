@@ -17,7 +17,7 @@ OFFSET_Y = TILE_HEIGHT // 2
 
 DARK_TEXTURE = make_circle_texture(2 * TILE_WIDTH, BLACK)
 FOG_TEXTURE = make_circle_texture(2 * TILE_WIDTH, FOG)
-SIZE = 50
+FOG_SPRITELIST_SIZE = 60
 
 
 class FogSprite(Sprite):
@@ -64,16 +64,15 @@ class FogOfWar(Rect):
         """
         Fill whole map with black tiles representing unexplored, hidden area.
         """
-        cols, rows = self.game.map.columns // SIZE, self.game.map.rows // SIZE
-
+        cols, rows = self.game.map.columns // FOG_SPRITELIST_SIZE, self.game.map.rows // FOG_SPRITELIST_SIZE
         sprite_lists = {}
-        for col in range(cols + 1):
-            for row in range(rows + 1):
+        for col in range(cols+1):
+            for row in range(rows+1):
                 sprite_lists[(col, row)] = SpriteList(is_static=True)
 
         get_tile_position = self.get_tile_position
         for x, y in self.unexplored:
-            sprite_list = sprite_lists[(x // SIZE, y // SIZE)]
+            sprite_list = sprite_lists[(x // FOG_SPRITELIST_SIZE, y // FOG_SPRITELIST_SIZE)]
             sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
             self.grids_to_sprites[(x, y)] = sprite
             sprite_list.append(sprite)
@@ -95,7 +94,7 @@ class FogOfWar(Rect):
         # set of GridPositions revealed this frame to the MiniMap instance:
         self.game.mini_map.visible = revealed
         for grid in revealed:
-            sprite_list = self.fog_sprite_lists[(grid[0] // SIZE, grid[1] // SIZE)]
+            sprite_list = self.fog_sprite_lists[(grid[0] // FOG_SPRITELIST_SIZE, grid[1] // FOG_SPRITELIST_SIZE)]
             sprite_list.remove(grids_to_sprites[grid])
             del grids_to_sprites[grid]
         # add grey-semi-transparent fog to the tiles which are no longer seen:
@@ -104,7 +103,7 @@ class FogOfWar(Rect):
         for grid_x, grid_y in fog.difference(grids_to_sprites):
             x, y = get_tile_position(grid_x, grid_y)
             grids_to_sprites[(grid_x, grid_y)] = sprite = FogSprite((x, y), FOG_TEXTURE)
-            sprite_list = self.fog_sprite_lists[(grid_x // SIZE, grid_y // SIZE)]
+            sprite_list = self.fog_sprite_lists[(grid_x // FOG_SPRITELIST_SIZE, grid_y // FOG_SPRITELIST_SIZE)]
             sprite_list.append(sprite)
         self.explored.update(visible)
         self.unexplored.difference_update(visible)

@@ -1,103 +1,188 @@
-INFO: 03/09/2023 02:35:55 PM Loaded 28 sounds.
-INFO: 03/09/2023 02:35:55 PM Found 2 playlists
-INFO: 03/09/2023 02:35:55 PM Found 0 scenarios in E:\Programowanie\Python\python_real_time_strategy_game\saved_games.
-INFO: 03/09/2023 02:35:55 PM Found 3 saved games in E:\Programowanie\Python\python_real_time_strategy_game\saved_games.
-INFO: 03/09/2023 02:35:56 PM Mouse button 1 clicked on Tab id: 3026302700800
-INFO: 03/09/2023 02:35:56 PM Switched to View: LoadingScreen
-INFO: 03/09/2023 02:35:56 PM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x000002C09DB36AC0>,), kwargs: {}
-INFO: 03/09/2023 02:35:56 PM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x000002C09DAFBA90>,), kwargs: {}
-INFO: 03/09/2023 02:35:56 PM Time: 3.0322481000000003--------------------
-INFO: 03/09/2023 02:35:57 PM Time: 0.26574450000000027--------------------
-INFO: 03/09/2023 02:35:57 PM Time: 0.09969279999999969--------------------
-INFO: 03/09/2023 02:35:57 PM Time: 0.03334059999999894--------------------
-INFO: 03/09/2023 02:35:57 PM Switched to View: Menu
-INFO: 03/09/2023 02:35:57 PM Switched to submenu main menu
-INFO: 03/09/2023 02:35:57 PM LOADING BUNDLE: main menu
-INFO: 03/09/2023 02:35:57 PM Time: 0.5377304000000009--------------------
-INFO: 03/09/2023 02:35:57 PM Time: 0.09361589999999964--------------------
-INFO: 03/09/2023 02:35:57 PM Time: 0.034029600000000215--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.0333363999999996--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03365430000000025--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03340500000000013--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.033611099999999894--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.033344899999999456--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03361250000000027--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03562080000000023--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03342559999999928--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.04386150000000022--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.035270399999999924--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03743220000000136--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03335119999999847--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03334310000000151--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03371229999999947--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03545599999999993--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03426999999999936--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03335240000000006--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03421460000000032--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.036571200000000914--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03335239999999828--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03702420000000117--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.033796799999999294--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03398180000000117--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03334219999999988--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03335210000000011--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03333370000000002--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.033338099999999926--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03334130000000002--------------------
-INFO: 03/09/2023 02:35:58 PM Time: 0.03338209999999897--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.033915099999999754--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03397830000000113--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.033338799999999225--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03334470000000067--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03346129999999903--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03334249999999983--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03335030000000039--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03417710000000085--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03400279999999967--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.034001699999999246--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03339610000000093--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03335359999999987--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.033357799999999216--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03389609999999976--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03401110000000074--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.03335629999999945--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.033334400000001096--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.033335899999999086--------------------
-INFO: 03/09/2023 02:35:59 PM Called function: on_mouse_press, args: (MouseCursor, 123, 116, 1, 0), kwargs: {}
-INFO: 03/09/2023 02:35:59 PM Called function: on_left_button_press, args: (MouseCursor, 123, 116, 0), kwargs: {}
-INFO: 03/09/2023 02:35:59 PM Mouse button 1 clicked on Button id: 3026302576960
-INFO: 03/09/2023 02:35:59 PM Switched to submenu Confirmaton dialog
-INFO: 03/09/2023 02:35:59 PM LOADING BUNDLE: Confirmaton dialog
-INFO: 03/09/2023 02:35:59 PM Called function: on_mouse_press, args: (MouseCursor, 123, 116, 1, 0), kwargs: {}
-INFO: 03/09/2023 02:35:59 PM Called function: on_left_button_press, args: (MouseCursor, 123, 116, 0), kwargs: {}
-INFO: 03/09/2023 02:35:59 PM Mouse button 1 clicked on Button id: 3026302576960
-INFO: 03/09/2023 02:35:59 PM Switched to submenu Confirmaton dialog
-INFO: 03/09/2023 02:35:59 PM LOADING BUNDLE: Confirmaton dialog
-INFO: 03/09/2023 02:35:59 PM Time: 0.1318710000000003--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.1661412999999996--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.0669347000000009--------------------
-INFO: 03/09/2023 02:35:59 PM Time: 0.04592829999999992--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03402589999999961--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03333779999999997--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.0402755999999993--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03335670000000057--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.034075200000000194--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.033351899999999546--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03494710000000012--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03370929999999994--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03334219999999988--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.033337100000000675--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03333909999999918--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.0348348000000005--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03333439999999932--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.033813100000001484--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03334029999999899--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.033347000000000904--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03337609999999991--------------------
-INFO: 03/09/2023 02:36:00 PM Time: 0.03400539999999985--------------------
-INFO: 03/09/2023 02:36:00 PM Called function: on_mouse_press, args: (MouseCursor, 420, 530, 1, 0), kwargs: {}
-INFO: 03/09/2023 02:36:00 PM Called function: on_left_button_press, args: (MouseCursor, 420, 530, 0), kwargs: {}
-INFO: 03/09/2023 02:36:00 PM Mouse button 1 clicked on Button id: 3026306593600
-INFO: 03/09/2023 02:36:00 PM Terminating application...
-INFO: 03/09/2023 02:36:00 PM Switched to submenu main menu
-INFO: 03/09/2023 02:36:00 PM LOADING BUNDLE: main menu
+INFO: 03/09/2023 03:11:04 PM Loaded 28 sounds.
+INFO: 03/09/2023 03:11:04 PM Found 2 playlists
+INFO: 03/09/2023 03:11:04 PM Found 0 scenarios in E:\Programowanie\Python\python_real_time_strategy_game\saved_games.
+INFO: 03/09/2023 03:11:04 PM Found 3 saved games in E:\Programowanie\Python\python_real_time_strategy_game\saved_games.
+INFO: 03/09/2023 03:11:05 PM Mouse button 1 clicked on Tab id: 2630755716736
+INFO: 03/09/2023 03:11:05 PM Switched to View: LoadingScreen
+INFO: 03/09/2023 03:11:05 PM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x00000264854399A0>,), kwargs: {}
+INFO: 03/09/2023 03:11:05 PM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x00000264853FB940>,), kwargs: {}
+INFO: 03/09/2023 03:11:05 PM Time: 1.4690115000000001--------------------
+INFO: 03/09/2023 03:11:05 PM Time: 0.10490509999999986--------------------
+INFO: 03/09/2023 03:11:05 PM Time: 0.033339200000000346--------------------
+INFO: 03/09/2023 03:11:05 PM Time: 0.033363599999999494--------------------
+INFO: 03/09/2023 03:11:05 PM Switched to View: Menu
+INFO: 03/09/2023 03:11:05 PM Switched to submenu main menu
+INFO: 03/09/2023 03:11:05 PM LOADING BUNDLE: main menu
+INFO: 03/09/2023 03:11:06 PM Time: 0.15693659999999987--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033338000000000534--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03333859999999955--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033388700000000604--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033342799999999784--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03360509999999994--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03753030000000024--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.09690119999999958--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.036279900000000254--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03333779999999997--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.036378299999999975--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03415889999999955--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033349000000000295--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.037790300000000165--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033864499999999964--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03333940000000002--------------------
+INFO: 03/09/2023 03:11:06 PM Called function: on_mouse_press, args: (MouseCursor, 1053, 870, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:06 PM Called function: on_left_button_press, args: (MouseCursor, 1053, 870, 0), kwargs: {}
+INFO: 03/09/2023 03:11:06 PM Mouse button 1 clicked on Button id: 2630755614080
+INFO: 03/09/2023 03:11:06 PM Switched to submenu skirmish menu
+INFO: 03/09/2023 03:11:06 PM LOADING BUNDLE: skirmish menu
+INFO: 03/09/2023 03:11:06 PM Time: 0.0355086--------------------
+INFO: 03/09/2023 03:11:06 PM Called function: on_mouse_press, args: (MouseCursor, 1053, 870, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:06 PM Called function: on_left_button_press, args: (MouseCursor, 1053, 870, 0), kwargs: {}
+INFO: 03/09/2023 03:11:06 PM Time: 0.0700668000000002--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03334359999999936--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.036077300000000534--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.04004790000000025--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03338829999999948--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03349150000000023--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.033973699999999774--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03658870000000025--------------------
+INFO: 03/09/2023 03:11:06 PM Time: 0.03757309999999947--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.038281000000000454--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03573399999999971--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03334780000000048--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03334719999999969--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03732390000000052--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.0337379999999996--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.036018799999999906--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03656930000000003--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03422370000000008--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03333739999999974--------------------
+INFO: 03/09/2023 03:11:07 PM Time: 0.03334629999999983--------------------
+INFO: 03/09/2023 03:11:07 PM Called function: on_mouse_press, args: (MouseCursor, 965, 298, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:07 PM Called function: on_left_button_press, args: (MouseCursor, 965, 298, 0), kwargs: {}
+INFO: 03/09/2023 03:11:07 PM Mouse button 1 clicked on Button id: 2630755761088
+INFO: 03/09/2023 03:11:07 PM Switched to View: LoadingScreen
+INFO: 03/09/2023 03:11:07 PM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x000002648585C8E0>,), kwargs: {}
+INFO: 03/09/2023 03:11:07 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:07 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'map', <class 'map.map.Map'>, 0.35, {'rows': 100, 'columns': 100, 'grid_width': 60, 'grid_height': 40}), kwargs: {}
+INFO: 03/09/2023 03:11:07 PM Generated QuadTree of depth: 0
+INFO: 03/09/2023 03:11:07 PM Called function: generate_nodes, args: (<map.map.Map object at 0x000002648585CC10>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Generated 10000 map nodes.
+INFO: 03/09/2023 03:11:08 PM Map was initialized successfully...
+INFO: 03/09/2023 03:11:08 PM Time: 0.2387902000000004--------------------
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x00000264853F2820>), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'fog_of_war', <class 'map.fog_of_war.FogOfWar'>, 0.15), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Time: 0.5473938--------------------
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM GameObjectsSpawner was initialized successfully. Found 43 entities in config file.
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'explosions_pool', <class 'effects.explosions.ExplosionsPool'>, 0.1), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Time: 0.41679710000000014--------------------
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'mini_map', <class 'user_interface.minimap.MiniMap'>, 0.15, ((1920, 1080), (388, 197), (60, 40), 100)), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: load, args: (<__main__.Game object at 0x0000026485839D60>, 'debugger', None, 0.1), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Time: 0.03375699999999959--------------------
+INFO: 03/09/2023 03:11:08 PM Called function: update_loading, args: (<__main__.Game object at 0x0000026485839D60>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Switched to View: Game
+INFO: 03/09/2023 03:11:08 PM Called function: load_timer, args: (<__main__.Game object at 0x0000026485839D60>, <__main__.Timer object at 0x0000026485839CD0>), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_options_panel
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_resources_section
+INFO: 03/09/2023 03:11:08 PM Called function: plant_trees, args: (<map.map.Map object at 0x000002648585CC10>,), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x000002648585C790>, Event scheduled by: Game, function: scheduling_test, args: (), kwargs: {}, time left: None), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x000002648585C790>, Event scheduled by: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x000002648585C790>, Event scheduled by: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x000002648585C790>, Event scheduled by: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None), kwargs: {}
+INFO: 03/09/2023 03:11:08 PM Destroying GameObject: tree_leaf_1 id: 31
+INFO: 03/09/2023 03:11:08 PM Destroying GameObject: tree_leaf_2 id: 22
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_options_panel
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_resources_section
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_options_panel
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_resources_section
+INFO: 03/09/2023 03:11:08 PM Destroying GameObject: tree_leaf_1 id: 102
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_options_panel
+INFO: 03/09/2023 03:11:08 PM LOADING BUNDLE: ui_resources_section
+INFO: 03/09/2023 03:11:09 PM QuadTree depth after spawning Units and Buildings: 1
+INFO: 03/09/2023 03:11:09 PM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x000002648585C790>, Event scheduled by: Mission, function: evaluate_triggers, args: (), kwargs: {}, time left: None), kwargs: {}
+INFO: 03/09/2023 03:11:09 PM Time: 0.6845785000000006--------------------
+INFO: 03/09/2023 03:11:09 PM Time: 0.0439835999999989--------------------
+INFO: 03/09/2023 03:11:09 PM Called function: execute, args: (Event scheduled by: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
+INFO: 03/09/2023 03:11:09 PM Called function: execute, args: (Event scheduled by: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
+INFO: 03/09/2023 03:11:09 PM Called function: execute, args: (Event scheduled by: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
+INFO: 03/09/2023 03:11:09 PM Called function: execute, args: (Event scheduled by: Mission, function: evaluate_triggers, args: (), kwargs: {}, time left: None,), kwargs: {}
+INFO: 03/09/2023 03:11:09 PM Trigger HasUnitsOfTypeTrigger for player: Player 2 of faction: Freemen was executed!
+INFO: 03/09/2023 03:11:10 PM Time: 0.7493246000000013--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03963789999999889--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03797560000000111--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.038245999999999114--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03689149999999941--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.039175500000000696--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.038261300000000276--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03891720000000021--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03765319999999939--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03907129999999981--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.037233699999999814--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.0402547000000002--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.038370600000000366--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.04098240000000075--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03494269999999844--------------------
+INFO: 03/09/2023 03:11:10 PM Pressed key: 65307, other pressed keys: set()
+INFO: 03/09/2023 03:11:10 PM Switched to View: Menu
+INFO: 03/09/2023 03:11:10 PM Switched to submenu main menu
+INFO: 03/09/2023 03:11:10 PM LOADING BUNDLE: main menu
+INFO: 03/09/2023 03:11:10 PM Time: 0.04586070000000042--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.035171200000000624--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03333450000000049--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03412819999999961--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.036562999999999235--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.033444600000001046--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.033340100000000206--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.033944799999998665--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03520500000000126--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.034220999999998725--------------------
+INFO: 03/09/2023 03:11:10 PM Time: 0.03427869999999977--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.035692200000001506--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03360129999999906--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.033721599999999796--------------------
+INFO: 03/09/2023 03:11:11 PM Called function: on_mouse_press, args: (MouseCursor, 247, 104, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Called function: on_left_button_press, args: (MouseCursor, 247, 104, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Mouse button 1 clicked on Button id: 2630755601280
+INFO: 03/09/2023 03:11:11 PM Switched to submenu Confirmaton dialog
+INFO: 03/09/2023 03:11:11 PM LOADING BUNDLE: Confirmaton dialog
+INFO: 03/09/2023 03:11:11 PM Called function: on_mouse_press, args: (MouseCursor, 247, 104, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Called function: on_left_button_press, args: (MouseCursor, 247, 104, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Mouse button 1 clicked on Button id: 2630755601280
+INFO: 03/09/2023 03:11:11 PM Switched to submenu Confirmaton dialog
+INFO: 03/09/2023 03:11:11 PM LOADING BUNDLE: Confirmaton dialog
+INFO: 03/09/2023 03:11:11 PM Time: 0.0691430000000004--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03333759999999941--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.033338999999999785--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.0334171000000012--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03478690000000029--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.033341799999998756--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03451230000000116--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.034926699999999755--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.033349100000000576--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03390689999999985--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03335179999999838--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.035294700000001455--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03334949999999992--------------------
+INFO: 03/09/2023 03:11:11 PM Called function: on_mouse_press, args: (MouseCursor, 469, 582, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Called function: on_left_button_press, args: (MouseCursor, 469, 582, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Time: 0.033346899999999735--------------------
+INFO: 03/09/2023 03:11:11 PM Called function: on_mouse_press, args: (MouseCursor, 469, 582, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Called function: on_left_button_press, args: (MouseCursor, 469, 582, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Time: 0.033352799999999405--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.034222299999999706--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.033940100000000584--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03373320000000035--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03334789999999899--------------------
+INFO: 03/09/2023 03:11:11 PM Time: 0.03334860000000006--------------------
+INFO: 03/09/2023 03:11:11 PM Called function: on_mouse_press, args: (MouseCursor, 471, 544, 1, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Called function: on_left_button_press, args: (MouseCursor, 471, 544, 0), kwargs: {}
+INFO: 03/09/2023 03:11:11 PM Mouse button 1 clicked on Button id: 2631038723008
+INFO: 03/09/2023 03:11:11 PM Terminating application...
+INFO: 03/09/2023 03:11:11 PM Switched to submenu main menu
+INFO: 03/09/2023 03:11:11 PM LOADING BUNDLE: main menu
