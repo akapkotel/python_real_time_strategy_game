@@ -69,7 +69,7 @@ SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 UI_WIDTH = SCREEN_WIDTH // 5
 
 PLAYER_UNITS = 5
-CPU_UNITS = 1
+CPU_UNITS = 5
 
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 

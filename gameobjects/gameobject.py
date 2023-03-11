@@ -9,6 +9,7 @@ from PIL import Image
 from arcade import AnimatedTimeBasedSprite, load_texture, Texture
 from arcade.arcade_types import Point
 
+from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
 from utils.data_types import GridPosition
 from utils.functions import get_path_to_file, add_extension
@@ -173,6 +174,7 @@ class Tree(TerrainObject):
         return int(self.object_name[-1])
 
 
+
 class Wreck(TerrainObject):
 
     def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
@@ -181,20 +183,19 @@ class Wreck(TerrainObject):
         self.set_proper_wreck_or_body_texture(filename, texture_index)
         self.schedule_event(ScheduledEvent(self, lifetime, self.kill))
 
-
     def set_proper_wreck_or_body_texture(self, name, texture_index):
         texture_name = get_path_to_file(name)
         width, height = Image.open(texture_name).size
         try:  # for tanks with turrets
             i, j = texture_index  # Tuple
             self.texture = load_texture(texture_name,
-                                   j * (width // 8),
-                                   i * (height // 8), width // 8,
-                                   height // 8)
+                                   j * (width // ROTATIONS),
+                                   i * (height // ROTATIONS), width // ROTATIONS,
+                                   height // ROTATIONS)
         except TypeError:
             self.texture = load_texture(texture_name,
-                                   texture_index * (width // 8),
-                                   0, width // 8, height)
+                                   texture_index * (width // ROTATIONS),
+                                   0, width // ROTATIONS, height)
 
 
 class PlaceableGameobject:

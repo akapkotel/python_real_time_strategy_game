@@ -530,8 +530,8 @@ class Tank(Vehicle):
 
     def _load_textures_and_reset_hitbox(self):
         """
-        Create 8 lists of 8-texture spritesheets for each combination of hull
-        and turret directions.
+        Create 16 lists of 16-texture spritesheets for each combination of hull
+        and turret directions possible in game.
         """
         width, height = get_texture_size(self.full_name, ROTATIONS, ROTATIONS)
         self.textures = [load_textures(self.filename_with_path,
@@ -555,7 +555,7 @@ class Tank(Vehicle):
                          turret_angle: float = None):
         if hull_angle is not None:
             self.facing_direction = self.angles[int(hull_angle)]
-        # for Tank we need to set it's turret direction too:
+        # in case of Tank we need to set its turret direction too:
         if turret_angle is None:
             self.turret_facing_direction = self.facing_direction
         else:
