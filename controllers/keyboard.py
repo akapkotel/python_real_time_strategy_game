@@ -77,9 +77,9 @@ class KeyboardHandler(ToggledElement):
     @ignore_in_menu
     def keyboard_map_scroll(self):
         keys = self.keys_pressed
-        dx = (RIGHT in keys or D in keys) - (LEFT in keys or A in keys)
-        dy = (UP in keys or W in keys) - (DOWN in keys or S in keys)
-        if dx != 0 or dy != 0:
+        dx = (RIGHT in keys) - (LEFT in keys)
+        dy = (UP in keys) - (DOWN in keys)
+        if dx or dy:
             self.window.change_viewport(- dx * KEYBOARD_SCROLL_SPEED, - dy * KEYBOARD_SCROLL_SPEED)
 
     @ignore_in_game

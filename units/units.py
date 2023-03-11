@@ -466,7 +466,7 @@ class Vehicle(Unit):
         width, height = get_texture_size(self.full_name, columns=8)
         self.textures = load_textures(
             get_path_to_file(self.filename_with_path),
-            [(i * width, 0, width, height) for i in range(8)]
+            [(i * width, 0, width, height) for i in range(ROTATIONS)]
         )
 
     def on_update(self, delta_time: float = 1/60):
@@ -503,7 +503,7 @@ class VehicleThreads(Sprite):
     def __init__(self, texture, index, x, y):
         super().__init__(texture, center_x=x, center_y=y, hit_box_algorithm='None')
         self.textures = load_textures(
-            texture, [(i * 29, 0, 29, 28) for i in range(8)]
+            texture, [(i * 29, 0, 29, 28) for i in range(ROTATIONS)]
         )
         self.set_texture(index)
 
@@ -533,9 +533,9 @@ class Tank(Vehicle):
         Create 8 lists of 8-texture spritesheets for each combination of hull
         and turret directions.
         """
-        width, height = get_texture_size(self.full_name, 8, 8)
+        width, height = get_texture_size(self.full_name, ROTATIONS, ROTATIONS)
         self.textures = [load_textures(self.filename_with_path,
-            [(i * width, j * height, width, height) for i in range(8)]) for j in range(8)
+            [(i * width, j * height, width, height) for i in range(ROTATIONS)]) for j in range(ROTATIONS)
         ]
         self.set_texture(self.facing_direction, self.turret_facing_direction)
         self.set_hit_box(self.texture.hit_box_points)
@@ -622,7 +622,7 @@ class Soldier(Unit):
 
     def _load_textures_and_reset_hitbox(self):
         texture_name = get_path_to_file(self.full_name)
-        width, height = get_texture_size(self.full_name, rows=9, columns=8)
+        width, height = get_texture_size(self.full_name, rows=ROTATIONS, columns=ROTATIONS)
 
         self.all_textures = {
             stance: self.load_pose_textures(texture_name, width, height, stance)
@@ -639,8 +639,8 @@ class Soldier(Unit):
         return [
             load_textures(
                 texture_name, [(i * width, j * height, width, height)
-                               for i in range(8)]
-            ) for j in range(start, start + 8)
+                               for i in range(ROTATIONS)]
+            ) for j in range(start, start + ROTATIONS)
         ]
 
     @property
@@ -665,7 +665,7 @@ class Soldier(Unit):
         self.last_step_time += delta_time
         if self.last_step_time > self.infantry_steps_duration:
             self.last_step_time = 0
-            if self.cur_texture_index < len(self.textures) - 1:
+            if self.cur_texture_index < ROTATIONS - 1:
                 self.cur_texture_index += 1
             else:
                 self.cur_texture_index = 0

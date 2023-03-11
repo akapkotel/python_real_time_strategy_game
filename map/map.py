@@ -35,7 +35,7 @@ VERTICAL_DIST = 10
 DIAGONAL_DIST = 14  # approx square root of 2
 MAP_TEXTURES = {
     'mud': load_spritesheet(
-        get_path_to_file('mud_tileset_6x6.png'), 60, 45, 4, 16, 0)
+        get_path_to_file('mud_tileset_6x6.png'), 60, 50, 4, 16, 0)
 }
 ADJACENT_OFFSETS = [
     (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0), (+1, +1)

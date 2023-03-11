@@ -541,7 +541,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
 
-        print('Game __init__ method worked')
+        log('Game initialized successfully', console=True)
 
     @property
     def things_to_update_each_frame(self):

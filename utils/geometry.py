@@ -9,7 +9,7 @@ from shapely.geometry import LineString, Polygon
 
 from utils.data_types import Point, Number
 
-ROTATIONS = 8  # how many directions our Sprites can rotate toward
+ROTATIONS = 16  # how many directions our Sprites can rotate toward
 CIRCLE_SLICE = 360 / ROTATIONS  # angular width of a single rotation step
 ROTATION_STEP = CIRCLE_SLICE / 2  # center of each rotation step
 
