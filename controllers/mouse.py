@@ -135,6 +135,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
+        if self.placeable_gameobject is not None:
+            grid_x, grid_y = position_to_map_grid(x, y)
+            self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
+            # TODO: snap placeable to the map grid and show player if it could be placed at current position
+            ...
 
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):

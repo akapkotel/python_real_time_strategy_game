@@ -326,7 +326,7 @@ class Map:
     @cached_property
     def nonexistent_node(self) -> MapNode:
         node = MapNode(-1, -1)
-        node.pathable = False
+        node.pathable = node._walkable = False
         return node
 
 

@@ -128,7 +128,6 @@ class Faction(EventsCreator, Observer, Observed):
             other.start_alliance(self, propagate=False)
 
     def update(self):
-        # log(f'Updating faction: {self.name} players: {self.players}')
         self.known_enemies.clear()
         for player in self.players:
             player.update()
@@ -160,7 +159,6 @@ class Player(EventsCreator, Observer, Observed):
                  name: Optional[str] = None,
                  color: Optional[Color] = None,
                  faction: Optional[Faction] = None):
-        # ResourcesManager.__init__(self)
         EventsCreator.__init__(self)
         Observer.__init__(self)
         Observed.__init__(self)
@@ -273,8 +271,8 @@ class Player(EventsCreator, Observer, Observed):
         self.detach_observers()
 
     def enough_resources_for(self, expense: str) -> bool:
-        for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):  # [category]
-            required_amount = self.game.configs[expense][resource]  # [category]
+        for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):
+            required_amount = self.game.configs[expense][resource]
             if not self.has_resource(resource, required_amount):
                 if self.is_local_human_player:
                     self.notify_player_of_resource_deficit(resource)
@@ -331,12 +329,6 @@ class Player(EventsCreator, Observer, Observed):
         self.__dict__.update(state)
         self.faction = self.game.factions[self.faction]
         self.observed_attributes = defaultdict(list)
-        # for resource_name in RESOURCES.keys():
-        #     setattr(self, resource_name, state[resource_name])
-        #     setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 1.0 if resource_name is not ENERGY else 0.0)
-        #     setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
-        #     if resource_name != ENERGY:
-        #         setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
         self.attach_observers(observers=[self.game, self.faction])
 
 

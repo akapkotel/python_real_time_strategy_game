@@ -612,7 +612,7 @@ class UiTextLabel(UiElement):
     sound_on_mouse_click = None
 
     def __init__(self, x: int, y: int, text: str, font_size: int = 10, text_color: Color = WHITE,
-                 name: Optional[str] = None, active: bool = False, align_x: str = 'left', align_y: str = 'baseline',
+                 name: Optional[str] = None, active: bool = False, align_x: str = 'center', align_y: str = 'center',
                  visible: bool = True, parent: Optional[Hierarchical] = None, subgroup: Optional[int] = None):
         super().__init__('', x, y, name, active, visible, parent, subgroup)
         self.text = text
@@ -620,16 +620,14 @@ class UiTextLabel(UiElement):
         self.text_color = text_color
         self.align_text_x = align_x
         self.align_text_y = align_y
-        self.textures = [
-            make_texture(int(len(text) * font_size * 0.725), font_size * 2, (1, 1, 1, 1))
-        ]
+        self.textures = [make_texture(1, 1, (1, 1, 1, 1))]
         self.set_texture(0)
 
     def draw(self):
-        super().draw()
         draw_text(
-            self.text, self.left, self.bottom + self.size // 2,
-            self.text_color, self.size, anchor_x=self.align_text_x, anchor_y=self.align_text_y)
+            self.text, *self.position, self.text_color, self.size,
+            anchor_x=self.align_text_x, anchor_y=self.align_text_y
+        )
 
     def draw_highlight_around_element(self):
         pass
@@ -934,21 +932,21 @@ class _SliderHandle(UiElement):
 class Hint(Sprite, ToggledElement):
 
     def __init__(self, texture_name: str, text: str=None, x=0, y=0, text_position: Tuple[int, int]=None,
-                 text_color: Color=WHITE, text_size: int=10, text_align: str='left', required_delay: float=0):
-        super().__init__(get_path_to_file(name_to_texture_name(texture_name)), center_x=x, center_y=y)
+                 text_color: Color=WHITE, text_size: int=10, text_align: str='left', delay: float=0):
+        super().__init__(get_path_to_file(texture_name), center_x=x, center_y=y)
         ToggledElement.__init__(self, visible=False, active=True)
-        self.required_delay = required_delay
+        self.delay = delay
         self.text = text
         self.text_x, self.text_y = text_position or 0, 0
         self.text_attributes = (text_color, text_size, text_align)
-        self.delay = 0
+        self.time_since_triggered = 0
 
     def reset_delay(self):
-        self.delay = time.time() + self.required_delay
+        self.time_since_triggered = time.time() + self.delay
 
     @property
     def should_show(self) -> bool:
-        return time.time() >= self.delay
+        return time.time() >= self.time_since_triggered
 
     def draw(self):
         if self._visible:

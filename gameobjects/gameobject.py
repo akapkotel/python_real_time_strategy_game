@@ -6,9 +6,11 @@ from typing import Optional, Dict, List, Union, Tuple
 
 from PIL import Image
 
-from arcade import AnimatedTimeBasedSprite, load_texture, Texture
+from arcade import AnimatedTimeBasedSprite, load_texture, Texture, draw_rectangle_filled
 from arcade.arcade_types import Point
 
+from map.constants import TILE_WIDTH, TILE_HEIGHT
+from utils.colors import GREEN, RED
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
 from utils.data_types import GridPosition
@@ -208,7 +210,23 @@ class PlaceableGameobject:
     def __init__(self, gameobject_name: str):
         self.game = GameObject.game
         self.gameobject_name = gameobject_name
+        self.grid_width, self.grid_height = self.game.configs[gameobject_name]['size']
+        self.grids = None
+
+    def snap_to_the_map_grid(self, gx, gy):
+        from map.map import map_grid_to_position
+        self.grids = {
+            map_grid_to_position((gx + x, gy + y)): self.game.map.node(gx + x, gy + y).walkable
+            for y in range(self.grid_height) for x in range(self.grid_width)
+        }
+
+    def draw(self):
+        for position, availability in self.grids:
+            color = GREEN if availability else RED
+            draw_rectangle_filled(
+                position[0], position[1], TILE_WIDTH, TILE_HEIGHT, color
+            )
 
     def emplace(self, position: GridPosition):
-        self.game.spawn(self.gameobject_name, )
+        self.game.spawn(self.gameobject_name)
         raise NotImplementedError

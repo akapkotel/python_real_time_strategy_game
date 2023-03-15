@@ -10,7 +10,7 @@ class ScheduledEvent:
     """
     This event is an alternative to the pyglet.clock.schedule. ScheduledEvent
     can be pickled with shelve module and does not require scheduled functions
-    to have additional float parameter for schedule delay, so it's signature is
+    to have additional float parameter for schedule time_since_triggered, so it's signature is
     not touched.
     """
 
@@ -51,12 +51,12 @@ class ScheduledEvent:
     def shelve(self):
         return {
             'creator': self.get_creator_name(),
-            'delay': self.delay,
+            'time_since_triggered': self.delay,
             'function': self.function.__name__,
             'args': self.args,
             'kwargs': self.kwargs,
             'repeat': -1 if self.repeat == inf else self.repeat,
-            'delay left': EventsScheduler.instance.time_left_to_event_execution(self)
+            'time_since_triggered left': EventsScheduler.instance.time_left_to_event_execution(self)
         }
 
     def get_creator_name(self) -> Union[str, Tuple[str, int]]:
@@ -91,7 +91,7 @@ class EventsScheduler:
         self.schedulers.append(event.creator)
         self.scheduled_events.append(event)
         delay = event.delay_left or event.delay
-        # self.execution_times.append(self.game.timer['total'] + delay)
+        # self.execution_times.append(self.game.timer['total'] + time_since_triggered)
         self.execution_times.append(self.game.timer.total + delay)
 
 
@@ -131,7 +131,7 @@ class EventsScheduler:
     def unshelve_scheduled_events(self, shelved_events: List[Dict]):
         for shelved in shelved_events:
             creator = self.game.find_object_by_class_and_id(shelved['creator'])
-            delay = shelved['delay']
+            delay = shelved['time_since_triggered']
             function = getattr(creator, shelved['function'])
             self.schedule(
                 ScheduledEvent(creator, delay, function, *list(shelved.values())[3:])
