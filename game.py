@@ -597,7 +597,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return {
             Soldier: self.units,
             Unit: self.units,
-            Tank: self.units,
+            VehicleWithTurret: self.units,
             Building: self.buildings,
             Sprite: self.terrain_tiles,
             TerrainObject: self.static_objects,
@@ -719,27 +719,27 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def show_units_construction_options(self):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        units_construction_bundle = self.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+        units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
         if not units_construction_bundle.elements:
             self.create_units_constructions_options(units_construction_bundle)
-        self.load_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+        self.load_bundle(UI_UNITS_CONSTRUCTION_PANEL)
 
     def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
         x, y = self.ui_position
         units_construction_bundle.elements.clear()
-        positions = generate_2d_grid(x - 135, y + 92, 6, 4, 75, 75)
+        positions = generate_2d_grid(x - 135, y, 6, 4, 75, 75)
         for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-            b = ProgressButton(unit_name + '_icon.png', column, row, unit_name,
-                               functions=partial(producer.start_production, unit_name))\
-                .add_hint(Hint(unit_name + '_production_hint.png', required_delay=0.5))
+            hint = Hint(f'{unit_name}_production_hint.png', delay=0.5)
+            b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
+                               functions=partial(producer.start_production, unit_name)).add_hint(hint)
             b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
             units_construction_bundle.elements.append(b)
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
-        Add animated sprite to the self.effects spritelist to display e.g.:
+        Add animated sprite to the 'self.effects' spritelist to display e.g.:
         explosions.
         """
         if effect_type is Explosion:
@@ -784,8 +784,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             (
                 self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=2),
                 self.spawn('garrison', self.players[2], (600, 800), garrison=12),
-
-                #TODO: loading saved Capitol building crashes game
+                self.spawn('command_center', self.players[2], (400, 900), garrison=8),
                 self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1),
             )
         )
@@ -818,18 +817,18 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_units_spawning(self):
         spawned_units = []
-        unit_name = 'tank_medium'
+        units_names = ('tank_medium', 'apc', 'truck')
         walkable = list(self.map.all_walkable_nodes)
-        for player in (self.players.values()):
-            node = random.choice(walkable)
-            walkable.remove(node)
-            amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
-            names = [unit_name] * amount
-            spawned_units.extend(
-                self.spawn_group(names, player, node.position)
-            )
+        for unit_name in units_names:
+            for player in (self.players.values()):
+                node = random.choice(walkable)
+                walkable.remove(node)
+                amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
+                names = [unit_name] * amount
+                spawned_units.extend(
+                    self.spawn_group(names, player, node.position)
+                )
         self.units.extend(spawned_units)
-        log(f'QuadTree depth after spawning Units and Buildings: {self.map.quadtree.total_depth()}', console=True)
 
     def test_missions(self):
         human = self.local_human_player
@@ -1022,7 +1021,7 @@ if __name__ == '__main__':
     )
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
-    from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier, Tank
+    from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier, VehicleWithTurret
     from gameobjects.gameobject import GameObject, TerrainObject, Wreck
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar

@@ -69,10 +69,8 @@ class Unit(PlayerEntity):
         self.permanent_units_group: int = 0
         self.navigating_group = None
 
-        self._weapons.extend(
-            Weapon(name=name, owner=self) for name in
-            self.configs['weapons_names']
-        )
+        if (weapons := self.configs['weapons_names']) is not None:
+            self._weapons.extend(Weapon(name=name, owner=self) for name in weapons)
 
         self.tasks = []
         self.current_task = None
@@ -107,7 +105,7 @@ class Unit(PlayerEntity):
 
     def angle_to_texture(self, angle_to_target: float):
         """
-        Our units can face only 8 possible angles, which are precalculated
+        Our units can face only 16 possible angles, which are precalculated
         for each one of 360 possible integer angles for fast lookup in existing
         angles-dict.
         """
@@ -156,7 +154,7 @@ class Unit(PlayerEntity):
     def update_current_node(self):
         current_node = self.get_current_node()
         if current_node is not self.current_node:
-            if not self.quadtree.in_bounds(self):
+            if self.quadtree is not None and not self.quadtree.in_bounds(self):
                 self.update_in_map_quadtree()
         return current_node
 
@@ -172,10 +170,6 @@ class Unit(PlayerEntity):
         else:
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
-
-    def update_fire_covered_area(self):
-        area = find_area(*self.current_node.grid, self.attack_range_matrix)
-        self.fire_covered = {self.map[g] for g in self.map.in_bounds(area)}
 
     def update_blocked_map_nodes(self, new_current_node: MapNode):
         """
@@ -448,11 +442,13 @@ class Vehicle(Unit):
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
-        thread_texture = ''.join((self.object_name, '_threads.png'))
 
+        self._load_textures_and_reset_hitbox()
+
+        thread_texture = ''.join((self.object_name, '_threads.png'))
         # texture of the VehicleThreads left by this Vehicle
         self.threads_texture = get_path_to_file(thread_texture)
-        # when this Vehicle left it's threads on the ground last time:
+        # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
         self.fuel = 100.0
@@ -463,11 +459,13 @@ class Vehicle(Unit):
         return 5 / self.max_speed
 
     def _load_textures_and_reset_hitbox(self):
-        width, height = get_texture_size(self.full_name, columns=8)
+        width, height = get_texture_size(self.full_name, columns=ROTATIONS)
         self.textures = load_textures(
-            get_path_to_file(self.filename_with_path),
+            self.filename_with_path,
             [(i * width, 0, width, height) for i in range(ROTATIONS)]
         )
+        self.set_texture(self.facing_direction)
+        self.set_hit_box(self.texture.hit_box_points)
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -493,7 +491,7 @@ class Vehicle(Unit):
 
     def spawn_wreck(self):
         wreck_name = self.object_name.replace(".png", "_wreck.png")
-        self.game.spawn(wreck_name, self.position, self.cur_texture_index)
+        self.game.spawner.spawn(wreck_name, None, self.position, self.cur_texture_index)
 
 
 class VehicleThreads(Sprite):
@@ -515,16 +513,15 @@ class VehicleThreads(Sprite):
             self.kill()
 
 
-class Tank(Vehicle):
+class VehicleWithTurret(Vehicle):
 
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
-        super().__init__(texture_name, player, weight, position, id)
-
         # combine facing_direction with turret to obtain proper texture:
         self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
 
-        self._load_textures_and_reset_hitbox()
+        super().__init__(texture_name, player, weight, position, id)
+
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
 
@@ -555,7 +552,7 @@ class Tank(Vehicle):
                          turret_angle: float = None):
         if hull_angle is not None:
             self.facing_direction = self.angles[int(hull_angle)]
-        # in case of Tank we need to set its turret direction too:
+        # in case of VehicleWithTurret we need to set its turret direction too:
         if turret_angle is None:
             self.turret_facing_direction = self.facing_direction
         else:

@@ -6,7 +6,7 @@ from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union
 
-from arcade import load_texture, MOUSE_BUTTON_RIGHT
+from arcade import load_texture, MOUSE_BUTTON_RIGHT, draw_rectangle_outline
 from arcade.arcade_types import Point
 
 from gameobjects.constants import UNITS
@@ -18,7 +18,7 @@ from user_interface.user_interface import (
 from campaigns.research import Technology
 from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
-    Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS
+    Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS, FUEL
 )
 from utils.colors import GREEN, RED
 from utils.functions import (
@@ -69,7 +69,7 @@ class UnitsProducer:
         Each time a new UnitsProducer enters the game, UI panel with Units-available for plaer to build must be
         refreshed to contain any new Unit this new Building produces.
         """
-        units_construction_bundle = self.game.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)
+        units_construction_bundle = self.game.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
         self.game.create_units_constructions_options(units_construction_bundle)
 
     @logger()
@@ -103,6 +103,7 @@ class UnitsProducer:
             if unit == self.currently_produced and unit not in queue:
                 self._toggle_production(produced=None)
                 self.production_progress = 0.0
+        self.update_ui_units_construction_section()
 
     def remove_unit_from_production_queue(self, unit):
         self.production_queue.reverse()
@@ -117,7 +118,7 @@ class UnitsProducer:
         returned = 1
         if unit not in self.production_queue:
             returned = self.production_progress / self.production_time
-        for resource in (STEEL, ELECTRONICS, CONSCRIPTS):
+        for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS):
             required_amount = self.game.configs[unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
@@ -139,7 +140,7 @@ class UnitsProducer:
             self._start_production(unit=self.production_queue[-1])
 
     def update_ui_units_construction_section(self):
-        if  (ui_panel := self.game.get_bundle(UI_BUILDINGS_CONSTRUCTION_PANEL)).elements:
+        if  (ui_panel := self.game.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)).elements:
             self.update_production_buttons(ui_panel)
 
     def update_production_buttons(self, ui_panel: UiElementsBundle):
@@ -175,12 +176,12 @@ class UnitsProducer:
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
         positions = generate_2d_grid(x - 135, y - 120, 4, 4, 75, 75)
-        for i, unit in enumerate(self.produced_units):
+        for i, unit_name in enumerate(self.produced_units):
             column, row = positions[i]
-            b = ProgressButton(unit + '_icon.png', column, row, unit,
-                               functions=partial(self.start_production, unit)).\
-                add_hint(Hint(unit + '_production_hint.png', required_delay=0.5))
-            b.bind_function(partial(self.cancel_production, unit), MOUSE_BUTTON_RIGHT)
+            hint = Hint(f'{unit_name}_production_hint.png', delay=0.5)
+            b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
+                               functions=partial(self.start_production, unit_name)).add_hint(hint)
+            b.bind_function(partial(self.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
             production_buttons.append(b)
         return production_buttons
 
@@ -305,7 +306,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.energy_consumption = self.configs['energy_consumption']
 
         self.position = self.place_building_properly_on_the_grid()
-        self.occupied_nodes: Set[MapNode] = self.block_map_nodes()
+        self.occupied_nodes: Set[MapNode] = self.find_occupied_nodes()
+        self.block_map_nodes(self.occupied_nodes)
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
@@ -330,30 +332,25 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         width and height so they occupy minimum MapNodes.
         """
         self.position = normalize_position(*self.position)
+        left = self.position[0] - (TILE_WIDTH // 2) + 1
+        bottom = self.position[1] - (TILE_HEIGHT // 2) + 1
+        return left + self.width // 2, bottom + self.height // 2
 
-        grid_width, grid_height = self.configs['size']
-
-        offset_x = (grid_width % 3) * (TILE_WIDTH // 2)
-        offset_y = (grid_height % 3) * (TILE_HEIGHT // 2)
-
-        # offset_x = 0 if not (self.width // TILE_WIDTH) % 3 else TILE_WIDTH // 2
-        # offset_y = 0 if not (self.height // TILE_HEIGHT) % 3 else TILE_HEIGHT // 2
-        return self.center_x + offset_x, self.center_y + offset_y
-
-    def block_map_nodes(self) -> Set[MapNode]:
+    def find_occupied_nodes(self) -> Set[MapNode]:
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         max_x_grid = int(self.right // TILE_WIDTH)
         max_y_grid = int(self.top // TILE_HEIGHT)
-        occupied_nodes = {
-            self.game.map.grid_to_node((x, y)) for x in
-            range(min_x_grid, max_x_grid) for y in
-            range(min_y_grid, max_y_grid - 1)
+        return {
+            self.game.map.grid_to_node((x, y))
+            for x in range(min_x_grid, max_x_grid)
+            for y in range(min_y_grid, max_y_grid)
         }
+
+    def block_map_nodes(self, occupied_nodes: Set[MapNode]):
         for node in occupied_nodes:
             node.remove_tree()
             self.block_map_node(node)
-        return set(occupied_nodes)
 
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
@@ -376,8 +373,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if not self.observed_nodes:  # Building need calculate it only once
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
-            # if self.weapons:
-            #     self.update_fire_covered_area()
 
     def update_fire_covered_area(self):
         x, y = position_to_map_grid(*self.position)
@@ -412,6 +407,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.update_production()
         self.update_observed_area()
         self.update_ui_buildings_panel()
+
+    def draw(self):
+        super().draw()
 
     def update_production(self):
         if self.produced_units is not None:
@@ -448,8 +446,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def create_building_ui_information(self, x, y) -> List[UiElement]:
         text_color = GREEN if self.is_controlled_by_player else RED
         return [
-            UiTextLabel(x + 25, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
-            UiTextLabel(x + 5, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
+            UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
+            UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
         ]
 
     def create_ui_buttons(self, x, y) -> List[Button]:
@@ -515,20 +513,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.clear_known_enemies()
         self.remove_from_map_quadtree()
         self.change_player(player)
-        self.refresh_occupied_nodes()
         self.insert_to_map_quadtree()
 
     def clear_known_enemies(self):
         # self.player.remove_known_enemies(self.id, self.known_enemies)
         self.known_enemies.clear()
 
-    def change_player(self, player):
+    def change_player(self, new_player: Player):
         self.detach(self.player)
-        self.attach(player)
-
-    def refresh_occupied_nodes(self):
-        self.unblock_occupied_nodes()
-        self.occupied_nodes = self.block_map_nodes()
+        self.attach(new_player)
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
@@ -610,4 +603,5 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from game import Game
     from map.constants import TILE_WIDTH, TILE_HEIGHT
-    from user_interface.constants import UI_BUILDINGS_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL
+    from user_interface.constants import UI_BUILDINGS_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, \
+        UI_UNITS_CONSTRUCTION_PANEL
