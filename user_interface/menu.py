@@ -16,6 +16,7 @@ from user_interface.user_interface import (
 from utils.views import LoadableWindowView
 
 
+
 class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):

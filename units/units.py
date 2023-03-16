@@ -25,7 +25,7 @@ from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
-    vector_2d, ROTATION_STEP, ROTATIONS, find_area
+    vector_2d, ROTATION_STEP, ROTATIONS
 )
 from units.weapons import Weapon
 
@@ -303,9 +303,9 @@ class Unit(PlayerEntity):
         self.set_rotated_texture()
 
     def calculate_unit_virtual_angle(self, angle_to_target):
-        difference = abs(self.virtual_angle - angle_to_target)
-        rotation = min(difference, self.rotation_speed)
-        if difference < 180:
+        angular_difference = abs(self.virtual_angle - angle_to_target)
+        rotation = min(angular_difference, self.rotation_speed)
+        if angular_difference < 180:
             direction = 1 if self.virtual_angle < angle_to_target else -1
         else:
             direction = -1 if self.virtual_angle < angle_to_target else 1
@@ -451,8 +451,8 @@ class Vehicle(Unit):
         # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
-        self.fuel = 100.0
-        self.fuel_consumption = 0.0
+        self.fuel = self.configs['fuel']
+        self.fuel_consumption = self.configs['fuel_consumption']
 
     @cached_property
     def threads_frequency(self):
@@ -491,7 +491,7 @@ class Vehicle(Unit):
 
     def spawn_wreck(self):
         wreck_name = self.object_name.replace(".png", "_wreck.png")
-        self.game.spawner.spawn(wreck_name, None, self.position, self.cur_texture_index)
+        self.game.spawn(wreck_name, None, self.position, self.cur_texture_index)
 
 
 class VehicleThreads(Sprite):
@@ -591,7 +591,7 @@ class VehicleWithTurret(Vehicle):
 
     def spawn_wreck(self):
         wreck_name = f'{self.object_name}_wreck.png'
-        self.game.spawner.spawn(
+        self.game.spawn(
             wreck_name, None, self.position,
             (self.facing_direction, self.turret_facing_direction)
         )

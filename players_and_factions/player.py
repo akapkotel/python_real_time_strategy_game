@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import os.path
 import random
 
 from math import dist
@@ -9,7 +10,7 @@ from collections import defaultdict
 from functools import cached_property
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
-from arcade import rand_in_circle, draw_text
+from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
 from user_interface.constants import UI_RESOURCES_SECTION
@@ -24,9 +25,8 @@ from utils.data_types import FactionId, TechnologyId, GridPosition
 from utils.functions import (
     ignore_in_editor_mode, add_player_color_to_name
 )
-from utils.game_logging import log
 from utils.geometry import (
-    is_visible, clamp, find_area, precalculate_circular_area_matrix
+    clamp, find_area, precalculate_circular_area_matrix
 )
 from utils.scheduling import EventsCreator, ScheduledEvent
 
@@ -447,10 +447,9 @@ class PlayerEntity(GameObject):
                  texture_name: str,
                  player: Player,
                  position: Point,
-                 robustness: int = 0,
                  id: Optional[int] = None):
         self.colored_name = add_player_color_to_name(texture_name, player.color)
-        super().__init__(self.colored_name, robustness, position, id)
+        super().__init__(self.colored_name, position, id)
         self.map = self.game.map
         self.player: Player = player
         self.faction: Faction = self.player.faction
@@ -526,9 +525,11 @@ class PlayerEntity(GameObject):
 
     @property
     def should_reveal_map(self) -> bool:
-        # flag used to avoid enemy units revealing map for human player, only
-        # player's units and his allies units reveal map for him:
-        return self.faction is self.game.local_human_player.faction
+        return self.is_controlled_by_player
+        # TODO: use this when multiplayer is implemented
+        #  flag used to avoid enemy units revealing map for human player, only
+        #  player's units and his allies units reveal map for him:
+        # return self.faction is self.game.local_human_player.faction
 
     @property
     def max_health(self) -> float:
@@ -673,10 +674,6 @@ class PlayerEntity(GameObject):
                 self._enemy_assigned_by_player = None
             self._targeted_enemy = None
 
-    def visible_for(self, other: PlayerEntity) -> bool:
-        obstacles = self.game.buildings
-        return is_visible(self.position, other.position, obstacles)
-
     def is_enemy(self, other: PlayerEntity) -> bool:
         return self.faction.is_enemy(other.faction)
 
@@ -705,16 +702,11 @@ class PlayerEntity(GameObject):
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
         self.health -= random.gauss(damage, deviation) * effectiveness
-        self.create_hit_audio_visual_effects()
         self.check_id_should_entity_die()
 
     def check_id_should_entity_die(self):
         if self._health <= 0:
             self.kill()
-
-    def create_hit_audio_visual_effects(self):
-        position = rand_in_circle(self.position, self.collision_radius // 3)
-        # self.game.create_effect(Explosion(*position, 'HITBLAST'))
 
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:

@@ -5,49 +5,23 @@ import os
 from functools import lru_cache
 from typing import Dict, Tuple
 
-import PIL
+from PIL import Image
 from arcade.arcade_types import Color
-from shapely import speedups
 
 from utils.colors import colors_names
-
-SEPARATOR = '-' * 20
-
-speedups.enable()
+from utils.game_logging import log
 
 
-# def get_screen_size() -> Tuple[int, int]:
-#     from PIL import ImageGrab
-#     screen = ImageGrab.grab()
-#     return int(screen.width), int(screen.height)
-
-
-# def get_objects_with_attribute(instance: object,
-#                                name: str,
-#                                ignore: Tuple = ()) -> List[Any]:
-#     """
-#     Search all attributes of <instance> to find all objects which have their
-#     own attribute of <name> and return these objects as List. You can also add
-#     a Tuple of class names to be ignored during query.
-#     """
-#     attributes = instance.__dict__.values()
-#     return [
-#         attr for attr in attributes if
-#         hasattr(attr, name) and not isinstance(attr, ignore)
-#     ]
-
-
-# very universal function
 @lru_cache
 def get_path_to_file(filename: str, extension: str = 'png') -> str:
     """
     Build full absolute path to the filename and return it + /filename.
     """
     correct_filename = add_extension(filename, extension)
-    for directory in os.walk(os.getcwd()):
-        if correct_filename in directory[2]:
-            return f'{directory[0]}/{correct_filename}'
-
+    for dirpath, dirnames, filenames in os.walk(os.getcwd()):
+        if correct_filename in filenames:
+            return os.path.join(dirpath, correct_filename)
+    log(f'File {filename} does not exist!')
 
 def get_object_name(filename: str) -> str:
     """
@@ -62,9 +36,7 @@ def remove_path_from_name(filename: str):
 
 
 def add_extension(object_name: str, extension: str = 'png') -> str:
-    if not object_name.endswith(extension):
-        return '.'.join((object_name, extension))
-    return object_name
+    return '.'.join((object_name, extension)) if not object_name.endswith(extension) else object_name
 
 
 def all_files_of_type_named(extension: str,
@@ -91,22 +63,10 @@ def find_paths_to_all_files_of_type(extension: str,
 
 
 def add_player_color_to_name(name: str, color: Color) -> str:
-    if (color := colors_names[color]) not in name:
-        # split = name.split('.')
-        # return ''.join((split[0], '_', color, '.', split[1]))
-        return '_'.join((name, color))
+    color_name = colors_names[color]
+    if not name.endswith(color_name):
+        return '_'.join((name, color_name))
     return name
-
-
-def decolorised_name(name: str) -> str:
-    for color in ('_red', '_green', '_blue', '_yellow'):
-        if color in name:
-            return name.replace(color, '')  # name.rsplit('_', 1)[0]
-    return name
-
-
-def name_to_texture_name(name: str) -> str:
-    return name + '.png' if '.png' not in name else name
 
 
 # def get_enemies(war: int) -> Tuple[int, int]:
@@ -159,5 +119,5 @@ def ignore_in_game(func):
 def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
     if '/' not in texture_name:
         texture_name = get_path_to_file(texture_name)
-    image = PIL.Image.open(texture_name)
+    image = Image.open(texture_name)
     return image.size[0] // columns, image.size[1] // rows

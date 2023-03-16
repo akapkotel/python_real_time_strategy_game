@@ -26,12 +26,8 @@ from utils.observer import Observed, Observer
 from utils.geometry import clamp
 from utils.colors import rgb_to_rgba
 from utils.improved_spritelists import UiSpriteList
-
-from utils.functions import (
-    get_path_to_file, name_to_texture_name, get_texture_size
-)
+from utils.functions import get_path_to_file, get_texture_size
 from utils.game_logging import log
-
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
@@ -283,7 +279,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None):
-        full_texture_name = get_path_to_file(name_to_texture_name(texture_name))
+        full_texture_name = get_path_to_file(texture_name)
         super().__init__(full_texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)

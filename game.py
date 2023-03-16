@@ -43,10 +43,8 @@ from user_interface.user_interface import (
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
-from utils.data_types import Viewport, Number
-from utils.functions import (
-    get_path_to_file, SEPARATOR, ignore_in_editor_mode
-)
+from utils.data_types import Viewport
+from utils.functions import get_path_to_file, ignore_in_editor_mode
 from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
@@ -57,6 +55,8 @@ from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
+
+SEPARATOR = '-' * 20
 
 BEFORE_INTERFACE_LAYER = -2
 
@@ -727,7 +727,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
         x, y = self.ui_position
         units_construction_bundle.elements.clear()
-        positions = generate_2d_grid(x - 135, y, 6, 4, 75, 75)
+        positions = generate_2d_grid(x - 135, y + 93, 6, 4, 75, 75)
         for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
@@ -780,14 +780,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         player.start_war_with(cpu_player)
 
     def test_buildings_spawning(self):
-        self.buildings.extend(
-            (
-                self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=2),
-                self.spawn('garrison', self.players[2], (600, 800), garrison=12),
-                self.spawn('command_center', self.players[2], (400, 900), garrison=8),
-                self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1),
-            )
-        )
+        self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=1)
+        self.spawn('garrison', self.players[2], (600, 800), garrison=1)
+        self.spawn('command_center', self.players[2], (400, 900), garrison=1)
+        self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1)
+        ConstructionSite('command_center', self.players[2], 850, 800),
 
     def spawn(self,
               object_name: str,
@@ -798,8 +795,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         player = self.get_player_instance(player)
         if position is None:
             position = self.map.get_random_position()
-        spawned = self.spawner.spawn(object_name, player, position, *args, **kwargs)
-        return spawned
+        return self.spawner.spawn(object_name, player, position, *args, **kwargs)
 
     def get_player_instance(self, player: Union[Player, int]) -> Optional[Player]:
         try:
@@ -816,7 +812,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return self.spawner.spawn_group(names, player, position, **kwargs)
 
     def test_units_spawning(self):
-        spawned_units = []
         units_names = ('tank_medium', 'apc', 'truck')
         walkable = list(self.map.all_walkable_nodes)
         for unit_name in units_names:
@@ -825,10 +820,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 walkable.remove(node)
                 amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
                 names = [unit_name] * amount
-                spawned_units.extend(
-                    self.spawn_group(names, player, node.position)
-                )
-        self.units.extend(spawned_units)
+                self.spawn_group(names, player, node.position)
 
     def test_missions(self):
         human = self.local_human_player
@@ -1025,7 +1017,7 @@ if __name__ == '__main__':
     from gameobjects.gameobject import GameObject, TerrainObject, Wreck
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
-    from buildings.buildings import Building
+    from buildings.buildings import Building, ConstructionSite
     from campaigns.missions import (
         Mission, load_campaigns, Campaign, MissionDescriptor
     )

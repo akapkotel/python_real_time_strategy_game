@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Dict, KeysView, Optional, Set
 
-from arcade import Sprite, SpriteList, make_circle_texture
+from arcade import Sprite, SpriteList, make_soft_circle_texture
 
 from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
@@ -15,8 +15,8 @@ OFFSET_X = TILE_WIDTH // 2
 OFFSET_Y = TILE_HEIGHT // 2
 
 
-DARK_TEXTURE = make_circle_texture(2 * TILE_WIDTH, BLACK)
-FOG_TEXTURE = make_circle_texture(2 * TILE_WIDTH, FOG)
+DARK_TEXTURE = make_soft_circle_texture(3 * TILE_WIDTH, BLACK)
+FOG_TEXTURE = make_soft_circle_texture(3 * TILE_WIDTH, FOG, 128)
 FOG_SPRITELIST_SIZE = 60
 
 
@@ -119,8 +119,8 @@ class FogOfWar(Rect):
         screen_width, screen_height = left - right, top - bottom
 
         for grid, sprite_list in self.fog_sprite_lists.items():
-            s_left, s_right = grid[0] * screen_width, (grid[0] + 1) * screen_width,
-            s_bottom, s_top = grid[1] * screen_height, (grid[1] +1) * screen_height
+            s_left, s_right = grid[0] * screen_width, (grid[0] + 1) * screen_width
+            s_bottom, s_top = grid[1] * screen_height, (grid[1] + 1) * screen_height
             if (left < s_right or right > s_left) and (bottom < s_top or top > s_bottom):
                 sprite_list.draw()
 

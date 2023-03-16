@@ -16,7 +16,7 @@ from gameobjects.gameobject import GameObject, Wreck, Tree
 
 UNIT = 'Unit'
 
-TANK = 'VehicleWithTurret'
+VEHICLE_WITH_TURRET = 'VehicleWithTurret'
 
 VEHICLE = 'Vehicle'
 
@@ -56,7 +56,7 @@ class GameObjectsSpawner:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
         elif self.configs[name][CLASS] == BUILDING:
             return self._spawn_building(name, player, position, **kwargs)
-        elif self.configs[name][CLASS] in (SOLDIER, VEHICLE, TANK):
+        elif self.configs[name][CLASS] in (SOLDIER, VEHICLE, VEHICLE_WITH_TURRET):
             return self._spawn_unit(name, player, position, **kwargs)
 
     def _spawn_building(self, name: str, player, position, **kwargs) -> Building:
@@ -68,14 +68,13 @@ class GameObjectsSpawner:
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         class_name = self.configs[name][CLASS]
-        _class = {
+        spawned_object_class = {
             UNIT: Unit,
             VEHICLE: Vehicle,
-            TANK: VehicleWithTurret,
+            VEHICLE_WITH_TURRET: VehicleWithTurret,
             SOLDIER: Soldier
         }[class_name]
-        unit = _class(name, player, 1, position, **kwargs)
-
+        unit = spawned_object_class(name, player, 1, position, **kwargs)
         return self._get_attributes_from_configs_file(name, unit)
 
     def _get_attributes_from_configs_file(self, name, spawned):

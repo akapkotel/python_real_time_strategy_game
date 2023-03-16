@@ -6,10 +6,9 @@ from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union
 
-from arcade import load_texture, MOUSE_BUTTON_RIGHT, draw_rectangle_outline
+from arcade import load_texture, draw_rectangle_outline, draw_lrtb_rectangle_filled, MOUSE_BUTTON_RIGHT
 from arcade.arcade_types import Point
 
-from gameobjects.constants import UNITS
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
@@ -20,13 +19,16 @@ from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS, FUEL
 )
-from utils.colors import GREEN, RED
+from utils.views import ProgressBar
+from utils.colors import GREEN, RED, BLACK, YELLOW
 from utils.functions import (
-    add_player_color_to_name, get_texture_size, name_to_texture_name,
-    get_path_to_file, ignore_in_editor_mode
+    add_player_color_to_name, get_texture_size,
+    get_path_to_file, ignore_in_editor_mode, add_extension
 )
 from utils.geometry import find_area, generate_2d_grid
 from controllers.constants import CURSOR_ENTER_TEXTURE
+from map.constants import TILE_WIDTH, TILE_HEIGHT
+from user_interface.constants import UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
 
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -291,7 +293,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :param position: Point -- coordinates of the center (x, y)
         :param produces:
         """
-        PlayerEntity.__init__(self, building_name, player, position, 4, id)
+        PlayerEntity.__init__(self, building_name, player, position, id)
         self.produced_units = produced_units
         self.produced_resource = produced_resource
         self.research_facility = research_facility
@@ -329,7 +331,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def place_building_properly_on_the_grid(self) -> Point:
         """
         Buildings positions must be adjusted accordingly to their texture
-        width and height so they occupy minimum MapNodes.
+        width and height, so they occupy minimum MapNodes.
         """
         self.position = normalize_position(*self.position)
         left = self.position[0] - (TILE_WIDTH // 2) + 1
@@ -500,7 +502,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)
-        texture_name = name_to_texture_name(recolored)
+        texture_name = add_extension(recolored)
         size = get_texture_size(texture_name)
         path_and_texture = get_path_to_file(texture_name)
         return path_and_texture, size
@@ -593,15 +595,48 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
 
 class ConstructionSite(Building):
+    """
+    When Player decides where to build a nwe Building, the ConstructionSite is raised there for the construction time.
+    When Building construction is completed, ConstructionSite disappears and actual Building is spawned in its place.
+    """
 
-        def __init__(self, x, y, building_name: str, player: Player, position: Point):
-            super().__init__('construction_site', player, position)
-            self.constructed_building = building_name
+    def __init__(self, building_name: str, player: Player, x, y):
+        # size of this Building depends on the size of constructed object:
+        constructed_building_configs = self.game.configs[building_name]
+        size = constructed_building_configs['size']
+        super().__init__(f'construction_site_{size[0]}x{size[1]}', player, (x, y))
+        # TODO: create construction textures for each Building with stages of construction
+        # self.textures = []
+        # self.set_texture(0)
+
+        self.constructed_building_position = x, y
+        self.constructed_building_name = building_name
+        self.maximum_construction_progress = max = constructed_building_configs['max_health']
+        self.construction_progress = 0
+
+        self.progress_bar = ProgressBar(self.center_x, self.top, size[1] * TILE_WIDTH, 20, 0, max, 1, BLACK, YELLOW)
+
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
+        self.construction_progress += 1
+        if self.construction_progress >= self.maximum_construction_progress:
+            self.finish_construction()
+        elif self.is_controlled_by_player:
+            self.progress_bar.update()
+
+    def draw(self):
+        super().draw()
+        if self.is_controlled_by_player:
+            self.progress_bar.draw()
+
+    def finish_construction(self):
+        self.stop_drawing()
+        self.progress_bar = None
+        self.kill()
+        self.game.spawn(self.constructed_building_name, self.player, self.constructed_building_position)
+        self.game.sound_player.play_sound('construction_complete.wav')
 
 
 if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from game import Game
-    from map.constants import TILE_WIDTH, TILE_HEIGHT
-    from user_interface.constants import UI_BUILDINGS_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, \
-        UI_UNITS_CONSTRUCTION_PANEL

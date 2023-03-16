@@ -2,14 +2,14 @@
 
 from typing import List, Tuple, Set, Dict, Union, Optional, Any, Generator
 from arcade import (
-    Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text
+    Window, View, SpriteList, Sprite, SpriteSolidColor, draw_text, draw_rectangle_outline, draw_lrtb_rectangle_filled
 )
 
 
 # from utils.functions import get_objects_with_attribute
 from utils.game_logging import log, logger
 from utils.improved_spritelists import LayeredSpriteList
-from utils.colors import WHITE, GREEN
+from utils.colors import WHITE, GREEN, BLACK
 from utils.data_types import Viewport
 
 
@@ -162,22 +162,11 @@ class LoadingScreen(LoadableWindowView):
         self.sprite_list = SpriteList()
         self.loading_text = loading_text
         self.progress = 0
-        self.progress_bar = self.create_progress_bar()
+        self.progress_bar = ProgressBar(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT / 30)
         self.loading_background = Sprite(background_name) if \
             background_name is not None else None
-        self.sprite_list.extend(
-            [e for e in (self.progress_bar, self.loading_background) if e]
-        )
         self.set_updated_and_drawn_lists()
         self.loaded_view = loaded_view
-
-    @staticmethod
-    def create_progress_bar() -> SpriteSolidColor:
-        bar_width = 1
-        bar_height = int(SCREEN_HEIGHT * 0.025)
-        bar = SpriteSolidColor(bar_width, bar_height, GREEN)
-        bar.center_y = SCREEN_HEIGHT / 2
-        return bar
 
     def on_show_view(self):
         super().on_show_view()
@@ -190,11 +179,13 @@ class LoadingScreen(LoadableWindowView):
             self.update_progress(progress)
             self.loaded_view.on_update(delta_time)
         except AttributeError:
-            self.update_progress(delta_time)
-        self.update_progress_bar()
+            progress = delta_time
+            self.update_progress(progress)
+        self.progress_bar.update(progress=progress)
 
     def on_draw(self):
         super().on_draw()
+        self.progress_bar.draw()
         self.draw_loading_text()
 
     def draw_loading_text(self):
@@ -206,10 +197,34 @@ class LoadingScreen(LoadableWindowView):
         if self.progress >= 100:
             self.window.show_view(self.loaded_view)
 
-    def update_progress_bar(self):
-        progress = self.progress
-        self.progress_bar.center_x = center = progress * (SCREEN_WIDTH / 200)
-        self.progress_bar.width = 0.01 + center * 2
+class ProgressBar:
+
+    def __init__(self, x, y, width, height, start_progres=0, max_progress=100, progress_step=1, outline_color=BLACK, color=GREEN):
+        self.total_progress = start_progres
+        self.max_progress = max_progress
+        self.progress_step = progress_step
+        self.left_margin = x - (width / 2)
+        self.width = width
+
+        self.outline_data = [x, y, width, height, outline_color]
+        self.progress_bar_data = [
+            self.left_margin + 1,
+            self.left_margin + 1.01 + (width / max_progress) * start_progres,
+            y + (height / 2) - 1,
+            y - (height / 2) + 1,
+            color
+        ]
+
+    def draw(self):
+        draw_rectangle_outline(*self.outline_data)
+        draw_lrtb_rectangle_filled(*self.progress_bar_data)
+
+    def update(self, progress: Optional[float] = None):
+        if progress is None:
+            self.total_progress += self.progress_step
+        else:
+            self.total_progress += progress
+        self.progress_bar_data[1] = self.left_margin + (self.width / self.max_progress) * self.total_progress
 
 
 if __name__:

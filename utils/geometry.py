@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 from functools import lru_cache
-from math import atan2, degrees, radians, sin, cos, inf, dist
+from math import atan2, degrees, radians, sin, cos, dist
 from typing import Optional, Sequence, Tuple, List
 
 from numba import njit
-from shapely.geometry import LineString, Polygon
 
 from utils.data_types import Point, Number
 
@@ -14,14 +13,50 @@ CIRCLE_SLICE = 360 / ROTATIONS  # angular width of a single rotation step
 ROTATION_STEP = CIRCLE_SLICE / 2  # center of each rotation step
 
 
+matrix = [(-8, -4), (-8, -3), (-8, -2), (-8, -1), (-8, 0), (-8, 1), (-8, 2),
+          (-8, 3), (-8, 4), (-7, -5), (-7, -4), (-7, -3), (-7, -2), (-7, -1),
+          (-7, 0), (-7, 1), (-7, 2), (-7, 3), (-7, 4), (-7, 5), (-6, -6),
+          (-6, -5), (-6, -4), (-6, -3), (-6, -2), (-6, -1), (-6, 0), (-6, 1),
+          (-6, 2), (-6, 3), (-6, 4), (-6, 5), (-6, 6), (-5, -7), (-5, -6),
+          (-5, -5), (-5, -4), (-5, -3), (-5, -2), (-5, -1), (-5, 0), (-5, 1),
+          (-5, 2), (-5, 3), (-5, 4), (-5, 5), (-5, 6), (-5, 7), (-4, -8),
+          (-4, -7), (-4, -6), (-4, -5), (-4, -4), (-4, -3), (-4, -2), (-4, -1),
+          (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4), (-4, 5), (-4, 6),
+          (-4, 7), (-4, 8), (-3, -8), (-3, -7), (-3, -6), (-3, -5), (-3, -4),
+          (-3, -3), (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3),
+          (-3, 4), (-3, 5), (-3, 6), (-3, 7), (-3, 8), (-2, -8), (-2, -7),
+          (-2, -6), (-2, -5), (-2, -4), (-2, -3), (-2, -2), (-2, -1), (-2, 0),
+          (-2, 1), (-2, 2), (-2, 3), (-2, 4), (-2, 5), (-2, 6), (-2, 7),
+          (-2, 8), (-1, -8), (-1, -7), (-1, -6), (-1, -5), (-1, -4), (-1, -3),
+          (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2), (-1, 3), (-1, 4),
+          (-1, 5), (-1, 6), (-1, 7), (-1, 8), (0, -8), (0, -7), (0, -6),
+          (0, -5), (0, -4), (0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
+          (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8), (1, -8), (1, -7),
+          (1, -6), (1, -5), (1, -4), (1, -3), (1, -2), (1, -1), (1, 0), (1, 1),
+          (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (2, -8),
+          (2, -7), (2, -6), (2, -5), (2, -4), (2, -3), (2, -2), (2, -1),
+          (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
+          (2, 8), (3, -8), (3, -7), (3, -6), (3, -5), (3, -4), (3, -3),
+          (3, -2), (3, -1), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5),
+          (3, 6), (3, 7), (3, 8), (4, -8), (4, -7), (4, -6), (4, -5), (4, -4),
+          (4, -3), (4, -2), (4, -1), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
+          (4, 5), (4, 6), (4, 7), (4, 8), (5, -7), (5, -6), (5, -5), (5, -4),
+          (5, -3), (5, -2), (5, -1), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4),
+          (5, 5), (5, 6), (5, 7), (6, -6), (6, -5), (6, -4), (6, -3), (6, -2),
+          (6, -1), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6),
+          (7, -5), (7, -4), (7, -3), (7, -2), (7, -1), (7, 0), (7, 1), (7, 2),
+          (7, 3), (7, 4), (7, 5), (8, -4), (8, -3), (8, -2), (8, -1), (8, 0),
+          (8, 1), (8, 2), (8, 3), (8, 4)]
+
+
 def precalculate_possible_sprites_angles(rotations=ROTATIONS,
                                          circle_slice=CIRCLE_SLICE,
                                          rotation_step=ROTATION_STEP):
     """
     Build dict of int angles. We chop 360 degrees circle by 8 slices
-    each of 45 degrees. First slice has it's center at 0/360 degrees,
-    second slice has it's center at 22.5 degrees etc. This dict allows
-    for fast replacing angle of range 0-359 to one of 8 pre-calculated
+    each of 45 degrees. First slice has its center at 0/360 degrees,
+    second slice has its center at 22.5 degrees etc. This dict allows
+    for fast replacing angle of range 0-359 to one of 16 pre-calculated
     angles.
     """
     return {
@@ -103,31 +138,6 @@ def move_along_vector(start: Point,
     return p1[0] + vector[0], p1[1] + vector[1]
 
 
-def is_visible(position_a: Point,
-               position_b: Point,
-               obstacles: Sequence,
-               max_distance: float = inf) -> bool:
-    """
-    Check if position_a is 'visible' from position_b and vice-versa. 'Visible'
-    means, that you can connect both points with straight line without
-    intersecting any obstacle.
-
-    :param position_a: tuple -- coordinates of first position (x, y)
-    :param position_b: tuple -- coordinates of second position (x, y)
-    :param obstacles: list -- Obstacle objects to check against
-    :param max_distance: float -- maximum visibility fistance
-    :return: tuple -- (bool, list)
-    """
-    line_of_sight = LineString([position_a, position_b])
-    if line_of_sight.length > max_distance:
-        return False
-    elif not obstacles:
-        return True
-    return not any(
-        (Polygon(o.get_adjusted_hit_box()).crosses(line_of_sight) for o in
-         obstacles))
-
-
 @lru_cache(maxsize=None)
 # @njit(['int64, int64, int64'], nogil=True, fastmath=True, cache=True)
 def calculate_circular_area(grid_x, grid_y, max_distance):
@@ -164,8 +174,8 @@ def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None):
 
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
-    """Guarantee that number will by larger than min and less than max."""
-    return value if minimum < value < maximum else max(minimum, min(value, maximum))
+    """Guarantee that number will be larger than min and less than max."""
+    return max(minimum, min(value, maximum))
 
 
 def average_position_of_points_group(positions: Sequence[Point]) -> Point:
@@ -176,47 +186,11 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
     positions_count = len(positions)
     if positions_count == 1:
         return positions[0]
-    sum_x, sum_y = 0, 0
-    for position in positions:
-        sum_x += position[0]
-        sum_y += position[1]
-    return sum_x / positions_count, sum_y / positions_count
 
+    averaged_x_position = sum(position[0] for position in positions) / positions_count
+    averaged_y_position = sum(position[1] for position in positions) / positions_count
 
-matrix = [(-8, -4), (-8, -3), (-8, -2), (-8, -1), (-8, 0), (-8, 1), (-8, 2),
-          (-8, 3), (-8, 4), (-7, -5), (-7, -4), (-7, -3), (-7, -2), (-7, -1),
-          (-7, 0), (-7, 1), (-7, 2), (-7, 3), (-7, 4), (-7, 5), (-6, -6),
-          (-6, -5), (-6, -4), (-6, -3), (-6, -2), (-6, -1), (-6, 0), (-6, 1),
-          (-6, 2), (-6, 3), (-6, 4), (-6, 5), (-6, 6), (-5, -7), (-5, -6),
-          (-5, -5), (-5, -4), (-5, -3), (-5, -2), (-5, -1), (-5, 0), (-5, 1),
-          (-5, 2), (-5, 3), (-5, 4), (-5, 5), (-5, 6), (-5, 7), (-4, -8),
-          (-4, -7), (-4, -6), (-4, -5), (-4, -4), (-4, -3), (-4, -2), (-4, -1),
-          (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4), (-4, 5), (-4, 6),
-          (-4, 7), (-4, 8), (-3, -8), (-3, -7), (-3, -6), (-3, -5), (-3, -4),
-          (-3, -3), (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3),
-          (-3, 4), (-3, 5), (-3, 6), (-3, 7), (-3, 8), (-2, -8), (-2, -7),
-          (-2, -6), (-2, -5), (-2, -4), (-2, -3), (-2, -2), (-2, -1), (-2, 0),
-          (-2, 1), (-2, 2), (-2, 3), (-2, 4), (-2, 5), (-2, 6), (-2, 7),
-          (-2, 8), (-1, -8), (-1, -7), (-1, -6), (-1, -5), (-1, -4), (-1, -3),
-          (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2), (-1, 3), (-1, 4),
-          (-1, 5), (-1, 6), (-1, 7), (-1, 8), (0, -8), (0, -7), (0, -6),
-          (0, -5), (0, -4), (0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
-          (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8), (1, -8), (1, -7),
-          (1, -6), (1, -5), (1, -4), (1, -3), (1, -2), (1, -1), (1, 0), (1, 1),
-          (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (2, -8),
-          (2, -7), (2, -6), (2, -5), (2, -4), (2, -3), (2, -2), (2, -1),
-          (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
-          (2, 8), (3, -8), (3, -7), (3, -6), (3, -5), (3, -4), (3, -3),
-          (3, -2), (3, -1), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5),
-          (3, 6), (3, 7), (3, 8), (4, -8), (4, -7), (4, -6), (4, -5), (4, -4),
-          (4, -3), (4, -2), (4, -1), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
-          (4, 5), (4, 6), (4, 7), (4, 8), (5, -7), (5, -6), (5, -5), (5, -4),
-          (5, -3), (5, -2), (5, -1), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4),
-          (5, 5), (5, 6), (5, 7), (6, -6), (6, -5), (6, -4), (6, -3), (6, -2),
-          (6, -1), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6),
-          (7, -5), (7, -4), (7, -3), (7, -2), (7, -1), (7, 0), (7, 1), (7, 2),
-          (7, 3), (7, 4), (7, 5), (8, -4), (8, -3), (8, -2), (8, -1), (8, 0),
-          (8, 1), (8, 2), (8, 3), (8, 4)]
+    return averaged_x_position, averaged_y_position
 
 
 def generate_2d_grid(start_x, start_y, rows, columns, item_width, item_height, padding=0) -> List[Tuple[Number, Number]]:

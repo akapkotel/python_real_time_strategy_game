@@ -22,7 +22,7 @@ from utils.scheduling import EventsCreator, ScheduledEvent
 
 def name_without_color(name: str) -> str:
     for color in ('_red', '_green', '_blue', '_yellow'):
-        if color in name:
+        if name.endswith(color):
             return name.replace(color, '')
     return name
 
@@ -35,8 +35,9 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     game = None
     total_objects_count = 0
 
-    def __init__(self, texture_name: str, durability: int = 0,
-                 position: Point = (0, 0), id: Optional[int] = None,
+    def __init__(self, texture_name: str,
+                 position: Point = (0, 0),
+                 id: Optional[int] = None,
                  observers: Optional[List[Observer]] = None):
         # raw name of the object without texture extension and Player color
         # used to query game.configs and as a basename to build other names
@@ -55,9 +56,6 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         else:
             self.id = id
             GameObject.total_objects_count = max(GameObject.total_objects_count, id)
-
-        self._durability = durability  # used to determine if object makes a
-        # tile not-walkable or can be destroyed by vehicle entering the MapTile
 
         self.is_updated = True
         self.is_rendered = True
@@ -83,9 +81,6 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     def on_screen(self) -> bool:
         l, r, b, t = self.game.viewport
         return l < self.right and r > self.left and b < self.top and t > self.bottom
-
-    def destructible(self, weight: int = 0) -> bool:
-        return weight > self._durability
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_visibility()
@@ -145,7 +140,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
 class TerrainObject(GameObject):
 
     def __init__(self, filename: str, durability: int, position: Point):
-        GameObject.__init__(self, filename, durability, position)
+        GameObject.__init__(self, filename, position)
         self.map_node = self.game.map.position_to_node(*self.position)
         if durability:
             self.map_node.static_gameobject = self
