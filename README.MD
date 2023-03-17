@@ -90,6 +90,14 @@ To be done.
 38. Player can now produce new units.
 39. Soldiers can enter end leave Buildings.
 40. UI displays amount of resources, player has.
+17.03.2023:
+41. New UI with icons for resources and units and buildings construction panels.
+42. Prettier Fog Of War without sharp edges.
+43. Units are now rotated in 16 directions instead of 8.
+44. CPU-player can now build Units, having enough resources and proper factories.
+45. Added two more units prototypes - Truck and APC.
+46. Minimap and teleporting to the map-locations by clickling on the
+   minimap (was added long time ago, but I missed noticing it).
 
 #### TO BE DONE:
 #### Minor:
@@ -99,17 +107,15 @@ To be done.
    diagonal-movements-collisions.
 3. Better collision-avoidance to replace tiles-reserving system -
    flocking maybe? How to make it working with pathfinding?
-4. Minimap and teleporting to the map-locations by clickling on the
-   minimap.
-5. Units-radiochatter sounds - DONE. Battle sounds.
-6. Skirmish mission customisation submenu (this is the only available
+4. Units-radiochatter sounds - DONE. Battle sounds.
+5. Skirmish mission customisation submenu (this is the only available
    game mode for now).
-7. Playlist for background music tracks - DONE.
-8. Better Ai for Units autonomous behaviour.
-9. Flocking for Soldier class.
-10. Implement Jump Point Search to optimize A* performance.
-11. Less cpu-heavy VehicleThreads.
-12. Nicer MiniMap without ugly rectangles representing discovered area - DONE.
+6. Playlist for background music tracks - DONE.
+7. Better Ai for Units autonomous behaviour.
+8. Flocking for Soldier class.
+9. Implement Jump Point Search to optimize A* performance.
+10. Less cpu-heavy VehicleThreads.
+11. Nicer MiniMap without ugly rectangles representing discovered area - DONE.
 
 #### Major:
 1. User-interface. (currently being developed)

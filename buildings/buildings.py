@@ -614,7 +614,7 @@ class ConstructionSite(Building):
         self.maximum_construction_progress = max = constructed_building_configs['max_health']
         self.construction_progress = 0
 
-        self.progress_bar = ProgressBar(self.center_x, self.top, size[1] * TILE_WIDTH, 20, 0, max, 1, BLACK, YELLOW)
+        self.progress_bar = ProgressBar(self.center_x, self.top, self.width, 20, 0, max, 1, BLACK, YELLOW)
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)

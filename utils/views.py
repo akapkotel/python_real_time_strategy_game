@@ -209,7 +209,7 @@ class ProgressBar:
         self.outline_data = [x, y, width, height, outline_color]
         self.progress_bar_data = [
             self.left_margin + 1,
-            self.left_margin + 1.01 + (width / max_progress) * start_progres,
+            self.left_margin + 2,
             y + (height / 2) - 1,
             y - (height / 2) + 1,
             color
