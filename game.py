@@ -105,9 +105,9 @@ def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
 
 class Settings:
     """This class will serve for permanently saving user-defined settings and restore them between games."""
-    __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'debug', 'god_mode', 'ai_sleep','debug_mouse',
-                 'debug_map', 'vehicles_threads', 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode',
-                 'remove_wrecks_after_seconds', 'damage_randomness_factor', 'percent_chance_for_spawning_tree', 'resources_abundance',
+    __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'god_mode', 'ai_sleep', 'vehicles_threads',
+                 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode', 'remove_wrecks_after_seconds',
+                 'damage_randomness_factor', 'percent_chance_for_spawning_tree', 'resources_abundance',
                  'starting_resources', 'screen_width', 'screen_height', 'map_width', 'map_height', 'tile_width',
                  'tile_height', 'hints_delay_seconds', 'pyprofiler', 'developer_mode')
 
@@ -120,11 +120,6 @@ class Settings:
         self.update_rate = 1 / (self.fps * self.game_speed)
 
         self.full_screen: bool = False
-
-        self.debug: bool = False
-        self.debug_mouse: bool = True
-        self.debug_map: bool = False
-
         self.pyprofiler: bool = False
 
         self.god_mode: bool = False
@@ -475,8 +470,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.assign_reference_to_self_for_all_classes()
 
-        self.generate_random_entities = self.loader is None
-
         self.timer = Timer()
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
@@ -538,7 +531,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
-            ['debugger', GameDebugger if self.settings.debug else None, 0.10]
         ] if self.loader is None else []
 
         log('Game initialized successfully', console=True)
@@ -757,16 +749,23 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.change_interface_content()
 
     def create_random_scenario(self):
-        if self.generate_random_entities:
+        if self.loader is None:
             self.test_scheduling_events()
             self.test_factions_and_players_creation()
             self.test_buildings_spawning()
             self.test_units_spawning()
             self.test_missions()
+
+    def place_viewport_at_players_base_or_starting_position(self):
+        if self.local_human_player.buildings:
+            position = average_position_of_points_group(
+                [u.position for u in self.local_human_player.buildings]
+            )
+        else:
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )
-            self.window.move_viewport_to_the_position(*position)
+        self.window.move_viewport_to_the_position(*position)
 
     def test_scheduling_events(self):
         event = ScheduledEvent(self, 5, self.scheduling_test)
@@ -906,7 +905,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         # assure that FoW will not cover player interface:
         self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
         super().after_loading()
-        self.create_random_scenario()
+        if self.loader is None:
+            self.create_random_scenario()
+        self.place_viewport_at_players_base_or_starting_position()
         self.update_interface_position(self.viewport[1], self.viewport[3])
 
     def save_timer(self):
@@ -951,8 +952,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.debugger.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
-        if self.settings.debug_map and self.map is not None:
-            self.map.quadtree.draw()
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center

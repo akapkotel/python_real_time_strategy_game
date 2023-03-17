@@ -203,13 +203,13 @@ class ProgressBar:
         self.total_progress = start_progres
         self.max_progress = max_progress
         self.progress_step = progress_step
-        self.left_margin = x - (width / 2)
+        self.left_margin = x - (width // 2)
         self.width = width
 
         self.outline_data = [x, y, width, height, outline_color]
         self.progress_bar_data = [
             self.left_margin + 1,
-            self.left_margin + 2,
+            self.left_margin + 1,
             y + (height / 2) - 1,
             y - (height / 2) + 1,
             color
@@ -224,7 +224,7 @@ class ProgressBar:
             self.total_progress += self.progress_step
         else:
             self.total_progress += progress
-        self.progress_bar_data[1] = self.left_margin + (self.width / self.max_progress) * self.total_progress
+        self.progress_bar_data[1] = self.left_margin + 1 + (self.width / self.max_progress) * self.total_progress
 
 
 if __name__:

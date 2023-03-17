@@ -77,9 +77,6 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 back_to_menu_button,
                 # set 'subgroup' index for each element to assign it to the
                 # proper tab in options sub-menu:
-                Checkbox('menu_checkbox.png', x, next(y), 'Draw debug:', 20,
-                         ticked=window.settings.debug,
-                         variable=(window.settings, 'debug'), subgroup=1),
                 Checkbox('menu_checkbox.png', x, next(y), 'Vehicles threads:',
                          20, ticked=window.settings.vehicles_threads,
                          variable=(window.settings, 'vehicles_threads'),
