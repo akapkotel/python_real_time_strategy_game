@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict
 
 from arcade.arcade_types import Point
 
 from buildings.buildings import Building
-from map.map import map_grid_to_position
 from players_and_factions.player import Player
 from units.units import Unit, Soldier, VehicleWithTurret, Vehicle
 
@@ -38,18 +37,6 @@ class GameObjectsSpawner:
         self.pathfinder = self.game.pathfinder
         self.configs: Dict[str, Dict[str, Any]] = self.game.configs
         log(f'GameObjectsSpawner was initialized successfully. Found {len(self.configs)} entities in config file.', console=True)
-
-    def spawn_group(self,
-                    names: Sequence[str],
-                    player: Player,
-                    position: Point,
-                    **kwargs) -> List[GameObject]:
-        positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
-        spawned = []
-        for i, name in enumerate(names):
-            position = map_grid_to_position(positions[i])
-            spawned.append(self.spawn(name, player, position, **kwargs))
-        return spawned
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
         if player is None:

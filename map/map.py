@@ -12,11 +12,13 @@ from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
 )
 
-from arcade import Sprite, Texture, load_spritesheet
+from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
+from arcade.color import OLD_MOSS_GREEN
 
 from game import PROFILING_LEVEL
 from map.constants import TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
 from gameobjects.gameobject import GameObject
+from utils.colors import SAND
 from utils.data_types import GridPosition, Number
 from utils.priority_queue import PriorityQueue
 from utils.scheduling import EventsCreator
@@ -259,7 +261,7 @@ class Map:
 
     @property
     def random_walkable_node(self) -> MapNode:
-        return random.choice(tuple(self.nodes.values()))
+        return random.choice(tuple(self.all_walkable_nodes))
 
     @property
     def all_walkable_nodes(self) -> Generator[MapNode]:
@@ -276,14 +278,15 @@ class Map:
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
-        try:
-            terrain_type, index, rotation = self.nodes_data[(x, y)]
-            t, i, r = set_terrain_texture(terrain_type, index, rotation)
-        except KeyError:
-            terrain_type = 'mud'
-            t, i, r = set_terrain_texture(terrain_type)
-            self.nodes_data[(x, y)] = terrain_type, i, r
-        sprite.texture = t
+        sprite.texture = make_soft_square_texture(TILE_WIDTH, OLD_MOSS_GREEN, 255, 255)
+        # try:
+        #     terrain_type, index, rotation = self.nodes_data[(x, y)]
+        #     t, i, r = set_terrain_texture(terrain_type, index, rotation)
+        # except KeyError:
+        #     terrain_type = 'mud'
+        #     t, i, r = set_terrain_texture(terrain_type)
+        #     self.nodes_data[(x, y)] = terrain_type, i, r
+        # sprite.texture = t
         self.game.terrain_tiles.append(sprite)
 
     def calculate_distances_between_nodes(self):

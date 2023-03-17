@@ -17,6 +17,7 @@ __credits__ = {'Coding': __author__,
 import random
 import time
 import pathlib
+from dataclasses import dataclass
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
@@ -105,11 +106,6 @@ def ask_player_for_confirmation(position: Tuple, after_switch_to_bundle: str):
 
 class Settings:
     """This class will serve for permanently saving user-defined settings and restore them between games."""
-    __slots__ = ('fps', 'game_speed', 'update_rate', 'full_screen', 'god_mode', 'ai_sleep', 'vehicles_threads',
-                 'threads_fadeout_seconds', 'shot_blasts', 'editor_mode', 'remove_wrecks_after_seconds',
-                 'damage_randomness_factor', 'percent_chance_for_spawning_tree', 'resources_abundance',
-                 'starting_resources', 'screen_width', 'screen_height', 'map_width', 'map_height', 'tile_width',
-                 'tile_height', 'hints_delay_seconds', 'pyprofiler', 'developer_mode')
 
     def __init__(self):
         self.developer_mode: bool = True
@@ -130,8 +126,8 @@ class Settings:
 
         self.shot_blasts: bool = True
         self.remove_wrecks_after_seconds: int = 30
-        self.damage_randomness_factor = 0.25  # standard deviation
-        self.percent_chance_for_spawning_tree: float = 0.05  # percentage chance of tree being spawned
+        self.damage_randomness_factor = 0.25
+        self.percent_chance_for_spawning_tree: float = 0.05
 
         self.resources_abundance: float = 0.01
         self.starting_resources: float = 0.5
@@ -144,6 +140,14 @@ class Settings:
         self.tile_height: int = TILE_HEIGHT
 
         self.hints_delay_seconds: int = 1
+
+        with open('settings.txt', 'r') as file:
+            for line in file.readlines():
+                attribute, value = line.split(' = ')
+                if 'self' in value or '(' in value or ')' in value:
+                    continue
+                else:
+                    self.__setattr__(attribute, eval(value))
 
 
 class GameWindow(Window, EventsCreator):
@@ -711,16 +715,15 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def show_units_construction_options(self):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
-        if not units_construction_bundle.elements:
-            self.create_units_constructions_options(units_construction_bundle)
+        self.create_units_constructions_options()
         self.load_bundle(UI_UNITS_CONSTRUCTION_PANEL)
 
-    def create_units_constructions_options(self, units_construction_bundle: UiElementsBundle):
+    def create_units_constructions_options(self):
         x, y = self.ui_position
+        units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
         units_construction_bundle.elements.clear()
-        positions = generate_2d_grid(x - 135, y + 93, 6, 4, 75, 75)
-        for i, unit_name in enumerate(self.local_human_player.units_possible_to_build):
+        positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
+        for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
             hint = Hint(f'{unit_name}_production_hint.png', delay=0.5)
@@ -791,24 +794,25 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
               position: Optional[Point] = None,
               *args,
               **kwargs) -> Optional[GameObject]:
-        player = self.get_player_instance(player)
+        player = self.players.get(player, player)
         if position is None:
             position = self.map.get_random_position()
         return self.spawner.spawn(object_name, player, position, *args, **kwargs)
 
-    def get_player_instance(self, player: Union[Player, int]) -> Optional[Player]:
-        try:
-            return self.players[player]
-        except KeyError:  # it's already a Player instance, or None
-            return player
-
     def spawn_group(self,
                     names: List[str],
                     player: Union[Player, int],
-                    position: Point,
-                    **kwargs):
-        player = self.get_player_instance(player)
-        return self.spawner.spawn_group(names, player, position, **kwargs)
+                    position: Optional[Point] = None,
+                    *args,
+                    **kwargs) -> List[Unit]:
+        player = self.players.get(player, player)
+        if position is None:
+            position = self.map.get_random_position()
+        positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
+        return [
+            self.spawner.spawn(name, player, map_grid_to_position(position), *args, **kwargs)
+            for name, position in zip(names, positions)
+        ]
 
     def test_units_spawning(self):
         units_names = ('tank_medium', 'apc', 'truck')
@@ -817,7 +821,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             for player in (self.players.values()):
                 node = random.choice(walkable)
                 walkable.remove(node)
-                amount = CPU_UNITS if player.id == 4 else PLAYER_UNITS
+                amount = PLAYER_UNITS if player.is_local_human_player else CPU_UNITS
                 names = [unit_name] * amount
                 self.spawn_group(names, player, node.position)
 
@@ -1002,7 +1006,7 @@ def run_game(settings: Settings):
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
-    from map.map import Map, Pathfinder
+    from map.map import Map, Pathfinder, map_grid_to_position
     from units.unit_management import (
         UnitsManager, SelectedEntityMarker, PermanentUnitsGroup
     )

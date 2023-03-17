@@ -87,6 +87,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             ],
             register_to=self
         )
+
         # sound:
         y = (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu.extend(
@@ -110,6 +111,19 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             ]
         )
 
+        if self.window.settings.developer_mode:
+            y = (i for i in range(300, SCREEN_HEIGHT, 75))
+            options_menu.extend(
+                (Checkbox('menu_checkbox.png', x, next(y), 'God mode:',
+                         20, ticked=window.settings.god_mode,
+                         variable=(window.settings, 'god_mode'),
+                         subgroup=3),
+                Checkbox('menu_checkbox.png', x, next(y), 'AI Sleep:',
+                         20, ticked=window.settings.ai_sleep,
+                         variable=(window.settings, 'ai_sleep'),
+                         subgroup=3))
+            )
+
         # tabs switching what groups of elements are visible by
         # switching between subgroups:
         graphics_tab = Tab('menu_tab_graphics.png', 960,
@@ -118,8 +132,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         sound_tab = Tab('menu_tab_sound.png', 320,
                         SCREEN_HEIGHT - 34, functions=partial(
                         options_menu.switch_to_subgroup, 2),
-                        other_tabs=(graphics_tab, ))
-        game_tab = Tab('menu_tab_blank.png', 1600,
+                        other_tabs=(graphics_tab,))
+        game_tab = Tab('menu_tab_game.png', 1600,
                         SCREEN_HEIGHT - 34, functions=partial(
                         options_menu.switch_to_subgroup, 3),
                         other_tabs=(graphics_tab, sound_tab))

@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
-from user_interface.constants import UI_RESOURCES_SECTION
+from user_interface.constants import UI_RESOURCES_SECTION, UI_UNITS_CONSTRUCTION_PANEL
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
@@ -167,8 +167,8 @@ class Player(EventsCreator, Observer, Observed):
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color
 
-        self.units_possible_to_build: Set[str] = set()
-        self.buildings_possible_to_build: Set[str] = set()
+        self.units_possible_to_build: List[str] = []
+        self.buildings_possible_to_build: List[str] = []
 
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
@@ -236,6 +236,7 @@ class Player(EventsCreator, Observer, Observed):
     def _remove_building(self, building: Building):
         self.buildings.discard(building)
         self.faction.buildings.discard(building)
+        self.update_construction_options(building)
         self.update_energy_balance(building)
 
     def is_enemy(self, other: Player) -> bool:
@@ -330,6 +331,14 @@ class Player(EventsCreator, Observer, Observed):
         self.faction = self.game.factions[self.faction]
         self.observed_attributes = defaultdict(list)
         self.attach_observers(observers=[self.game, self.faction])
+
+    def update_construction_options(self, building: Building):
+        if (produced_units := building.produced_units) is not None:
+            for unit_name in produced_units:
+                self.units_possible_to_build.remove(unit_name)
+        if (constructions := self.game.configs[building.object_name]['allows_construction']) is not None:
+            for building_name in constructions:
+                self.buildings_possible_to_build.remove(building_name)
 
 
 class HumanPlayer(Player):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import os.path
 import random
 import time
 
@@ -93,7 +94,7 @@ class Unit(PlayerEntity):
         self.game.explosions_pool.add(name, required)
 
     @abstractmethod
-    def _load_textures_and_reset_hitbox(self):
+    def _load_textures_and_reset_hit_box(self):
         """
         Since we can have many spritesheets representing our Unit.
         Some units have rotating turrets, so above the normal 8-texture
@@ -443,7 +444,7 @@ class Vehicle(Unit):
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
 
-        self._load_textures_and_reset_hitbox()
+        self._load_textures_and_reset_hit_box()
 
         thread_texture = ''.join((self.object_name, '_threads.png'))
         # texture of the VehicleThreads left by this Vehicle
@@ -458,7 +459,7 @@ class Vehicle(Unit):
     def threads_frequency(self):
         return 5 / self.max_speed
 
-    def _load_textures_and_reset_hitbox(self):
+    def _load_textures_and_reset_hit_box(self):
         width, height = get_texture_size(self.full_name, columns=ROTATIONS)
         self.textures = load_textures(
             self.filename_with_path,
@@ -471,7 +472,7 @@ class Vehicle(Unit):
         super().on_update(delta_time)
         if self.moving:
             self.consume_fuel()
-            if self.is_rendered and self.game.settings.vehicles_threads:
+            if self.is_rendered and self.game.settings.vehicles_threads and self.threads_texture is not None:
                 self.leave_threads()
 
     def consume_fuel(self):
@@ -480,10 +481,7 @@ class Vehicle(Unit):
     def leave_threads(self):
         if (t := self.timer.frames) - self.threads_time >= self.threads_frequency:
             self.threads_time = t
-            self.game.vehicles_threads.append(self.create_threads())
-
-    def create_threads(self):
-        return VehicleThreads(self.threads_texture, self.cur_texture_index, *self.position),
+            self.game.vehicles_threads.append(VehicleThreads(self.threads_texture, self.facing_direction, *self.position))
 
     def kill(self):
         self.spawn_wreck()
@@ -525,7 +523,7 @@ class VehicleWithTurret(Vehicle):
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
 
-    def _load_textures_and_reset_hitbox(self):
+    def _load_textures_and_reset_hit_box(self):
         """
         Create 16 lists of 16-texture spritesheets for each combination of hull
         and turret directions possible in game.
@@ -581,9 +579,6 @@ class VehicleWithTurret(Vehicle):
         self.turret_aim_target = None
         super().on_update(delta_time)
 
-    def create_threads(self):
-        return VehicleThreads(self.threads_texture, self.facing_direction, *self.position)
-
     def fight_enemy(self, enemy: PlayerEntity):
         self.turret_aim_target = enemy
         self.set_hull_and_turret_texture(enemy)
@@ -615,9 +610,9 @@ class Soldier(Unit):
         self.outside = True
         self.equipment = None
         self.all_textures: Dict[int, List[List[Texture]]] = {}
-        self._load_textures_and_reset_hitbox()
+        self._load_textures_and_reset_hit_box()
 
-    def _load_textures_and_reset_hitbox(self):
+    def _load_textures_and_reset_hit_box(self):
         texture_name = get_path_to_file(self.full_name)
         width, height = get_texture_size(self.full_name, rows=ROTATIONS, columns=ROTATIONS)
 

@@ -19,6 +19,7 @@ from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS, FUEL
 )
+from utils.scheduling import ScheduledEvent
 from utils.views import ProgressBar
 from utils.colors import GREEN, RED, BLACK, YELLOW
 from utils.functions import (
@@ -49,7 +50,7 @@ class UnitsProducer:
     def __init__(self, produced_units: Tuple[str]):
         # Units which are available to produce in this Building and their costs in resources:
         self.produced_units: Dict[str, Dict[str: int]] = self.build_units_productions_costs_dict(produced_units)
-        self.player.units_possible_to_build.update(produced_units)
+        self.player.units_possible_to_build.extend(produced_units)
         # Queue of Units to be produced
         self.production_queue: Deque[str] = deque()
         # Name of the Unit, which is currently in production, if any:
@@ -63,16 +64,15 @@ class UnitsProducer:
         # used to pick one building to produce new units if player has more such factories:
         self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
-        if self.player.is_local_human_player:
-            self.recreate_ui_units_construction_section()
-
-    def recreate_ui_units_construction_section(self):
-        """
-        Each time a new UnitsProducer enters the game, UI panel with Units-available for plaer to build must be
-        refreshed to contain any new Unit this new Building produces.
-        """
-        units_construction_bundle = self.game.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
-        self.game.create_units_constructions_options(units_construction_bundle)
+    #     if self.player.is_local_human_player:
+    #         self.recreate_ui_units_construction_section()
+    #
+    # def recreate_ui_units_construction_section(self):
+    #     """
+    #     Each time a new UnitsProducer enters the game, UI panel with Units-available for plaer to build must be
+    #     refreshed to contain any new Unit this new Building produces.
+    #     """
+    #     self.game.create_units_constructions_options()
 
     @logger()
     def start_production(self, unit: str):
@@ -147,8 +147,8 @@ class UnitsProducer:
 
     def update_production_buttons(self, ui_panel: UiElementsBundle):
         for produced in self.produced_units:
-            button = ui_panel.find_by_name(produced)
-            self.update_single_button(button, produced)
+            if (button := ui_panel.find_by_name(produced)) is not None:
+                self.update_single_button(button, produced)
 
     def update_single_button(self, button: ProgressButton, produced: str):
         button.counter = self.production_queue.count(produced)
@@ -318,7 +318,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.spawn_soldiers_for_garrison(garrison)
 
         if (buildings := self.configs.get('allows_construction')) is not None:
-            self.player.buildings_possible_to_build.update(buildings)
+            self.player.buildings_possible_to_build.extend(buildings)
 
         self.layered_spritelist.swap_rendering_layers(
             self, 0, position_to_map_grid(*self.position)[1]
@@ -453,7 +453,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         ]
 
     def create_ui_buttons(self, x, y) -> List[Button]:
-        buttons = [self.create_garrison_button(x, y)]
+        buttons = [self.create_garrison_button(x, y), self.create_demolish_button(x, y)]
         if self.produced_units is not None:
             buttons.extend(self.create_production_buttons(x, y))
         return buttons
@@ -466,6 +466,17 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         )
         button.counter = len(self.garrisoned_soldiers)
         return button
+
+    def create_demolish_button(self, x, y) -> Button:
+        return Button(
+            'game_button_destroy.png', x - 35, y - 45, 'demolish',
+            functions=self.autodestruct
+        )
+
+    def autodestruct(self):
+        self.on_being_damaged(100, 100)
+        if self.alive:
+            self.schedule_event(ScheduledEvent(self, 1, self.autodestruct))
 
     @property
     def count_empty_garrison_slots(self) -> int:
