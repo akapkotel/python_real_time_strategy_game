@@ -488,8 +488,7 @@ class Vehicle(Unit):
         super().kill()
 
     def spawn_wreck(self):
-        wreck_name = self.object_name.replace(".png", "_wreck.png")
-        self.game.spawn(wreck_name, None, self.position, self.cur_texture_index)
+        self.game.spawn(f'{self.object_name}_wreck.png', None, self.position, self.facing_direction)
 
 
 class VehicleThreads(Sprite):

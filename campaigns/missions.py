@@ -71,17 +71,22 @@ class Mission:
             self.description
         )
 
-    def unlock_technologies_for_player(self, player: Player, *technologies: str):
+    def unlock_technologies_for_player(self, player: Player, *technologies: str) -> Mission:
         for tech_name in technologies:
             tech_data = self.game.configs[tech_name]
             technology = Technology(*[d for d in list(tech_data.values())[4:]])
             self.allowed_technologies[player.id][technology.id] = technology
         return self
 
+    def unlock_buildings_for_player(self, player: Player, *buildings: str) -> Mission:
+        for building_name in buildings:
+            player.buildings_possible_to_build.append(building_name)
+        return self
+
     def extend(self, *items):
         raise TypeError(f'Unknown items. Accepted are: Condition, Player')
 
-    def add_triggers(self, *triggers: Trigger):
+    def add_triggers(self, *triggers: Trigger) -> Mission:
         for trigger in triggers:
             trigger.bind_mission(self)
             self.triggers.append(trigger)
@@ -89,7 +94,7 @@ class Mission:
                 self.required_victory_points[trigger.player.id] += points
         return self
 
-    def add_players(self, *items: Player):
+    def add_players(self, *items: Player) -> Mission:
         for player in items:
             self.players.add(player.id)
             self.victory_points[player.id] = 0

@@ -6,7 +6,6 @@ from math import dist
 from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 
-from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log
 
 from arcade import load_sound, play_sound, stop_sound, Sound
@@ -18,14 +17,16 @@ SOUNDS_EXTENSION = 'wav'
 MUSIC_TRACK_SUFFIX = 'theme'
 UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
 UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
-UNIT_PRODUCTION_FINISHED = [f'unit_{end}.wav' for end in ("ready", "complete")]
+UNIT_PRODUCTION_FINISHED = [f'unit_{suffix}.wav' for suffix in ("ready", "complete")]
 
 
 class AudioPlayer:
+    window = None
     game = None
     instance = None
 
     def __init__(self,
+                 window,
                  sounds_directory: str = SOUNDS_DIRECTORY,
                  sound_on: bool = True,
                  music_on: bool = True,
@@ -36,6 +37,7 @@ class AudioPlayer:
         :param sounds_directory: str -- name of the directory without path
         :param sound_on: bool -- if sounds should be played or not
         """
+        self.window = window
         self._music_on = music_on
         self._sound_effects_on = sound_effects_on
 
@@ -43,7 +45,7 @@ class AudioPlayer:
         self.music_volume = self.volume
         self.effects_volume = self.volume
 
-        self.sounds: Dict[str, Sound] = self._preload_sounds(sounds_directory)
+        self.sounds: Dict[str, Sound] = self._preload_sounds()
         self.currently_played: List[Player] = []
         self.current_music: Optional[Player] = None
         log(f'Loaded {len(self.sounds)} sounds.', console=True)
@@ -61,12 +63,10 @@ class AudioPlayer:
 
         log(f'Found {len(self.playlists)} playlists', console=True)
 
-    @staticmethod
-    def _preload_sounds(sounds_directory=None) -> Dict[str, Sound]:
-        names_to_paths = find_paths_to_all_files_of_type(SOUNDS_EXTENSION,
-                                                         sounds_directory)
+    def _preload_sounds(self) -> Dict[str, Sound]:
+        names_to_paths = self.window.resources_manager.get_paths_to_all_files_of_type(SOUNDS_EXTENSION)
         return {
-            name: load_sound(f'{path}/{name}', streaming=False) for
+            name: load_sound(path, streaming=False) for
             name, path in names_to_paths.items()
         }
 

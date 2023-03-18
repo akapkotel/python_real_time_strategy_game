@@ -43,10 +43,11 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         # used to query game.configs and as a basename to build other names
         self.object_name = name_without_color(texture_name)
         # name with texture extension added used to find ant load texture
-        self.full_name = add_extension(texture_name)
-        self.filename_with_path = get_path_to_file(self.full_name)
-        x, y = position
-        super().__init__(self.filename_with_path, center_x=x, center_y=y)
+        self.full_name = full_name = add_extension(texture_name)
+
+        self.filename_with_path = self.game.resources_manager.get_path_to_single_file(full_name)
+
+        super().__init__(self.filename_with_path, center_x=position[0], center_y=position[1])
         Observed.__init__(self, observers)
         EventsCreator.__init__(self)
 

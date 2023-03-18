@@ -439,11 +439,25 @@ class Button(UiElement):
 
 class ProgressButton(Button):
     """
-    This button displays a progress of some process it is attached to. Updating
+    This button displays the progress of some process it is attached to. Updating
     and tracking of this progress is up to user.
     """
-    _progress = 0
-    _counter = 0
+
+    def __init__(self, texture_name: str,
+                 x: int,
+                 y: int,
+                 name: Optional[str] = None,
+                 active: bool = True,
+                 visible: bool = True,
+                 parent: Optional[Hierarchical] = None,
+                 functions: Optional[Union[Callable, Tuple[Callable]]] = None,
+                 subgroup: Optional[int] = None,
+                 selectable_group: Optional[SelectableGroup] = None,
+                 color: Optional[Color] = None,
+                 counter: Optional[int] = None):
+        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color)
+        self._counter = counter
+        self._progress = 0
 
     @property
     def progress(self):

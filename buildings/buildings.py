@@ -453,23 +453,27 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         ]
 
     def create_ui_buttons(self, x, y) -> List[Button]:
-        buttons = [self.create_garrison_button(x, y), self.create_demolish_button(x, y)]
+        buttons = [
+            self.create_garrison_button(x, y),
+            self.create_demolish_button(x, y)
+        ]
+
         if self.produced_units is not None:
             buttons.extend(self.create_production_buttons(x, y))
+
         return buttons
 
     def create_garrison_button(self, x, y) -> ProgressButton:
-        button = ProgressButton(
+        return ProgressButton(
             'ui_leave_building_btn.png', x - 135, y - 45, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
-            functions=self.on_soldier_exit
+            functions=self.on_soldier_exit,
+            counter=len(self.garrisoned_soldiers)
         )
-        button.counter = len(self.garrisoned_soldiers)
-        return button
 
     def create_demolish_button(self, x, y) -> Button:
         return Button(
-            'game_button_destroy.png', x - 35, y - 45, 'demolish',
+            'game_button_destroy.png', x - 55, y - 45, 'demolish',
             functions=self.autodestruct
         )
 

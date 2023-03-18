@@ -14,10 +14,10 @@ __credits__ = {'Coding': __author__,
                'Music': [],
                'Sounds': []}
 
+import os
 import random
 import time
 import pathlib
-from dataclasses import dataclass
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
@@ -29,6 +29,7 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from effects.sound import AudioPlayer
+from gameobjects.constants import UNITS, BUILDINGS
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from user_interface.scenario_editor import ScenarioEditor
@@ -45,7 +46,7 @@ from user_interface.user_interface import (
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
 from utils.data_types import Viewport
-from utils.functions import get_path_to_file, ignore_in_editor_mode
+from utils.functions import get_path_to_file, ignore_in_editor_mode, find_paths_to_all_files_of_type
 from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
@@ -150,6 +151,30 @@ class Settings:
                     self.__setattr__(attribute, eval(value))
 
 
+class ResourcesManager:
+
+    def __init__(self, extensions: Tuple[str] = ('png', 'wav'), resources_path: Optional[str] = None):
+        self.extensions = extensions
+        self.resources_path = resources_path or os.path.abspath('resources')
+        self.resources = {}
+        for extension in self.extensions:
+            names_to_paths = find_paths_to_all_files_of_type(extension, self.resources_path)
+            self.resources[extension] = {name: pathlib.Path(path, name) for name, path in names_to_paths.items()}
+
+    def get_path_to_single_file(self, file_name: str) -> Union[Dict[str, str], str]:
+        extension = file_name.split('.')[-1]
+        try:
+            return self.resources[extension][file_name]
+        except KeyError:
+            raise FileNotFoundError(f'File {file_name} was not found in {self.resources_path} and its subdirectories!')
+
+    def get_paths_to_all_files_of_type(self, extension: str):
+            try:
+                return self.resources[extension]
+            except KeyError:
+                raise FileNotFoundError(f'There are no files with {extension} extensions in {self.resources_path}!')
+
+
 class GameWindow(Window, EventsCreator):
     """
     This class represents the whole window-application which allows player to
@@ -167,12 +192,13 @@ class GameWindow(Window, EventsCreator):
         self.set_caption(__title__)
         self.set_fullscreen(settings.full_screen)
 
+        self.resources_manager = ResourcesManager()
         self.settings = Settings()  # shared with Game
 
         self.campaigns: Dict[str, Campaign] = load_campaigns()
         self.missions: List[MissionDescriptor] = []
 
-        self.sound_player = AudioPlayer()
+        self.sound_player = AudioPlayer(window=self)
 
         self.save_manager = SaveManager('saved_games', 'scenarios', self)
 
@@ -540,9 +566,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         log('Game initialized successfully', console=True)
 
     @property
-    def things_to_update_each_frame(self):
+    def things_to_update_each_frame(self) -> Tuple[EventsScheduler, GameDebugger, FogOfWar, Pathfinder, MiniMap, Timer, Mission]:
         return (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer,
                 self.current_mission)
+
+    @property
+    def resources_manager(self) -> ResourcesManager:
+        return self.window.resources_manager
 
     @property
     def sound_player(self) -> AudioPlayer:
@@ -609,9 +639,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             elements=[
                 right_panel,
                 Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
-                       functions=self.show_buildings_construction_options),
+                       functions=partial(self.show_construction_options, BUILDINGS)),
                 Button('ui_units_construction_options.png', ui_x + 90, ui_y + 153,
-                       functions=self.show_units_construction_options),
+                       functions=partial(self.show_construction_options, UNITS)),
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
@@ -708,9 +738,18 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if all(isinstance(u, Engineer) for u in context_units):
             bundle.extend(Engineer.create_ui_buttons(*self.ui_position))
 
-    def show_buildings_construction_options(self):
+    def show_construction_options(self, which: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        for building_name in self.local_human_player.buildings_possible_to_build:
+        if which is UNITS:
+            construction_bundle = UI_UNITS_CONSTRUCTION_PANEL
+            self.create_units_constructions_options()
+        else:
+            construction_bundle = UI_BUILDINGS_CONSTRUCTION_PANEL
+            self.create_buildings_construction_options()
+        self.load_bundle(construction_bundle)
+
+    def create_buildings_construction_options(self):
+        for i, building_name in enumerate(self.local_human_player.buildings_possible_to_build):
             log(building_name, True)  # TODO: real logic instead of test log
 
     def show_units_construction_options(self):
@@ -838,7 +877,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.current_mission = Mission('Test Mission', 'Map 1')\
             .add_players(human, cpu_player)\
             .add_triggers(*triggers)\
-            .unlock_technologies_for_player(human, 'technology_1')
+            .unlock_technologies_for_player(human, 'technology_1')\
+            .unlock_buildings_for_player(human, 'command_center')
 
     def on_being_attached(self, attached: Observed):
         if isinstance(attached, GameObject):

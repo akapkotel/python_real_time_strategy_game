@@ -56,9 +56,9 @@ def find_paths_to_all_files_of_type(extension: str,
     found.
     """
     names_to_paths = {}
-    for directory in os.walk(os.path.abspath(base_directory)):
-        for file_name in (f for f in directory[2] if f.endswith(extension)):
-            names_to_paths[file_name] = directory[0]
+    for path, dirs, files in os.walk(os.path.abspath(base_directory)):
+        for file_name in (f for f in files if f.endswith(extension)):
+            names_to_paths[file_name] = path
     return names_to_paths
 
 
