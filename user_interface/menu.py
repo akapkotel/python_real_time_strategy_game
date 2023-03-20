@@ -13,6 +13,7 @@ from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
     UiTextLabel, Slider, Background, Frame
 )
+from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
 
 
@@ -25,12 +26,12 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         self.set_updated_and_drawn_lists()
         self.create_submenus()
 
+    def create_back_to_menu_button(self) -> Button:
+        return Button('menu_button_back.png', SCREEN_X, 150, functions=partial(self.switch_to_bundle_of_name, MAIN_MENU))
+
     def create_submenus(self):
         window = self.window
         switch_menu = self.switch_to_bundle_of_name
-        back_to_menu_button = Button('menu_button_back.png', SCREEN_X, 150,
-            functions=partial(switch_menu, MAIN_MENU)
-        )
 
         x, y = SCREEN_X * 0.25, (i for i in range(125, SCREEN_HEIGHT, 125))
         main_menu = UiElementsBundle(
@@ -70,55 +71,64 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
+        columns = 4
+        rows = 10
+        col_width = SCREEN_WIDTH // (columns + 1)
+        row_height = SCREEN_HEIGHT // (rows + 1)
+
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
+
         x, y = SCREEN_X, (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu = UiElementsBundle(
             name=OPTIONS_SUBMENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 # set 'subgroup' index for each element to assign it to the
                 # proper tab in options sub-menu:
-                Checkbox('menu_checkbox.png', x, next(y), 'Vehicles threads:',
+                Checkbox('menu_checkbox.png', *next(positions), 'Vehicles threads:',
                          20, ticked=window.settings.vehicles_threads,
                          variable=(window.settings, 'vehicles_threads'),
                          subgroup=1),
-                Checkbox('menu_checkbox.png', x, next(y), 'Full screen:',
+                Checkbox('menu_checkbox.png', *next(positions), 'Full screen:',
                          20, ticked=window.fullscreen,
                          functions=window.toggle_full_screen, subgroup=1),
             ],
             register_to=self
         )
 
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
         # sound:
-        y = (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu.extend(
             [
-                Checkbox('menu_checkbox.png', x, next(y),
+                Checkbox('menu_checkbox.png', *next(positions),  # x, next(y)
                     'Music:', 20, ticked=window.sound_player.music_on,
                     variable=(window.sound_player, 'music_on'), subgroup=2
                 ),
-                Checkbox('menu_checkbox.png', x, next(y),
+                Checkbox('menu_checkbox.png', *next(positions),  # x, next(y)
                     'Sound effects:', 20, ticked=window.sound_player.sound_effects_on,
                     variable=(window.sound_player, 'sound_effects_on'),
                     subgroup=2
                 ),
-                Slider('slider.png', x, next(y), 'Sound volume:', 200,
+                Slider('slider.png', *next(positions), 'Sound volume:', 200,
                        variable=(window.sound_player, 'volume'), subgroup=2),
-                Slider('slider.png', x, next(y), 'Effects volume:', 200,
+                Slider('slider.png', *next(positions), 'Effects volume:', 200,
                        variable=(window.sound_player, 'effects_volume'), subgroup=2),
-                Slider('slider.png', x, next(y), 'Music volume:', 200,
+                Slider('slider.png', *next(positions), 'Music volume:', 200,
                        variable=(window.sound_player, 'music_volume'),
                        subgroup=2),
             ]
         )
 
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
+
         if self.window.settings.developer_mode:
             y = (i for i in range(300, SCREEN_HEIGHT, 75))
             options_menu.extend(
-                (Checkbox('menu_checkbox.png', x, next(y), 'God mode:',
+                (Checkbox('menu_checkbox.png', *next(positions), 'God mode:',
                          20, ticked=window.settings.god_mode,
                          variable=(window.settings, 'god_mode'),
                          subgroup=3),
-                Checkbox('menu_checkbox.png', x, next(y), 'AI Sleep:',
+                Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
                          20, ticked=window.settings.ai_sleep,
                          variable=(window.settings, 'ai_sleep'),
                          subgroup=3))
@@ -145,7 +155,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         loading_menu = UiElementsBundle(
             name=LOADING_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 # left column - ui-buttons:
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=window.load_saved_game_or_scenario),
@@ -161,7 +171,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         saving_menu = UiElementsBundle(
             name=SAVING_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 Button('menu_button_savegame.png', x, next(y),
                        functions=partial(window.save_game, text_input)),
                 text_input
@@ -174,7 +184,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         new_game_menu = UiElementsBundle(
             name=NEW_GAME_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 Button('menu_button_skirmish.png', x, y,
                        functions=partial(switch_menu, 'skirmish menu')),
                 Button('menu_button_campaign.png', 2 * x, y,
@@ -188,7 +198,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         credits = UiElementsBundle(
             name='credits',
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
             ],
             register_to=self
         )
@@ -199,7 +209,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[
                 # TODO: create background image
                 # Background('background.png', SCREEN_X, SCREEN_Y),
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 Button('menu_button_play.png', SCREEN_X, next(y),
                        functions=window.start_new_game),
                 Slider('slider.png', SCREEN_X, next(y), 'Trees density:', 200,
@@ -222,7 +232,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         campaign_menu = UiElementsBundle(
             name=CAMPAIGN_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self,
@@ -232,7 +242,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         multiplayer_menu = UiElementsBundle(
             name=MULTIPLAYER_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self
@@ -241,7 +251,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         scenario_editor_menu = UiElementsBundle(
             name=SCENARIO_EDITOR_MENU,
             elements=[
-                back_to_menu_button,
+                self.create_back_to_menu_button(),
                 UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self

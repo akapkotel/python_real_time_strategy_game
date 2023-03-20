@@ -200,11 +200,10 @@ class UnitsProducer:
         self.production_time = state['production_time']
 
     def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
-        # configs = self.game.configs[UNITS]
-        configs = self.game.configs
+        game_configs = self.game.configs
         resources = (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS)
         units_production_costs = {
-            unit: {resource: configs[unit][resource] for resource in resources} for unit in produced_units
+            unit: {resource: game_configs[unit][resource] for resource in resources} for unit in produced_units
         }
         return units_production_costs
 

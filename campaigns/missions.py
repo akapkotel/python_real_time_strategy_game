@@ -116,8 +116,7 @@ class Mission:
             self.end_mission(winner=self.game.players[winner_id])
 
     def update(self):
-        pass
-        # self.evaluate_triggers()
+        self.evaluate_triggers()
 
     def evaluate_triggers(self):
         for trigger in (c for c in self.triggers if c.fulfilled()):

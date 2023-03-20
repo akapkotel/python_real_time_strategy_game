@@ -269,7 +269,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update_cursor_pointed(self):
         """
-        Search all Spritelists and DividedSpriteLists for any UiElements or
+        Search all Spritelists and LayeredSpriteLists for any UiElements or
         GameObjects placed at the MouseCursor position.
         """
         pointed = self.get_pointed_sprite(*self.position)

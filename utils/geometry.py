@@ -196,8 +196,8 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
 def generate_2d_grid(start_x, start_y, rows, columns, item_width, item_height, padding=0) -> List[Tuple[Number, Number]]:
     grid = []
     for column in range(columns):
-        shift_x = (column // rows) * (item_width + padding)
+        shift_x = column * (item_width + padding)
         for row in range(rows):
             shift_y = (row % rows) * (item_height + padding)
-            grid.append((start_x - shift_x, start_y - shift_y))
+            grid.append((start_x + shift_x, start_y - shift_y))
     return grid

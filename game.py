@@ -109,12 +109,13 @@ class Settings:
     """This class will serve for permanently saving user-defined settings and restore them between games."""
 
     def __init__(self):
-        self.developer_mode: bool = True
+        self.developer_mode: bool = __status__ == "development"
         self.editor_mode: bool = False
 
         self.fps: int = 30
         self.game_speed: float = 1.0
         self.update_rate = 1 / (self.fps * self.game_speed)
+        self.draw_fps_counter: bool = self.developer_mode
 
         self.full_screen: bool = False
         self.pyprofiler: bool = False
@@ -290,7 +291,8 @@ class GameWindow(Window, EventsCreator):
         self.current_view.on_draw()
         if (cursor := self.cursor).visible:
             cursor.draw()
-        self.draw_current_fps_on_screen()
+        if self.settings.draw_fps_counter:
+            self.draw_current_fps_on_screen()
 
     def draw_current_fps_on_screen(self):
         draw_text(f'FPS: {str(self.current_fps)}',
