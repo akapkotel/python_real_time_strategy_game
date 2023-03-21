@@ -112,7 +112,7 @@ class Settings:
         self.developer_mode: bool = __status__ == "development"
         self.editor_mode: bool = False
 
-        self.fps: int = 30
+        self.fps: int = 60
         self.game_speed: float = 1.0
         self.update_rate = 1 / (self.fps * self.game_speed)
         self.draw_fps_counter: bool = self.developer_mode
@@ -387,6 +387,7 @@ class GameWindow(Window, EventsCreator):
         self._update_viewport_coordinates(new_left, new_bottom)
 
     def get_viewport(self) -> Viewport:
+        """Returns a Tuple of 4 floats: left margin, right margin, bottom margin, top margin of the screen."""
         # We cache viewport coordinates each time they are changed,
         # so there is no need for redundant call to the Window method
         return self.current_view.viewport
@@ -511,7 +512,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = LayeredSpriteList()
         self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
-        self.buildings = LayeredSpriteList(is_static=True, use_spatial_hash=True)
+        self.buildings = LayeredSpriteList()
         self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()
@@ -547,7 +548,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.units_manager = UnitsManager(cursor=self.cursor)
 
-        self.current_mission: Optional[Mission] = None
+        self.current_mission: Optional[Scenario] = None
 
         self.debugger: Optional[GameDebugger] = None
 
@@ -568,7 +569,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         log('Game initialized successfully', console=True)
 
     @property
-    def things_to_update_each_frame(self) -> Tuple[EventsScheduler, GameDebugger, FogOfWar, Pathfinder, MiniMap, Timer, Mission]:
+    def things_to_update_each_frame(self) -> Tuple[EventsScheduler, GameDebugger, FogOfWar, Pathfinder, MiniMap, Timer, Scenario]:
         return (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer,
                 self.current_mission)
 
@@ -608,7 +609,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             return self.find_gameobject(object_class, object_id)
         else:
             object_class = eval(name_and_id)
-            return {Game: self, GameWindow: self.window, Mission: self.current_mission,
+            return {Game: self, GameWindow: self.window, Scenario: self.current_mission,
                     UnitsManager: self.units_manager}[object_class]
 
     def find_gameobject(self,
@@ -812,10 +813,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.move_viewport_to_the_position(*position)
 
     def test_scheduling_events(self):
+        # TODO: remove it when game is completed
         event = ScheduledEvent(self, 5, self.scheduling_test)
         self.schedule_event(event)
 
     def test_factions_and_players_creation(self):
+        # TODO: remove it when game is completed
         faction = Faction(name='Freemen')
         player = HumanPlayer(id=2, color=GREEN, faction=faction)
         cpu_player = CpuPlayer(color=RED)
@@ -823,6 +826,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         player.start_war_with(cpu_player)
 
     def test_buildings_spawning(self):
+        # TODO: remove it when game is completed
         self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=1)
         self.spawn('garrison', self.players[2], (600, 800), garrison=1)
         self.spawn('command_center', self.players[2], (400, 900), garrison=1)
@@ -856,6 +860,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ]
 
     def test_units_spawning(self):
+        # TODO: remove it when game is completed
         units_names = ('tank_medium', 'apc', 'truck')
         walkable = list(self.map.all_walkable_nodes)
         for unit_name in units_names:
@@ -867,18 +872,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 self.spawn_group(names, player, node.position)
 
     def test_missions(self):
+        # TODO: remove it when game is completed
         human = self.local_human_player
         cpu_player = self.players[4]
-        triggers = (
-            MapRevealedTrigger(human).set_vp(1),
-            NoUnitsLeftTrigger(human).triggers(Defeat()),
-            TimePassedTrigger(human, 10).set_vp(1).triggers(Victory()),
-            HasUnitsOfTypeTrigger(human, 'tank_medium').set_vp(1),
-            NoUnitsLeftTrigger(cpu_player).triggers(Defeat())
+        events = (
+            Victory(human).add_triggers(PlayerSelectedUnitsTrigger(human)),
+            Defeat(human).add_triggers(NoUnitsLeftTrigger(human)),
+            Defeat(cpu_player).add_triggers(NoUnitsLeftTrigger(cpu_player)),
         )
-        self.current_mission = Mission('Test Mission', 'Map 1')\
+        self.current_mission = Scenario('Test Mission', 'Map 1')\
             .add_players(human, cpu_player)\
-            .add_triggers(*triggers)\
+            .add_events(*events)\
             .unlock_technologies_for_player(human, 'technology_1')\
             .unlock_buildings_for_player(human, 'command_center')
 
@@ -1063,13 +1067,9 @@ if __name__ == '__main__':
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building, ConstructionSite
-    from campaigns.missions import (
-        Mission, load_campaigns, Campaign, MissionDescriptor
-    )
-    from campaigns.triggers import (
-        NoUnitsLeftTrigger, MapRevealedTrigger, TimePassedTrigger, HasUnitsOfTypeTrigger
-    )
-    from campaigns.triggered_events import Defeat, Victory
+    from campaigns.missions import Scenario, Campaign, load_campaigns, MissionDescriptor
+    from campaigns.events import Victory, Defeat
+    from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

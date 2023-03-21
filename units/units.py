@@ -617,16 +617,16 @@ class Soldier(Unit):
 
         self.all_textures = {
             stance: self.load_pose_textures(texture_name, width, height, stance)
-            for stance in (IDLE,)  # MOVE, KNEEL, CRAWL
+            for stance in (IDLE,)  # TODO: MOVE, KNEEL, CRAWL
         }
 
         self.textures = self.all_textures[self.stance][self.facing_direction]
         self.set_texture(0)
-        self.set_hit_box(self.texture.hit_box_points)
+        self.hit_box = self.texture.hit_box_points
 
     @staticmethod
     def load_pose_textures(texture_name, width, height, stance):
-        start = 8 * stance
+        start = ROTATIONS * stance
         return [
             load_textures(
                 texture_name, [(i * width, j * height, width, height)
@@ -636,17 +636,17 @@ class Soldier(Unit):
 
     @property
     def should_be_rendered(self) -> bool:
-        return self.on_screen and self.outside
+        return self.outside and super().should_be_rendered
+
 
     @property
     def is_controlled_by_player(self) -> bool:
-        return self.player.is_local_human_player and self.outside
+        return self.player.is_local_human_player and self.outside  # selecting Soldiers inside Buildings is forbidden
 
     def on_update(self, delta_time=1/60):
-        if self.outside:
-            super().on_update(delta_time)
-            if self.on_screen and self.moving:
-                self.update_animation(delta_time)
+        super().on_update(delta_time)
+        if self.on_screen and self.moving:
+            self.update_animation(delta_time)
 
     def angle_to_texture(self, angle_to_target: float):
         index = self.angles[int(angle_to_target)]
@@ -668,12 +668,16 @@ class Soldier(Unit):
         self.assign_enemy(None)
         self.game.units_manager.unselect(self)
         building.on_soldier_enter(soldier=self)
+        self.stop_rendering()
+        self.stop_updating()
 
     def leave_building(self, building):
         x, y = building.position
         self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
         self.insert_to_map_quadtree()
         self.outside = True
+        self.start_rendering()
+        self.start_updating()
 
     def restore_health(self):
         wounds = round(self._max_health - self.health, 3)

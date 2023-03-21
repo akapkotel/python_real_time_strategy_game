@@ -2,73 +2,28 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Optional
 
 from players_and_factions.player import Player, Faction
-from campaigns.triggered_events import AddVictoryPoints, TriggeredEvent
-from utils.game_logging import log
 
 
-class Trigger:
-    """
-    Trigger is a flag-class checked against, to evaluate if any of the
-    Players achieved his objectives. You can use them as events also.
-    """
+class EventTrigger:
+    """EventTrigger is used for TriggeredEvents to control if they should happen."""
 
-    def __init__(self, player: Player, optional: bool = False):
-        self.name = self.__class__.__name__
+    def __init__(self, player: Player):
         self.player = player
-        self.mission: Optional[Mission] = None
-        self.optional = optional
-        self.victory_points = 0
-        self._triggered_events = []
+        self.game = self.player.game
+        self.active = True
 
     def __str__(self):
         return f'{self.__class__.__name__} for player: {self.player}'
 
-    def set_vp(self, value: int) -> Trigger:
-        self.victory_points = value
-        self.add_triggered_event(AddVictoryPoints(self.player, value))
-        return self
-
-    def triggers(self, *triggered_events: TriggeredEvent) -> Trigger:
-        """
-        Use this method to attach TriggeredEvents to this Trigger object. Use:
-        trigger.triggers(TriggeredEvent())
-
-        :param triggered_events: Tuple[TriggeredEvent] -- you can pass as many
-        TriggeredEvent objects as you want. They execute() method would be called
-        when is_met() method of this class is called.
-        :return: Trigger -- this object to allow chaining
-        """
-        for triggered in triggered_events:
-            self.add_triggered_event(triggered)
-        return self
-
-    def bind_mission(self, mission: Mission) -> Trigger:
-        self.mission = mission
-        for consequence in (c for c in self._triggered_events if c.mission is None):
-            consequence.mission = mission
-        return self
-
-    def add_triggered_event(self, triggered_event: TriggeredEvent) -> Trigger:
-        if triggered_event.player is None:
-            triggered_event.player = self.player
-        self._triggered_events.append(triggered_event)
-        return self
-
     @abstractmethod
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         raise NotImplementedError
-
-    def execute_triggered_events(self):
-        for triggered_event in self._triggered_events:
-            triggered_event.execute()
-            log(f'Trigger {self} was executed!', console=True)
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.player = self.mission.game.players[self.player]
+        self.player = self.game.players[self.player]
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -76,14 +31,35 @@ class Trigger:
         return state
 
 
-class TimePassedTrigger(Trigger):
+class PlayerSelectedUnitsTrigger(EventTrigger):
+
+    def __init__(self, player: Player, *units_to_select_names: str):
+        super().__init__(player)
+        self.units_to_select_names = units_to_select_names
+
+    def condition_fulfilled(self) -> bool:
+        if not self.units_to_select_names:
+            return len(self.game.units_manager.selected_units) > 0
+
+
+class PlayerSelectedBuildingTrigger(EventTrigger):
+
+    def __init__(self, player: Player, building_to_select_name: str):
+        super().__init__(player)
+        self.building_to_select_name = building_to_select_name
+
+    def condition_fulfilled(self) -> bool:
+        return self.game.units_manager.selected_building.object_name == self.building_to_select_name
+
+
+class TimePassedTrigger(EventTrigger):
 
     def __init__(self, player: Player, required_time: int):
         super().__init__(player)
         self.required_time = required_time
 
-    def fulfilled(self) -> bool:
-        return self.mission.game.timer.minutes >= self.required_time
+    def condition_fulfilled(self) -> bool:
+        return self.game.timer.minutes >= self.required_time
 
     def __getstate__(self):
         saved = super().__getstate__()
@@ -94,12 +70,12 @@ class TimePassedTrigger(Trigger):
         super().__setstate__(state)
 
 
-class MapRevealedTrigger(Trigger):
-    def fulfilled(self) -> bool:
-        return len(self.mission.game.fog_of_war.unexplored) == 0
+class MapRevealedTrigger(EventTrigger):
+    def condition_fulfilled(self) -> bool:
+        return len(self.game.fog_of_war.unexplored) == 0
 
 
-class NoUnitsLeftTrigger(Trigger):
+class NoUnitsLeftTrigger(EventTrigger):
     """Beware that this Trigger checks bot against Units and Buildings!"""
 
     def __init__(self, player: Player = None, faction: Faction = None):
@@ -112,7 +88,7 @@ class NoUnitsLeftTrigger(Trigger):
         super().__init__(player)
         self.faction = faction
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         if self.faction is not None:
             return not (self.faction.units or self.faction.buildings)
         return not (self.player.units or self.player.buildings)
@@ -126,14 +102,14 @@ class NoUnitsLeftTrigger(Trigger):
         return state
 
 
-class HasUnitsOfTypeTrigger(Trigger):
+class HasUnitsOfTypeTrigger(EventTrigger):
 
     def __init__(self, player: Player, unit_type: str, amount=0):
         super().__init__(player)
         self.unit_type = unit_type.strip('.png')
         self.amount = amount
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         return sum(1 for u in self.player.units if self.unit_type in u.object_name) > self.amount
 
 
@@ -141,54 +117,50 @@ class HasBuildingsOfTypeCondition(HasUnitsOfTypeTrigger):
     def __init__(self, player: Player, building_type, amount=0):
         super().__init__(player, building_type, amount)
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         return sum(1 for u in self.player.buildings if self.unit_type in u.object_name) > self.amount
 
 
-class ControlsBuildingTrigger(Trigger):
+class ControlsBuildingTrigger(EventTrigger):
     def __init__(self, player: Player, building_id: int):
         super().__init__(player)
         self.building_id = building_id
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         return any(b.id == self.building_id for b in self.player.buildings)
 
 
-class ControlsAreaTrigger(Trigger):
+class ControlsAreaTrigger(EventTrigger):
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         pass
 
 
-class HasTechnologyTrigger(Trigger):
-    def __init__(self, mission, player: Player, technology_id: int):
+class HasTechnologyTrigger(EventTrigger):
+    def __init__(self, scenario, player: Player, technology_id: int):
         super().__init__(player)
         self.technology_id = technology_id
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         return self.technology_id in self.player.known_technologies
 
 
-class HasResourceTrigger(Trigger):
+class HasResourceTrigger(EventTrigger):
 
     def __init__(self, player: Player, resource: str, amount: int):
         super().__init__(player)
         self.resource = resource
         self.amount = amount
 
-    def fulfilled(self) -> bool:
+    def condition_fulfilled(self) -> bool:
         return self.player.has_resource(self.resource, self.amount)
 
 
-class VictoryPointsTrigger(Trigger):
+class VictoryPointsTrigger(EventTrigger):
 
     def __init__(self, player: Player, required_vp: int):
         super().__init__(player)
         self.required_vp = required_vp
 
-    def fulfilled(self) -> bool:
-        return self.mission.victory_points[self.player.id] >= self.required_vp
-
-
-if __name__ == '__main__':
-    from campaigns.missions import Mission
+    def condition_fulfilled(self) -> bool:
+        return self.game.current_mission.victory_points[self.player.id] >= self.required_vp

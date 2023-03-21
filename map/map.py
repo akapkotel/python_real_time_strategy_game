@@ -52,6 +52,8 @@ MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 TreeID = int
 
+MAP_TILE_TEXTURE = make_soft_square_texture(TILE_WIDTH, OLD_MOSS_GREEN, 255, 255)
+
 
 def position_to_map_grid(x: Number, y: Number) -> GridPosition:
     """Return map-grid-normalised position."""
@@ -278,7 +280,7 @@ class Map:
 
     def create_map_sprite(self, x, y):
         sprite = Sprite(center_x=x, center_y=y)
-        sprite.texture = make_soft_square_texture(TILE_WIDTH, OLD_MOSS_GREEN, 255, 255)
+        sprite.texture = MAP_TILE_TEXTURE
         # try:
         #     terrain_type, index, rotation = self.nodes_data[(x, y)]
         #     t, i, r = set_terrain_texture(terrain_type, index, rotation)

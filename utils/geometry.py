@@ -183,14 +183,9 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
     :param positions: Sequence -- array of Points (x, y)
     :return: Point -- two-dimensional tuple (x, y) representing point
     """
-    positions_count = len(positions)
-    if positions_count == 1:
+    if (positions_count := len(positions)) == 1:
         return positions[0]
-
-    averaged_x_position = sum(position[0] for position in positions) / positions_count
-    averaged_y_position = sum(position[1] for position in positions) / positions_count
-
-    return averaged_x_position, averaged_y_position
+    return sum(p[0] for p in positions) / positions_count, sum(p[1] for p in positions) / positions_count
 
 
 def generate_2d_grid(start_x, start_y, rows, columns, item_width, item_height, padding=0) -> List[Tuple[Number, Number]]:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import os.path
 import random
 
 from math import dist
@@ -10,10 +9,9 @@ from collections import defaultdict
 from functools import cached_property
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
-from arcade import rand_in_circle
 from arcade.arcade_types import Color, Point
 
-from user_interface.constants import UI_RESOURCES_SECTION, UI_UNITS_CONSTRUCTION_PANEL
+from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
@@ -592,10 +590,6 @@ class PlayerEntity(GameObject):
         if self.known_enemies or self._enemy_assigned_by_player:
             self.update_battle_behaviour()
         super().on_update(delta_time)
-
-    def draw(self):
-        if self.is_rendered:
-            super().draw()
 
     @property
     def should_be_rendered(self) -> bool:

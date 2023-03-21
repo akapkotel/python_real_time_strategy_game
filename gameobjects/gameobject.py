@@ -81,7 +81,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     @property
     def on_screen(self) -> bool:
         l, r, b, t = self.game.viewport
-        return l < self.right and r > self.left and b < self.top and t > self.bottom
+        return self.right > l and self.left < r and self.top > b and self.bottom < t
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_visibility()
@@ -93,19 +93,23 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
     def update_visibility(self):
         if self.should_be_rendered:
             if not self.is_rendered:
-                self.start_drawing()
+                self.start_rendering()
         elif self.is_rendered:
-            self.stop_drawing()
+            self.stop_rendering()
 
     @property
     def should_be_rendered(self) -> bool:
         return self.on_screen
 
-    def start_drawing(self):
+    def start_rendering(self):
+        # log(f'Start rendering {self}', True)
         self.is_rendered = True
+        self.alpha = 255
 
-    def stop_drawing(self):
+    def stop_rendering(self):
+        # log(f'Stop rendering {self}', True)
         self.is_rendered = False
+        self.alpha = 0
 
     def start_updating(self):
         self.is_updated = True

@@ -56,7 +56,7 @@ class KeyboardHandler(ToggledElement):
         if game is None or not game.is_running:
             self.window.close()
         elif game.current_mission.ended:
-            game.current_mission.quit_mission()
+            game.current_mission.quit_scenario()
         else:
             self.window.show_view(self.window.menu_view)
 

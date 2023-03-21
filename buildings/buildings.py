@@ -409,9 +409,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.update_observed_area()
         self.update_ui_buildings_panel()
 
-    def draw(self):
-        super().draw()
-
     def update_production(self):
         if self.produced_units is not None:
             self.update_units_production()
@@ -510,9 +507,19 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if soldier.player.is_local_human_player:
             self.game.sound_player.play_sound('enemy_building_captured.vaw')
         self.put_soldier_into_garrison(soldier=soldier)
-        path_and_texture, size = self.find_proper_texture(soldier.player)
-        self.change_building_texture(path_and_texture, size)
         self.reconfigure_building(soldier.player)
+
+    def reconfigure_building(self, player: Player):
+        self.clear_known_enemies()
+        self.remove_from_map_quadtree()
+        self.change_player(player)
+        self.insert_to_map_quadtree()
+        self.change_building_texture(player)
+
+    def change_building_texture(self, player: Player):
+        path_and_texture, size = self.find_proper_texture(player)
+        self.textures = [load_texture(path_and_texture, 0, 0, *size)]
+        self.set_texture(0)
 
     def find_proper_texture(self, player) -> Tuple[str, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)
@@ -520,16 +527,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         size = get_texture_size(texture_name)
         path_and_texture = get_path_to_file(texture_name)
         return path_and_texture, size
-
-    def change_building_texture(self, path_and_texture, size):
-        self.textures = [load_texture(path_and_texture, 0, 0, *size)]
-        self.set_texture(0)
-
-    def reconfigure_building(self, player: Player):
-        self.clear_known_enemies()
-        self.remove_from_map_quadtree()
-        self.change_player(player)
-        self.insert_to_map_quadtree()
 
     def clear_known_enemies(self):
         # self.player.remove_known_enemies(self.id, self.known_enemies)
@@ -644,7 +641,7 @@ class ConstructionSite(Building):
             self.progress_bar.draw()
 
     def finish_construction(self):
-        self.stop_drawing()
+        self.stop_rendering()
         self.progress_bar = None
         self.kill()
         self.game.spawn(self.constructed_building_name, self.player, self.constructed_building_position)

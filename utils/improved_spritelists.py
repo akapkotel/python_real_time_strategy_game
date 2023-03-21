@@ -54,8 +54,8 @@ class LayeredSpriteList(SpriteList):
     This SpriteList works with Sprites having attributes: 'id', 'updated' and
     'rendered'. It is possible to switch updating and drawing of single
     sprites by changing their 'updated' and 'rendered' attributes inside
-    their own logic, or by calling 'start_updating', 'start_drawing',
-    'stop_updating' and 'stop_drawing' methods of SelectableSpriteList with
+    their own logic, or by calling 'start_updating', 'start_rendering',
+    'stop_updating' and 'stop_rendering' methods of SelectableSpriteList with
     the chosen Sprite as parameter.
     LayeredSpritelist also maintains hashmap of all Sprites which allows for
     fast lookups by their 'id' attribute.
@@ -77,7 +77,6 @@ class LayeredSpriteList(SpriteList):
         # 'closer' to the player'spoint of view being obstructed by those which
         # are more distant
         self.rendering_layers = self.create_rendering_layers()
-
         self.update_on = update_on
         self.draw_on = draw_on
 
@@ -105,18 +104,20 @@ class LayeredSpriteList(SpriteList):
             self.add_to_rendering_layer(entity)
 
     def add_to_rendering_layer(self, sprite):
-        try:
-            self.rendering_layers[sprite.current_node.grid[1]].append(sprite)
-        except (AttributeError, ValueError):
-            pass
+        pass
+        # try:
+        #     self.rendering_layers[sprite.current_node.grid[1]].append(sprite)
+        # except (AttributeError, ValueError):
+        #     pass
 
     def swap_rendering_layers(self, sprite, old_layer: int, new_layer: int):
-        try:
-            self.rendering_layers[old_layer].remove(sprite)
-        except ValueError:
-            pass
-        finally:
-            self.rendering_layers[new_layer].append(sprite)
+        pass
+        # try:
+        #     self.rendering_layers[old_layer].remove(sprite)
+        # except ValueError:
+        #     pass
+        # finally:
+        #     self.rendering_layers[new_layer].append(sprite)
 
     def remove(self, sprite):
         try:
@@ -128,44 +129,17 @@ class LayeredSpriteList(SpriteList):
             pass
 
     def remove_from_rendering_layer(self, sprite):
-        try:
-            self.rendering_layers[sprite.current_node.grid[1]].remove(sprite)
-        except (AttributeError, ValueError):
-            if sprite.is_building:
-                for layer in (l for l in self.rendering_layers if sprite in l):
-                    layer.remove(sprite)
+        pass
+        # try:
+        #     self.rendering_layers[sprite.current_node.grid[1]].remove(sprite)
+        # except (AttributeError, ValueError):
+        #     if sprite.is_building:
+        #         for layer in (l for l in self.rendering_layers if sprite in l):
+        #             layer.remove(sprite)
 
     def extend(self, iterable):
         for sprite in iterable:
             self.append(sprite)
-
-    @staticmethod
-    def start_updating(sprite):
-        try:
-            sprite.is_updated = True
-        except AttributeError as e:
-            log(e)
-
-    @staticmethod
-    def stop_updating(sprite):
-        try:
-            sprite.is_updated = False
-        except AttributeError as e:
-            log(e)
-
-    @staticmethod
-    def start_drawing(sprite):
-        try:
-            sprite.is_rendered = True
-        except AttributeError as e:
-            log(e)
-
-    @staticmethod
-    def stop_drawing(sprite):
-        try:
-            sprite.is_rendered = False
-        except AttributeError as e:
-            log(e)
 
     def on_update(self, delta_time: float = 1/60):
         if self.update_on:
@@ -174,9 +148,14 @@ class LayeredSpriteList(SpriteList):
 
     def draw(self):
         if self.draw_on:
-            for layer in self.rendering_layers[::-1]:  # from bottom to top
-                for sprite in (s for s in layer if s.is_rendered):
-                    sprite.draw()
+            super().draw()
+        if any(s.is_building for s in self.registry.values()):
+            for building in self:
+                building.draw()
+
+            # for layer in self.rendering_layers[::-1]:  # from bottom to top
+            #     for sprite in (s for s in layer if s.is_rendered):
+            #         sprite.draw()
 
     def pop(self, index: int = -1) -> Sprite:
         sprite = super().pop(index)
