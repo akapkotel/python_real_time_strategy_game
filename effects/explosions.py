@@ -26,6 +26,7 @@ class ExplosionsPool:
     CPU load. Number of pooled Explosions is dynamically adjusted to number of
     Units in game.
     """
+    game = None
 
     def __init__(self):
         super().__init__()
@@ -57,7 +58,7 @@ class Explosion(Sprite):
     """ This class creates an explosion animation."""
     game = None
 
-    def __init__(self, sprite_sheet_name: str, pool, sound=True):
+    def __init__(self, sprite_sheet_name: str, pool: ExplosionsPool, sound=True):
         super().__init__()
         self.name = sprite_sheet_name
         self.pool = pool
@@ -77,7 +78,6 @@ class Explosion(Sprite):
         # Update to the next frame of the animation. If we are at the end
         # of our frames, then put it back to the pool.
         if self.exploding:
-            self.update_animation(delta_time)
             self.cur_texture_index += 1
             if self.cur_texture_index < len(self.textures):
                 self.set_texture(self.cur_texture_index)

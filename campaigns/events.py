@@ -9,7 +9,7 @@ from players_and_factions.player import Player
 
 
 class Event:
-    """Event is executed when its TriggerEvent is fired."""
+    """Event is executed when its Trigger is fired."""
 
     def __init__(self, player: Player):
         self.player = player

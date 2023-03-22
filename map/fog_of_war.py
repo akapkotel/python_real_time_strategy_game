@@ -3,9 +3,9 @@
 from functools import lru_cache
 from typing import Dict, KeysView, Optional, Set
 
-from arcade import Sprite, SpriteList, make_soft_circle_texture
+from arcade import Sprite, SpriteList, make_soft_circle_texture, draw_rectangle_outline
 
-from utils.colors import BLACK, FOG
+from utils.colors import BLACK, FOG, RED
 from utils.data_types import GridPosition
 from game import Game
 from map.constants import TILE_WIDTH, TILE_HEIGHT
@@ -89,10 +89,9 @@ class FogOfWar(Rect):
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
         grids_to_sprites = self.grids_to_sprites
-        revealed = visible.intersection(grids_to_sprites)
         # since MiniMap also draws FoW, but the miniaturized version of, send
         # set of GridPositions revealed this frame to the MiniMap instance:
-        self.game.mini_map.visible = revealed
+        self.game.mini_map.visible = revealed = visible.intersection(grids_to_sprites)
         for grid in revealed:
             sprite_list = self.fog_sprite_lists[(grid[0] // FOG_SPRITELIST_SIZE, grid[1] // FOG_SPRITELIST_SIZE)]
             sprite_list.remove(grids_to_sprites[grid])
@@ -107,7 +106,7 @@ class FogOfWar(Rect):
             sprite_list.append(sprite)
         self.explored.update(visible)
         self.unexplored.difference_update(visible)
-        visible.clear()
+        self.visible.clear()
 
     @staticmethod
     @lru_cache()

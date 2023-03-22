@@ -83,12 +83,8 @@ class LayeredSpriteList(SpriteList):
     def create_rendering_layers(self) -> List[List]:
         return [[] for _ in range(self.game.settings.map_height)]
 
-    def get_by_id(self, sprite_id: int) -> Optional[Sprite]:
-        """Return element with particular 'id' attribute value or None."""
-        try:
-            return self.registry[sprite_id]
-        except KeyError:
-            return None
+    def get(self, sprite_id: int) -> Optional[Sprite]:
+        return self.registry.get(sprite_id)
 
     def __len__(self) -> int:
         return len(self.registry)

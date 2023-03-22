@@ -11,7 +11,7 @@ from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture
+from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture
 from arcade.arcade_types import Point
 
 from effects.constants import SHOT_BLAST, EXPLOSION
@@ -110,7 +110,7 @@ class Unit(PlayerEntity):
         for each one of 360 possible integer angles for fast lookup in existing
         angles-dict.
         """
-        index = self.angles[int(angle_to_target)]
+        self.facing_direction = index = self.angles[int(angle_to_target)]
         self.set_texture(index)
 
     @property
@@ -448,7 +448,7 @@ class Vehicle(Unit):
 
         thread_texture = ''.join((self.object_name, '_threads.png'))
         # texture of the VehicleThreads left by this Vehicle
-        self.threads_texture = get_path_to_file(thread_texture)
+        self.threads_texture = self.game.resources_manager.get_path_to_single_file(thread_texture)
         # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
@@ -466,7 +466,7 @@ class Vehicle(Unit):
             [(i * width, 0, width, height) for i in range(ROTATIONS)]
         )
         self.set_texture(self.facing_direction)
-        self.set_hit_box(self.texture.hit_box_points)
+        self.hit_box = self.texture.hit_box_points
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -493,14 +493,9 @@ class Vehicle(Unit):
 
 class VehicleThreads(Sprite):
 
-    __slots__ = ['textures']
-
     def __init__(self, texture, index, x, y):
         super().__init__(texture, center_x=x, center_y=y, hit_box_algorithm='None')
-        self.textures = load_textures(
-            texture, [(i * 29, 0, 29, 28) for i in range(ROTATIONS)]
-        )
-        self.set_texture(index)
+        self.texture = load_texture(texture, index * 80, 0, 80, 21)
 
     def on_update(self, delta_time: float = 1 / 60):
         # threads slowly disappearing through time
@@ -532,7 +527,7 @@ class VehicleWithTurret(Vehicle):
             [(i * width, j * height, width, height) for i in range(ROTATIONS)]) for j in range(ROTATIONS)
         ]
         self.set_texture(self.facing_direction, self.turret_facing_direction)
-        self.set_hit_box(self.texture.hit_box_points)
+        self.hit_box = self.texture.hit_box_points
 
     def set_rotated_texture(self):
         if (enemy := self.turret_aim_target) is not None:

@@ -183,9 +183,8 @@ class Player(EventsCreator, Observer, Observed):
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
             if resource_name != ENERGY:
                 setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
-        self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
-
         self.attach_observers(observers=[self.game, self.faction])
+        self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
 
     def __repr__(self) -> str:
         return self.name

@@ -13,10 +13,9 @@ from buildings.buildings import Building
 from effects.sound import (
     UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
 )
-from gameobjects.spawning import BUILDING
 from units.units_tasking import UnitTask, TaskEnterBuilding
 from utils.colors import GREEN, RED, YELLOW
-from game import Game
+from game import Game, UI_WIDTH
 from players_and_factions.player import PlayerEntity
 from units.units import Unit, Vehicle, Soldier
 from utils.functions import get_path_to_file, ignore_in_menu
@@ -228,7 +227,7 @@ class PermanentUnitsGroup:
 
     def __setstate__(self, state: Dict):
         self.__dict__.update(state)
-        self.units = {self.game.units.get_by_id(u_id) for u_id in self.units}
+        self.units = {self.game.units.get(u_id) for u_id in self.units}
 
     def __del__(self):
         for unit in self.units:
@@ -292,12 +291,12 @@ class UnitsManager(EventsCreator):
 
     @ignore_in_menu
     def on_terrain_click_with_units(self, x, y, units):
-        self.clear_units_assigned_enemies(units)
+        self.clear_units_assigned_enemies()
         x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
         self.create_movement_order(units, x, y)
 
-    def clear_units_assigned_enemies(self, units):
-        for unit in units:
+    def clear_units_assigned_enemies(self):
+        for unit in self.selected_units:
             unit.assign_enemy(None)
 
     def create_movement_order(self, units, x, y):
@@ -337,7 +336,7 @@ class UnitsManager(EventsCreator):
             self.send_units_to_attack_target(clicked, units)
 
     def send_units_to_attack_target(self, target, units):
-        self.clear_units_assigned_enemies(units)
+        self.clear_units_assigned_enemies()
         for unit in units:
             unit._enemy_assigned_by_player = target
         self.send_units_to_pointed_location(units, *target.position)
@@ -370,26 +369,20 @@ class UnitsManager(EventsCreator):
     def select_building(self, building: Building):
         self.unselect_all_selected()
         self.selected_building = building
-        self.create_selection_markers(building=building)
+        self.create_building_selection_marker(building=building)
         self.game.change_interface_content(context=building)
 
-    def update_selection_markers_set(self, new, lost):
+    def update_selection_markers_set(self, new: Collection[Unit], lost: Collection[Unit]):
         discarded = {m for m in self.selection_markers if m.selected in lost}
         self.clear_selection_markers(discarded)
-        self.create_selection_markers(new)
+        self.create_units_selection_markers(new)
 
     @ignore_in_menu
     def select_units(self, *units: Unit):
         self.selected_units.extend(units)
-        self.create_selection_markers(units)
+        self.create_units_selection_markers(units)
         self.game.change_interface_content(context=units)
         self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
-
-    def create_selection_markers(self, units=None, building=None):
-        if units is not None:
-            self.create_units_selection_markers(units)
-        if building is not None:
-            self.create_building_selection_marker(building)
 
     def create_units_selection_markers(self, units: Collection[Unit]):
         self.selection_markers.update(
@@ -429,16 +422,12 @@ class UnitsManager(EventsCreator):
         self.clear_selection_markers()
         self.game.change_interface_content(context=None)
 
-    def clear_selection_markers(self,
-                                killed: Set[SelectedUnitMarker] = None):
+    def clear_selection_markers(self, killed: Set[SelectedUnitMarker] = None):
         killed = self.selection_markers.copy() if killed is None else killed
         for marker in killed:
             self.kill_selection_marker(marker)
 
     def update(self):
-        self.update_selection_markers()
-
-    def update_selection_markers(self):
         for marker in self.selection_markers:
             marker.update() if marker.selected.alive else marker.kill()
 
@@ -455,7 +444,8 @@ class UnitsManager(EventsCreator):
             group = self.permanent_units_groups[group_id]
             selected = self.selected_units
             if selected and set(selected) == group.units:
-                self.game.window.move_viewport_to_the_position(*group.position)
+                x, y = group.position
+                self.game.window.move_viewport_to_the_position(x + UI_WIDTH / 2, y)
             else:
                 self.unselect_all_selected()
                 self.select_units(*group.units)

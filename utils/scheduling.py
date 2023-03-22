@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 from math import inf
-from typing import List, Tuple, Dict, Any, Optional, Callable, Union
+from typing import List, Tuple, Dict, Any, Optional, Callable, Union, Iterator
 
 from utils.game_logging import log, logger
+
 
 
 class ScheduledEvent:
@@ -34,10 +36,10 @@ class ScheduledEvent:
         self.kwargs = kwargs or {}
         self.repeat = inf if repeat == -1 else repeat
         self.delay_left = delay_left
-        print(f'created new event {self}')
+        print(f'{self}')
 
     def __repr__(self):
-        return (f'Event scheduled by: {self.creator.__class__.__name__}, '
+        return (f'ScheduledEvent(creator: {self.creator.__class__.__name__}, '
                 f'function: {self.function.__name__}, args: {self.args}, '
                 f'kwargs: {self.kwargs}, time left: {self.delay_left}')
 
@@ -81,43 +83,52 @@ class EventsScheduler:
 
     def __init__(self, game):
         self.game = game
-        self.schedulers: List[EventsCreator] = []
-        self.scheduled_events: List[ScheduledEvent] = []
         self.execution_times: List[float] = []
+        self.scheduled_events: List[ScheduledEvent] = []
         EventsScheduler.instance = self
+
+    def __contains__(self, event: ScheduledEvent) -> bool:
+        return event in self.scheduled_events
+
+    def __iter__(self) -> Iterator[ScheduledEvent]:
+        return self.scheduled_events.__iter__()
 
     @logger()
     def schedule(self, event: ScheduledEvent):
-        self.schedulers.append(event.creator)
+        delay = (event.delay_left or event.delay) + self.game.timer.total
         self.scheduled_events.append(event)
-        delay = event.delay_left or event.delay
-        # self.execution_times.append(self.game.timer['total'] + time_since_triggered)
-        self.execution_times.append(self.game.timer.total + delay)
-
+        self.execution_times.append(delay)
 
     @logger()
-    def unschedule(self, index: int):
+    def unschedule(self, event: ScheduledEvent):
         try:
-            self.schedulers.pop(index)
-            self.scheduled_events.pop(index)
-            self.execution_times.pop(index)
-        except ValueError as e:
+            self._unschedule(self.scheduled_events.index(event))
+        except IndexError as e:
             log(f'Failed to unschedule ScheduledEvent due to: {e}')
 
+    def _unschedule(self, event_index: int):
+        self.scheduled_events.pop(event_index)
+        self.execution_times.pop(event_index)
+
     def update(self):
-        time = self.game.timer.total  # ['total']
-        for i, event in enumerate(self.scheduled_events):
+        time = self.game.timer.total
+        dead_events_indexes = []
+        for i, event in enumerate(self.scheduled_events[:]):
             if time >= self.execution_times[i]:
                 event.execute()
                 if event.repeat:
                     event.repeat -= 1
                     self.execution_times[i] = time + event.delay
                 else:
-                    self.unschedule(i)
+                    dead_events_indexes.append(i)
+        self._unschedule_dead_events(dead_events_indexes)
+
+    def _unschedule_dead_events(self, dead_events_indexes: List[int]):
+        for index in dead_events_indexes:
+            self._unschedule(index)
 
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
-        index = self.scheduled_events.index(event)
-        return self.game.timer.total - self.execution_times[index]  # ['total']
+        return self.execution_times[self.scheduled_events.index(event)] - self.game.timer.total
 
     def save(self) -> List[Dict]:
         return self.shelve_scheduled_events()
@@ -166,14 +177,3 @@ class EventsCreator:
     def get_function_bound_object(function: Callable) -> Optional[str]:
         if hasattr(function, '__self__'):
             return 'self'
-
-    def scheduling_test(self):
-        """
-        Function created for testing purposes only. You can schedule it
-        from any object inheriting the EventsCreator interface to test if
-        scheduling works properly:
-
-        event = ScheduledEvent(self, 2, self.scheduling_test, repeat=True)
-        self.schedule_event(event)
-        """
-        log(f'Hi, event created by: {self} was executed properly', console=True)

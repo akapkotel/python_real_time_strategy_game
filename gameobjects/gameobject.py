@@ -183,7 +183,10 @@ class Wreck(TerrainObject):
         super().__init__(filename, durability, position)
         lifetime = self.game.settings.remove_wrecks_after_seconds
         self.set_proper_wreck_or_body_texture(filename, texture_index)
-        self.schedule_event(ScheduledEvent(self, lifetime, self.kill))
+        self.schedule_event(ScheduledEvent(creator=self, delay=lifetime, function=self.kill))
+
+    def __repr__(self) -> str:
+        return f'Wreck(id: {self.id})'
 
     def set_proper_wreck_or_body_texture(self, name, texture_index):
         texture_name = get_path_to_file(name)

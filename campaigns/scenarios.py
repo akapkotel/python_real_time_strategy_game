@@ -25,7 +25,7 @@ MissionDescriptor = namedtuple('MissionDescriptor',
 
 class Scenario:
     """
-    Mission keeps track of TriggeredEvents checking if any of them should be executed.
+    Scenario keeps track of TriggeredEvents checking if any of them should be executed.
     """
     game = None
 

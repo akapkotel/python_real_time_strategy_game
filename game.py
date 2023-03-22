@@ -24,7 +24,8 @@ from functools import partial
 
 
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT,
+    draw_rectangle_outline
 )
 from arcade.arcade_types import Color, Point
 
@@ -115,7 +116,7 @@ class Settings:
         self.fps: int = 60
         self.game_speed: float = 1.0
         self.update_rate = 1 / (self.fps * self.game_speed)
-        self.draw_fps_counter: bool = self.developer_mode
+        self.draw_fps_counter: bool = self.developer_mode and not self.editor_mode
 
         self.full_screen: bool = False
         self.pyprofiler: bool = False
@@ -153,6 +154,11 @@ class Settings:
 
 
 class ResourcesManager:
+    """
+    This class finds paths to all audio files and textures used in game and caches them in internal dict for easy and
+    fast access. Later on instead of searching a texture each time, when a new gameObject is instantiated, its
+    constructor just query this manager for the proper path to the file.
+    """
 
     def __init__(self, extensions: Tuple[str] = ('png', 'wav'), resources_path: Optional[str] = None):
         self.extensions = extensions
@@ -189,6 +195,8 @@ class GameWindow(Window, EventsCreator):
         self.total_delta_time = 0
         self.frames = 0
         self.current_fps = 0
+
+
 
         self.set_caption(__title__)
         self.set_fullscreen(settings.full_screen)
@@ -631,7 +639,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             Sprite: self.terrain_tiles,
             TerrainObject: self.static_objects,
             Wreck: self.static_objects,
-        }[object_class].get_by_id(object_id)
+        }[object_class].get(object_id)
 
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
@@ -795,11 +803,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_random_scenario(self):
         if self.loader is None:
-            self.test_scheduling_events()
             self.test_factions_and_players_creation()
             self.test_buildings_spawning()
             self.test_units_spawning()
-            self.test_missions()
+            self.test_scenarios()
 
     def place_viewport_at_players_base_or_starting_position(self):
         if self.local_human_player.buildings:
@@ -811,11 +818,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 [u.position for u in self.local_human_player.units]
             )
         self.window.move_viewport_to_the_position(*position)
-
-    def test_scheduling_events(self):
-        # TODO: remove it when game is completed
-        event = ScheduledEvent(self, 5, self.scheduling_test)
-        self.schedule_event(event)
 
     def test_factions_and_players_creation(self):
         # TODO: remove it when game is completed
@@ -871,12 +873,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 names = [unit_name] * amount
                 self.spawn_group(names, player, node.position)
 
-    def test_missions(self):
+    def test_scenarios(self):
         # TODO: remove it when game is completed
         human = self.local_human_player
         cpu_player = self.players[4]
         events = (
-            Victory(human).add_triggers(PlayerSelectedUnitsTrigger(human)),
+            # Victory(human).add_triggers(PlayerSelectedUnitsTrigger(human)),
             Defeat(human).add_triggers(NoUnitsLeftTrigger(human)),
             Defeat(cpu_player).add_triggers(NoUnitsLeftTrigger(cpu_player)),
         )
@@ -1067,7 +1069,7 @@ if __name__ == '__main__':
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building, ConstructionSite
-    from campaigns.missions import Scenario, Campaign, load_campaigns, MissionDescriptor
+    from campaigns.scenarios import Scenario, Campaign, load_campaigns, MissionDescriptor
     from campaigns.events import Victory, Defeat
     from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger
     from user_interface.menu import Menu
