@@ -172,7 +172,7 @@ class AudioPlayer:
     def _stop_music_track(self):
         try:
             stop_sound(self.current_music)
-        except AttributeError:
+        except (AttributeError, ValueError):
             pass
         finally:
             self.current_music = None

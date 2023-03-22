@@ -101,32 +101,25 @@ class EventsScheduler:
 
     @logger()
     def unschedule(self, event: ScheduledEvent):
-        try:
-            self._unschedule(self.scheduled_events.index(event))
-        except IndexError as e:
-            log(f'Failed to unschedule ScheduledEvent due to: {e}')
+        self._unschedule(self.scheduled_events.index(event))
 
     def _unschedule(self, event_index: int):
-        self.scheduled_events.pop(event_index)
-        self.execution_times.pop(event_index)
+        try:
+            self.scheduled_events.pop(event_index)
+            self.execution_times.pop(event_index)
+        except IndexError as e:
+            log(f'Failed to unschedule ScheduledEvent due to: {e}', True)
 
     def update(self):
         time = self.game.timer.total
-        dead_events_indexes = []
-        for i, event in enumerate(self.scheduled_events[:]):
+        for i, event in enumerate(self.scheduled_events):
             if time >= self.execution_times[i]:
                 event.execute()
                 if event.repeat:
                     event.repeat -= 1
                     self.execution_times[i] = time + event.delay
                 else:
-                    dead_events_indexes.append(i)
-        self._unschedule_dead_events(dead_events_indexes)
-
-    def _unschedule_dead_events(self, dead_events_indexes: List[int]):
-        for index in dead_events_indexes:
-            self._unschedule(index)
-
+                    self._unschedule(i)
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         return self.execution_times[self.scheduled_events.index(event)] - self.game.timer.total
 

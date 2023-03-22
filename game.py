@@ -196,8 +196,6 @@ class GameWindow(Window, EventsCreator):
         self.frames = 0
         self.current_fps = 0
 
-
-
         self.set_caption(__title__)
         self.set_fullscreen(settings.full_screen)
 
@@ -528,20 +526,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.events_scheduler = EventsScheduler(game=self)
 
+        self.scenario_editor = None
         self.map: Optional[Map] = None
-
-        self.pathfinder: Optional[Pathfinder] = None
-
+        self.mini_map: Optional[MiniMap] = None
         self.fog_of_war: Optional[FogOfWar] = None
 
-        self.scenario_editor = None
+        self.pathfinder: Optional[Pathfinder] = None
 
         # All GameObjects are initialized by the specialised factory:
         self.spawner: Optional[GameObjectsSpawner] = None
 
         self.explosions_pool: Optional[ExplosionsPool] = None
-
-        self.mini_map: Optional[MiniMap] = None
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -880,7 +875,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         events = (
             # Victory(human).add_triggers(PlayerSelectedUnitsTrigger(human)),
             Defeat(human).add_triggers(NoUnitsLeftTrigger(human)),
-            Defeat(cpu_player).add_triggers(NoUnitsLeftTrigger(cpu_player)),
+            Victory(human).add_triggers(
+                NoUnitsLeftTrigger(cpu_player),
+                TimePassedTrigger(human, 10),
+                MapRevealedTrigger(human)
+            )
         )
         self.current_mission = Scenario('Test Mission', 'Map 1')\
             .add_players(human, cpu_player)\
@@ -1071,7 +1070,7 @@ if __name__ == '__main__':
     from buildings.buildings import Building, ConstructionSite
     from campaigns.scenarios import Scenario, Campaign, load_campaigns, MissionDescriptor
     from campaigns.events import Victory, Defeat
-    from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger
+    from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger, TimePassedTrigger, MapRevealedTrigger
     from user_interface.menu import Menu
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger

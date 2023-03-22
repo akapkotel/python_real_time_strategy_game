@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from random import gauss
+from random import uniform
 
 from typing import List
 
@@ -9,9 +9,17 @@ from arcade.texture import Texture
 
 from effects.constants import SHOT_BLAST
 from effects.sound import SOUNDS_EXTENSION
-from utils.geometry import move_along_vector
-from effects.explosions import Explosion
 from players_and_factions.player import PlayerEntity
+
+EXPERIENCE_HIT_CHANCE_BONUS = 0.05
+
+INFANTRY_HIT_CHANCE_PENALTY = -25
+
+TARGET_MOVEMENT_HIT_PENALTY = -15
+
+MOVEMENT_HIT_PENALTY = -25
+
+BUILDING_HIT_CHANCE_BONUS = 25
 
 
 class Weapon:
@@ -63,20 +71,17 @@ class Weapon:
         hit_chance = sum(
             (
                 self.accuracy,
-                self.owner.experience * 0.05,
-                -target.experience * 0.05,
-                25 if target.is_building else 0,
+                self.owner.experience * EXPERIENCE_HIT_CHANCE_BONUS,
+                -target.experience * EXPERIENCE_HIT_CHANCE_BONUS,
+                BUILDING_HIT_CHANCE_BONUS * target.is_building,
                 -target.cover,
-                -25 if self.owner.moving else 0,
-                -15 if target.moving else 0,
-                -25 if target.is_infantry and not self.owner.is_infantry else 0
+                MOVEMENT_HIT_PENALTY * self.owner.moving,
+                TARGET_MOVEMENT_HIT_PENALTY * target.moving,
+                INFANTRY_HIT_CHANCE_PENALTY * target.is_infantry * self.owner.is_infantry
             )
         )
-        return gauss(hit_chance, 0.1) < hit_chance
+        return uniform(0, 100) < hit_chance
 
     def create_shot_audio_visual_effects(self):
-        barrel_angle = 45 * self.owner.barrel_end
         x, y = self.owner.center_x, self.owner.center_y + 10
-        blast_position = move_along_vector((x, y), 35.0, angle=barrel_angle)
-        self.owner.game.create_effect(Explosion, SHOT_BLAST, *blast_position)
         self.owner.game.sound_player.play_sound(self.shot_sound, sound_position=(x, y))

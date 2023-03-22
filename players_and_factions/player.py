@@ -524,7 +524,7 @@ class PlayerEntity(GameObject):
     @property
     def alive(self) -> bool:
         return self._health > 0
-
+    @property
     @abstractmethod
     def moving(self) -> bool:
         raise NotImplementedError
