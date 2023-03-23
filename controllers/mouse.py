@@ -14,7 +14,7 @@ from buildings.buildings import Building
 from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED, MAP_GREEN
 from game import Game
-from gameobjects.gameobject import GameObject, PlaceableGameobject
+from gameobjects.gameobject import GameObject, PlaceableGameObject
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
@@ -56,7 +56,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         self.mouse_dragging = False
 
-        self.placeable_gameobject: Optional[PlaceableGameobject] = None
+        self.placeable_gameobject: Optional[PlaceableGameObject] = None
 
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
@@ -138,8 +138,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.placeable_gameobject is not None:
             grid_x, grid_y = position_to_map_grid(x, y)
             self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
-            # TODO: snap placeable to the map grid and show player if it could be placed at current position
-            ...
+
+    def attach_placeable_gameobject(self, gameobject_name: str):
+        self.placeable_gameobject = PlaceableGameObject(gameobject_name, self.game.local_human_player, *self.position)
+        grid_x, grid_y = position_to_map_grid(*self.position)
+        self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
 
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
@@ -157,6 +160,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.evaluate_mini_map_click(x, y)
         if self.bound_text_input_field not in (ui_element, None):
             self.unbind_text_input_field()
+        if self.placeable_gameobject is not None and self.placeable_gameobject.is_construction_possible():
+            self.placeable_gameobject.build()
 
     @ignore_in_menu
     def evaluate_mini_map_click(self, x: float, y: float):
@@ -437,6 +442,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
+
+        if self.placeable_gameobject is not None:
+            self.placeable_gameobject.draw()
 
         super().draw()
 

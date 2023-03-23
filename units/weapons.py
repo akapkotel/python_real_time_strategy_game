@@ -68,16 +68,17 @@ class Weapon:
         self.ammunition = max(0, self.ammunition - 1)
 
     def check_if_target_was_hit(self, target: PlayerEntity) -> bool:
+        # we use that booleans are integers we can multiply by other values to avoid if statements
         hit_chance = sum(
             (
                 self.accuracy,
+                -target.cover,
                 self.owner.experience * EXPERIENCE_HIT_CHANCE_BONUS,
                 -target.experience * EXPERIENCE_HIT_CHANCE_BONUS,
                 BUILDING_HIT_CHANCE_BONUS * target.is_building,
-                -target.cover,
                 MOVEMENT_HIT_PENALTY * self.owner.moving,
                 TARGET_MOVEMENT_HIT_PENALTY * target.moving,
-                INFANTRY_HIT_CHANCE_PENALTY * target.is_infantry * self.owner.is_infantry
+                INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry -self.owner.is_infantry)
             )
         )
         return uniform(0, 100) < hit_chance

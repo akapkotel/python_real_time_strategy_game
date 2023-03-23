@@ -118,8 +118,8 @@ class Unit(PlayerEntity):
         return self.current_node.adjacent_nodes
 
     @property
-    def moving(self) -> float:
-        return self.change_x or self.change_y
+    def moving(self) -> bool:
+        return bool(self.change_x or self.change_y)
 
     def reached_destination(self, destination: Union[MapNode, GridPosition]) -> bool:
         try:

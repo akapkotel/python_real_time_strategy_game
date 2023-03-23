@@ -33,7 +33,6 @@ from effects.sound import AudioPlayer
 from gameobjects.constants import UNITS, BUILDINGS
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
-from user_interface.scenario_editor import ScenarioEditor
 from user_interface.constants import (
     EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU, UI_RESOURCES_SECTION, UI_UNITS_PANEL, UI_BUILDINGS_PANEL,
     UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_OPTIONS_PANEL, MINIMAP_WIDTH, MINIMAP_HEIGHT,
@@ -1072,6 +1071,7 @@ if __name__ == '__main__':
     from campaigns.events import Victory, Defeat
     from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger, TimePassedTrigger, MapRevealedTrigger
     from user_interface.menu import Menu
+    from user_interface.scenario_editor import ScenarioEditor
     from user_interface.minimap import MiniMap
     from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager

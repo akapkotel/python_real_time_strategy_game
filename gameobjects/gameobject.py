@@ -10,7 +10,7 @@ from arcade import AnimatedTimeBasedSprite, load_texture, Texture, draw_rectangl
 from arcade.arcade_types import Point
 
 from map.constants import TILE_WIDTH, TILE_HEIGHT
-from utils.colors import GREEN, RED
+from utils.colors import GREEN, RED, transparent
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
 from utils.data_types import GridPosition
@@ -203,33 +203,41 @@ class Wreck(TerrainObject):
                                    0, width // ROTATIONS, height)
 
 
-class PlaceableGameobject:
+class PlaceableGameObject:
     """
-    Used be ScenarioEditor and MouseCursor classes to attach a GameObject to
-    the cursor allowing user to move it around the map and spawn it wherever he
-    wants with a mouse-click.
+    This class generates a semi-transparent gizmo of Building showing to player if its construction is possible and how
+    much space is required to build the object.
     """
 
-    def __init__(self, gameobject_name: str):
-        self.game = GameObject.game
+    def __init__(self, gameobject_name: str, player, x, y):
+        self.game = player.game
+        self.player = player
         self.gameobject_name = gameobject_name
+        self.position = x, y
         self.grid_width, self.grid_height = self.game.configs[gameobject_name]['size']
         self.grids = None
 
     def snap_to_the_map_grid(self, gx, gy):
         from map.map import map_grid_to_position
+        self.position = map_grid_to_position((gx, gy))
         self.grids = {
-            map_grid_to_position((gx + x, gy + y)): self.game.map.node(gx + x, gy + y).walkable
+            map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).walkable
             for y in range(self.grid_height) for x in range(self.grid_width)
         }
 
     def draw(self):
-        for position, availability in self.grids:
-            color = GREEN if availability else RED
+        for (gx, gy), is_available in self.grids.items():
             draw_rectangle_filled(
-                position[0], position[1], TILE_WIDTH, TILE_HEIGHT, color
+                gx, gy, TILE_WIDTH, TILE_HEIGHT, transparent(GREEN if is_available else RED, 64)
             )
 
-    def emplace(self, position: GridPosition):
-        self.game.spawn(self.gameobject_name)
-        raise NotImplementedError
+    def is_construction_possible(self) -> bool:
+        return self.is_location_available and self.player.enough_resources_for(self.gameobject_name)
+
+    @property
+    def is_location_available(self) -> bool:
+        return all(bool(availability) for availability in self.grids.values())
+
+    def build(self):
+        from buildings.buildings import ConstructionSite
+        self.game.spawn(ConstructionSite(self.gameobject_name, self.player, *self.position))

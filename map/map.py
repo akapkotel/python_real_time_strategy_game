@@ -326,7 +326,7 @@ class Map:
         return random.choice([n.position for n in self.all_walkable_nodes])
 
     def node(self, grid: GridPosition) -> MapNode:
-        return self.nodes.get(grid, default=self.nonexistent_node)
+        return self.nodes.get(grid, self.nonexistent_node)
 
     @cached_property
     def nonexistent_node(self) -> MapNode:

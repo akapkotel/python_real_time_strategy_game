@@ -135,8 +135,9 @@ class UnitsProducer:
     def update_units_production(self):
         if self.currently_produced is not None:
             self.production_progress += 0.01 * self.health_percentage
-            self.update_ui_units_construction_section()
-            if int(self.production_progress) == self.production_time:
+            if self.is_controlled_by_player:
+                self.update_ui_units_construction_section()
+            if self.production_progress >= self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
             self._start_production(unit=self.production_queue[-1])
@@ -361,7 +362,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     @property
     def moving(self) -> bool:
-        return False  # this is rather obvious, this is a Building
+        return False  # this is rather obvious, since this is a Building
 
     @staticmethod
     def unblock_map_node(node: MapNode):

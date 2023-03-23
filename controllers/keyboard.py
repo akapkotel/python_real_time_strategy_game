@@ -6,6 +6,7 @@ from arcade import Window
 from arcade.key import *
 
 from gameobjects.constants import UNITS, BUILDINGS
+from gameobjects.gameobject import PlaceableGameObject
 from user_interface.user_interface import (
     ToggledElement, TextInputField, UiBundlesHandler
 )
@@ -43,9 +44,11 @@ class KeyboardHandler(ToggledElement):
             self.window.game_view.show_construction_options(UNITS)
         elif symbol == B and self.window.is_game_running:
             self.window.game_view.show_construction_options(BUILDINGS)
-        elif symbol == C:
+        elif symbol == D:
             if self.window.settings.developer_mode:
                 breakpoint()
+        elif symbol == C:
+            self.window.cursor.attach_placeable_gameobject('command_center')
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif (digit := chr(symbol)).isdigit():

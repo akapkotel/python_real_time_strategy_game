@@ -269,6 +269,8 @@ class Player(EventsCreator, Observer, Observed):
         self.detach_observers()
 
     def enough_resources_for(self, expense: str) -> bool:
+        if self.game.settings.developer_mode:
+            return True
         for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):
             required_amount = self.game.configs[expense][resource]
             if not self.has_resource(resource, required_amount):

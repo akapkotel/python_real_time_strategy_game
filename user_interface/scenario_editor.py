@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from arcade import Color
 
-from gameobjects.gameobject import PlaceableGameobject
+from gameobjects.gameobject import PlaceableGameObject
 from gameobjects.constants import UNITS, BUILDINGS
 from user_interface.constants import EDITOR
 from user_interface.user_interface import (
@@ -102,5 +102,5 @@ class ScenarioEditor:
         return editor_ui_elements
 
     def attach_gameobject_to_cursor(self, gameobject_name: str):
-        placeable = PlaceableGameobject(gameobject_name)
+        placeable = PlaceableGameObject(gameobject_name)
         self.game.window.cursor.placeable_gameobject = placeable

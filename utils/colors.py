@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from typing import Sequence, Union
 
 from arcade.arcade_types import Color, RGB, RGBA
 from arcade.color import SAND as ARCADE_SAND
@@ -38,3 +39,11 @@ colors_names = {
 
 def rgb_to_rgba(color: RGB, alpha: int) -> RGBA:
     return color[0], color[1], color[2], clamp(alpha, 255, 0)
+
+
+def transparent(original_color: Color, transparency: int) -> Color:
+    try:
+        r, g, b, _ = original_color
+    except ValueError:
+        r, g, b = original_color
+    return r, g, b, transparency
