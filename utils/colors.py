@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from typing import Sequence, Union
 
+import arcade.color
 from arcade.arcade_types import Color, RGB, RGBA
 from arcade.color import SAND as ARCADE_SAND
 
@@ -30,6 +31,7 @@ CIV_COLOR: Color = (250, 218, 94, 255)
 AMBIENT_COLOR: Color = (125, 125, 75, 255)
 NO_FOV_COLOR: Color = (0, 0, 0, 255)
 TRANSPARENT: Color = (0, 0, 0, 0)
+CONSTRUCTION_BAR_COLOR = arcade.color.BANANA_YELLOW
 
 
 colors_names = {
@@ -41,9 +43,13 @@ def rgb_to_rgba(color: RGB, alpha: int) -> RGBA:
     return color[0], color[1], color[2], clamp(alpha, 255, 0)
 
 
-def transparent(original_color: Color, transparency: int) -> Color:
-    try:
-        r, g, b, _ = original_color
-    except ValueError:
-        r, g, b = original_color
-    return r, g, b, transparency
+def add_transparency(original_color: Color, transparency: int) -> Color:
+    """
+    Changes original color transparency, or makes it transparent.
+
+    :param original_color: Color -- RGB or RGBA color
+    :param transparency: int -- if provided value is out of 0-255 range, it will be automatically clamped
+    :return:
+    """
+    r, g, b = original_color[:3]
+    return r, g, b, clamp(transparency, 255, 0)

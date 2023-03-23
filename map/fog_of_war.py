@@ -3,9 +3,9 @@
 from functools import lru_cache
 from typing import Dict, KeysView, Optional, Set
 
-from arcade import Sprite, SpriteList, make_soft_circle_texture, draw_rectangle_outline
+from arcade import Sprite, SpriteList, make_soft_circle_texture
 
-from utils.colors import BLACK, FOG, RED
+from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
 from game import Game
 from map.constants import TILE_WIDTH, TILE_HEIGHT

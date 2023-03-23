@@ -4,7 +4,7 @@ from __future__ import annotations
 __title__ = 'Python Real Time Strategy Game'
 __author__ = 'Rafał "Akapkotel" Trąbski'
 __license__ = "Share Alike Attribution-NonCommercial-ShareAlike 4.0"
-__version__ = "0.0.4"
+__version__ = "0.0.9"
 __maintainer__ = "Rafał Trąbski"
 __email__ = "rafal.trabski@mises.pl"
 __status__ = "development"
@@ -24,8 +24,7 @@ from functools import partial
 
 
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT,
-    draw_rectangle_outline
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
 )
 from arcade.arcade_types import Color, Point
 
@@ -34,14 +33,33 @@ from gameobjects.constants import UNITS, BUILDINGS
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from user_interface.constants import (
-    EDITOR, MAIN_MENU, SAVING_MENU, LOADING_MENU, UI_RESOURCES_SECTION, UI_UNITS_PANEL, UI_BUILDINGS_PANEL,
-    UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_OPTIONS_PANEL, MINIMAP_WIDTH, MINIMAP_HEIGHT,
-    SCENARIOS, SAVED_GAMES,
+    EDITOR,
+    MAIN_MENU,
+    SAVING_MENU,
+    LOADING_MENU,
+    UI_RESOURCES_SECTION,
+    UI_UNITS_PANEL,
+    UI_BUILDINGS_PANEL,
+    UI_UNITS_CONSTRUCTION_PANEL,
+    UI_BUILDINGS_CONSTRUCTION_PANEL,
+    UI_OPTIONS_PANEL,
+    MINIMAP_WIDTH,
+    MINIMAP_HEIGHT,
+    SCENARIOS,
+    SAVED_GAMES,
 )
 from user_interface.user_interface import (
-    Frame, Button, UiBundlesHandler, UiElementsBundle, GenericTextButton,
-    SelectableGroup, TextInputField, UiTextLabel,
-    UiElement, ProgressButton, Hint
+    Frame,
+    Button,
+    UiBundlesHandler,
+    UiElementsBundle,
+    GenericTextButton,
+    SelectableGroup,
+    TextInputField,
+    UiTextLabel,
+    UiElement,
+    ProgressButton,
+    Hint
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
@@ -53,7 +71,7 @@ from utils.geometry import clamp, average_position_of_points_group, generate_2d_
 from utils.improved_spritelists import (
     LayeredSpriteList, SpriteListWithSwitch, UiSpriteList,
 )
-from utils.scheduling import EventsCreator, EventsScheduler, ScheduledEvent
+from utils.scheduling import EventsCreator, EventsScheduler
 from utils.views import LoadingScreen, LoadableWindowView, Updateable
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
@@ -120,8 +138,11 @@ class Settings:
         self.full_screen: bool = False
         self.pyprofiler: bool = False
 
-        self.god_mode: bool = False
+        self.immortal_player_units: bool = False
         self.ai_sleep: bool = False
+        self.instant_production_time: bool = False
+        self.unlimited_player_resources: bool = False
+        self.unlimited_cpu_resources: bool = False
 
         self.vehicles_threads: bool = True
         self.threads_fadeout_seconds: int = 2
@@ -228,6 +249,10 @@ class GameWindow(Window, EventsCreator):
         self.keyboard = KeyboardHandler(self, self.menu_view)
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
+
+    @property
+    def game(self) -> Game:
+        return self.game_view
 
     @property
     def screen_center(self) -> Point:
@@ -827,7 +852,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.spawn('garrison', self.players[2], (600, 800), garrison=1)
         self.spawn('command_center', self.players[2], (400, 900), garrison=1)
         self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1)
-        ConstructionSite('command_center', self.players[2], 850, 800),
+        ConstructionSite('command_center', self.players[2], (850, 800))
 
     def spawn(self,
               object_name: str,
@@ -943,8 +968,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        for thing in (t for t in self.things_to_update_each_frame if t is not None):
-            thing.update()
+        for thing in (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer, self.current_mission):
+            if thing is not None:
+                thing.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players()

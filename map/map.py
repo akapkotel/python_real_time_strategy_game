@@ -426,6 +426,10 @@ class MapNode:
         self._pathable = value
 
     @property
+    def available_for_construction(self)  -> bool:
+        return self.walkable and self.grid in self.map.game.fog_of_war.explored and not any(n.building for n in self.adjacent_nodes)
+
+    @property
     def walkable_adjacent(self) -> Set[MapNode]:
         return {n for n in self.adjacent_nodes if n.walkable}
 

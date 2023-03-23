@@ -6,7 +6,7 @@ from collections import deque
 from functools import partial
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union
 
-from arcade import load_texture, draw_rectangle_outline, draw_lrtb_rectangle_filled, MOUSE_BUTTON_RIGHT
+from arcade import load_texture, MOUSE_BUTTON_RIGHT
 from arcade.arcade_types import Point
 
 from units.units import Soldier, Unit
@@ -19,9 +19,8 @@ from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS, FUEL
 )
-from utils.scheduling import ScheduledEvent
 from utils.views import ProgressBar
-from utils.colors import GREEN, RED, BLACK, YELLOW
+from utils.colors import GREEN, RED, BLACK, CONSTRUCTION_BAR_COLOR
 from utils.functions import (
     add_player_color_to_name, get_texture_size,
     get_path_to_file, ignore_in_editor_mode, add_extension
@@ -127,7 +126,11 @@ class UnitsProducer:
     def set_production_progress_and_speed(self, unit: str):
         self.production_progress = 0
         production_time = self.game.configs[unit]['production_time']
-        self.production_time = production_time * self.game.settings.fps
+        self.production_time = self.instant_production or production_time * self.game.settings.fps
+
+    @property
+    def instant_production(self) -> bool:
+        return self.game.settings.instant_production_time and self.is_controlled_by_player
 
     def _toggle_production(self, produced: Optional[str]):
         self.currently_produced = produced
@@ -314,6 +317,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
 
+        self.autodestruction_progress = 0
+
         if garrison:
             self.spawn_soldiers_for_garrison(garrison)
 
@@ -409,6 +414,17 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.update_production()
         self.update_observed_area()
         self.update_ui_buildings_panel()
+        if self.autodestruction_progress:
+            self.update_autodestruction()
+
+    def update_autodestruction(self):
+        self.autodestruction_progress += 0.25
+        if self.autodestruction_progress >= 100:
+            self.kill()
+        # TODO: gradually remove garrisoned Soldiers from Building
+
+    def draw(self):
+        pass
 
     def update_production(self):
         if self.produced_units is not None:
@@ -424,6 +440,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             panel = self.game.get_bundle(UI_BUILDINGS_PANEL)
             panel.find_by_name('health').text = f'HP: {round(self.health)} / {self.max_health}'
 
+            if self.autodestruction_progress:
+                self.update_demolish_button(panel)
+
             if self.is_controlled_by_player and self.produced_units is not None:
                 self.update_production_buttons(panel)
 
@@ -438,7 +457,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         """
         ui_elements = self.create_building_ui_information(x, y)
         if self.is_controlled_by_player:
-            buttons = self.create_ui_buttons(x, y)
+            buttons = self.create_building_ui_buttons(x, y)
             ui_elements.extend(buttons)
         return ui_elements
 
@@ -449,7 +468,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
         ]
 
-    def create_ui_buttons(self, x, y) -> List[Button]:
+    def create_building_ui_buttons(self, x, y) -> List[Button]:
         buttons = [
             self.create_garrison_button(x, y),
             self.create_demolish_button(x, y)
@@ -469,15 +488,26 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         )
 
     def create_demolish_button(self, x, y) -> Button:
-        return Button(
+        demolish_button = ProgressButton(
             'game_button_destroy.png', x - 55, y - 45, 'demolish',
-            functions=self.autodestruct
+            functions=self.start_autodestruction,
         )
+        demolish_button.bind_function(self.cancel_autodestruction, MOUSE_BUTTON_RIGHT)
+        return demolish_button
 
-    def autodestruct(self):
-        self.on_being_damaged(100, 100)
-        if self.alive:
-            self.schedule_event(ScheduledEvent(self, 1, self.autodestruct))
+    def start_autodestruction(self):
+        if not self.autodestruction_progress:
+            self.autodestruction_progress += 1
+            self.game.sound_player.play_sound('preparing_to_autodestruction.wav')
+
+    def cancel_autodestruction(self):
+        self.autodestruction_progress = 0
+        self.update_demolish_button(ui_panel=self.game.get_bundle(UI_BUILDINGS_PANEL))
+        self.game.sound_player.play_sound('autodestruction_cancelled.wav')
+
+    def update_demolish_button(self, ui_panel: UiElementsBundle):
+        demolish_button = ui_panel.find_by_name('demolish')
+        demolish_button.progress = self.autodestruction_progress
 
     @property
     def count_empty_garrison_slots(self) -> int:
@@ -612,21 +642,23 @@ class ConstructionSite(Building):
     When Building construction is completed, ConstructionSite disappears and actual Building is spawned in its place.
     """
 
-    def __init__(self, building_name: str, player: Player, x, y):
-        # size of this Building depends on the size of constructed object:
-        constructed_building_configs = self.game.configs[building_name]
-        size = constructed_building_configs['size']
-        super().__init__(f'construction_site_{size[0]}x{size[1]}', player, (x, y))
-        # TODO: create construction textures for each Building with stages of construction
-        # self.textures = []
-        # self.set_texture(0)
+    def __init__(self, building_name: str, player: Player, position):
+        super().__init__(f'construction_site', player, position)
 
-        self.constructed_building_position = x, y
+        constructed_building_configs = self.game.configs[building_name]
+
+        self.constructed_building_position = position
         self.constructed_building_name = building_name
-        self.maximum_construction_progress = max = constructed_building_configs['max_health']
+
+        # TODO: find a way to resize placeholder texture to the size of constructed building in game
+        # TODO: create construction textures for each Building with stages of construction
+
+        self.maximum_construction_progress = constructed_building_configs['max_health']
         self.construction_progress = 0
 
-        self.progress_bar = ProgressBar(self.center_x, self.top, self.width, 20, 0, max, 1, BLACK, YELLOW)
+        self.construction_progress_bar = ProgressBar(
+            self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK, CONSTRUCTION_BAR_COLOR
+        )
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -634,16 +666,15 @@ class ConstructionSite(Building):
         if self.construction_progress >= self.maximum_construction_progress:
             self.finish_construction()
         elif self.is_controlled_by_player:
-            self.progress_bar.update()
+            self.construction_progress_bar.update()
 
     def draw(self):
-        super().draw()
         if self.is_controlled_by_player:
-            self.progress_bar.draw()
+            self.construction_progress_bar.draw()
 
     def finish_construction(self):
         self.stop_rendering()
-        self.progress_bar = None
+        self.construction_progress_bar = None
         self.kill()
         self.game.spawn(self.constructed_building_name, self.player, self.constructed_building_position)
         self.game.sound_player.play_sound('construction_complete.wav')

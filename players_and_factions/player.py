@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade.arcade_types import Color, Point
 
+from gameobjects.constants import CONSTRUCTION_SITE
 from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
@@ -269,7 +270,7 @@ class Player(EventsCreator, Observer, Observed):
         self.detach_observers()
 
     def enough_resources_for(self, expense: str) -> bool:
-        if self.game.settings.developer_mode:
+        if self.unlimited_resources:
             return True
         for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):
             required_amount = self.game.configs[expense][resource]
@@ -278,6 +279,10 @@ class Player(EventsCreator, Observer, Observed):
                     self.notify_player_of_resource_deficit(resource)
                 return False
         return True
+
+    @property
+    def unlimited_resources(self):
+        return (self.is_local_human_player and self.game.settings.unlimited_player_resources) or self.game.settings.unlimited_cpu_resources
 
     def _identify_expense_category(self, expense: str) -> str:
         try:
@@ -456,7 +461,7 @@ class PlayerEntity(GameObject):
                  player: Player,
                  position: Point,
                  id: Optional[int] = None):
-        self.colored_name = add_player_color_to_name(texture_name, player.color)
+        self.colored_name = self.get_texture_name_with_player_color(player, texture_name)
         super().__init__(self.colored_name, position, id)
         self.map = self.game.map
         self.player: Player = player
@@ -512,6 +517,12 @@ class PlayerEntity(GameObject):
         self.kill_experience = 0
 
         self.attach_observers(observers=[self.game, self.player])
+
+    def get_texture_name_with_player_color(self, player, texture_name) -> str:
+        if CONSTRUCTION_SITE in texture_name:
+            return texture_name
+        else:
+            return add_player_color_to_name(texture_name, player.color)
 
     def __repr__(self) -> str:
         return f'{self.object_name}(id: {self.id}, player.id: {self.player.id})'
@@ -701,7 +712,7 @@ class PlayerEntity(GameObject):
         :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
-        if self.game.settings.god_mode and self.player.is_local_human_player:
+        if self.game.settings.immortal_player_units and self.player.is_local_human_player:
             return
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)

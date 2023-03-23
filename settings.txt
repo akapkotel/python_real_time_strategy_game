@@ -13,5 +13,3 @@ starting_resources = 0.5
 screen_width = 1920
 screen_height = 1080
 hints_delay_seconds = 1
-pyprofiler = False
-developer_mode = True

@@ -77,6 +77,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         self.forced_cursor: Optional[int] = None
 
+        self.cursor_over_minimap_position: Optional[Tuple[int, int]] = None
+
         # used to change cursor color when placed over objects if they are friends or foes
         self.cursor_default_color = MAP_GREEN
         self.cross_color = self.cursor_default_color
@@ -147,14 +149,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
-            self.on_left_button_press(x, y, modifiers)
+            self.on_left_button_press(x, y)
         elif button is MOUSE_BUTTON_RIGHT:
-            self.on_right_button_press(x, y, modifiers)
-        elif button is MOUSE_BUTTON_MIDDLE:
-            self.on_middle_button_press(x, y, modifiers)
+            self.on_right_button_press()
 
     @logger()
-    def on_left_button_press(self, x: float, y: float, modifiers: int):
+    def on_left_button_press(self, x: float, y: float):
         if (ui_element := self.pointed_ui_element) is not None:
             ui_element.on_mouse_press(MOUSE_BUTTON_LEFT)
             self.evaluate_mini_map_click(x, y)
@@ -166,22 +166,16 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     @ignore_in_menu
     def evaluate_mini_map_click(self, x: float, y: float):
         left, _, bottom, _ = self.game.viewport
-        x, y = x + left, y + bottom
-        if (position := self.game.mini_map.cursor_inside(x, y)) is not None:
+        if self.cursor_over_minimap_position is not None:
             if units := self.units_manager.selected_units:
-                self.units_manager.on_terrain_click_with_units(*position, units)
+                self.units_manager.on_terrain_click_with_units(*self.cursor_over_minimap_position, units)
             else:
-                self.window.move_viewport_to_the_position(*position)
+                self.window.move_viewport_to_the_position(*self.cursor_over_minimap_position)
 
     @logger()
-    def on_right_button_press(self, x: float, y: float, modifiers: int):
-        self.placeable_gameobject = None
+    def on_right_button_press(self):
         if self.pointed_ui_element is not None:
             self.pointed_ui_element.on_mouse_press(MOUSE_BUTTON_RIGHT)
-
-    @logger()
-    def on_middle_button_press(self, x: float, y: float, modifiers: int):
-        pass
 
     def on_mouse_release(self, x: float, y: float, button: int):
         if button is MOUSE_BUTTON_LEFT:
@@ -212,12 +206,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_right_button_release(self):
         if self.mouse_dragging:
             self.mouse_dragging = None
+            return
         elif self.pointed_ui_element is not None:
             pass
         elif self.units_manager.units_or_building_selected:
             self.units_manager.unselect_all_selected()
         else:
             self.units_manager.selected_building = None
+        self.placeable_gameobject = None
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
@@ -257,8 +253,12 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def update(self):
         super().update()
+        if self.game is not None and self.game.mini_map is not None:
+            self.cursor_over_minimap_position = self.game.mini_map.cursor_over_minimap(*self.position)
         if self.units_manager is not None:
             self.units_manager.update()
+        if self.placeable_gameobject is not None:
+            self.placeable_gameobject.update()
         self.update_cursor_pointed()
         self.update_cursor_texture()
         self.update_animation(self.window.settings.update_rate)
@@ -360,12 +360,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             pass
 
     def update_cursor_texture(self):
-        if self.window.is_game_running:
-            self.cursor_in_game()
-        else:
-            self.set_texture(CURSOR_NORMAL_TEXTURE)
-
-    def cursor_in_game(self):
+        if not self.window.is_game_running:
+            return self.set_texture(CURSOR_NORMAL_TEXTURE)
         if self.pointed_ui_element:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
         elif (forced := self.forced_cursor) is not None:
@@ -436,14 +432,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def draw(self):
         self.draw_cross_cursor()
 
-        # if self.show_hint and self.text_hint_delay <= self.game.timer['total']:
         if self.show_hint and self.text_hint_delay <= self.game.timer.total:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
 
         if (selection := self.mouse_drag_selection) is not None:
             selection.draw()
 
-        if self.placeable_gameobject is not None:
+        if self.placeable_gameobject is not None and self.is_game_loaded_and_running and self.pointed_ui_element is None:
             self.placeable_gameobject.draw()
 
         super().draw()
@@ -463,6 +458,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         draw_lrtb_rectangle_filled(x, right, top, bottom, BLACK)
         draw_lrtb_rectangle_outline(x, right, top, bottom, WHITE)
         draw_text(text_hint, x + 5, y, WHITE, 11, anchor_y='center')
+
 
 
 class MouseDragSelection:

@@ -10,7 +10,7 @@ from arcade import AnimatedTimeBasedSprite, load_texture, Texture, draw_rectangl
 from arcade.arcade_types import Point
 
 from map.constants import TILE_WIDTH, TILE_HEIGHT
-from utils.colors import GREEN, RED, transparent
+from utils.colors import GREEN, RED, add_transparency
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
 from utils.data_types import GridPosition
@@ -215,21 +215,33 @@ class PlaceableGameObject:
         self.gameobject_name = gameobject_name
         self.position = x, y
         self.grid_width, self.grid_height = self.game.configs[gameobject_name]['size']
+        self.last_grid = None
         self.grids = None
+        self.drawn_gizmo_data = None
 
     def snap_to_the_map_grid(self, gx, gy):
+        """
+        Create dictionary of map positions and their boolean 'availabilities' for constructing Building. This dict would
+        be used to draw colored gizmo on the screen when player seek a proper position for placing the Building.
+        """
+        if self.last_grid == (gx, gy):
+            return
         from map.map import map_grid_to_position
         self.position = map_grid_to_position((gx, gy))
         self.grids = {
-            map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).walkable
+            map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).available_for_construction
             for y in range(self.grid_height) for x in range(self.grid_width)
         }
 
+    def update(self):
+        self.drawn_gizmo_data = (
+            (gx, gy, TILE_WIDTH, TILE_HEIGHT, add_transparency(GREEN if is_available else RED, 64))
+            for (gx, gy), is_available in self.grids.items()
+        )
+
     def draw(self):
-        for (gx, gy), is_available in self.grids.items():
-            draw_rectangle_filled(
-                gx, gy, TILE_WIDTH, TILE_HEIGHT, transparent(GREEN if is_available else RED, 64)
-            )
+        for grid_data in self.drawn_gizmo_data:
+            draw_rectangle_filled(*grid_data)
 
     def is_construction_possible(self) -> bool:
         return self.is_location_available and self.player.enough_resources_for(self.gameobject_name)
@@ -240,4 +252,4 @@ class PlaceableGameObject:
 
     def build(self):
         from buildings.buildings import ConstructionSite
-        self.game.spawn(ConstructionSite(self.gameobject_name, self.player, *self.position))
+        ConstructionSite(self.gameobject_name, self.player, self.position)

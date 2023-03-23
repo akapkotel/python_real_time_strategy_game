@@ -122,16 +122,28 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
 
         if self.window.settings.developer_mode:
-            y = (i for i in range(300, SCREEN_HEIGHT, 75))
             options_menu.extend(
-                (Checkbox('menu_checkbox.png', *next(positions), 'God mode:',
-                         20, ticked=window.settings.god_mode,
-                         variable=(window.settings, 'god_mode'),
+                (Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
+                         20, ticked=window.settings.immortal_player_units,
+                         variable=(window.settings, 'immortal_player_units'),
                          subgroup=3),
                 Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
                          20, ticked=window.settings.ai_sleep,
                          variable=(window.settings, 'ai_sleep'),
-                         subgroup=3))
+                         subgroup=3),
+                 Checkbox('menu_checkbox.png', *next(positions), 'Unlimited player resources:',
+                          20, ticked=window.settings.unlimited_player_resources,
+                          variable=(window.settings, 'unlimited_player_resources'),
+                          subgroup=3),
+                 Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources',
+                          20, ticked=window.settings.unlimited_cpu_resources,
+                          variable=(window.settings, 'unlimited_cpu_resources'),
+                          subgroup=3),
+                 Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
+                          20, ticked=window.settings.instant_production_time,
+                          variable=(window.settings, 'instant_production_time'),
+                          subgroup=3),
+                )
             )
 
         # tabs switching what groups of elements are visible by

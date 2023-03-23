@@ -82,7 +82,7 @@ class MiniMap:
             r, t = self.screen_width - MARGIN_RIGHT, self.screen_height - MARGIN_TOP
             dx, dy = r - self.max_width // 2 - self.width // 2, t - self.max_height
         else:
-            dx, dy = self.minimap_left_and_bottom
+            dx, dy, *_ = self.minimap_bounds
         self.move_shapes_lists(dx + 9, dy + 60)
         return self.shapes_lists
 
@@ -108,7 +108,7 @@ class MiniMap:
 
     def update_viewport(self):
         x, y = self.game.window.screen_center
-        left, bottom = self.minimap_left_and_bottom
+        left, bottom, *_ = self.minimap_bounds
         return [
             left + ((x - 200) * self.ratio),
             bottom + (y * self.ratio),
@@ -117,7 +117,7 @@ class MiniMap:
         ]
 
     def update_drawn_units(self):
-        left, bottom = self.minimap_left_and_bottom
+        left, bottom, *_ = self.minimap_bounds
         self.drawn_entities = [
             [left + (entity.center_x * self.ratio),
              bottom + (entity.center_y * self.ratio),
@@ -127,9 +127,11 @@ class MiniMap:
         # TODO: update building, draw terrain objects
 
     @property
-    def minimap_left_and_bottom(self):
+    def minimap_bounds(self) -> Tuple[float, float, float, float]:
         return (self.position[0] - (self.width // 2),
-                self.position[1] - (self.height // 2))
+                self.position[1] - (self.height // 2),
+                self.position[0] + (self.width // 2),
+                self.position[1] + (self.height // 2))
 
     def update_revealed_areas(self):
         revealed_this_time = self.visible.difference(self.drawn_area)
@@ -154,13 +156,13 @@ class MiniMap:
         draw_rectangle_outline(*self.viewport, color=WHITE)
         draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
 
-    def cursor_inside(self, x: float, y: float) -> Optional[Tuple[int, int]]:
+    def cursor_over_minimap(self, x: float, y: float) -> Optional[Tuple[float, float]]:
         """
         Check if mouse cursor points at the MiniMap area, if so, return the
         pointed position translated from minimap's to world dimensions.
         """
-        left, bottom = self.minimap_left_and_bottom
-        if left < x < left + self.width and bottom < y < bottom + self.height:
+        left, bottom, right, top = self.minimap_bounds
+        if left < x < right and bottom < y < bottom + top:
             return (x - left) // self.ratio, (y - bottom) // self.ratio
 
     def save(self):

@@ -224,7 +224,7 @@ class ProgressBar:
             self.total_progress += self.progress_step
         else:
             self.total_progress += progress
-        self.progress_bar_data[1] = self.left_margin + 1 + (self.width / self.max_progress) * self.total_progress
+        self.progress_bar_data[1] = self.left_margin + 1 + ((self.width - 1) / self.max_progress) * self.total_progress
 
 
 if __name__:

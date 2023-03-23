@@ -10,24 +10,21 @@ from players_and_factions.player import Player
 from units.units import Unit, Soldier, VehicleWithTurret, Vehicle
 
 from utils.game_logging import log
-from gameobjects.constants import CLASS, CORPSE, WRECK, TREE
+from gameobjects.constants import (
+    CLASS,
+    CORPSE,
+    WRECK,
+    TREE,
+    UNIT,
+    VEHICLE_WITH_TURRET,
+    VEHICLE,
+    SOLDIER,
+    BUILDING,
+    RESEARCH_FACILITY,
+    PRODUCED_RESOURCE,
+    PRODUCED_UNITS
+)
 from gameobjects.gameobject import GameObject, Wreck, Tree
-
-UNIT = 'Unit'
-
-VEHICLE_WITH_TURRET = 'VehicleWithTurret'
-
-VEHICLE = 'Vehicle'
-
-SOLDIER = 'Soldier'
-
-BUILDING = 'Building'
-
-RESEARCH_FACILITY = 'research_facility'
-
-PRODUCED_RESOURCE = 'produced_resource'
-
-PRODUCED_UNITS = 'produced_units'
 
 
 class GameObjectsSpawner:
@@ -73,6 +70,8 @@ class GameObjectsSpawner:
 
     @staticmethod
     def _spawn_terrain_object(name, position, *args, **kwargs) -> GameObject:
+        if 'construction_center' in name:
+            return
         if WRECK in name or CORPSE in name:
             texture_index = args[0]
             return Wreck(name, 0 if CORPSE in name else 1, position, texture_index)
