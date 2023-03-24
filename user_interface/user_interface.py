@@ -31,6 +31,9 @@ from utils.game_logging import log
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
+PLACEHOLDER_TEXTURE = 'placeholder.png'
+
+
 def make_texture(width: int, height: int, color: Color) -> Texture:
     """
     Return a :class:`Texture` of a square with the given diameter and color,
@@ -272,6 +275,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
     """
     sound_on_mouse_enter = 'cursor_over_ui_element.wav'
     sound_on_mouse_click = 'click_on_ui_element.wav'
+    game = None
 
     def __init__(self, texture_name: str, x: int, y: int,
                  name: Optional[str] = None, active: bool = True,
@@ -279,7 +283,9 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None):
+
         full_texture_name = get_path_to_file(texture_name)
+
         super().__init__(full_texture_name, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)

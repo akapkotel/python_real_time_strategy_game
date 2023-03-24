@@ -138,3 +138,5 @@ dmypy.json
 
 # logfiles
 .log
+
+/testing_solutions.py

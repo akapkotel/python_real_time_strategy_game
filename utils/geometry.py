@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, dist
-from typing import Optional, Sequence, Tuple, List
+from typing import Optional, Sequence, Tuple, List, Set
 
 from numba import njit
 
@@ -139,7 +139,6 @@ def move_along_vector(start: Point,
 
 
 @lru_cache(maxsize=None)
-# @njit(['int64, int64, int64'], nogil=True, fastmath=True, cache=True)
 def calculate_circular_area(grid_x, grid_y, max_distance):
     radius = max_distance * 1.6
     observable_area = []
@@ -154,7 +153,7 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
     return observable_area
 
 
-@lru_cache()
+@lru_cache
 def precalculate_circular_area_matrix(max_distance: int) -> Tuple[Tuple[int, int], ...]:
     radius = max_distance * 1.6
     observable_area = []
@@ -169,8 +168,8 @@ def precalculate_circular_area_matrix(max_distance: int) -> Tuple[Tuple[int, int
 
 
 @lru_cache(maxsize=None)
-def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None):
-    return [(pos[0] + x, pos[1] + y) for pos in matrix_]
+def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None) -> Set[Tuple[int, int]]:
+    return {(pos[0] + x, pos[1] + y) for pos in matrix_}
 
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:

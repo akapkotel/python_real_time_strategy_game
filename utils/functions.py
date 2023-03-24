@@ -23,14 +23,15 @@ def get_path_to_file(filename: str, extension: str = 'png') -> str:
             return os.path.join(dirpath, correct_filename)
     log(f'File {filename} does not exist!')
 
+@lru_cache
 def get_object_name(filename: str) -> str:
     """
-    Retrieve raw name of a GameObject from the absolute path to it's texture.
+    Retrieve raw name of a GameObject from the absolute path to its texture.
     """
     name_with_extension = remove_path_from_name(filename)
     return name_with_extension.split('.', 1)[0]
 
-
+@lru_cache
 def remove_path_from_name(filename: str):
     return filename.rpartition('/')[-1]
 
@@ -61,7 +62,7 @@ def find_paths_to_all_files_of_type(extension: str,
             names_to_paths[file_name] = path
     return names_to_paths
 
-
+@lru_cache
 def add_player_color_to_name(name: str, color: Color) -> str:
     color_name = colors_names[color]
     if not name.endswith(color_name):

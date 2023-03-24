@@ -381,11 +381,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
 
-    def update_fire_covered_area(self):
-        x, y = position_to_map_grid(*self.position)
-        area = find_area(x, y, self.attack_range_matrix)
-        self.fire_covered = {self.map[grid] for grid in area}
-
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
         pass

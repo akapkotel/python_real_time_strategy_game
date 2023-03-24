@@ -281,8 +281,11 @@ class Player(EventsCreator, Observer, Observed):
         return True
 
     @property
-    def unlimited_resources(self):
-        return (self.is_local_human_player and self.game.settings.unlimited_player_resources) or self.game.settings.unlimited_cpu_resources
+    def unlimited_resources(self) -> bool:
+        return (
+                (self.is_local_human_player and self.game.settings.unlimited_player_resources)
+                or(self.game.settings.unlimited_cpu_resources and not self.is_local_human_player)
+        )
 
     def _identify_expense_category(self, expense: str) -> str:
         try:
@@ -627,9 +630,9 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def calculate_observed_area(self) -> Set[GridPosition]:
-        position = position_to_map_grid(*self.position)
-        circular_area = find_area(*position, self.visibility_matrix)
-        return set(self.map.in_bounds(circular_area))
+        gx, gy = position_to_map_grid(*self.position)
+        circular_map_grid_area = find_area(gx, gy, self.visibility_matrix)
+        return self.map.in_bounds(circular_map_grid_area)
 
     @ignore_in_editor_mode
     def update_known_enemies_set(self):
@@ -661,12 +664,6 @@ class PlayerEntity(GameObject):
         #     return enemies_in_range[0]
         # else:
         #     return sorted_by_health[0]
-
-    def inside_area(self, other: Union[Unit, Building], area) -> bool:
-        if other.is_unit:
-            return other.current_node in self.observed_nodes
-        else:
-            return len(self.observed_nodes & other.occupied_nodes) > 0
 
     def in_attack_range(self, other: PlayerEntity) -> bool:
         if other.is_unit:

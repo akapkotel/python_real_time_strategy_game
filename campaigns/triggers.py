@@ -163,4 +163,4 @@ class VictoryPointsTrigger(EventTrigger):
         self.required_vp = required_vp
 
     def condition_fulfilled(self) -> bool:
-        return self.game.current_mission.victory_points[self.player.id] >= self.required_vp
+        return self.game.current_scenario.victory_points[self.player.id] >= self.required_vp

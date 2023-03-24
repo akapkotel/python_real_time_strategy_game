@@ -59,7 +59,7 @@ from user_interface.user_interface import (
     UiTextLabel,
     UiElement,
     ProgressButton,
-    Hint
+    Hint, Checkbox
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
@@ -155,6 +155,8 @@ class Settings:
         self.resources_abundance: float = 0.01
         self.starting_resources: float = 0.5
 
+        self.show_minimap: bool = True
+
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
         self.map_width: int = 100
@@ -179,6 +181,7 @@ class ResourcesManager:
     fast access. Later on instead of searching a texture each time, when a new gameObject is instantiated, its
     constructor just query this manager for the proper path to the file.
     """
+    instance = None
 
     def __init__(self, extensions: Tuple[str] = ('png', 'wav'), resources_path: Optional[str] = None):
         self.extensions = extensions
@@ -187,6 +190,7 @@ class ResourcesManager:
         for extension in self.extensions:
             names_to_paths = find_paths_to_all_files_of_type(extension, self.resources_path)
             self.resources[extension] = {name: pathlib.Path(path, name) for name, path in names_to_paths.items()}
+        ResourcesManager.instance = self
 
     def get_path_to_single_file(self, file_name: str) -> Union[Dict[str, str], str]:
         extension = file_name.split('.')[-1]
@@ -575,9 +579,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.units_manager = UnitsManager(cursor=self.cursor)
 
-        self.current_mission: Optional[Scenario] = None
-
-        self.debugger: Optional[GameDebugger] = None
+        self.current_campaign: Optional[Campaign] = None
+        self.current_scenario: Optional[Scenario] = None
 
         # list used only when Game is randomly-generated:
         rows, columns = self.settings.map_height, self.settings.map_width
@@ -594,11 +597,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ] if self.loader is None else []
 
         log('Game initialized successfully', console=True)
-
-    @property
-    def things_to_update_each_frame(self) -> Tuple[EventsScheduler, GameDebugger, FogOfWar, Pathfinder, MiniMap, Timer, Scenario]:
-        return (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer,
-                self.current_mission)
 
     @property
     def resources_manager(self) -> ResourcesManager:
@@ -636,7 +634,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             return self.find_gameobject(object_class, object_id)
         else:
             object_class = eval(name_and_id)
-            return {Game: self, GameWindow: self.window, Scenario: self.current_mission,
+            return {Game: self, GameWindow: self.window, Scenario: self.current_scenario,
                     UnitsManager: self.units_manager}[object_class]
 
     def find_gameobject(self,
@@ -668,6 +666,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             name=UI_OPTIONS_PANEL,
             elements=[
                 right_panel,
+                Checkbox('menu_checkbox.png', ui_x - 150, ui_y + 370, '', 10,
+                         ticked=self.settings.show_minimap, variable=(self.settings, 'show_minimap')),
                 Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
                        functions=partial(self.show_construction_options, BUILDINGS)),
                 Button('ui_units_construction_options.png', ui_x + 90, ui_y + 153,
@@ -897,15 +897,15 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         human = self.local_human_player
         cpu_player = self.players[4]
         events = (
-            # Victory(human).add_triggers(PlayerSelectedUnitsTrigger(human)),
             Defeat(human).add_triggers(NoUnitsLeftTrigger(human)),
             Victory(human).add_triggers(
                 NoUnitsLeftTrigger(cpu_player),
                 TimePassedTrigger(human, 10),
-                MapRevealedTrigger(human)
+                MapRevealedTrigger(human),
+                # PlayerSelectedUnitsTrigger(human)
             )
         )
-        self.current_mission = Scenario('Test Mission', 'Map 1')\
+        self.current_scenario = Scenario('Test Mission', 'Map 1')\
             .add_players(human, cpu_player)\
             .add_events(*events)\
             .unlock_technologies_for_player(human, 'technology_1')\
@@ -968,7 +968,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        for thing in (self.events_scheduler, self.debugger, self.fog_of_war, self.pathfinder, self.mini_map, self.timer, self.current_mission):
+        for thing in (self.events_scheduler, self.fog_of_war, self.pathfinder, self.mini_map, self.timer, self.current_scenario):
             if thing is not None:
                 thing.update()
         super().update_view(delta_time)
@@ -1021,11 +1021,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
         super().on_draw()
-        if self.mini_map is not None:
+        if self.mini_map is not None and self.settings.show_minimap:
             self.mini_map.draw()
         self.timer.draw()
-        if self.debugger is not None:
-            self.debugger.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
 
@@ -1095,11 +1093,9 @@ if __name__ == '__main__':
     from buildings.buildings import Building, ConstructionSite
     from campaigns.scenarios import Scenario, Campaign, load_campaigns, MissionDescriptor
     from campaigns.events import Victory, Defeat
-    from campaigns.triggers import PlayerSelectedUnitsTrigger, NoUnitsLeftTrigger, TimePassedTrigger, MapRevealedTrigger
+    from campaigns.triggers import NoUnitsLeftTrigger, TimePassedTrigger, MapRevealedTrigger
     from user_interface.menu import Menu
-    from user_interface.scenario_editor import ScenarioEditor
     from user_interface.minimap import MiniMap
-    from utils.debugging import GameDebugger
     from persistency.save_handling import SaveManager
 
     settings = Settings()

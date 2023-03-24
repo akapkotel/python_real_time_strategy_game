@@ -83,8 +83,8 @@ class SaveManager:
             file['local_human_player'] = game.local_human_player.id
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
-            file['mission_descriptor'] = game.current_mission.get_descriptor
-            file['mission'] = game.current_mission
+            file['mission_descriptor'] = game.current_scenario.get_descriptor
+            file['mission'] = game.current_scenario
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
@@ -185,7 +185,7 @@ class SaveManager:
             entity.after_respawn(e)
 
     def load_mission(self, mission):
-        self.game.current_mission = mission
+        self.game.current_scenario = mission
 
     def load_permanent_units_groups(self, groups):
         self.game.units_manager.permanent_units_groups = groups

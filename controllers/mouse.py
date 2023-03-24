@@ -2,11 +2,21 @@
 from typing import List, Optional, Set, Tuple, Type, Union
 
 from arcade import (
-    AnimatedTimeBasedSprite, AnimationKeyframe, MOUSE_BUTTON_LEFT,
-    MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT, Sprite,
-    SpriteList, Texture, Window, draw_lrtb_rectangle_filled, draw_line,
-    draw_lrtb_rectangle_outline, draw_text, get_sprites_at_point, load_texture,
-    load_textures, draw_lines
+    AnimatedTimeBasedSprite,
+    AnimationKeyframe,
+    MOUSE_BUTTON_LEFT,
+    MOUSE_BUTTON_RIGHT,
+    Sprite,
+    SpriteList,
+    Texture,
+    Window,
+    draw_lrtb_rectangle_filled,
+    draw_lrtb_rectangle_outline,
+    draw_text,
+    get_sprites_at_point,
+    load_texture,
+    load_textures,
+    draw_lines
 )
 
 from controllers.constants import *
@@ -21,7 +31,10 @@ from utils.scheduling import EventsCreator
 from units.unit_management import UnitsManager
 from units.units import Unit
 from user_interface.user_interface import (
-    CursorInteractive, ToggledElement, UiElement, ScrollableContainer,
+    CursorInteractive,
+    ToggledElement,
+    UiElement,
+    ScrollableContainer,
     TextInputField
 )
 
@@ -157,14 +170,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_left_button_press(self, x: float, y: float):
         if (ui_element := self.pointed_ui_element) is not None:
             ui_element.on_mouse_press(MOUSE_BUTTON_LEFT)
-            self.evaluate_mini_map_click(x, y)
+            self.evaluate_mini_map_click()
         if self.bound_text_input_field not in (ui_element, None):
             self.unbind_text_input_field()
         if self.placeable_gameobject is not None and self.placeable_gameobject.is_construction_possible():
             self.placeable_gameobject.build()
 
     @ignore_in_menu
-    def evaluate_mini_map_click(self, x: float, y: float):
+    def evaluate_mini_map_click(self):
         left, _, bottom, _ = self.game.viewport
         if self.cursor_over_minimap_position is not None:
             if units := self.units_manager.selected_units:

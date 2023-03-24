@@ -64,7 +64,7 @@ def normalize_position(x: Number, y: Number) -> NormalizedPoint:
     return map_grid_to_position((int(x // TILE_WIDTH), int(y // TILE_HEIGHT)))
 
 
-@lru_cache()
+@lru_cache(maxsize=62500)
 def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
     """Return (x, y) position of the map-grid-normalised Node."""
     return (

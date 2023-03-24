@@ -6,14 +6,13 @@ from typing import Optional, Dict, List, Union, Tuple
 
 from PIL import Image
 
-from arcade import AnimatedTimeBasedSprite, load_texture, Texture, draw_rectangle_filled
+from arcade import AnimatedTimeBasedSprite, load_texture, draw_rectangle_filled
 from arcade.arcade_types import Point
 
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from utils.colors import GREEN, RED, add_transparency
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
-from utils.data_types import GridPosition
 from utils.functions import get_path_to_file, add_extension
 from utils.game_logging import log
 from utils.improved_spritelists import LayeredSpriteList

@@ -9,7 +9,7 @@ class UnitTask:
     """
     UnitsTask allows to assign to the groups of Units an objective, and then
     keep updating the task, checking if it is finished or not. Default way the
-    task works is that it is automatically rescheduling it's 'update' method
+    task works is that it is automatically rescheduling its 'update' method
     after each update call, if any alive Unit is still assigned to it.
     """
     identifier = 0
@@ -70,7 +70,7 @@ class TaskEnterBuilding(UnitTask):
         super().__init__(units_manager, soldiers)
 
     def update(self):
-        for soldier in [s for s in self.units]:
+        for soldier in self.units[:]:
             self.check_if_soldier_can_enter(soldier)
         super().update()
 
