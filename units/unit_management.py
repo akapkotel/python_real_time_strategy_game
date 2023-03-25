@@ -240,7 +240,7 @@ class UnitsManager(EventsCreator):
     allows player to interact with units, buildings etc. by the mouse-cursor.
     It keeps track of the currently selected units and provides a way for the
     player to give them orders by the mouse-clicks. UnitsManager should be an
-    attribute of Cursor class. Game should also have it's reference.
+    attribute of Cursor class. Game should also have its reference.
     """
     game: Optional[Game] = None
 
@@ -271,7 +271,7 @@ class UnitsManager(EventsCreator):
         self.permanent_units_groups: Dict[int, PermanentUnitsGroup] = {}
 
         # Units could be assigned with tasks to do, which n-require to be
-        # updated to check the task status, if Unit finished it's task etc.
+        # updated to check the task status, if Unit finished its task etc.
         self.units_tasks: List[UnitTask] = []
 
     def __contains__(self, unit) -> bool:
@@ -332,7 +332,7 @@ class UnitsManager(EventsCreator):
                 self.send_units_to_attack_target(clicked, units)
             else:
                 self.on_building_clicked(clicked)
-        else:
+        elif units:
             self.send_units_to_attack_target(clicked, units)
 
     def send_units_to_attack_target(self, target, units):
@@ -342,7 +342,6 @@ class UnitsManager(EventsCreator):
         self.send_units_to_pointed_location(units, *target.position)
 
     def on_unit_clicked(self, clicked_unit: Unit):
-        self.unselect_all_selected()
         self.select_units(clicked_unit)
 
     def on_building_clicked(self, clicked_building: Building):
@@ -379,6 +378,7 @@ class UnitsManager(EventsCreator):
 
     @ignore_in_menu
     def select_units(self, *units: Unit):
+        self.unselect_all_selected()
         self.selected_units.extend(units)
         self.create_units_selection_markers(units)
         self.game.change_interface_content(context=units)
@@ -435,19 +435,16 @@ class UnitsManager(EventsCreator):
         units = self.selected_units.copy()
         new_group = PermanentUnitsGroup(group_id=digit, units=units)
         self.permanent_units_groups[digit] = new_group
-        self.unselect_all_selected()
         self.select_units(*units)
 
     @ignore_in_menu
     def select_permanent_units_group(self, group_id: int):
         try:
             group = self.permanent_units_groups[group_id]
-            selected = self.selected_units
-            if selected and set(selected) == group.units:
+            if (selected := self.selected_units) and set(selected) == group.units:
                 x, y = group.position
                 self.game.window.move_viewport_to_the_position(x + UI_WIDTH / 2, y)
             else:
-                self.unselect_all_selected()
                 self.select_units(*group.units)
         except KeyError:
             pass
@@ -457,7 +454,7 @@ class HashedList(list):
     """
     Wrapper for a list of currently selected Units. Adds fast look-up by using
     of set containing triggers id's.
-    To work, it requires added triggers to have an unique 'id' attribute.
+    To work, it requires added triggers to have a unique 'id' attribute.
     """
 
     def __init__(self, iterable=None):

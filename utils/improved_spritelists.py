@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import pyglet
+
 from typing import Dict, Optional, Union
 
 from arcade import SpriteList, Sprite
@@ -68,7 +70,7 @@ class LayeredSpriteList(SpriteList):
                  draw_on=True):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
         # to keep track of triggers in spritelist, fast lookups:
-        self.registry: Dict[int, Sprite] = {}
+        self.registry: Dict[int, GameObject] = {}
 
         # layers are ordering Sprites spatially from top of the map to bottom
         # what allows rendering them in reversed way to avoid Sprites being
@@ -81,30 +83,30 @@ class LayeredSpriteList(SpriteList):
     def create_rendering_layers(self) -> List[List]:
         return [[] for _ in range(self.game.settings.map_height)]
 
-    def get(self, sprite_id: int) -> Optional[Sprite]:
-        return self.registry.get(sprite_id)
+    def get(self, game_object_id: int) -> Optional[Sprite]:
+        return self.registry.get(game_object_id)
 
     def __len__(self) -> int:
         return len(self.registry)
 
-    def __contains__(self, sprite) -> bool:
-        return sprite.id in self.registry
+    def __contains__(self, game_object: GameObject) -> bool:
+        return game_object.id in self.registry
 
-    def append(self, entity):
-        entity.layered_spritelist = self
-        if entity.id not in self.registry:
-            self.registry[entity.id] = entity
-            super().append(entity)
-            self.add_to_rendering_layer(entity)
+    def append(self, game_object: GameObject) -> None:
+        game_object.layered_spritelist = self
+        if game_object.id not in self.registry:
+            self.registry[game_object.id] = game_object
+            super().append(game_object)
+            self.add_to_rendering_layer(game_object)
 
-    def add_to_rendering_layer(self, sprite):
+    def add_to_rendering_layer(self, game_object: GameObject) -> None:
         pass
         # try:
         #     self.rendering_layers[sprite.current_node.grid[1]].append(sprite)
         # except (AttributeError, ValueError):
         #     pass
 
-    def swap_rendering_layers(self, sprite, old_layer: int, new_layer: int):
+    def swap_rendering_layers(self, game_object: GameObject, old_layer: int, new_layer: int) -> None:
         pass
         # try:
         #     self.rendering_layers[old_layer].remove(sprite)
@@ -113,16 +115,16 @@ class LayeredSpriteList(SpriteList):
         # finally:
         #     self.rendering_layers[new_layer].append(sprite)
 
-    def remove(self, sprite):
+    def remove(self, game_object: GameObject) -> None:
         try:
-            del self.registry[sprite.id]
-            super().remove(sprite)
-            sprite.layered_spritelist = None
-            self.remove_from_rendering_layer(sprite)
+            del self.registry[game_object.id]
+            super().remove(game_object)
+            game_object.layered_spritelist = None
+            self.remove_from_rendering_layer(game_object)
         except KeyError:
             pass
 
-    def remove_from_rendering_layer(self, sprite):
+    def remove_from_rendering_layer(self, game_object: GameObject) -> None:
         pass
         # try:
         #     self.rendering_layers[sprite.current_node.grid[1]].remove(sprite)
@@ -131,19 +133,19 @@ class LayeredSpriteList(SpriteList):
         #         for layer in (l for l in self.rendering_layers if sprite in l):
         #             layer.remove(sprite)
 
-    def extend(self, iterable):
-        for sprite in iterable:
-            self.append(sprite)
+    def extend(self, game_objects: Iterable[GameObject]) -> None:
+        for game_object in game_objects:
+            self.append(game_object)
 
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self, delta_time: float = 1/60) -> None:
         if self.update_on:
-            for sprite in (s for s in self if s.is_updated):
-                sprite.on_update(delta_time)
+            for game_object in (gobj for gobj in self if gobj.is_updated):
+                game_object.on_update(delta_time)
 
-    def draw(self):
+    def draw(self) -> None:
         if self.draw_on:
             super().draw()
-        if any(s.is_building for s in self.registry.values()):
+        if any(game_object.is_building for game_object in self.registry.values()):
             for building in self:
                 building.draw()
 
@@ -152,12 +154,12 @@ class LayeredSpriteList(SpriteList):
             #         sprite.draw()
 
     def pop(self, index: int = -1) -> Sprite:
-        sprite = super().pop(index)
-        del self.registry[sprite.id]
-        self.remove_from_rendering_layer(sprite)
-        return sprite
+        game_object = super().pop(index)
+        del self.registry[game_object.id]
+        self.remove_from_rendering_layer(game_object)
+        return game_object
 
-    def clear(self):
+    def clear(self) -> None:
         """Safe clearing of the whole SpriteList using reversed order."""
         for _ in range(len(self)):
             self.pop()

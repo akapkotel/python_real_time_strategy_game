@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Optional, Tuple, List, Set, Union
+from typing import Optional, Tuple, List, Set, Union, Dict
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
                     create_rectangle_filled)
@@ -55,7 +55,6 @@ class MiniMap:
         self.shapes_lists = self.create_shapes_lists()
 
         self.visible = set()
-        self.revealed_count = 0
         self.reveal_minimap_area(self.game.fog_of_war.explored)
 
     def set_map_to_mini_map_ratio(self) -> float:
@@ -67,29 +66,28 @@ class MiniMap:
         return min(self.max_height / self.game.map.height,
                    self.max_width / self.game.map.width)
 
-    def create_shapes_lists(self):
+    def create_shapes_lists(self) -> Dict[int, ShapeElementList]:
         """
         Create one ShapeElementList for each Map row, to avoid updating single,
         humongous list each time new MapNode is revealed. Smaller lists are
         updated faster.
-
-        :return: List[ShapeElementList]
         """
         self.shapes_lists = {
             row: ShapeElementList() for row in range(self.rows)
         }
         if self.loaded:
             r, t = self.screen_width - MARGIN_RIGHT, self.screen_height - MARGIN_TOP
-            dx, dy = r - self.max_width // 2 - self.width // 2, t - self.max_height
+            dx, dy = r - (self.max_width // 2) - (self.width // 2), t - self.max_height
         else:
             dx, dy, *_ = self.minimap_bounds
         self.move_shapes_lists(dx + 9, dy + 60)
         return self.shapes_lists
 
     def update(self):
-        self.update_drawn_units()
-        self.update_revealed_areas()
-        self.visible.clear()
+        if self.game.settings.show_minimap:
+            self.update_drawn_units()
+            self.update_revealed_areas()
+            self.visible.clear()
 
     def update_position(self, dx: float, dy: float):
         self.move_shapes_lists(dx, dy)
@@ -139,12 +137,11 @@ class MiniMap:
         self.reveal_minimap_area(revealed_this_time)
 
     def reveal_minimap_area(self, revealed_this_time: Set[GridPosition]):
-        w, h = self.tile_size
-        for (x, y) in revealed_this_time:
-            shape = create_rectangle_filled(x * w, y * h, w, h, SAND)
-            # MapNode y determines which ShapeElementList it should belong to:
-            self.shapes_lists[y].append(shape)
-        self.revealed_count += len(revealed_this_time)
+        width, height = self.tile_size
+        for row, shape_list in self.shapes_lists.items():
+            append = shape_list.append
+            [append(create_rectangle_filled(grid_x * width, grid_y * height, width, height, SAND))
+             for (grid_x, grid_y) in [grid for grid in revealed_this_time if grid[1] is row]]
 
     def draw(self):
         # draw revealed map areas:

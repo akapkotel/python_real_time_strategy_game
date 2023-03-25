@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import os.path
 import random
 import time
+from enum import IntEnum
 
 from math import dist
 from abc import abstractmethod
@@ -18,7 +18,7 @@ from effects.constants import SHOT_BLAST, EXPLOSION
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, MapNode, MapPath, Pathfinder, normalize_position,
-    position_to_map_grid
+    position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
 from utils.colors import GREEN
@@ -29,6 +29,20 @@ from utils.geometry import (
     vector_2d, ROTATION_STEP, ROTATIONS
 )
 from units.weapons import Weapon
+
+
+CLOSE_ENOUGH_DISTANCE = 0.1
+
+IDLE = 0
+MOVE = 1
+KNEEL = 2
+CRAWL = 3
+
+class UnitActivity(IntEnum):
+    IDLE = 0
+    MOVE = 1
+    ATTACK = 2
+    DIE = 3
 
 
 class Unit(PlayerEntity):
@@ -47,6 +61,7 @@ class Unit(PlayerEntity):
         # Since we do not rotate actual Sprite, but change its texture to show
         # the correctly rotated Units on the screen, use 'virtual' rotation to
         # keep track of the Unit rotation angle without rotating actual Sprite:
+        self.current_activity = UnitActivity.IDLE
         self.facing_direction = random.randint(0, ROTATIONS - 1)
         self.virtual_angle = int(ROTATION_STEP * self.facing_direction) % 360
 
@@ -94,7 +109,7 @@ class Unit(PlayerEntity):
         self.game.explosions_pool.add(name, required)
 
     @abstractmethod
-    def _load_textures_and_reset_hit_box(self):
+    def _load_textures(self):
         """
         Since we can have many spritesheets representing our Unit.
         Some units have rotating turrets, so above the normal 8-texture
@@ -266,7 +281,7 @@ class Unit(PlayerEntity):
     def countdown_waiting(self, path):
         if time.time() >= self.path_wait_counter:
             node = self.map.position_to_node(*path[0])
-            if node.walkable or len(path) < 20:
+            if node.is_walkable or len(path) < 20:
                 self.restart_path(path)
             else:
                 self.path_wait_counter += 1
@@ -281,16 +296,13 @@ class Unit(PlayerEntity):
 
     def follow_path(self):
         destination = self.path[0]
-
-        angle_to_target = int(calculate_angle(*self.position, *destination))
-        if self.virtual_angle != angle_to_target:
-            self.stop()
-            return self.rotate_towards_target(angle_to_target)
-
-        speed = self.current_speed
-        if (distance_left := dist(self.position, destination)) <= speed:
+        if (distance_left := dist(self.position, destination)) < CLOSE_ENOUGH_DISTANCE * self.max_speed:
             self.move_to_next_waypoint()
         else:
+            angle_to_target = int(calculate_angle(*self.position, *destination))
+            if self.virtual_angle != angle_to_target:
+                self.stop()
+                return self.rotate_towards_target(angle_to_target)
             self.move_to_current_waypoint(destination, distance_left)
 
     def rotate_towards_target(self, angle_to_target):
@@ -310,7 +322,7 @@ class Unit(PlayerEntity):
             direction = 1 if self.virtual_angle < angle_to_target else -1
         else:
             direction = -1 if self.virtual_angle < angle_to_target else 1
-        self.virtual_angle = (self.virtual_angle + (rotation * direction)) % 360
+        self.virtual_angle = int((self.virtual_angle + (rotation * direction)) % 360)
 
     def set_rotated_texture(self):
         self.angle_to_texture(self.virtual_angle)
@@ -320,8 +332,7 @@ class Unit(PlayerEntity):
 
     def move_to_current_waypoint(self, destination, distance_left):
         angle = calculate_angle(*self.position, *destination)
-        self.current_speed = speed = min(distance_left, self.max_speed)
-        self.change_x, self.change_y = vector_2d(angle, speed)
+        self.change_x, self.change_y = vector_2d(angle, self.max_speed)
 
     def move_to(self, destination: GridPosition, force_destination=True):
         self.cancel_path_requests()
@@ -444,7 +455,8 @@ class Vehicle(Unit):
                  position: Point, id: int = None):
         super().__init__(texture_name, player, weight, position, id)
 
-        self._load_textures_and_reset_hit_box()
+        self._load_textures()
+        self.hit_box = self.texture.hit_box_points
 
         thread_texture = ''.join((self.object_name, '_threads.png'))
         # texture of the VehicleThreads left by this Vehicle
@@ -457,16 +469,16 @@ class Vehicle(Unit):
 
     @cached_property
     def threads_frequency(self):
-        return 5 / self.max_speed
+        return 100 / self.max_speed
 
-    def _load_textures_and_reset_hit_box(self):
+    def _load_textures(self):
         width, height = get_texture_size(self.full_name, columns=ROTATIONS)
         self.textures = load_textures(
             self.filename_with_path,
             [(i * width, 0, width, height) for i in range(ROTATIONS)]
         )
+        # TODO: change 'textures' for Vehicle to 2d list to show: 1. current_activity, and 2. facing_direction
         self.set_texture(self.facing_direction)
-        self.hit_box = self.texture.hit_box_points
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -499,7 +511,7 @@ class VehicleThreads(Sprite):
 
     def on_update(self, delta_time: float = 1 / 60):
         # threads slowly disappearing through time
-        if self.alpha > 1:
+        if self.alpha:
             self.alpha -= 1
         else:
             self.kill()
@@ -517,7 +529,7 @@ class VehicleWithTurret(Vehicle):
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
 
-    def _load_textures_and_reset_hit_box(self):
+    def _load_textures(self):
         """
         Create 16 lists of 16-texture spritesheets for each combination of hull
         and turret directions possible in game.
@@ -526,8 +538,11 @@ class VehicleWithTurret(Vehicle):
         self.textures = [load_textures(self.filename_with_path,
             [(i * width, j * height, width, height) for i in range(ROTATIONS)]) for j in range(ROTATIONS)
         ]
+        # TODO: change 'textures' for Vehicle to 3d list to show:
+        #  1. current_activity,
+        #  2. facing_direction,
+        #  3. turret_facing_direction
         self.set_texture(self.facing_direction, self.turret_facing_direction)
-        self.hit_box = self.texture.hit_box_points
 
     def set_rotated_texture(self):
         if (enemy := self.turret_aim_target) is not None:
@@ -569,7 +584,7 @@ class VehicleWithTurret(Vehicle):
         for sprite_list in self.sprite_lists:
             sprite_list.update_texture(self)
 
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self,delta_time: float = 1/60):
         self.turret_aim_target = None
         super().on_update(delta_time)
 
@@ -586,12 +601,6 @@ class VehicleWithTurret(Vehicle):
         )
 
 
-IDLE = 0
-MOVE = 1
-KNEEL = 2
-CRAWL = 3
-
-
 class Soldier(Unit):
     health_restoration = 0.003
     infantry_steps_duration = 0.05
@@ -604,9 +613,9 @@ class Soldier(Unit):
         self.outside = True
         self.equipment = None
         self.all_textures: Dict[int, List[List[Texture]]] = {}
-        self._load_textures_and_reset_hit_box()
+        self._load_textures()
 
-    def _load_textures_and_reset_hit_box(self):
+    def _load_textures(self):
         texture_name = get_path_to_file(self.full_name)
         width, height = get_texture_size(self.full_name, rows=ROTATIONS, columns=ROTATIONS)
 

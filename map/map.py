@@ -13,12 +13,11 @@ from typing import (
 )
 
 from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
-from arcade.color import OLD_MOSS_GREEN
 
 from game import PROFILING_LEVEL
-from map.constants import TILE_WIDTH, TILE_HEIGHT, SECTOR_SIZE
+from map.constants import TILE_WIDTH, TILE_HEIGHT
 from gameobjects.gameobject import GameObject
-from utils.colors import SAND
+from utils.colors import SAND, WATER_SHALLOW, BLACK
 from utils.data_types import GridPosition, Number
 from utils.priority_queue import PriorityQueue
 from utils.scheduling import EventsCreator
@@ -52,7 +51,9 @@ MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]
 TreeID = int
 
-MAP_TILE_TEXTURE = make_soft_square_texture(TILE_WIDTH, OLD_MOSS_GREEN, 255, 255)
+MAP_TILE_TEXTURE_GROUND = make_soft_square_texture(TILE_WIDTH, SAND, 255, 255)
+MAP_TILE_TEXTURE_WATER = make_soft_square_texture(TILE_WIDTH, WATER_SHALLOW, 255, 255)
+MAP_TILE_TEXTURE_VOID = make_soft_square_texture(TILE_WIDTH, BLACK, 255, 0)
 
 
 def position_to_map_grid(x: Number, y: Number) -> GridPosition:
@@ -97,7 +98,7 @@ def set_terrain_texture(terrain_type: str,
                         index: int = None,
                         rotation: int = None) -> Tuple[Texture, int, int]:
     index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
-    texture = MAP_TEXTURES[terrain_type][index]
+    texture: Texture = MAP_TEXTURES[terrain_type][index]
 
     rotation = rotation or random.randint(0, 5)
     texture.image.transpose(rotation)
@@ -168,13 +169,10 @@ def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
     return [node.position for node in path[::-1]]
 
 
-class TerrainCost(IntEnum):
-    ASPHALT = 1
-    GROUND = 2
-    GRASS = 2
-    GRAVEL = 3
-    SAND = 4
-    MUD = 5
+class TerrainType(IntEnum):
+    WATER = 0
+    GROUND = 1
+    VOID = 2
 
 
 class Map:
@@ -198,7 +196,7 @@ class Map:
         self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
         log(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
 
-        self.generate_nodes()
+        self.generate_map_nodes_and_tiles()
         #  TODO: find efficient way to use these costs in pathfinding
         # self.calculate_distances_between_nodes()
 
@@ -240,15 +238,15 @@ class Map:
 
     def walkable(self, grid) -> bool:
         try:
-            return self.nodes[grid].walkable
+            return self.nodes[grid].is_walkable
         except KeyError:
             return False
 
     def walkable_adjacent(self, x, y) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes(x, y) if n.walkable}
+        return {n for n in self.adjacent_nodes(x, y) if n.is_walkable}
 
     def pathable_adjacent(self, x, y) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes(x, y) if n.pathable}
+        return {n for n in self.adjacent_nodes(x, y) if n.is_pathable}
 
     def adjacent_nodes(self, x: Number, y: Number) -> Set[MapNode]:
         return {
@@ -267,20 +265,24 @@ class Map:
 
     @property
     def all_walkable_nodes(self) -> Generator[MapNode]:
-        return (node for node in self.nodes.values() if node.walkable)
+        return (node for node in self.nodes.values() if node.is_walkable)
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     @logger(console=True)
-    def generate_nodes(self):
+    def generate_map_nodes_and_tiles(self):
         for x in range(self.columns):
             for y in range(self.rows):
-                self.nodes[(x, y)] = node = MapNode(x, y)
-                self.create_map_sprite(*node.position)
+                self.nodes[(x, y)] = node = MapNode(x, y, TerrainType.VOID if x == 0 or y == 0 else TerrainType.GROUND)
+                self.create_map_sprite(*node.position, node.terrain_type)
         log(f'Generated {len(self.nodes)} map nodes.', console=True)
 
-    def create_map_sprite(self, x, y):
-        sprite = Sprite(center_x=x, center_y=y)
-        sprite.texture = MAP_TILE_TEXTURE
+    def create_map_sprite(self, x: int, y: int, terrain_type: TerrainType):
+        sprite = Sprite(center_x=x, center_y=y, hit_box_algorithm='None')
+        sprite.texture = {
+            terrain_type.GROUND: MAP_TILE_TEXTURE_GROUND,
+            terrain_type.VOID: MAP_TILE_TEXTURE_VOID,
+            terrain_type.WATER: MAP_TILE_TEXTURE_WATER
+        }[terrain_type]
         # try:
         #     terrain_type, index, rotation = self.nodes_data[(x, y)]
         #     t, i, r = set_terrain_texture(terrain_type, index, rotation)
@@ -290,6 +292,14 @@ class Map:
         #     self.nodes_data[(x, y)] = terrain_type, i, r
         # sprite.texture = t
         self.game.terrain_tiles.append(sprite)
+
+    def find_map_regions(self):
+        """
+        All MapNodes which are intermediary connected or there is possible path connecting them, belong to the same map
+        region, which allows for fast excluding impossible pathfinding calls - if start and destination belong to the
+        different regions, we do not need call A-star algorithm.
+        """
+        ...
 
     def calculate_distances_between_nodes(self):
         for node in self.nodes.values():
@@ -330,8 +340,8 @@ class Map:
 
     @cached_property
     def nonexistent_node(self) -> MapNode:
-        node = MapNode(-1, -1)
-        node.pathable = node._walkable = False
+        node = MapNode(-1, -1, TerrainType.VOID)
+        node.is_pathable = node._walkable = False
         return node
 
 
@@ -343,19 +353,20 @@ class MapNode:
     """
     map: Optional[Map] = None
 
-    def __init__(self, x, y):
+    def __init__(self, x: Number, y: Number, terrain_type: TerrainType):
         self.grid = int(x), int(y)
         self.position = self.x, self.y = map_grid_to_position(self.grid)
+        self.terrain_type: TerrainType = terrain_type
+        self.map_region: Optional[int] = None
         self.costs = None
 
-        self._pathable = True
+        self._pathable = terrain_type > -1
 
         self._tree: Optional[TreeID] = None
         self._unit: Optional[Unit] = None
         self._building: Optional[Building] = None
         self._static_gameobject: Optional[GameObject, TreeID] = None
 
-        self.terrain_cost: TerrainCost = TerrainCost.GROUND
 
     def __repr__(self) -> str:
         return f'MapNode(grid: {self.grid}, position: {self.position})'
@@ -409,33 +420,37 @@ class MapNode:
         self._static_gameobject = value
 
     @property
-    def walkable(self) -> bool:
+    def is_water(self) -> bool:
+        return self.terrain_type is TerrainType.WATER
+
+    @property
+    def is_walkable(self) -> bool:
         """
         Use it to find if node is not blocked at the moment by units or
         buildings.
         """
-        return self.pathable and self._unit is None
+        return self.terrain_type is TerrainType.GROUND and self.is_pathable and self._unit is None
 
     @property
-    def pathable(self) -> bool:
+    def is_pathable(self) -> bool:
         """Call it to find if this node is available for pathfinding at all."""
         return self._pathable and self._static_gameobject is None
 
-    @pathable.setter
-    def pathable(self, value: bool):
+    @is_pathable.setter
+    def is_pathable(self, value: bool):
         self._pathable = value
 
     @property
     def available_for_construction(self)  -> bool:
-        return self.walkable and self.grid in self.map.game.fog_of_war.explored and not any(n.building for n in self.adjacent_nodes)
+        return self.is_walkable and self.grid in self.map.game.fog_of_war.explored and not any(n.building for n in self.adjacent_nodes)
 
     @property
     def walkable_adjacent(self) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes if n.walkable}
+        return {n for n in self.adjacent_nodes if n.is_walkable}
 
     @property
     def pathable_adjacent(self) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes if n.pathable}
+        return {n for n in self.adjacent_nodes if n.is_pathable}
 
     @cached_property
     def adjacent_nodes(self) -> Set[MapNode]:
@@ -645,7 +660,7 @@ class Pathfinder(EventsCreator):
         self.created_waypoints_queue = None
 
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
-        if not self.map.position_to_node(x, y).walkable:
+        if not self.map.position_to_node(x, y).is_walkable:
             x, y = self.get_closest_walkable_position(x, y)
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
 
@@ -664,7 +679,7 @@ class Pathfinder(EventsCreator):
             # to avoid infinite attempts to find path to the Node blocked by
             # other Unit from the same navigating groups pathfinding to the
             # same place TODO: find a better way to not mutually-block nodes
-            if self.map.grid_to_node(destination).walkable:
+            if self.map.grid_to_node(destination).is_walkable:
                 if path := a_star(self.map, start, destination):
                     return unit.follow_new_path(path)
             self.request_path(unit, start, destination)
@@ -704,18 +719,18 @@ class Pathfinder(EventsCreator):
         nodes = self.map.nodes
         while len(waypoints) < required_waypoints:
             waypoints = [w for w in calculate_circular_area(*center, radius) if
-                         w in nodes and nodes[w].walkable]
+                         w in nodes and nodes[w].is_walkable]
             radius += 1
         waypoints.sort(key=lambda w: dist(w, center))
         return [d[0] for d in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self, x, y) -> NormalizedPoint:
         nearest_walkable = None
-        if (node := self.map.position_to_node(x, y)).walkable:
+        if (node := self.map.position_to_node(x, y)).is_walkable:
             return node.position
         while nearest_walkable is None:
             adjacent = node.adjacent_nodes
-            for adjacent_node in (n for n in adjacent if n.walkable):
+            for adjacent_node in (n for n in adjacent if n.is_walkable):
                 return adjacent_node.position
             node = random.choice([n for n in adjacent])
             # TODO: potential infinite loop

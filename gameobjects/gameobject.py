@@ -83,10 +83,12 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         return self.right > l and self.left < r and self.top > b and self.bottom < t
 
     def on_update(self, delta_time: float = 1 / 60):
+        self.center_x += self.change_x * delta_time
+        self.center_y += self.change_y * delta_time
+
         self.update_visibility()
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-        if self.frames:
+
+        if self.is_rendered and self.frames:
             self.update_animation(delta_time)
 
     def update_visibility(self):

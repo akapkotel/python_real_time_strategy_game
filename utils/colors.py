@@ -23,7 +23,7 @@ WHITE: Color = (255, 255, 255, 255)
 LIGHT: Color = (192, 192, 192, 255)
 FOG: Color = (32, 32, 32, 16)
 GREY: Color = (128, 128, 128, 255)
-BLACK: Color = (0, 0, 0, 255)
+BLACK: Color = arcade.color.BLACK
 SHADOW: Color = (169, 169, 169, 255)
 PLAYER_COLOR: Color = (18, 97, 128, 255)
 CPU_COLOR: Color = (212, 0, 0, 255)
@@ -32,7 +32,8 @@ AMBIENT_COLOR: Color = (125, 125, 75, 255)
 NO_FOV_COLOR: Color = (0, 0, 0, 255)
 TRANSPARENT: Color = (0, 0, 0, 0)
 CONSTRUCTION_BAR_COLOR = arcade.color.BANANA_YELLOW
-
+WATER_DEEP: Color = arcade.color.DARK_BLUE
+WATER_SHALLOW: Color = arcade.color.MEDIUM_BLUE
 
 colors_names = {
     GREEN: 'green', RED: 'red', YELLOW: 'yellow', BLUE: 'blue'

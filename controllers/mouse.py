@@ -210,7 +210,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @ignore_in_menu
     def close_drag_selection(self):
-        self.units_manager.unselect_all_selected()
         if units := [u for u in self.mouse_drag_selection.units]:
             self.units_manager.select_units(*units)
         self.mouse_drag_selection = None
@@ -292,13 +291,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         """
         pointed = self.get_pointed_sprite(*self.position)
         if isinstance(pointed, PlayerEntity):
-            self.switch_selected_gameobject(pointed)
+            self.switch_pointed_gameobject(pointed)
             self.update_mouse_pointed_ui_element(None)
         else:
-            self.switch_selected_gameobject(None)
+            self.switch_pointed_gameobject(None)
             self.update_mouse_pointed_ui_element(pointed)
 
-    def switch_selected_gameobject(self, pointed: Optional[GameObject]):
+    def switch_pointed_gameobject(self, pointed: Optional[GameObject]):
         if pointed is not self.pointed_gameobject:
             if self.pointed_gameobject is not None:
                 self.pointed_gameobject.on_mouse_exit()

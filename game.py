@@ -22,7 +22,7 @@ import pathlib
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
-
+import pyglet.clock
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
 )
@@ -661,12 +661,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_user_interface(self) -> UiSpriteList:
         ui_x, ui_y = SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_Y
         ui_size = UI_WIDTH, SCREEN_HEIGHT
-        right_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size)
+        # right_panel = Frame('ui_right_panel.png', ui_x, ui_y, *ui_size, name='right_panel')
         ui_options_section = UiElementsBundle(
             name=UI_OPTIONS_PANEL,
             elements=[
-                right_panel,
-                Checkbox('menu_checkbox.png', ui_x - 150, ui_y + 370, '', 10,
+                # right_panel,
+                Frame('ui_right_panel.png', ui_x, ui_y, *ui_size, name='right_panel'),
+                Checkbox('menu_checkbox.png', ui_x - 170, ui_y + 370, '', 10,
                          ticked=self.settings.show_minimap, variable=(self.settings, 'show_minimap')),
                 Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
                        functions=partial(self.show_construction_options, BUILDINGS)),
@@ -675,13 +676,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
-                        parent=right_panel),
-                 Button('game_button_save.png', ui_x, 120,
+                        parent='right_panel'),
+                Button('game_button_save.png', ui_x, 120,
                         functions=self.window.open_saving_menu,
-                        parent=right_panel),
-                 Button('game_button_pause.png', ui_x - 100, 120,
+                        parent='right_panel'),
+                Button('game_button_pause.png', ui_x - 100, 120,
                         functions=partial(self.toggle_pause),
-                        parent=right_panel),
+                        parent='right_panel'),
             ],
             register_to=self
         )
@@ -691,13 +692,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ui_resources_section = UiElementsBundle(
             name=UI_RESOURCES_SECTION,
             elements=[
-                UiTextLabel(x, y, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources)),
-                UiTextLabel(x + 100, y - 120, '0', 17, WHITE, next(resources))
+                UiTextLabel(x, y, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x + 165, y, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x, y - 40, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x + 165, y - 40, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x, y - 80, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x + 165, y - 80, '0', 17, WHITE, next(resources), align_x='left'),
+                UiTextLabel(x + 100, y - 120, '0', 17, WHITE, next(resources), align_x='left')
             ],
             register_to=self
         )

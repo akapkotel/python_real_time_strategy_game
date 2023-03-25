@@ -60,12 +60,14 @@ class Hierarchical:
     """
     __slots__ = ['_parent', '_children']
 
-    def __init__(self, parent: Optional[Hierarchical] = None):
+    def __init__(self, parent: Optional[Hierarchical | str] = None):
         self._parent = parent
         self._children: Optional[Set] = None
 
-        if parent is not None:
+        try:
             parent.add_child(self)
+        except AttributeError:
+            log(f'UiElement {id(self)} was unable to register its parent of type {type(parent)}')
 
     @property
     def parent(self):
@@ -101,7 +103,7 @@ class CursorInteractive(Hierarchical):
 
     def __init__(self, can_be_dragged: bool = False,
                  functions: Optional[Union[Callable, Tuple[Callable, ...]]] = None,
-                 parent: Optional[Hierarchical] = None):
+                 parent: Optional[Hierarchical | str] = None):
         """
         :param can_be_dragged: bool -- default: False
         :param functions: None or Callable or Tuple[Callable]
@@ -279,7 +281,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
 
     def __init__(self, texture_name: str, x: int, y: int,
                  name: Optional[str] = None, active: bool = True,
-                 visible: bool = True, parent: Optional[Hierarchical] = None,
+                 visible: bool = True, parent: Optional[Hierarchical | str] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None):
@@ -303,6 +305,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
     @bundle.setter
     def bundle(self, bundle: UiElementsBundle):
         self._bundle = bundle
+        if isinstance(self.parent, str) and (parent := bundle.find_by_name(self.parent)) is not None:
+            self.parent = parent
 
     def add_hint(self, hint: Hint) -> UiElement:
         self.hint = hint
@@ -415,7 +419,7 @@ class Button(UiElement):
                  name: Optional[str] = None,
                  active: bool = True,
                  visible: bool = True,
-                 parent: Optional[Hierarchical] = None,
+                 parent: Optional[Hierarchical | str] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,

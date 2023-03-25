@@ -404,7 +404,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if self.game.cursor.forced_cursor == CURSOR_ENTER_TEXTURE:
             self.game.cursor.force_cursor(index=None)
 
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self, fps, delta_time: float = 1/60):
         super().on_update(delta_time)
         self.update_production()
         self.update_observed_area()
@@ -655,8 +655,8 @@ class ConstructionSite(Building):
             self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK, CONSTRUCTION_BAR_COLOR
         )
 
-    def on_update(self, delta_time: float = 1/60):
-        super().on_update(delta_time)
+    def on_update(self, fps, delta_time: float = 1/60):
+        super().on_update(fps, delta_time)
         self.construction_progress += 1
         if self.construction_progress >= self.maximum_construction_progress:
             self.finish_construction()
