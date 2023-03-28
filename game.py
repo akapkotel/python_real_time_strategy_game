@@ -22,7 +22,7 @@ import pathlib
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
-import pyglet.clock
+import pyglet
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
 )
@@ -59,12 +59,12 @@ from user_interface.user_interface import (
     UiTextLabel,
     UiElement,
     ProgressButton,
-    Hint, Checkbox
+    Checkbox, UnitProductionCostsHint
 )
 from utils.observer import Observed
-from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba
+from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba, YELLOW
 from utils.data_types import Viewport
-from utils.functions import get_path_to_file, ignore_in_editor_mode, find_paths_to_all_files_of_type
+from utils.functions import ignore_in_editor_mode, find_paths_to_all_files_of_type
 from utils.game_logging import log, logger
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
@@ -213,15 +213,12 @@ class GameWindow(Window, EventsCreator):
     """
 
     def __init__(self, settings: Settings):
-        Window.__init__(self, settings.screen_width, settings.screen_height, update_rate=settings.update_rate)
+        Window.__init__(self, settings.screen_width, settings.screen_height, __title__, settings.full_screen, update_rate=settings.update_rate)
         EventsCreator.__init__(self)
 
         self.total_delta_time = 0
         self.frames = 0
         self.current_fps = 0
-
-        self.set_caption(__title__)
-        self.set_fullscreen(settings.full_screen)
 
         self.resources_manager = ResourcesManager()
         self.settings = Settings()  # shared with Game
@@ -244,7 +241,7 @@ class GameWindow(Window, EventsCreator):
         self.game_view: Optional[Game] = None
 
         # cursor-related:
-        self.cursor = MouseCursor(self, get_path_to_file('normal.png'))
+        self.cursor = MouseCursor(self, self.resources_manager.get_path_to_single_file('normal.png'))
         # store viewport data to avoid redundant get_viewport() calls and call
         # get_viewport only when viewport is actually changed:
         self.current_viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
@@ -308,7 +305,7 @@ class GameWindow(Window, EventsCreator):
         self.total_delta_time += delta_time
         log(f'Time: {delta_time}{SEPARATOR}', console=False)
 
-        self.current_fps = round(1 / delta_time, 2)
+        self.current_fps = round(pyglet.clock.get_fps(), 2)  # round(1 / delta_time, 2)
 
         self.current_view.on_update(delta_time)
 
@@ -332,7 +329,7 @@ class GameWindow(Window, EventsCreator):
         draw_text(f'FPS: {str(self.current_fps)}',
                   self.current_view.viewport[0] + 30,
                   self.current_view.viewport[3] - 30,
-                  WHITE
+                  GREEN if self.current_fps > 30 else YELLOW if self.current_fps > 20 else RED
         )
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
@@ -541,13 +538,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
-        self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.terrain_tiles = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = LayeredSpriteList()
-        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.static_objects = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
         self.buildings = LayeredSpriteList()
-        self.effects = SpriteList(is_static=True)
+        self.explosions_pool: Optional[ExplosionsPool] = ExplosionsPool()
+        # self.effects = SpriteList(is_static=True)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()
         self.set_updated_and_drawn_lists()
@@ -563,8 +561,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         # All GameObjects are initialized by the specialised factory:
         self.spawner: Optional[GameObjectsSpawner] = None
-
-        self.explosions_pool: Optional[ExplosionsPool] = None
 
         # Units belongs to the Players, Players belongs to the Factions, which
         # are updated each frame to evaluate AI, enemies-visibility, etc.
@@ -590,7 +586,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.15],
             ['spawner', GameObjectsSpawner, 0.05],
-            ['explosions_pool', ExplosionsPool, 0.10],
+            # ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
@@ -796,7 +792,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-            hint = Hint(f'{unit_name}_production_hint.png', delay=0.5)
+            hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=0.5)
             b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
                                functions=partial(producer.start_production, unit_name)).add_hint(hint)
             b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
@@ -808,11 +804,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         explosions.
         """
         if effect_type is Explosion:
-            effect = self.explosions_pool.get(name, x, y)
-        else:
-            return
-        self.effects.append(effect)
-        effect.play()
+            self.explosions_pool.create(name, x, y)
+            # effect = self.explosions_pool.get(name, x, y)
+        # else:
+        #     return
+        # self.effects.append(effect)
+        # effect.play()
 
     def on_show_view(self):
         super().on_show_view()
@@ -841,10 +838,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_factions_and_players_creation(self):
         # TODO: remove it when game is completed
-        faction = Faction(name='Freemen')
-        player = HumanPlayer(id=2, color=GREEN, faction=faction)
-        cpu_player = CpuPlayer(color=RED)
-        self.local_human_player: Optional[Player] = self.players[2]
+        self.local_human_player = player = HumanPlayer(id=2, color=GREEN, faction=Faction(name='Solarian Republic'))
+        cpu_player = CpuPlayer(color=RED, faction=Faction(name='Interplanetary Industrial Conglomerate'))
         player.start_war_with(cpu_player)
 
     def test_buildings_spawning(self):
@@ -1058,7 +1053,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
         self.players.clear()
-        self.window.settings = Settings()
         self.window.game_view = None
 
 def run_profiled_game(settings: Settings):

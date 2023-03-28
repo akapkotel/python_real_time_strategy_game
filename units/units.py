@@ -33,10 +33,6 @@ from units.weapons import Weapon
 
 CLOSE_ENOUGH_DISTANCE = 0.1
 
-IDLE = 0
-MOVE = 1
-KNEEL = 2
-CRAWL = 3
 
 class UnitActivity(IntEnum):
     IDLE = 0
@@ -609,7 +605,7 @@ class Soldier(Unit):
                  position: Point, id: Optional[int] = None):
         super().__init__(texture_name, player, weight, position, id)
         self.last_step_time = 0
-        self.stance = IDLE
+        self.activity = UnitActivity.IDLE
         self.outside = True
         self.equipment = None
         self.all_textures: Dict[int, List[List[Texture]]] = {}
@@ -621,10 +617,10 @@ class Soldier(Unit):
 
         self.all_textures = {
             stance: self.load_pose_textures(texture_name, width, height, stance)
-            for stance in (IDLE,)  # TODO: MOVE, KNEEL, CRAWL
+            for stance in (UnitActivity.IDLE,)  # TODO: MOVE, CRAWL
         }
 
-        self.textures = self.all_textures[self.stance][self.facing_direction]
+        self.textures = self.all_textures[self.activity][self.facing_direction]
         self.set_texture(0)
         self.hit_box = self.texture.hit_box_points
 
@@ -642,7 +638,6 @@ class Soldier(Unit):
     def should_be_rendered(self) -> bool:
         return self.outside and super().should_be_rendered
 
-
     @property
     def is_controlled_by_player(self) -> bool:
         return self.player.is_local_human_player and self.outside  # selecting Soldiers inside Buildings is forbidden
@@ -654,7 +649,7 @@ class Soldier(Unit):
 
     def angle_to_texture(self, angle_to_target: float):
         index = self.angles[int(angle_to_target)]
-        self.textures = self.all_textures[self.stance][index]
+        self.textures = self.all_textures[self.activity][index]
 
     def update_animation(self, delta_time: float = 1/60):
         self.last_step_time += delta_time
@@ -671,11 +666,12 @@ class Soldier(Unit):
         self.stop_completely()
         self.assign_enemy(None)
         self.game.units_manager.unselect(self)
-        building.on_soldier_enter(soldier=self)
         self.stop_rendering()
         self.stop_updating()
+        building.on_soldier_enter(soldier=self)
 
     def leave_building(self, building):
+        # TODO: replace this with Building exit position
         x, y = building.position
         self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
         self.insert_to_map_quadtree()

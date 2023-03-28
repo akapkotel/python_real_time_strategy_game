@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import pyglet
-
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Iterable, Iterator
 
 from arcade import SpriteList, Sprite
+
 
 
 class SpriteListWithSwitch(SpriteList):
@@ -48,6 +47,7 @@ class SpriteListWithSwitch(SpriteList):
         self.draw_on = not self.draw_on
 
 
+
 # noinspection PyUnresolvedReferences
 class LayeredSpriteList(SpriteList):
     """
@@ -69,14 +69,13 @@ class LayeredSpriteList(SpriteList):
                  update_on=True,
                  draw_on=True):
         super().__init__(use_spatial_hash, spatial_hash_cell_size, is_static)
-        # to keep track of triggers in spritelist, fast lookups:
-        self.registry: Dict[int, GameObject] = {}
+        self.game_objects: Dict[int, GameObject] = {}
 
         # layers are ordering Sprites spatially from top of the map to bottom
         # what allows rendering them in reversed way to avoid Sprites being
         # 'closer' to the player'spoint of view being obstructed by those which
         # are more distant
-        self.rendering_layers = self.create_rendering_layers()
+        # self.rendering_layers = self.create_rendering_layers()
         self.update_on = update_on
         self.draw_on = draw_on
 
@@ -84,20 +83,19 @@ class LayeredSpriteList(SpriteList):
         return [[] for _ in range(self.game.settings.map_height)]
 
     def get(self, game_object_id: int) -> Optional[Sprite]:
-        return self.registry.get(game_object_id)
+        return self.game_objects.get(game_object_id)
 
     def __len__(self) -> int:
-        return len(self.registry)
+        return len(self.game_objects)
 
     def __contains__(self, game_object: GameObject) -> bool:
-        return game_object.id in self.registry
+        return game_object.id in self.game_objects
 
     def append(self, game_object: GameObject) -> None:
         game_object.layered_spritelist = self
-        if game_object.id not in self.registry:
-            self.registry[game_object.id] = game_object
+        if game_object.id not in self.game_objects:
+            self.game_objects[game_object.id] = game_object
             super().append(game_object)
-            self.add_to_rendering_layer(game_object)
 
     def add_to_rendering_layer(self, game_object: GameObject) -> None:
         pass
@@ -117,10 +115,11 @@ class LayeredSpriteList(SpriteList):
 
     def remove(self, game_object: GameObject) -> None:
         try:
-            del self.registry[game_object.id]
+            del self.game_objects[game_object.id]
             super().remove(game_object)
             game_object.layered_spritelist = None
-            self.remove_from_rendering_layer(game_object)
+            if game_object.is_rendered:
+                self.rendered.remove(game_object)
         except KeyError:
             pass
 
@@ -145,7 +144,10 @@ class LayeredSpriteList(SpriteList):
     def draw(self) -> None:
         if self.draw_on:
             super().draw()
-        if any(game_object.is_building for game_object in self.registry.values()):
+            self.draw_buildings()
+
+    def draw_buildings(self):
+        if any(game_object.is_building for game_object in self.game_objects.values()):
             for building in self:
                 building.draw()
 
@@ -155,8 +157,8 @@ class LayeredSpriteList(SpriteList):
 
     def pop(self, index: int = -1) -> Sprite:
         game_object = super().pop(index)
-        del self.registry[game_object.id]
-        self.remove_from_rendering_layer(game_object)
+        del self.game_objects[game_object.id]
+        # self.remove_from_rendering_layer(game_object)
         return game_object
 
     def clear(self) -> None:
@@ -196,3 +198,6 @@ class UiSpriteList(SpriteList):
         # noinspection PyUnresolvedReferences
         for ui_element in (u for u in self if u.active):
             ui_element.on_update()
+
+if __name__ == '__main__':
+    from gameobjects.gameobject import GameObject

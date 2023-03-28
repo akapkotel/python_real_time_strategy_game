@@ -272,7 +272,8 @@ class Map:
     def generate_map_nodes_and_tiles(self):
         for x in range(self.columns):
             for y in range(self.rows):
-                self.nodes[(x, y)] = node = MapNode(x, y, TerrainType.VOID if x == 0 or y == 0 else TerrainType.GROUND)
+                terrain = TerrainType.VOID if x in(0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
+                self.nodes[(x, y)] = node = MapNode(x, y, terrain)
                 self.create_map_sprite(*node.position, node.terrain_type)
         log(f'Generated {len(self.nodes)} map nodes.', console=True)
 
@@ -367,9 +368,11 @@ class MapNode:
         self._building: Optional[Building] = None
         self._static_gameobject: Optional[GameObject, TreeID] = None
 
+    def __str__(self) -> str:
+        return f'MapNode(position: {self.position})'
 
     def __repr__(self) -> str:
-        return f'MapNode(grid: {self.grid}, position: {self.position})'
+        return f'MapNode(x={self.x}, y={self.y}, terrain_type={self.terrain_type})'
 
     def in_bounds(self, *args, **kwargs):
         return self.map.in_bounds(*args, **kwargs)

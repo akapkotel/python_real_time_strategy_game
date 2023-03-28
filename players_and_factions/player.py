@@ -12,6 +12,10 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from arcade.arcade_types import Color, Point
 
 from gameobjects.constants import CONSTRUCTION_SITE
+from players_and_factions.constants import (
+    FactionName, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS, RESOURCES, YIELD_PER_SECOND,
+    CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY
+)
 from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
@@ -20,7 +24,6 @@ from utils.observer import Observed, Observer
 from utils.priority_queue import PriorityQueue
 from utils.colors import GREEN, RED
 from utils.data_types import FactionId, TechnologyId, GridPosition
-# from utils.game_logging import log
 from utils.functions import (
     ignore_in_editor_mode, add_player_color_to_name
 )
@@ -28,24 +31,6 @@ from utils.geometry import (
     clamp, find_area, precalculate_circular_area_matrix
 )
 from utils.scheduling import EventsCreator, ScheduledEvent
-
-
-
-# CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
-
-FUEL = 'fuel'
-FOOD = 'food'
-AMMUNITION = 'ammunition'
-ENERGY = 'energy'
-STEEL = 'steel'
-ELECTRONICS = 'electronics'
-CONSCRIPTS = 'conscripts'
-
-RESOURCES = {FUEL: 0, ENERGY: 0, AMMUNITION: 0, STEEL: 0, ELECTRONICS: 0, FOOD: 0, CONSCRIPTS: 0}
-
-YIELD_PER_SECOND = "_yield_per_second"
-CONSUMPTION_PER_SECOND = "_consumption_per_second"
-PRODUCTION_EFFICIENCY = "_production_efficiency"
 
 
 def new_id(objects: Dict) -> int:
@@ -64,14 +49,14 @@ class Faction(EventsCreator, Observer, Observed):
 
     def __init__(self,
                  id: Optional[FactionId] = None,
-                 name: Optional[str] = None,
+                 name: FactionName = None,
                  friends: Optional[Set[FactionId]] = None,
                  enemies: Optional[Set[FactionId]] = None):
         EventsCreator.__init__(self)
         Observer.__init__(self)
         Observed.__init__(self)
         self.id = id or new_id(self.game.factions)
-        self.name: str = name or f'Faction {self.id}'
+        self.name = name or f'Faction {self.id}'
 
         self.friendly_factions: Set[FactionId] = friends or set()
         self.enemy_factions: Set[FactionId] = enemies or set()
@@ -194,7 +179,7 @@ class Player(EventsCreator, Observer, Observed):
     def is_local_human_player(self) -> bool:
         return self is self.game.local_human_player
 
-    def get_default_producer_of_unit(self, unit_name: str) -> Optional[Building]:
+    def get_default_producer_of_unit(self, unit_name: str) -> Optional[UnitsProducer]:
         for producer in (b for b in self.buildings if b.produced_units is not None and unit_name in b.produced_units):
             if producer.default_producer:
                 return producer
@@ -309,7 +294,7 @@ class Player(EventsCreator, Observer, Observed):
         setattr(self, f"{resource}{YIELD_PER_SECOND}", old_yield + change)
 
     def _update_resources_stock(self):
-        for resource_name in [k for k in RESOURCES.keys() if k is not ENERGY]:
+        for resource_name in [k for k in RESOURCES if k is not ENERGY]:
             stock = getattr(self, resource_name)
             increase = getattr(self, f"{resource_name}{YIELD_PER_SECOND}")
             setattr(self, resource_name, stock + increase)
@@ -754,5 +739,5 @@ if __name__:
     # these imports are placed here to avoid circular-imports issue:
     from units.weapons import Weapon
     from units.units import Unit, Soldier
-    from buildings.buildings import Building
+    from buildings.buildings import Building, UnitsProducer
     from units.unit_management import SelectedEntityMarker

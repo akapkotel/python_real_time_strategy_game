@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import deque
 from typing import Dict, Deque
 
-from arcade import Sprite, load_spritesheet
+from arcade import Sprite, load_spritesheet, SpriteList
 
 from effects.constants import (
     EXPLOSION_SMALL_5, HIT_BLAST, SHOT_BLAST, EXPLOSION
@@ -34,6 +34,7 @@ class ExplosionsPool:
             name: deque([Explosion(name, self, EXPLOSION in name)
                          for _ in range(20)]) for name in explosions
         }
+        self.exploding = SpriteList(is_static=True)
 
     def get(self, explosion_name, x, y) -> Explosion:
         try:
@@ -41,6 +42,7 @@ class ExplosionsPool:
         except IndexError:
             explosion = Explosion(explosion_name, self)
         explosion.position = x, y
+        self.exploding.append(explosion)
         return explosion
 
     def put(self, explosion: Explosion):
@@ -52,6 +54,18 @@ class ExplosionsPool:
             self.put(Explosion(explosion_name, self))
         elif explosions_count > required:
             self.explosions[explosion_name].popleft()
+
+    def create(self, name, x, y):
+        explosion = Explosion(name, self, EXPLOSION in name)
+        explosion.position = x, y
+        self.exploding.append(explosion)
+        explosion.play()
+
+    def on_update(self, delta_time):
+        self.exploding.on_update(delta_time)
+
+    def draw(self):
+        self.exploding.draw()
 
 
 class Explosion(Sprite):
@@ -72,7 +86,7 @@ class Explosion(Sprite):
         self.cur_texture_index = 0  # Start at the first frame
         self.exploding = True
         if self.sound is not None:
-            self.game.window.sound_player.play_sound(self.sound)
+            self.game.sound_player.play_sound(self.sound)
 
     def on_update(self, delta_time: float = 1/60):
         # Update to the next frame of the animation. If we are at the end

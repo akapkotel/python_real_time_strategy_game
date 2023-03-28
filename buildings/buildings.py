@@ -12,13 +12,14 @@ from arcade.arcade_types import Point
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
-    ProgressButton, UiElementsBundle, UiElement, Hint, Button, UiTextLabel
+    ProgressButton, UiElementsBundle, UiElement, Hint, Button, UiTextLabel, UnitProductionCostsHint
 )
 from campaigns.research import Technology
 from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
-    Player, PlayerEntity, STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS, FUEL
+    Player, PlayerEntity
 )
+from players_and_factions.constants import FUEL, AMMUNITION, STEEL, ELECTRONICS, CONSCRIPTS
 from utils.views import ProgressBar
 from utils.colors import GREEN, RED, BLACK, CONSTRUCTION_BAR_COLOR
 from utils.functions import (
@@ -63,16 +64,6 @@ class UnitsProducer:
         # used to pick one building to produce new units if player has more such factories:
         self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
-    #     if self.player.is_local_human_player:
-    #         self.recreate_ui_units_construction_section()
-    #
-    # def recreate_ui_units_construction_section(self):
-    #     """
-    #     Each time a new UnitsProducer enters the game, UI panel with Units-available for plaer to build must be
-    #     refreshed to contain any new Unit this new Building produces.
-    #     """
-    #     self.game.create_units_constructions_options()
-
     @logger()
     def start_production(self, unit: str):
         if self.player.enough_resources_for(expense=unit):
@@ -104,7 +95,8 @@ class UnitsProducer:
             if unit == self.currently_produced and unit not in queue:
                 self._toggle_production(produced=None)
                 self.production_progress = 0.0
-        self.update_ui_units_construction_section()
+        if self.player.is_local_human_player:
+            self.update_ui_units_construction_section()
 
     def remove_unit_from_production_queue(self, unit):
         self.production_queue.reverse()
@@ -138,7 +130,7 @@ class UnitsProducer:
     def update_units_production(self):
         if self.currently_produced is not None:
             self.production_progress += 0.01 * self.health_percentage
-            if self.is_controlled_by_player:
+            if self.player.is_local_human_player:
                 self.update_ui_units_construction_section()
             if self.production_progress >= self.production_time:
                 self.finish_production(self.production_queue.pop())
@@ -166,8 +158,8 @@ class UnitsProducer:
         self.production_progress = 0
         self._toggle_production(produced=None)
         self.spawn_finished_unit(finished_unit)
-        self.update_ui_units_construction_section()
         if self.player.is_local_human_player:
+            self.update_ui_units_construction_section()
             self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
 
     def spawn_finished_unit(self, finished_unit: str):
@@ -184,7 +176,7 @@ class UnitsProducer:
         positions = generate_2d_grid(x - 135, y - 120, 4, 4, 75, 75)
         for i, unit_name in enumerate(self.produced_units):
             column, row = positions[i]
-            hint = Hint(f'{unit_name}_production_hint.png', delay=0.5)
+            hint = UnitProductionCostsHint(self.player, self.produced_units[unit_name], delay=0.5)
             b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
                                functions=partial(self.start_production, unit_name)).add_hint(hint)
             b.bind_function(partial(self.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
@@ -205,7 +197,7 @@ class UnitsProducer:
 
     def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
         game_configs = self.game.configs
-        resources = (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS)
+        resources = (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS)
         units_production_costs = {
             unit: {resource: game_configs[unit][resource] for resource in resources} for unit in produced_units
         }

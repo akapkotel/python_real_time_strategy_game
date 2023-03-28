@@ -24,7 +24,7 @@ from controllers.constants import HORIZONTAL, VERTICAL
 from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.observer import Observed, Observer
 from utils.geometry import clamp
-from utils.colors import rgb_to_rgba
+from utils.colors import rgb_to_rgba, GREEN, RED
 from utils.improved_spritelists import UiSpriteList
 from utils.functions import get_path_to_file, get_texture_size
 from utils.game_logging import log
@@ -976,6 +976,33 @@ class Hint(Sprite, ToggledElement):
                 draw_text(self.text, x, y, *self.text_attributes)
 
 
+class UnitProductionCostsHint(Hint):
+
+    def __init__(self, local_human_player: Player, production_costs: Dict[str, int], delay: float=0):
+        super().__init__('unit_production_hint.png', delay=delay)
+        self.local_human_player = local_human_player
+        self.production_costs = production_costs
+        self.label_height = self.height / len(production_costs)
+        self.labels = []
+
+    def show(self):
+        for i, (resource, cost) in enumerate(self.production_costs.items()):
+            color = GREEN if self.local_human_player.has_resource(resource, cost) else RED
+            self.labels.append(
+                (str(cost), self.center_x, self.top - (i + 0.5) * self.label_height, color, 15)
+            )
+        super().show()
+
+    def hide(self):
+        self.labels.clear()
+        super().hide()
+
+    def draw(self):
+        super().draw()
+        for label in self.labels:
+            draw_text(*label, anchor_x='left', anchor_y='center')
+
+
 @dataclass
 class UiElementsBundle(Observed):
     """
@@ -1292,4 +1319,6 @@ class UiBundlesHandler(Observer):
 
 
 # To avoid circular imports
-from controllers.keyboard import KeyboardHandler
+if __name__ == '__main__':
+    from controllers.keyboard import KeyboardHandler
+    from players_and_factions.player import Player

@@ -25,6 +25,7 @@ from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED, MAP_GREEN
 from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameObject
+from utils.data_types import Number
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
@@ -121,18 +122,17 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             frames_count = texture.width // 60
             locations_list = [(60 * j, 0, 60, 60) for j in range(frames_count)]
             frames = load_textures(get_path_to_file(names[i]), locations_list)
+            duration = 1 // frames_count
             self.all_frames_lists.append(
-                self.new_frames_list(frames)
+                self.new_frames_list(frames, duration)
             )
 
     @staticmethod
-    def new_frames_list(frames: List[Texture]) -> List[AnimationKeyframe]:
-        frames_count = len(frames)
-        duration = (1 // frames_count)
+    def new_frames_list(frames: List[Texture], duration: Number) -> List[AnimationKeyframe]:
         return [
             AnimationKeyframe(
-                duration=duration, texture=frames[i], tile_id=i
-            ) for i in range(frames_count)
+                duration=duration, texture=frame, tile_id=i
+            ) for i, frame in enumerate(frames)
         ]
 
     def bind_units_manager(self, manager: UnitsManager):
@@ -319,16 +319,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.show_hint = False
         self.cross_color = self.cursor_default_color
 
-    def set_cursor_cross_color(self, pointed: PlayerEntity, color=None):
-        if color is not None:
-            self.cross_color = color
-        elif pointed.is_controlled_by_player:
+    def set_cursor_cross_color(self, pointed: PlayerEntity):
+        if pointed.is_controlled_by_player:
             self.cross_color = GREEN
         else:
             self.cross_color = RED
 
     def get_pointed_sprite(self, x, y) -> Optional[Union[PlayerEntity, UiElement]]:
-        # Since we have many spritelists which are drawn_area in some
+        # Since we have many spritelists which are drawn in some
         # hierarchical order, we must iterate over them catching
         # cursor-pointed elements in backward order: last draw, is first to
         # be mouse-pointed (it lies on the top)

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from typing import Optional, Tuple, List, Set, Union, Dict
+from typing import Optional, Tuple, List, Set, Union, Dict, Iterable
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
-                    create_rectangle_filled)
+                    create_rectangle_filled, TShape)
 from arcade.arcade_types import Color
 
 from game import Game
