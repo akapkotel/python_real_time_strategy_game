@@ -90,19 +90,8 @@ class Unit(PlayerEntity):
         self.outside = True
 
         self.explosion_name = EXPLOSION
-        self.update_explosions_pool()
 
         self.layered_spritelist.swap_rendering_layers(self, 0, self.current_node.grid[1])
-
-    def update_explosions_pool(self):
-        """
-        Assure that there would be enough Explosion instances in the pool to
-        get one when this Unit is destroyed.
-        """
-        name = self.explosion_name
-        required = len([u for u in self.game.units if u.explosion_name == name])
-        self.game.explosions_pool.add(SHOT_BLAST, required)
-        self.game.explosions_pool.add(name, required)
 
     @abstractmethod
     def _load_textures(self):

@@ -544,8 +544,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.units = LayeredSpriteList()
         self.static_objects = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
         self.buildings = LayeredSpriteList()
-        self.explosions_pool: Optional[ExplosionsPool] = ExplosionsPool()
-        # self.effects = SpriteList(is_static=True)
+        self.explosions_pool: Optional[ExplosionsPool] = ExplosionsPool(self)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()
         self.set_updated_and_drawn_lists()
@@ -804,12 +803,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         explosions.
         """
         if effect_type is Explosion:
-            self.explosions_pool.create(name, x, y)
-            # effect = self.explosions_pool.get(name, x, y)
-        # else:
-        #     return
-        # self.effects.append(effect)
-        # effect.play()
+            self.explosions_pool.create_explosion('explosion.png', x, y)
 
     def on_show_view(self):
         super().on_show_view()

@@ -1277,10 +1277,9 @@ class UiBundlesHandler(Observer):
 
     def _unload_bundle(self, bundle: UiElementsBundle):
         self.active_bundles.discard(bundle.name)
-        for element in self.ui_elements_spritelist[::-1]:
-            if element.bundle == bundle:
-                bundle.displayed_in_manager = None
-                self.remove(element)
+        for element in (e for e in self.ui_elements_spritelist if e.bundle == bundle):
+            bundle.displayed_in_manager = None
+            self.remove(element)
         bundle.on_unload()
 
     @singledispatchmethod

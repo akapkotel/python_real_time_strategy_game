@@ -41,7 +41,7 @@ class Weapon:
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
         self.explosion_name = SHOT_BLAST
-        self.owner.game.explosions_pool.add(self.explosion_name, 75)
+        # self.owner.game.explosions_pool.add(self.explosion_name, 75)
 
         for attr_name, value in self.owner.game.configs[name].items():
             setattr(self, attr_name, value)

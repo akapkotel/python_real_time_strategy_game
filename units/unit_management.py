@@ -50,7 +50,6 @@ selection_textures = load_textures(
 soldier_selection_textures = load_textures(
     get_path_to_file('soldier_selection_marker.png'),
     [(i * SOLDIER_SELECTION_MARKER_SIZE, 0, SOLDIER_SELECTION_MARKER_SIZE, SOLDIER_SELECTION_MARKER_SIZE) for i in range(10)]
-    # get_path_to_file('soldier_selection_marker.png'), 0, 0, 40, 40
 )
 building_selection_texture = load_texture(
     get_path_to_file('building_selection_marker.png'), 0, 0, BUILDING_SELECTION_MARKER_SIZE, BUILDING_SELECTION_MARKER_SIZE

@@ -1,104 +1,52 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from collections import deque
-from typing import Dict, Deque
-
 from arcade import Sprite, load_spritesheet, SpriteList
-
-from effects.constants import (
-    EXPLOSION_SMALL_5, HIT_BLAST, SHOT_BLAST, EXPLOSION
-)
-from utils.functions import get_path_to_file
-
-path = get_path_to_file
-explosions = {
-    EXPLOSION: load_spritesheet(path('explosion.png'), 256, 256, 15, 75),
-    SHOT_BLAST: load_spritesheet(path('shot_blast.png'), 256, 256, 4, 16),
-    HIT_BLAST: load_spritesheet(path('hit_blast.png'), 256, 256, 8, 48),
-    EXPLOSION_SMALL_5: load_spritesheet(path('explosion_small_5.png'), 256, 256, 15, 60)
-}
 
 
 class ExplosionsPool:
-    """
-    Pooling allows to avoid initializing many, often-used objects lowering
-    CPU load. Number of pooled Explosions is dynamically adjusted to number of
-    Units in game.
-    """
     game = None
+    explosions_names = ('explosion.png', 'shot_blast.png')  # 'hit_blast.png'
+    explosions_spritesheets_paths = {}
+    explosions_sounds_files_paths = {}
 
-    def __init__(self):
-        super().__init__()
-        self.explosions: Dict[str, Deque] = {
-            name: deque([Explosion(name, self, EXPLOSION in name)
-                         for _ in range(20)]) for name in explosions
-        }
-        self.exploding = SpriteList(is_static=True)
+    def __init__(self, game):
+        self.game = game
+        self.explosions = SpriteList()
+        for explosion_name in self.explosions_names:
+            self.explosions_spritesheets_paths[explosion_name] = self.game.resources_manager.get_path_to_single_file(explosion_name)
+            self.explosions_sounds_files_paths[explosion_name] = explosion_name.replace('png', 'wav')
 
-    def get(self, explosion_name, x, y) -> Explosion:
-        try:
-            explosion = self.explosions[explosion_name].popleft()
-        except IndexError:
-            explosion = Explosion(explosion_name, self)
-        explosion.position = x, y
-        self.exploding.append(explosion)
-        return explosion
-
-    def put(self, explosion: Explosion):
-        self.explosions[explosion.name].append(explosion)
-
-    def add(self, explosion_name: str, required: int):
-        explosions_count = len(self.explosions[explosion_name])
-        if explosions_count < required:
-            self.put(Explosion(explosion_name, self))
-        elif explosions_count > required:
-            self.explosions[explosion_name].popleft()
-
-    def create(self, name, x, y):
-        explosion = Explosion(name, self, EXPLOSION in name)
-        explosion.position = x, y
-        self.exploding.append(explosion)
-        explosion.play()
+    def create_explosion(self, explosion_name: str, x, y):
+        explosion_spritesheet_path = self.explosions_spritesheets_paths[explosion_name]
+        sound_file_path = self.explosions_sounds_files_paths[explosion_name]
+        self.explosions.append(
+            Explosion(explosion_spritesheet_path, sound_file_path, x, y)
+        )
 
     def on_update(self, delta_time):
-        self.exploding.on_update(delta_time)
+        self.explosions.on_update(delta_time)
 
     def draw(self):
-        self.exploding.draw()
+        self.explosions.draw()
 
 
 class Explosion(Sprite):
     """ This class creates an explosion animation."""
     game = None
 
-    def __init__(self, sprite_sheet_name: str, pool: ExplosionsPool, sound=True):
-        super().__init__()
-        self.name = sprite_sheet_name
-        self.pool = pool
-        self.sound = '.'.join((self.name.lower(), 'wav')) if sound else None
-        self.textures = [t for t in explosions[sprite_sheet_name]]
+    def __init__(self, explosion_spritesheet_path: str, sound_file_path: str, x, y):
+        super().__init__(center_x=x, center_y=y)
+        self.textures = load_spritesheet(explosion_spritesheet_path, 256, 256, 15, 60)
         self.set_texture(0)
-        self.exploding = False
-
-    def play(self):
-        self.set_texture(0)
-        self.cur_texture_index = 0  # Start at the first frame
-        self.exploding = True
-        if self.sound is not None:
-            self.game.sound_player.play_sound(self.sound)
+        self.game.sound_player.play_sound(sound_file_path)
 
     def on_update(self, delta_time: float = 1/60):
-        # Update to the next frame of the animation. If we are at the end
-        # of our frames, then put it back to the pool.
-        if self.exploding:
-            self.cur_texture_index += 1
-            if self.cur_texture_index < len(self.textures):
-                self.set_texture(self.cur_texture_index)
-            else:
-                self.return_to_pool()
+        if self.cur_texture_index < len(self.textures) - 1:
+            self.update_animation(delta_time)
+        else:
+            self.kill()
 
-    def return_to_pool(self):
-        self.exploding = False
-        self.remove_from_sprite_lists()
-        self.pool.put(self)
+    def update_animation(self, delta_time: float = 1/60):
+        self.cur_texture_index += 1
+        self.set_texture(self.cur_texture_index)

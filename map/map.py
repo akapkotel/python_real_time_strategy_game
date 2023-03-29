@@ -15,7 +15,8 @@ from typing import (
 from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
 
 from game import PROFILING_LEVEL
-from map.constants import TILE_WIDTH, TILE_HEIGHT
+from map.constants import TILE_WIDTH, TILE_HEIGHT, NormalizedPoint, ADJACENT_OFFSETS, DIAGONAL_DIST, VERTICAL_DIST, \
+    MapPath, TreeID, OPTIMAL_PATH_LENGTH, PathRequest
 from gameobjects.gameobject import GameObject
 from utils.colors import SAND, WATER_SHALLOW, BLACK
 from utils.data_types import GridPosition, Number
@@ -31,25 +32,13 @@ from utils.geometry import calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
-PATH = 'PATH'
-VERTICAL_DIST = 10
-DIAGONAL_DIST = 14  # approx square root of 2
+
 MAP_TEXTURES = {
     'mud': load_spritesheet(
         get_path_to_file('mud_tileset_6x6.png'), 60, 50, 4, 16, 0)
 }
-ADJACENT_OFFSETS = [
-    (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0), (+1, +1)
-]
-OPTIMAL_PATH_LENGTH = 50
 
 random_value = random.random
-
-# typing aliases:
-NormalizedPoint = Tuple[int, int]
-MapPath = Union[List[NormalizedPoint], List[GridPosition]]
-PathRequest = Tuple['Unit', GridPosition, GridPosition]
-TreeID = int
 
 MAP_TILE_TEXTURE_GROUND = make_soft_square_texture(TILE_WIDTH, SAND, 255, 255)
 MAP_TILE_TEXTURE_WATER = make_soft_square_texture(TILE_WIDTH, WATER_SHALLOW, 255, 255)
