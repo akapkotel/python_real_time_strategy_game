@@ -187,7 +187,11 @@ def average_position_of_points_group(positions: Sequence[Point]) -> Point:
     return sum(p[0] for p in positions) / positions_count, sum(p[1] for p in positions) / positions_count
 
 
-def generate_2d_grid(start_x, start_y, rows, columns, item_width, item_height, padding=0) -> List[Tuple[Number, Number]]:
+def generate_2d_grid(start_x: float, start_y: float, rows: int, columns: int, item_width: float, item_height: float, padding=0) -> List[Tuple[Number, Number]]:
+    """
+    Create 2-dimensional grid ordering items in rows and columns. This function automatically distributes items among
+    rows and columns starting at first column on the left side and filling it from the top to bottom.
+    """
     grid = []
     for column in range(columns):
         shift_x = column * (item_width + padding)

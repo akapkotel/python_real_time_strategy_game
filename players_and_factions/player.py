@@ -134,9 +134,9 @@ class Faction(EventsCreator, Observer, Observed):
 
 
 class Player(EventsCreator, Observer, Observed):
+    resources = {FUEL: 50, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 75, CONSCRIPTS: 15}
     game = None
     cpu = False
-    resources = {FUEL: 50, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 75, CONSCRIPTS: 15}
 
     def __init__(self,
                  id: Optional[int] = None,
@@ -188,7 +188,7 @@ class Player(EventsCreator, Observer, Observed):
         attached: Union[Unit, Building]
         attached.player = self
         attached.faction = self.faction
-        if isinstance(attached, Unit):
+        if attached.is_unit:
             self._add_unit(attached)
         else:
             self._add_building(attached)
@@ -200,7 +200,6 @@ class Player(EventsCreator, Observer, Observed):
     def _add_building(self, building: Building):
         self.buildings.add(building)
         self.faction.buildings.add(building)
-        self.update_energy_balance(building)
 
     def notify(self, attribute: str, value: Any):
         pass
@@ -220,7 +219,7 @@ class Player(EventsCreator, Observer, Observed):
         self.buildings.discard(building)
         self.faction.buildings.discard(building)
         self.update_construction_options(building)
-        self.update_energy_balance(building)
+        self.update_energy_balance()
 
     def is_enemy(self, other: Player) -> bool:
         return self.faction.is_enemy(other.faction)
@@ -254,23 +253,28 @@ class Player(EventsCreator, Observer, Observed):
     def kill(self):
         self.detach_observers()
 
-    def enough_resources_for(self, expense: str) -> bool:
-        if self.unlimited_resources:
+    def enough_resources_for(self, expense: Optional[str] = None, costs: Optional[Dict[str, int]] = None) -> bool:
+        return self.unlimited_resources or self._enough_resources_for(expense, costs)
+
+    def _enough_resources_for(self, expense: Optional[str] = None, costs: Optional[Dict[str, int]] = None) -> bool:
+        if costs:
+            for resource, cost in costs.items():
+                if not self.has_resource(resource, cost):
+                    if self.is_local_human_player:
+                        self.notify_player_of_resource_deficit(resource)
+                    return False
             return True
-        for resource in (r for r in self.resources.keys() if r in self.game.configs[expense]):
-            required_amount = self.game.configs[expense][resource]
-            if not self.has_resource(resource, required_amount):
-                if self.is_local_human_player:
-                    self.notify_player_of_resource_deficit(resource)
-                return False
-        return True
+        if expense:
+            return self._enough_resources_for(None, self.fetch_costs_for(expense))
+
+    def fetch_costs_for(self, expense: str) -> Dict[str, int]:
+        return {resource: self.game.configs[expense].get(resource, 0) for resource in self.resources.keys()}
 
     @property
     def unlimited_resources(self) -> bool:
-        return (
-                (self.is_local_human_player and self.game.settings.unlimited_player_resources)
-                or(self.game.settings.unlimited_cpu_resources and not self.is_local_human_player)
-        )
+        if self.is_local_human_player:
+            return self.game.settings.unlimited_player_resources
+        return self.game.settings.unlimited_cpu_resources
 
     def _identify_expense_category(self, expense: str) -> str:
         try:
@@ -284,7 +288,7 @@ class Player(EventsCreator, Observer, Observed):
         return getattr(self, resource, 0)
 
     def has_resource(self, resource: str, amount: int = 1) -> bool:
-        return self.resource(resource) >= amount
+        return self.resource(resource) >= amount or self.unlimited_resources
 
     def notify_player_of_resource_deficit(self, resource: str):
         self.game.window.sound_player.play_sound(f'not_enough_{resource}.wav')
@@ -305,9 +309,21 @@ class Player(EventsCreator, Observer, Observed):
     def add_resource(self, resource_name: str, amount: float):
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
-    def update_energy_balance(self, building: Building):
-        # TODO
-        pass
+    def update_energy_balance(self):
+        required_energy = sum(building.energy_consumption for building in self.buildings)
+        produced_energy = sum(building.energy_production for building in self.buildings if building.produced_resource == ENERGY)
+        power_ratio = 0 if not required_energy else max(1, (produced_energy / required_energy))
+        for building in self.buildings:
+            building.power_ratio = power_ratio
+        setattr(self, ENERGY, max(0, produced_energy - required_energy))
+
+    def update_construction_options(self, building: Building):
+        if (produced_units := building.produced_units) is not None:
+            for unit_name in produced_units:
+                self.units_possible_to_build.remove(unit_name)
+        if (constructions := self.game.configs[building.object_name]['allows_construction']) is not None:
+            for building_name in constructions:
+                self.buildings_possible_to_build.remove(building_name)
 
     def __getstate__(self) -> Dict:
         saved_player = {k: v for (k, v) in self.__dict__.items()}
@@ -323,14 +339,6 @@ class Player(EventsCreator, Observer, Observed):
         self.faction = self.game.factions[self.faction]
         self.observed_attributes = defaultdict(list)
         self.attach_observers(observers=[self.game, self.faction])
-
-    def update_construction_options(self, building: Building):
-        if (produced_units := building.produced_units) is not None:
-            for unit_name in produced_units:
-                self.units_possible_to_build.remove(unit_name)
-        if (constructions := self.game.configs[building.object_name]['allows_construction']) is not None:
-            for building_name in constructions:
-                self.buildings_possible_to_build.remove(building_name)
 
 
 class HumanPlayer(Player):
@@ -468,9 +476,9 @@ class PlayerEntity(GameObject):
         self.selection_marker: Optional[SelectedEntityMarker] = None
 
         # this is checked so frequent that it is worth caching it:
-        self.is_building = isinstance(self, Building)
+        self.is_building = isinstance(self, Building) or issubclass(self.__class__, Building)
         self.is_unit = not self.is_building
-        self.is_infantry = isinstance(self, Soldier)
+        self.is_infantry = self.is_unit and (isinstance(self, Soldier) or issubclass(self.__class__, Soldier))
 
         self._max_health = self.configs['max_health']
         self._health = self._max_health
@@ -516,18 +524,19 @@ class PlayerEntity(GameObject):
         return f'{self.object_name}(id: {self.id}, player.id: {self.player.id})'
 
     def __bool__(self) -> bool:
-        return self.alive
+        return self.is_alive
 
     @property
     def configs(self):
         return self.game.configs[self.object_name]
 
     @property
-    def alive(self) -> bool:
+    def is_alive(self) -> bool:
         return self._health > 0
+
     @property
     @abstractmethod
-    def moving(self) -> bool:
+    def is_moving(self) -> bool:
         raise NotImplementedError
 
     @property
@@ -536,7 +545,6 @@ class PlayerEntity(GameObject):
         # TODO: use this when multiplayer is implemented
         #  flag used to avoid enemy units revealing map for human player, only
         #  player's units and his allies units reveal map for him:
-        # return self.faction is self.game.local_human_player.faction
 
     @property
     def max_health(self) -> float:
@@ -664,7 +672,7 @@ class PlayerEntity(GameObject):
             self.check_if_enemy_destroyed(enemy)
 
     def check_if_enemy_destroyed(self, enemy: PlayerEntity):
-        if not enemy.alive:
+        if not enemy.is_alive:
             self.experience += enemy.kill_experience
             self.known_enemies.discard(enemy)
             if self._enemy_assigned_by_player is enemy:

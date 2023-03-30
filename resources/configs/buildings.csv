@@ -1,9 +1,9 @@
 object_name,game_id,class,produced_units,allows_construction,produced_resource,research_facility,max_health,armour,garrison_size,energy_consumption,steel,electronics,visibility_radius,attack_radius,weapons_names,size,construction_time
-command_center,B001,Building,None,(small_power_generator;garrison;storage_facility),None,False,800,0.75,8,100,200,200,10,0,None,(3;3),15
-small_power_generator,B002,Building,None,(electronics_planty;steel_foundry;fuel_plant),(energy),False,200,0.60,0,0,50,50,4,0,None,(1;1),7
-garrison,B003,Building,(soldier),(barracks;small_bunker;hydroponic_farm),(recruits),False,800,0.75,12,100,200,100,8,0,None,(2;2),10
-electronics_plant,B004,Building,None,(research_laboratory),(electronics),False,600,0.75,2,175,450,450,6,0,None,(2;2),15
-steel_foundry,B005,Building,None,(light_vehicles_factory),(steel),False,1800,0.75,4,175,450,90,8,0,None,(3;3),20
+command_center,B001,Building,None,(small_power_generator;garrison;storage_facility),energy,False,800,0.75,8,100,200,200,10,0,None,(3;3),15
+small_power_generator,B002,Building,None,(electronics_planty;steel_foundry;fuel_plant),energy,False,200,0.60,0,0,50,50,4,0,None,(1;1),7
+garrison,B003,Building,(soldier),(barracks;small_bunker;hydroponic_farm),conscripts,False,800,0.75,12,100,200,100,8,0,None,(2;2),10
+electronics_plant,B004,Building,None,(research_laboratory),electronics,False,600,0.75,2,175,450,450,6,0,None,(2;2),15
+steel_foundry,B005,Building,None,(light_vehicles_factory),steel,False,1800,0.75,4,175,450,90,8,0,None,(3;3),20
 fuel_plant,B006,Building,None,None,(fuel),False,1800,0.75,4,300,450,180,8,0,None,(3;3),20
 hydroponic_farm,B007,Building,None,None,(food),False,600,0.50,2,200,200,80,6,0,None,(2;2),10
 research_laboratory,B008,Building,None,None,None,True,600,0.75,4,250,200,800,5,0,None,(2;2),15
@@ -11,4 +11,4 @@ light_vehicles_factory,B009,Building,(truck;cistern;scout_car;apc),(medium_vehic
 medium_vehicles_factory,B010,Building,(tank_medium),(heavy_vehicles_factory),None,False,1000,0.75,2,180,300,300,8,0,None,(2;3),15
 storage_facillity,B011,Building,None,None,None,False,400,0.25,1,80,100,25,4,0,None,(2;2),5
 helipads,B012,Building,None,None,None,False,600,0.50,2,100,150,100,8,0,None,(2;2),10
-construction_site,B014,Building,None,None,None,False,500,0,0,0,0,0,4,0,None,(3;3),0
+construction_site,B014,Building,None,None,None,False,500,0,0,0.01,0,0,4,0,None,(3;3),0

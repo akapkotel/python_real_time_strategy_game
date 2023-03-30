@@ -44,7 +44,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         # name with texture extension added used to find ant load texture
         self.full_name = full_name = add_extension(texture_name)
 
-        self.filename_with_path = self.game.resources_manager.get_path_to_single_file(full_name)
+        self.filename_with_path = self.game.resources_manager.get(full_name)
 
         super().__init__(self.filename_with_path, center_x=position[0], center_y=position[1])
         Observed.__init__(self, observers)
@@ -83,9 +83,10 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         return self.right > l and self.left < r and self.top > b and self.bottom < t
 
     def on_update(self, delta_time: float = 1 / 60):
-        self.center_x += self.change_x * delta_time
-        self.center_y += self.change_y * delta_time
-
+        self.position = [
+            self._position[0] + self.change_x * delta_time,
+            self._position[1] + self.change_y * delta_time
+        ]
         self.update_visibility()
 
         if self.is_rendered and self.frames:
@@ -183,13 +184,13 @@ class Wreck(TerrainObject):
     def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
         super().__init__(filename, durability, position)
         lifetime = self.game.settings.remove_wrecks_after_seconds
-        self.set_proper_wreck_or_body_texture(filename, texture_index)
+        self.set_proper_wreck_texture(filename, texture_index)
         self.schedule_event(ScheduledEvent(creator=self, delay=lifetime, function=self.kill))
 
     def __repr__(self) -> str:
         return f'Wreck(id: {self.id})'
 
-    def set_proper_wreck_or_body_texture(self, name, texture_index):
+    def set_proper_wreck_texture(self, name, texture_index):
         texture_name = get_path_to_file(name)
         width, height = Image.open(texture_name).size
         try:  # for tanks with turrets
@@ -202,6 +203,15 @@ class Wreck(TerrainObject):
             self.texture = load_texture(texture_name,
                                    texture_index * (width // ROTATIONS),
                                    0, width // ROTATIONS, height)
+
+
+class Corpse(Wreck):
+
+    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
+        super().__init__(filename, durability, position, texture_index)
+
+    def __str__(self) -> str:
+        return f'Corpse(id: {self.id})'
 
 
 class PlaceableGameObject:
@@ -252,5 +262,8 @@ class PlaceableGameObject:
         return all(bool(availability) for availability in self.grids.values())
 
     def build(self):
-        from buildings.buildings import ConstructionSite
-        ConstructionSite(self.gameobject_name, self.player, self.position)
+        if self.game.scenario_editor is None:
+            from buildings.buildings import ConstructionSite
+            ConstructionSite(self.gameobject_name, self.player, self.position)
+        else:
+            self.game.spawn(self.gameobject_name, self.player, self.position)

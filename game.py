@@ -191,15 +191,25 @@ class ResourcesManager:
             names_to_paths = find_paths_to_all_files_of_type(extension, self.resources_path)
             self.resources[extension] = {name: pathlib.Path(path, name) for name, path in names_to_paths.items()}
         ResourcesManager.instance = self
+        log(f'ResourceManager found {sum(len(paths) for paths in self.resources.values())} files.', console=True)
 
-    def get_path_to_single_file(self, file_name: str) -> Union[Dict[str, str], str]:
+    def get(self, file_name_or_extension: str) -> Union[str, Dict[str, str]]:
+        """
+        Fetch a full path to the single game file (texture, sound, etc.) providing the name of this file, or paths to
+        all files of a particular type by providing the extension only.
+        """
+        if file_name_or_extension in self.extensions:
+            return self._get_paths_to_all_files_of_type(extension=file_name_or_extension)
+        return self._get_path_to_single_file(file_name=file_name_or_extension)
+
+    def _get_path_to_single_file(self, file_name: str) -> Union[Dict[str, str], str]:
         extension = file_name.split('.')[-1]
         try:
             return self.resources[extension][file_name]
         except KeyError:
             raise FileNotFoundError(f'File {file_name} was not found in {self.resources_path} and its subdirectories!')
 
-    def get_paths_to_all_files_of_type(self, extension: str):
+    def _get_paths_to_all_files_of_type(self, extension: str):
             try:
                 return self.resources[extension]
             except KeyError:
@@ -241,7 +251,7 @@ class GameWindow(Window, EventsCreator):
         self.game_view: Optional[Game] = None
 
         # cursor-related:
-        self.cursor = MouseCursor(self, self.resources_manager.get_path_to_single_file('normal.png'))
+        self.cursor = MouseCursor(self, self.resources_manager.get('normal.png'))
         # store viewport data to avoid redundant get_viewport() calls and call
         # get_viewport only when viewport is actually changed:
         self.current_viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
@@ -303,8 +313,6 @@ class GameWindow(Window, EventsCreator):
     def on_update(self, delta_time: float):
         self.frames += 1
         self.total_delta_time += delta_time
-        log(f'Time: {delta_time}{SEPARATOR}', console=False)
-
         self.current_fps = round(pyglet.clock.get_fps(), 2)  # round(1 / delta_time, 2)
 
         self.current_view.on_update(delta_time)
@@ -326,10 +334,10 @@ class GameWindow(Window, EventsCreator):
             self.draw_current_fps_on_screen()
 
     def draw_current_fps_on_screen(self):
-        draw_text(f'FPS: {str(self.current_fps)}',
+        draw_text(f'FPS: {self.current_fps}',
                   self.current_view.viewport[0] + 30,
                   self.current_view.viewport[3] - 30,
-                  GREEN if self.current_fps > 30 else YELLOW if self.current_fps > 20 else RED
+                  GREEN if self.current_fps > 24 else YELLOW if self.current_fps > 20 else RED
         )
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
@@ -538,11 +546,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
-        self.terrain_tiles = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
+        self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.dead_bodies = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
         self.units = LayeredSpriteList()
-        self.static_objects = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
+        self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
         self.buildings = LayeredSpriteList()
         self.explosions_pool: Optional[ExplosionsPool] = ExplosionsPool(self)
         self.selection_markers_sprites = SpriteList()
@@ -926,12 +935,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def attach_gameobject(self, gameobject: GameObject):
         if isinstance(gameobject, PlayerEntity):
-            if gameobject.is_building:
-                self.buildings.append(gameobject)
-            else:
-                self.units.append(gameobject)
+            self.attach_player_entity(gameobject)
+        elif isinstance(gameobject, Corpse):
+            self.dead_bodies.append(gameobject)
         else:
             self.static_objects.append(gameobject)
+
+    def attach_player_entity(self, gameobject: PlayerEntity):
+        if gameobject.is_building:
+            self.buildings.append(gameobject)
+        else:
+            self.units.append(gameobject)
 
     def attach_player_or_faction(self, attached: Union[Player, Faction]):
         if isinstance(attached, Player):
@@ -941,12 +955,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def detach_gameobject(self, gameobject: GameObject):
         if isinstance(gameobject, PlayerEntity):
-            if gameobject.is_building:
-                self.buildings.remove(gameobject)
-            else:
-                self.units.remove(gameobject)
+            self.detach_player_entity(gameobject)
+        elif isinstance(gameobject, Corpse):
+            self.dead_bodies.remove(gameobject)
         else:
             self.static_objects.remove(gameobject)
+
+    def detach_player_entity(self, gameobject: PlayerEntity):
+        if gameobject.is_building:
+            self.buildings.remove(gameobject)
+        else:
+            self.units.remove(gameobject)
 
     def detach_player_or_faction(self, detached: Union[Player, Faction]):
         if isinstance(detached, Player):
@@ -1076,7 +1095,7 @@ if __name__ == '__main__':
     from controllers.keyboard import KeyboardHandler
     from controllers.mouse import MouseCursor
     from units.units import Unit, UnitsOrderedDestinations, Engineer, Soldier, VehicleWithTurret
-    from gameobjects.gameobject import GameObject, TerrainObject, Wreck
+    from gameobjects.gameobject import GameObject, TerrainObject, Wreck, Corpse
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building, ConstructionSite

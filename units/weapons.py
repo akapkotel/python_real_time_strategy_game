@@ -76,8 +76,8 @@ class Weapon:
                 self.owner.experience * EXPERIENCE_HIT_CHANCE_BONUS,
                 -target.experience * EXPERIENCE_HIT_CHANCE_BONUS,
                 BUILDING_HIT_CHANCE_BONUS * target.is_building,
-                MOVEMENT_HIT_PENALTY * self.owner.moving,
-                TARGET_MOVEMENT_HIT_PENALTY * target.moving,
+                MOVEMENT_HIT_PENALTY * self.owner.is_moving,
+                TARGET_MOVEMENT_HIT_PENALTY * target.is_moving,
                 INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry -self.owner.is_infantry)
             )
         )

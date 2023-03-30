@@ -118,7 +118,7 @@ class Unit(PlayerEntity):
         return self.current_node.adjacent_nodes
 
     @property
-    def moving(self) -> bool:
+    def is_moving(self) -> bool:
         return bool(self.change_x or self.change_y)
 
     def reached_destination(self, destination: Union[MapNode, GridPosition]) -> bool:
@@ -177,7 +177,8 @@ class Unit(PlayerEntity):
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
         """
-        self.scan_next_nodes_for_collisions()
+        if self.path:
+            self.scan_next_nodes_for_collisions()
         self.update_current_blocked_node(new_current_node)
         if len(self.path) > 1:
             self.update_reserved_node()
@@ -204,10 +205,11 @@ class Unit(PlayerEntity):
         node.unit = self
 
     def scan_next_nodes_for_collisions(self):
-        if self.path:
-            next_node = self.map.position_to_node(*self.path[0])
-            if next_node.unit not in (self, None):
-                self.find_best_way_to_avoid_collision(next_node.unit)
+        next_node = self.map.position_to_node(*self.path[0])
+        if next_node.unit not in (self, None):
+            self.find_best_way_to_avoid_collision(next_node.unit)
+        elif next_node.static_gameobject is not None:
+            self.find_alternative_path()
 
     def find_best_way_to_avoid_collision(self, blocker: Unit):
         if blocker.has_destination or self.is_enemy(blocker):
@@ -380,7 +382,7 @@ class Unit(PlayerEntity):
         pass
 
     def fight_enemy(self, enemy):
-        if enemy.alive and enemy.is_enemy(self):
+        if enemy.is_alive and enemy.is_enemy(self):
             self.attack(enemy)
         elif self._enemy_assigned_by_player is enemy:
             self._enemy_assigned_by_player = self.targeted_enemy = None
@@ -435,6 +437,7 @@ class Unit(PlayerEntity):
 
 class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
+    allowed_terrains = TerrainType.GROUND
 
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, id: int = None):
@@ -445,7 +448,7 @@ class Vehicle(Unit):
 
         thread_texture = ''.join((self.object_name, '_threads.png'))
         # texture of the VehicleThreads left by this Vehicle
-        self.threads_texture = self.game.resources_manager.get_path_to_single_file(thread_texture)
+        self.threads_texture = self.game.resources_manager.get(thread_texture)
         # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
@@ -467,7 +470,7 @@ class Vehicle(Unit):
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
-        if self.moving:
+        if self.is_moving:
             self.consume_fuel()
             if self.is_rendered and self.game.settings.vehicles_threads and self.threads_texture is not None:
                 self.leave_threads()
@@ -586,7 +589,34 @@ class VehicleWithTurret(Vehicle):
         )
 
 
+class Boat(Vehicle):
+    allowed_terrains = TerrainType.WATER
+
+
+class BoatWithTurret(Boat):
+    ...
+
+
+class AirUnit(Vehicle):
+    allowed_terrains = TerrainType.WATER
+
+    def __init__(self, texture_name: str, player: Player, weight: int, position: Point):
+        super().__init__(texture_name, player, weight, position)
+
+        # AirUnits cast shadows on the ground at the position under theirs own position
+        self.shadow: Optional[Shadow] = None
+
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
+        self.shadow.on_update(delta_time)
+
+
+class Shadow(Sprite):
+    ...
+
+
 class Soldier(Unit):
+    allowed_terrains = TerrainType.GROUND
     health_restoration = 0.003
     infantry_steps_duration = 0.05
 
@@ -633,7 +663,7 @@ class Soldier(Unit):
 
     def on_update(self, delta_time=1/60):
         super().on_update(delta_time)
-        if self.on_screen and self.moving:
+        if self.on_screen and self.is_moving:
             self.update_animation(delta_time)
 
     def angle_to_texture(self, angle_to_target: float):
@@ -695,22 +725,24 @@ class UnitsOrderedDestinations:
     destination by the Pathfinder. Game uses these positions to display on the
     ordered destinations on the screen for the Player convenience.
     """
-    size = 5 / 90
+    size = 2
 
     def __init__(self):
         self.destinations = []
-        self.time_left = 0
+        self.seconds_left = 0
 
     def new_destinations(self, destinations: List[Point]):
-        self.destinations = destinations
-        self.time_left = 90
+        self.seconds_left = 3
+        self.destinations = [[x, y, self.size, GREEN, 4] for (x, y) in destinations]
 
     def on_update(self, delta_time):
-        if self.time_left > 0:
-            self.time_left -= 1
+        if self.seconds_left > 0:
+            self.seconds_left -= delta_time
+            for destination in self.destinations:
+                destination[2] = self.size * self.seconds_left
         else:
             self.destinations.clear()
 
     def draw(self):
-        for (x, y) in self.destinations:
-            draw_circle_filled(x, y, self.size * self.time_left, GREEN, 6)
+        for destination in self.destinations:
+            draw_circle_filled(*destination)

@@ -15,6 +15,7 @@ class Technology:
                  required: Tuple[TechnologyId] = (),
                  unlock: Tuple[TechnologyId] = (),
                  difficulty: float = 100.0,
+                 funding_cost: float = 0,
                  effect: str = None):
         self.id = id
         self.name = name
@@ -22,6 +23,7 @@ class Technology:
         self.required = required
         self.unlock = unlock
         self.difficulty = difficulty
+        self.funding_cost = 0
         self.function_on_researched = effect
 
     def unlocked(self, researcher) -> bool:

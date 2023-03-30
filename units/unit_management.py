@@ -428,7 +428,7 @@ class UnitsManager(EventsCreator):
 
     def update(self):
         for marker in self.selection_markers:
-            marker.update() if marker.selected.alive else marker.kill()
+            marker.update() if marker.selected.is_alive else marker.kill()
 
     def create_new_permanent_units_group(self, digit: int):
         units = self.selected_units.copy()
@@ -496,5 +496,5 @@ class HashedList(list):
         self.elements_ids.clear()
         super().clear()
 
-    def where(self, condition: Callable):
+    def where(self, condition: Callable) -> HashedList:
         return HashedList([e for e in self if condition(e)])

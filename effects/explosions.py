@@ -14,7 +14,7 @@ class ExplosionsPool:
         self.game = game
         self.explosions = SpriteList()
         for explosion_name in self.explosions_names:
-            self.explosions_spritesheets_paths[explosion_name] = self.game.resources_manager.get_path_to_single_file(explosion_name)
+            self.explosions_spritesheets_paths[explosion_name] = self.game.resources_manager.get(explosion_name)
             self.explosions_sounds_files_paths[explosion_name] = explosion_name.replace('png', 'wav')
 
     def create_explosion(self, explosion_name: str, x, y):

@@ -24,7 +24,7 @@ from gameobjects.constants import (
     PRODUCED_RESOURCE,
     PRODUCED_UNITS
 )
-from gameobjects.gameobject import GameObject, Wreck, Tree
+from gameobjects.gameobject import GameObject, Wreck, Tree, Corpse
 
 
 class GameObjectsSpawner:
@@ -70,11 +70,12 @@ class GameObjectsSpawner:
 
     @staticmethod
     def _spawn_terrain_object(name, position, *args, **kwargs) -> GameObject:
-        if 'construction_center' in name:
-            return
-        if WRECK in name or CORPSE in name:
+        if WRECK in name:
             texture_index = args[0]
             return Wreck(name, 0 if CORPSE in name else 1, position, texture_index)
+        if CORPSE in name:
+            texture_index = args[0]
+            return Corpse(name, 0 if CORPSE in name else 1, position, texture_index)
         if TREE in name:
             return Tree(name, 4, position)
         return GameObject(name, position=position)

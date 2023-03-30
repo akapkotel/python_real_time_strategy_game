@@ -2,6 +2,7 @@
 
 import os
 
+from pathlib import Path
 from functools import lru_cache
 from typing import Dict, Tuple
 
@@ -13,14 +14,15 @@ from utils.game_logging import log
 
 
 @lru_cache
-def get_path_to_file(filename: str, extension: str = 'png') -> str:
+def get_path_to_file(filename: str, extension: str = 'png') -> Path:
     """
     Build full absolute path to the filename and return it + /filename.
     """
     correct_filename = add_extension(filename, extension)
     for dirpath, dirnames, filenames in os.walk(os.getcwd()):
         if correct_filename in filenames:
-            return os.path.join(dirpath, correct_filename)
+            return Path(dirpath, correct_filename)
+            # return os.path.join(dirpath, correct_filename)
     log(f'File {filename} does not exist!')
 
 @lru_cache
@@ -120,5 +122,6 @@ def ignore_in_game(func):
 def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
     if '/' not in texture_name:
         texture_name = get_path_to_file(texture_name)
-    image = Image.open(texture_name)
-    return image.size[0] // columns, image.size[1] // rows
+    with Image.open(texture_name) as image:
+        width, height = image.size
+    return width // columns, height // rows

@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 from collections import deque
 from functools import partial
-from typing import Deque, List, Optional, Set, Tuple, Dict, Union
+from typing import Deque, List, Optional, Set, Tuple, Dict, Union, Iterable
 
 from arcade import load_texture, MOUSE_BUTTON_RIGHT
 from arcade.arcade_types import Point
@@ -19,7 +19,7 @@ from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity
 )
-from players_and_factions.constants import FUEL, AMMUNITION, STEEL, ELECTRONICS, CONSCRIPTS
+from players_and_factions.constants import FUEL, AMMUNITION, STEEL, ELECTRONICS, CONSCRIPTS, ENERGY
 from utils.views import ProgressBar
 from utils.colors import GREEN, RED, BLACK, CONSTRUCTION_BAR_COLOR
 from utils.functions import (
@@ -66,7 +66,8 @@ class UnitsProducer:
 
     @logger()
     def start_production(self, unit: str):
-        if self.player.enough_resources_for(expense=unit):
+        costs = self.produced_units[unit]
+        if self.player.enough_resources_for(expense=unit, costs=costs):
             self.consume_resources_from_the_pool(unit)
             if self.currently_produced is None:
                 self._start_production(unit, confirmation=True)
@@ -110,9 +111,9 @@ class UnitsProducer:
         """
         returned = 1
         if unit not in self.production_queue:
-            returned = self.production_progress / self.production_time
+            returned = 1
         for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS):
-            required_amount = self.game.configs[unit][resource]
+            required_amount = self.produced_units[unit][resource]
             self.player.add_resource(resource, required_amount * returned)
 
     def set_production_progress_and_speed(self, unit: str):
@@ -127,9 +128,10 @@ class UnitsProducer:
     def _toggle_production(self, produced: Optional[str]):
         self.currently_produced = produced
 
-    def update_units_production(self):
-        if self.currently_produced is not None:
-            self.production_progress += 0.01 * self.health_percentage
+    def update_units_production(self, delta_time: float):
+        if self.currently_produced is not None and self.is_powered:
+            health_factor = self.health_percentage * 0.01
+            self.production_progress += (health_factor * self.power_ratio * delta_time)
             if self.player.is_local_human_player:
                 self.update_ui_units_construction_section()
             if self.production_progress >= self.production_time:
@@ -205,22 +207,21 @@ class UnitsProducer:
 
 
 class ResourceProducer:
-    def __init__(self,
-                 produced_resource: str,
-                 require_transport: bool = False,
-                 recipient: Optional[Player] = None):
-        self.resource: str = produced_resource
-        self.require_transport = require_transport
-        self.yield_per_frame = value = 0.033
+    def __init__(self, produced_resource: str):
+        self.produced_resource = produced_resource
+        self.yield_per_second = 0.5
         self.reserves = 0.0
         self.stockpile = 0.0
-        self.recipient: Optional[Player] = recipient
-        self.recipient.change_resource_yield_per_second(self.resource, value)
+        self.max_stockpile = 500
 
-    def update_resource_production(self):
-        self.reserves -= self.yield_per_frame
-        if self.recipient is None:
-            self.stockpile += self.yield_per_frame
+    @property
+    def energy_production(self) -> float:
+        return self.health
+
+    def update_resource_production(self, delta_time: float):
+        produced_amount = self.yield_per_second * delta_time * self.power_ratio
+        self.player.add_resource(self.produced_resource, produced_amount)
+        self.reserves -= min(produced_amount, self.reserves)
 
     def save(self) -> Dict:
         return {}
@@ -231,29 +232,50 @@ class ResourceProducer:
 
 
 class ResearchFacility:
+    optimal_scientists_per_technology = 6
 
-    def __init__(self, owner: Player):
-        self.owner = owner
+    def __init__(self):
+        self.scientists = 3
+        self.max_scientists = 12
+        self.scientists_per_technology = 0
         self.funding = 0
-        self.researched_technology: Optional[Technology] = None
+        self.required_funding = 0
+        self.researched_technologies: Dict[Technology, float] = {}
 
     def start_research(self, technology: Technology):
-        if self.owner.knows_all_required(technology.required):
-            self.researched_technology = technology
+        if self.player.knows_all_required(technology.required):
+            self.researched_technologies[technology] = 0
+            self.required_funding += technology.funding_cost
+            self.update_scientists_efficiency()
 
-    def update_research(self):
-        if technology := self.researched_technology is None:
+    def update_scientists_efficiency(self):
+        self.scientists_per_technology = (self.scientists / len(
+            self.researched_technologies)) / self.optimal_scientists_per_technology
+
+    def change_funding(self, value: int):
+        self.funding += value
+
+    def update_research(self, delta_time: float):
+        if not self.researched_technologies:
             return
-        progress = self.funding / technology.difficulty if self.funding else 0
-        tech_id = technology.id
-        total_progress = self.owner.current_research.get(tech_id, 0) + progress
-        self.owner.current_research[tech_id] = total_progress
-        if total_progress > 100:
-            self.finish_research(technology)
+        finished_technologies = []
+        for technology in self.researched_technologies:
+            funding_factor = (self.funding / self.required_funding)
+            power_factor = 1
+            progress = (self.scientists_per_technology * funding_factor * power_factor) / technology.difficulty
+            total_progress = self.researched_technologies.get(technology, 0) + (progress * delta_time)
+            if total_progress >= 100:
+                finished_technologies.append(technology)
+            else:
+                self.researched_technologies[technology] = total_progress
+        self.finish_research(finished_technologies)
 
-    def finish_research(self, technology: Technology):
-        self.researched_technology = None
-        self.owner.update_known_technologies(technology)
+    def finish_research(self, finished_technologies: Iterable[Technology]):
+        for technology in finished_technologies:
+            del self.researched_technologies[technology]
+            self.required_funding -= technology.funding_cost
+            self.owner.update_known_technologies(technology)
+        self.update_scientists_efficiency()
 
     def save(self) -> Dict:
         if self.researched_technology is None:
@@ -295,12 +317,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         if produced_units is not None:
             UnitsProducer.__init__(self, produced_units)
-        elif produced_resource is not None:
-            ResourceProducer.__init__(self, produced_resource, False, self.player)
-        elif research_facility:
-            ResearchFacility.__init__(self, self.player)
+        if produced_resource is not None:
+            ResourceProducer.__init__(self, produced_resource)
+        if research_facility:
+            ResearchFacility.__init__(self)
 
         self.energy_consumption = self.configs['energy_consumption']
+        self.power_ratio = 0
 
         self.position = self.place_building_properly_on_the_grid()
         self.occupied_nodes: Set[MapNode] = self.find_occupied_nodes()
@@ -321,9 +344,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self, 0, position_to_map_grid(*self.position)[1]
         )
 
+        self.player.update_energy_balance()
+
     @property
     def is_selected(self) -> bool:
         return self.game.units_manager.selected_building is self
+
+    @property
+    def is_powered(self) -> bool:
+        return self.power_ratio > 0
 
     def place_building_properly_on_the_grid(self) -> Point:
         """
@@ -358,7 +387,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             soldier.enter_building(self)
 
     @property
-    def moving(self) -> bool:
+    def is_moving(self) -> bool:
         return False  # this is rather obvious, since this is a Building
 
     @staticmethod
@@ -396,9 +425,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if self.game.cursor.forced_cursor == CURSOR_ENTER_TEXTURE:
             self.game.cursor.force_cursor(index=None)
 
-    def on_update(self, fps, delta_time: float = 1/60):
+    def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
-        self.update_production()
+        self.update_production(delta_time)
         self.update_observed_area()
         self.update_ui_buildings_panel()
         if self.autodestruction_progress:
@@ -413,13 +442,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def draw(self):
         pass
 
-    def update_production(self):
+    def update_production(self, delta_time):
         if self.produced_units is not None:
-            self.update_units_production()
-        elif self.produced_resource is not None:
-            self.update_resource_production()
-        elif self.research_facility:
-            self.update_research()
+            self.update_units_production(delta_time)
+        if self.produced_resource not in (None, ENERGY):
+            self.update_resource_production(delta_time)
+        if self.research_facility:
+            self.update_research(delta_time)
 
     @ignore_in_editor_mode
     def update_ui_buildings_panel(self):
@@ -647,8 +676,8 @@ class ConstructionSite(Building):
             self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK, CONSTRUCTION_BAR_COLOR
         )
 
-    def on_update(self, fps, delta_time: float = 1/60):
-        super().on_update(fps, delta_time)
+    def on_update(self, delta_time: float = 1/60):
+        super().on_update(delta_time)
         self.construction_progress += 1
         if self.construction_progress >= self.maximum_construction_progress:
             self.finish_construction()

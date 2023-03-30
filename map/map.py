@@ -159,8 +159,8 @@ def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
 
 
 class TerrainType(IntEnum):
-    WATER = 0
-    GROUND = 1
+    GROUND = 0
+    WATER = 1
     VOID = 2
 
 
@@ -528,14 +528,15 @@ class NavigatingUnitsGroup:
     def __init__(self, units: List[Unit], x: Number, y: Number):
         self.map = Map.instance
         self.destination = position_to_map_grid(x, y)
-        self.units_paths = {unit: [] for unit in units}
+        self.units_paths: Dict[Unit, list] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
-        self.add_visible_indicators_of_destinations(destinations)
         self.reverse_units_paths()
+        if units[0].is_controlled_by_player:
+            self.add_visible_indicators_of_destinations(destinations)
 
     def __str__(self) -> str:
-        return f"NavigatingUnitsGroup(units:{len(self.units_paths)})"
+        return f'NavigatingUnitsGroup(units:{len(self.units_paths)})'
 
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units_paths.keys()
@@ -559,11 +560,11 @@ class NavigatingUnitsGroup:
         path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
-            self.slice_paths(units, destinations, path)
+            self.slice_paths(units, path)
         self.add_destinations_to_units_paths(destinations, units)
         return destinations
 
-    def slice_paths(self, units, destinations, path):
+    def slice_paths(self, units, path):
         for i in range(1, len(path) // OPTIMAL_PATH_LENGTH, OPTIMAL_PATH_LENGTH):
             step = path[i * OPTIMAL_PATH_LENGTH]
             units_steps = Pathfinder.instance.get_group_of_waypoints(*step, len(units))

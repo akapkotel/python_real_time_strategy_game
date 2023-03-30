@@ -64,7 +64,7 @@ class AudioPlayer:
         log(f'Found {len(self.playlists)} playlists', console=True)
 
     def _preload_sounds(self) -> Dict[str, Sound]:
-        names_to_paths = self.window.resources_manager.get_paths_to_all_files_of_type(SOUNDS_EXTENSION)
+        names_to_paths = self.window.resources_manager.get(SOUNDS_EXTENSION)
         return {
             name: load_sound(path, streaming=False) for
             name, path in names_to_paths.items()
