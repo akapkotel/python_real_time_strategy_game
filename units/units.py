@@ -52,8 +52,8 @@ class Unit(PlayerEntity):
                  player: Player,
                  weight: int,
                  position: Point,
-                 id: Optional[int] = None):
-        PlayerEntity.__init__(self, unit_name, player, position, id=id)
+                 object_id: Optional[int] = None):
+        PlayerEntity.__init__(self, unit_name, player, position, object_id=object_id)
         # Since we do not rotate actual Sprite, but change its texture to show
         # the correctly rotated Units on the screen, use 'virtual' rotation to
         # keep track of the Unit rotation angle without rotating actual Sprite:
@@ -440,8 +440,8 @@ class Vehicle(Unit):
     allowed_terrains = TerrainType.GROUND
 
     def __init__(self, texture_name: str, player: Player, weight: int,
-                 position: Point, id: int = None):
-        super().__init__(texture_name, player, weight, position, id)
+                 position: Point, object_id: int = None):
+        super().__init__(texture_name, player, weight, position, object_id)
 
         self._load_textures()
         self.hit_box = self.texture.hit_box_points
@@ -508,11 +508,11 @@ class VehicleThreads(Sprite):
 class VehicleWithTurret(Vehicle):
 
     def __init__(self, texture_name: str, player: Player, weight: int,
-                 position: Point, id: int = None):
+                 position: Point, object_id: int = None):
         # combine facing_direction with turret to obtain proper texture:
         self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
 
-        super().__init__(texture_name, player, weight, position, id)
+        super().__init__(texture_name, player, weight, position, object_id)
 
         self.turret_aim_target = None
         self.barrel_end = self.turret_facing_direction
@@ -621,8 +621,8 @@ class Soldier(Unit):
     infantry_steps_duration = 0.05
 
     def __init__(self, texture_name: str, player: Player, weight: int,
-                 position: Point, id: Optional[int] = None):
-        super().__init__(texture_name, player, weight, position, id)
+                 position: Point, object_id: Optional[int] = None):
+        super().__init__(texture_name, player, weight, position, object_id)
         self.last_step_time = 0
         self.activity = UnitActivity.IDLE
         self.outside = True

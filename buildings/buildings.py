@@ -4,6 +4,7 @@ from __future__ import annotations
 import random
 from collections import deque
 from functools import partial
+from pathlib import Path
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union, Iterable
 
 from arcade import load_texture, MOUSE_BUTTON_RIGHT
@@ -198,12 +199,11 @@ class UnitsProducer:
         self.production_time = state['production_time']
 
     def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
-        game_configs = self.game.configs
-        resources = (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS)
-        units_production_costs = {
-            unit: {resource: game_configs[unit][resource] for resource in resources} for unit in produced_units
+        return {
+            unit: {resource: self.game.configs[unit][resource]
+            for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS)}
+            for unit in produced_units
         }
-        return units_production_costs
 
 
 class ResourceProducer:
@@ -299,7 +299,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                  building_name: str,
                  player: Player,
                  position: Point,
-                 id: Optional[int] = None,
+                 object_id: Optional[int] = None,
                  produced_units: Optional[Tuple[str]] = None,
                  produced_resource: Optional[str] = None,
                  research_facility: bool = False,
@@ -310,7 +310,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :param position: Point -- coordinates of the center (x, y)
         :param produces:
         """
-        PlayerEntity.__init__(self, building_name, player, position, id)
+        PlayerEntity.__init__(self, building_name, player, position, object_id)
         self.produced_units = produced_units
         self.produced_resource = produced_resource
         self.research_facility = research_facility
@@ -568,7 +568,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.textures = [load_texture(path_and_texture, 0, 0, *size)]
         self.set_texture(0)
 
-    def find_proper_texture(self, player) -> Tuple[str, Tuple]:
+    def find_proper_texture(self, player) -> Tuple[Path, Tuple]:
         recolored = add_player_color_to_name(self.object_name, player.color)
         texture_name = add_extension(recolored)
         size = get_texture_size(texture_name)
@@ -576,12 +576,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return path_and_texture, size
 
     def clear_known_enemies(self):
-        # self.player.remove_known_enemies(self.id, self.known_enemies)
         self.known_enemies.clear()
 
     def change_player(self, new_player: Player):
         self.detach(self.player)
         self.attach(new_player)
+        self.player.update_energy_balance()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:

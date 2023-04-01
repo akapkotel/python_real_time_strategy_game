@@ -1,5 +1,5 @@
 object_name,game_id,class,produced_units,allows_construction,produced_resource,research_facility,max_health,armour,garrison_size,energy_consumption,steel,electronics,visibility_radius,attack_radius,weapons_names,size,construction_time
-command_center,B001,Building,None,(small_power_generator;garrison;storage_facility),energy,False,800,0.75,8,100,200,200,10,0,None,(3;3),15
+command_center,B001,Building,None,(small_power_generator;garrison;storage_facility),None,False,800,0.75,8,0,200,200,10,0,None,(3;3),15
 small_power_generator,B002,Building,None,(electronics_planty;steel_foundry;fuel_plant),energy,False,200,0.60,0,0,50,50,4,0,None,(1;1),7
 garrison,B003,Building,(soldier),(barracks;small_bunker;hydroponic_farm),conscripts,False,800,0.75,12,100,200,100,8,0,None,(2;2),10
 electronics_plant,B004,Building,None,(research_laboratory),electronics,False,600,0.75,2,175,450,450,6,0,None,(2;2),15

@@ -4,7 +4,6 @@ import os
 
 from pathlib import Path
 from functools import lru_cache
-from typing import Dict, Tuple
 
 from PIL import Image
 from arcade.arcade_types import Color
@@ -44,7 +43,7 @@ def add_extension(object_name: str, extension: str = 'png') -> str:
 
 def all_files_of_type_named(extension: str,
                             base_directory: str,
-                            named: str) -> Dict[str, str]:
+                            named: str) -> dict[str, str]:
     return {
         name: path for name, path
         in find_paths_to_all_files_of_type(extension, base_directory).items()
@@ -53,7 +52,7 @@ def all_files_of_type_named(extension: str,
 
 
 def find_paths_to_all_files_of_type(extension: str,
-                                    base_directory: str) -> Dict[str, str]:
+                                    base_directory: str) -> dict[str, str]:
     """
     Find and return a Dict containing all dirs where files with 'extension' are
     found.
@@ -119,7 +118,7 @@ def ignore_in_game(func):
     return wrapper
 
 
-def get_texture_size(texture_name: str, rows=1, columns=1) -> Tuple[int, int]:
+def get_texture_size(texture_name: str, rows=1, columns=1) -> tuple[int, int]:
     if '/' not in texture_name:
         texture_name = get_path_to_file(texture_name)
     with Image.open(texture_name) as image:

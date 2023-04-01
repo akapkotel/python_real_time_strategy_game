@@ -33,6 +33,7 @@ from utils.geometry import (
 from utils.scheduling import EventsCreator, ScheduledEvent
 
 
+
 def new_id(objects: Dict) -> int:
     if objects:
         return max(objects.keys()) << 1
@@ -291,7 +292,7 @@ class Player(EventsCreator, Observer, Observed):
         return self.resource(resource) >= amount or self.unlimited_resources
 
     def notify_player_of_resource_deficit(self, resource: str):
-        self.game.window.sound_player.play_sound(f'not_enough_{resource}.wav')
+        self.game.sound_player.play_sound(f'not_enough_{resource}.wav')
 
     def change_resource_yield_per_second(self, resource: str, change: float):
         old_yield = getattr(self, f"{resource}{YIELD_PER_SECOND}")
@@ -456,9 +457,9 @@ class PlayerEntity(GameObject):
                  texture_name: str,
                  player: Player,
                  position: Point,
-                 id: Optional[int] = None):
+                 object_id: Optional[int] = None):
         self.colored_name = self.get_texture_name_with_player_color(player, texture_name)
-        super().__init__(self.colored_name, position, id)
+        super().__init__(self.colored_name, position, object_id)
         self.map = self.game.map
         self.player: Player = player
         self.faction: Faction = self.player.faction
@@ -556,7 +557,7 @@ class PlayerEntity(GameObject):
 
     @property
     def health_percentage(self) -> int:
-        return int(self._health / self._max_health * 100)
+        return int((self._health / self._max_health) * 100)
 
     @health.setter
     def health(self, value: float):
@@ -732,7 +733,7 @@ class PlayerEntity(GameObject):
         )
         return saved_entity
 
-    def after_respawn(self, loaded_data: Dict):
+    def after_respawn(self, loaded_data: dict):
         """
         After initializing Entity during loading saved game state, load all the
         attributes which were saved, but not passed to __init__ method.

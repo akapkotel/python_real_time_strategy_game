@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Optional, Dict, List, Union, Tuple
+from typing import Optional, Union
 
 from PIL import Image
 
@@ -36,8 +36,8 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
 
     def __init__(self, texture_name: str,
                  position: Point = (0, 0),
-                 id: Optional[int] = None,
-                 observers: Optional[List[Observer]] = None):
+                 object_id: Optional[int] = None,
+                 observers: Optional[list[Observer]] = None):
         # raw name of the object without texture extension and Player color
         # used to query game.configs and as a basename to build other names
         self.object_name = name_without_color(texture_name)
@@ -50,12 +50,12 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         Observed.__init__(self, observers)
         EventsCreator.__init__(self)
 
-        if id is None:
+        if object_id is None:
             GameObject.total_objects_count += 1
             self.id = GameObject.total_objects_count
         else:
-            self.id = id
-            GameObject.total_objects_count = max(GameObject.total_objects_count, id)
+            self.id = object_id
+            GameObject.total_objects_count = max(GameObject.total_objects_count, object_id)
 
         self.is_updated = True
         self.is_rendered = True
@@ -135,7 +135,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
             self.detach_observers()
             super().kill()
 
-    def save(self) -> Dict:
+    def save(self) -> dict:
         """We save only simple data-types required to respawn original GameObject, instead of pickling it."""
         return {
             'id': self.id,
@@ -181,7 +181,7 @@ class Tree(TerrainObject):
 
 class Wreck(TerrainObject):
 
-    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
+    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[tuple, int]):
         super().__init__(filename, durability, position)
         lifetime = self.game.settings.remove_wrecks_after_seconds
         self.set_proper_wreck_texture(filename, texture_index)
@@ -207,7 +207,7 @@ class Wreck(TerrainObject):
 
 class Corpse(Wreck):
 
-    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[Tuple, int]):
+    def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[tuple, int]):
         super().__init__(filename, durability, position, texture_index)
 
     def __str__(self) -> str:
