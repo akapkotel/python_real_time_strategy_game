@@ -220,7 +220,7 @@ class Player(EventsCreator, Observer, Observed):
         self.buildings.discard(building)
         self.faction.buildings.discard(building)
         self.update_construction_options(building)
-        self.update_energy_balance()
+        self.recalculate_energy_balance()
 
     def is_enemy(self, other: Player) -> bool:
         return self.faction.is_enemy(other.faction)
@@ -310,13 +310,16 @@ class Player(EventsCreator, Observer, Observed):
     def add_resource(self, resource_name: str, amount: float):
         setattr(self, resource_name, getattr(self, resource_name) + abs(amount))
 
-    def update_energy_balance(self):
-        required_energy = sum(building.energy_consumption for building in self.buildings)
-        produced_energy = sum(building.energy_production for building in self.buildings if building.produced_resource == ENERGY)
-        power_ratio = 0 if not required_energy else max(1, (produced_energy / required_energy))
+    def recalculate_energy_balance(self):
+        if self.unlimited_resources:
+            power_ratio = 1
+        else:
+            required_energy = sum(building.energy_consumption for building in self.buildings)
+            produced_energy = sum(building.energy_production for building in self.buildings if building.is_power_plant)
+            power_ratio = 0 if required_energy == 0 else clamp((produced_energy / required_energy), 1, 0)
+            setattr(self, ENERGY, max(0, produced_energy - required_energy))
         for building in self.buildings:
             building.power_ratio = power_ratio
-        setattr(self, ENERGY, max(0, produced_energy - required_energy))
 
     def update_construction_options(self, building: Building):
         if (produced_units := building.produced_units) is not None:
@@ -507,8 +510,6 @@ class PlayerEntity(GameObject):
         self.fire_covered: Set[MapNode] = set()
 
         self._weapons: List[Weapon] = []
-        # use this number to animate shot blast from weapon:
-        self.barrel_end = self.cur_texture_index
 
         self.experience = 0
         self.kill_experience = 0

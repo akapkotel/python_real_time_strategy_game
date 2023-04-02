@@ -21,6 +21,7 @@ from map.map import (
     position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
+from user_interface.user_interface import UiElement
 from utils.colors import GREEN
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
@@ -141,7 +142,7 @@ class Unit(PlayerEntity):
     @property
     def is_selected(self) -> bool:
         selected = self in self.game.units_manager.selected_units
-        if (selection := self.game.cursor.mouse_drag_selection) is None:
+        if (selection := self.game.mouse.mouse_drag_selection) is None:
             return selected
         return selected or self in selection
 
@@ -434,6 +435,15 @@ class Unit(PlayerEntity):
         super().after_respawn(loaded_data)
         self.path = deque(loaded_data['path'])
 
+    def create_ui_elements(self, x, y) -> List[UiElement]:
+        """Create UI elements for unit."""
+        ui_elements = []
+        # TODO: add unit-specific UI elements
+        return ui_elements
+
+    def create_actions_buttons_specific_for_this_unit(self, x, y) -> List[UiElement]:
+        ...
+
 
 class Vehicle(Unit):
     """An interface for all Units which are engine-powered vehicles."""
@@ -492,6 +502,7 @@ class Vehicle(Unit):
 
 
 class VehicleThreads(Sprite):
+    """Creates a VehicleThreads sprite."""
 
     def __init__(self, texture, index, x, y):
         super().__init__(texture, center_x=x, center_y=y, hit_box_algorithm='None')
@@ -506,16 +517,14 @@ class VehicleThreads(Sprite):
 
 
 class VehicleWithTurret(Vehicle):
+    """An interface for all Units which are engine-powered vehicles, and which have a turret."""
 
     def __init__(self, texture_name: str, player: Player, weight: int,
                  position: Point, object_id: int = None):
         # combine facing_direction with turret to obtain proper texture:
         self.turret_facing_direction = random.randint(0, ROTATIONS - 1)
-
         super().__init__(texture_name, player, weight, position, object_id)
-
         self.turret_aim_target = None
-        self.barrel_end = self.turret_facing_direction
 
     def _load_textures(self):
         """
@@ -552,7 +561,6 @@ class VehicleWithTurret(Vehicle):
             self.turret_facing_direction = self.facing_direction
         else:
             self.turret_facing_direction = self.angles[int(turret_angle)]
-        self.barrel_end = self.turret_facing_direction
         self.set_texture(self.facing_direction, self.turret_facing_direction)
 
     def set_texture(self, hull_texture_index: int, turret_texture_index: int):
@@ -582,11 +590,7 @@ class VehicleWithTurret(Vehicle):
         super().fight_enemy(enemy)
 
     def spawn_wreck(self):
-        wreck_name = f'{self.object_name}_wreck.png'
-        self.game.spawn(
-            wreck_name, None, self.position,
-            (self.facing_direction, self.turret_facing_direction)
-        )
+        self.game.spawn(f'{self.object_name}_wreck.png', None, self.position, (self.facing_direction, self.turret_facing_direction))
 
 
 class Boat(Vehicle):
@@ -684,7 +688,8 @@ class Soldier(Unit):
         self.outside = False
         self.stop_completely()
         self.assign_enemy(None)
-        self.game.units_manager.unselect(self)
+        if self in self.game.units_manager:
+            self.game.units_manager.unselect(self)
         self.stop_rendering()
         self.stop_updating()
         building.on_soldier_enter(soldier=self)

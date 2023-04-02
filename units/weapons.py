@@ -7,7 +7,6 @@ from typing import List
 
 from arcade.texture import Texture
 
-from effects.constants import SHOT_BLAST
 from effects.sound import SOUNDS_EXTENSION
 from players_and_factions.player import PlayerEntity
 
@@ -28,7 +27,6 @@ class Weapon:
     def __init__(self, name: str, owner: PlayerEntity):
         self.max_ammunition: int = 0
         self.magazine_size = 0
-        self.effective_against_infantry = False
         self.owner = owner
         self.name: str = name
         self.damage: float = 0
@@ -40,8 +38,6 @@ class Weapon:
         self.next_firing_time = 0
         self.shot_sound = '.'.join((name, SOUNDS_EXTENSION))
         self.projectile_sprites: List[Texture] = []
-        self.explosion_name = SHOT_BLAST
-        # self.owner.game.explosions_pool.add(self.explosion_name, 75)
 
         for attr_name, value in self.owner.game.configs[name].items():
             setattr(self, attr_name, value)
@@ -59,9 +55,9 @@ class Weapon:
             target.on_being_damaged(self.damage, self.penetration)
         self.create_shot_audio_visual_effects()
 
-    def consume_ammunition(self):
+    def consume_ammunition(self, burst_size: int = 1):
         if self.magazine_size:
-            self.ammo_left_in_magazine -= 1
+            self.ammo_left_in_magazine -= burst_size
             if not self.ammo_left_in_magazine:
                 self.ammo_left_in_magazine = self.magazine_size
                 self.next_firing_time += (self.rate_of_fire * 4)

@@ -243,19 +243,22 @@ class UnitsManager(EventsCreator):
     """
     game: Optional[Game] = None
 
-    def __init__(self, cursor):
+    def __init__(self, mouse, keyboard):
         """
         :param cursor: MouseCursor -- reference to the cursor used in game
         """
         super().__init__()
-        self.cursor = cursor
+        self.mouse = mouse
+        self.keyboard = keyboard
         self.window = self.game.window
-        self.cursor.bind_units_manager(manager=self)
+        self.mouse.bind_units_manager(manager=self)
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
         self.selected_units: HashedList[Unit] = HashedList()
         self.selected_building: Optional[Building] = None
+
+        self.selected_units_types: Dict[str, int] = {}
 
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
         # that this unit is currently selected and will react for player's
@@ -282,7 +285,7 @@ class UnitsManager(EventsCreator):
 
     @ignore_in_menu
     def on_left_click_no_selection(self, x, y):
-        pointed = self.cursor.pointed_unit or self.cursor.pointed_building
+        pointed = self.mouse.pointed_unit or self.mouse.pointed_building
         if pointed is not None:
             self.on_player_entity_clicked(pointed)
         elif units := self.selected_units:
@@ -299,7 +302,7 @@ class UnitsManager(EventsCreator):
             unit.assign_enemy(None)
 
     def create_movement_order(self, units, x, y):
-        if LCTRL in self.game.window.keyboard.keys_pressed:
+        if LCTRL in self.keyboard.keys_pressed:
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)
@@ -368,7 +371,7 @@ class UnitsManager(EventsCreator):
         self.unselect_all_selected()
         self.selected_building = building
         self.create_building_selection_marker(building=building)
-        self.game.change_interface_content(context=building)
+        self.game.change_interface_content(context_gameobjects=building)
 
     def update_selection_markers_set(self, new: Collection[Unit], lost: Collection[Unit]):
         discarded = {m for m in self.selection_markers if m.selected in lost}
@@ -380,8 +383,13 @@ class UnitsManager(EventsCreator):
         self.unselect_all_selected()
         self.selected_units.extend(units)
         self.create_units_selection_markers(units)
-        self.game.change_interface_content(context=units)
+        self.update_types_of_selected_units(units)
+        self.game.change_interface_content(context_gameobjects=units)
         self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
+
+    def update_types_of_selected_units(self, units: Collection[Unit]):
+        for unit in units:
+            self.selected_units_types[unit.object_name] = self.selected_units_types.setdefault(unit.object_name, 0) + 1
 
     def create_units_selection_markers(self, units: Collection[Unit]):
         self.selection_markers.update(
@@ -407,19 +415,21 @@ class UnitsManager(EventsCreator):
             self.selected_building = None
         else:
             self.selected_units.remove(entity)
+            self.selected_units_types[entity.object_name] -= 1
         self.remove_from_selection_markers(entity)
         self.update_interface_on_selection_change()
 
     def update_interface_on_selection_change(self):
         if not self.selected_units and self.selected_building is None:
-            self.game.change_interface_content(context=None)
+            self.game.change_interface_content(context_gameobjects=None)
 
     @ignore_in_menu
     def unselect_all_selected(self):
         self.selected_units.clear()
         self.selected_building = None
         self.clear_selection_markers()
-        self.game.change_interface_content(context=None)
+        self.selected_units_types.clear()
+        self.game.change_interface_content(context_gameobjects=None)
 
     def clear_selection_markers(self, killed: Set[SelectedUnitMarker] = None):
         killed = self.selection_markers.copy() if killed is None else killed

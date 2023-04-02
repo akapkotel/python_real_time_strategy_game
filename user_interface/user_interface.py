@@ -284,11 +284,12 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
                  visible: bool = True, parent: Optional[Hierarchical | str] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
-                 selectable_group: Optional[SelectableGroup] = None):
+                 selectable_group: Optional[SelectableGroup] = None,
+                 scale: float = 1.0):
 
         full_texture_name = get_path_to_file(texture_name)
 
-        super().__init__(full_texture_name, center_x=x, center_y=y)
+        super().__init__(full_texture_name, scale=scale, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
         CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
         Selectable.__init__(self, selectable_group=selectable_group)
@@ -423,10 +424,10 @@ class Button(UiElement):
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,
-                 color: Optional[Color] = None):
-        super().__init__('', x, y, name, active, visible, parent,
-                         functions, subgroup=subgroup,
-                         selectable_group=selectable_group)
+                 color: Optional[Color] = None,
+                 scale: float = 1.0):
+        super().__init__('', x, y, name, active, visible, parent, functions, subgroup=subgroup,
+                         selectable_group=selectable_group, scale=scale)
         # we load 2 textures for button: normal and for 'highlighted' button:
         full_texture_name = get_path_to_file(texture_name)
         image = PIL.Image.open(full_texture_name)
@@ -437,6 +438,7 @@ class Button(UiElement):
         ]
         self.set_texture(0)
         self.button_color = color
+        # self.scale = scale
 
     def draw(self):
         super().draw()
@@ -1120,6 +1122,9 @@ class UiElementsBundle(Observed):
         self.displayed = False
         if self._on_unload is not None:
             self._on_unload()
+
+    def clear(self):
+        self.elements.clear()
 
 
 class UiBundlesHandler(Observer):

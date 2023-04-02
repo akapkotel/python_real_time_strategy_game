@@ -7,7 +7,7 @@ from functools import partial
 from pathlib import Path
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union, Iterable
 
-from arcade import load_texture, MOUSE_BUTTON_RIGHT
+from arcade import load_texture, MOUSE_BUTTON_RIGHT, draw_point
 from arcade.arcade_types import Point
 
 from units.units import Soldier, Unit
@@ -31,7 +31,6 @@ from utils.geometry import find_area, generate_2d_grid
 from controllers.constants import CURSOR_ENTER_TEXTURE
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from user_interface.constants import UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
-
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 from utils.game_logging import logger
@@ -59,74 +58,71 @@ class UnitsProducer:
         self.production_progress: int = 0
         self.production_time: int = 0
         # Where finished Unit would spawn:
-        self.spawn_point = self.center_x, self.center_y - 3 * TILE_HEIGHT
+        self.spawn_point = self.center_x, self.bottom
         # Point on the Map for finished Units to go after being spawned:
         self.deployment_point = None
         # used to pick one building to produce new units if player has more such factories:
         self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
-    @logger()
-    def start_production(self, unit: str):
-        costs = self.produced_units[unit]
-        if self.player.enough_resources_for(expense=unit, costs=costs):
-            self.consume_resources_from_the_pool(unit)
-            if self.currently_produced is None:
-                self._start_production(unit, confirmation=True)
-            self.production_queue.appendleft(unit)
+    def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
+        return {
+            unit: {resource: self.game.configs[unit][resource]
+                   for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS)}
+            for unit in produced_units
+        }
 
-    def _start_production(self, unit: str, confirmation=False):
-        self.set_production_progress_and_speed(unit)
-        self._toggle_production(produced=unit)
+    @logger()
+    def start_production(self, unit_name: str):
+        costs = self.produced_units[unit_name]
+        if self.player.enough_resources_for(expense=unit_name, costs=costs):
+            self.consume_resources_from_the_pool(unit_name)
+            if self.currently_produced is None:
+                self._start_production(unit_name, confirmation=True)
+            self.production_queue.appendleft(unit_name)
+
+    def _start_production(self, unit_name: str, confirmation=False):
+        self.set_production_progress_and_speed(unit_name)
+        self._set_currently_produced_to(unit_name)
         if self.player.is_local_human_player and confirmation:
             self.game.window.sound_player.play_sound('production_started.wav')
 
-    def consume_resources_from_the_pool(self, unit: str):
+    def consume_resources_from_the_pool(self, unit_name: str):
         for resource in (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS):
-            required_amount = self.produced_units[unit][resource]
+            required_amount = self.produced_units[unit_name][resource]
             self.player.consume_resource(resource, required_amount)
 
-    def cancel_production(self, unit: str):
-        """
-        First remove scheduled production, if more than 1 Unit is in queue.
-        Then, if onl one is produced, cancel current production. Return to the
-        pool resources supposed to be used in Unit production.
-        """
-        if unit in (queue := self.production_queue):
-            self.remove_unit_from_production_queue(unit)
-            self.return_resources_to_the_pool(unit)
-            if unit == self.currently_produced and unit not in queue:
-                self._toggle_production(produced=None)
+    def cancel_production(self, unit_name: str):
+        if unit_name in (queue := self.production_queue):
+            self.production_queue.remove(unit_name)
+            self.return_resources_to_the_pool(unit_name)
+            if unit_name == self.currently_produced and unit_name not in queue:
+                self._set_currently_produced_to(None)
                 self.production_progress = 0.0
         if self.player.is_local_human_player:
             self.update_ui_units_construction_section()
 
-    def remove_unit_from_production_queue(self, unit):
-        self.production_queue.reverse()
-        self.production_queue.remove(unit)
-        self.production_queue.reverse()
-
-    def return_resources_to_the_pool(self, unit):
+    def return_resources_to_the_pool(self, unit_name: str):
         """
         If production was already started, some resources would be lost. Only
         resources 'reserved' for enqueued production are fully returned.
         """
         returned = 1
-        if unit not in self.production_queue:
+        if unit_name not in self.production_queue:
             returned = 1
         for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS):
-            required_amount = self.produced_units[unit][resource]
+            required_amount = self.produced_units[unit_name][resource]
             self.player.add_resource(resource, required_amount * returned)
 
-    def set_production_progress_and_speed(self, unit: str):
+    def set_production_progress_and_speed(self, unit_name: str):
         self.production_progress = 0
-        production_time = self.game.configs[unit]['production_time']
-        self.production_time = self.instant_production or production_time * self.game.settings.fps
+        production_time = self.game.configs[unit_name]['production_time']
+        self.production_time = self.instant_production or production_time
 
     @property
     def instant_production(self) -> bool:
         return self.game.settings.instant_production_time and self.is_controlled_by_player
 
-    def _toggle_production(self, produced: Optional[str]):
+    def _set_currently_produced_to(self, produced: Optional[str]):
         self.currently_produced = produced
 
     def update_units_production(self, delta_time: float):
@@ -138,10 +134,10 @@ class UnitsProducer:
             if self.production_progress >= self.production_time:
                 self.finish_production(self.production_queue.pop())
         elif self.production_queue:
-            self._start_production(unit=self.production_queue[-1])
+            self._start_production(unit_name=self.production_queue[-1])
 
     def update_ui_units_construction_section(self):
-        if  (ui_panel := self.game.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)).elements:
+        if (ui_panel := self.game.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)).elements:
             self.update_production_buttons(ui_panel)
 
     def update_production_buttons(self, ui_panel: UiElementsBundle):
@@ -157,20 +153,22 @@ class UnitsProducer:
             button.progress = 0
 
     @logger()
-    def finish_production(self, finished_unit: str):
+    def finish_production(self, finished_unit_name: str):
         self.production_progress = 0
-        self._toggle_production(produced=None)
-        self.spawn_finished_unit(finished_unit)
+        self._set_currently_produced_to(None)
+        self.clear_spawning_point_for_new_unit()
+        self.spawn_finished_unit(finished_unit_name)
         if self.player.is_local_human_player:
             self.update_ui_units_construction_section()
             self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
 
-    def spawn_finished_unit(self, finished_unit: str):
+    def clear_spawning_point_for_new_unit(self):
         if (unit := self.game.map.position_to_node(*self.spawn_point).unit) is not None:
             node = self.game.pathfinder.get_closest_walkable_node(*self.spawn_point)
             unit.move_to(node.grid)
 
-        new_unit = self.game.spawn(finished_unit, self.player, self.spawn_point)
+    def spawn_finished_unit(self, finished_unit_name: str):
+        new_unit = self.game.spawn(finished_unit_name, self.player, self.spawn_point)
         if self.deployment_point is not None:
             new_unit.move_to(self.deployment_point)
 
@@ -198,13 +196,6 @@ class UnitsProducer:
         self.currently_produced = state['currently_produced']
         self.production_time = state['production_time']
 
-    def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
-        return {
-            unit: {resource: self.game.configs[unit][resource]
-            for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS)}
-            for unit in produced_units
-        }
-
 
 class ResourceProducer:
     def __init__(self, produced_resource: str):
@@ -216,6 +207,8 @@ class ResourceProducer:
 
     @property
     def energy_production(self) -> float:
+        # I decided that energy-production formula should be simple, and it is: bigger the power plant, more energy it
+        # produces, and 'health' also allows us to consider current damage the power plant took, which lowers yield
         return self.health
 
     def update_resource_production(self, delta_time: float):
@@ -344,7 +337,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self, 0, position_to_map_grid(*self.position)[1]
         )
 
-        self.player.update_energy_balance()
+        self.player.recalculate_energy_balance()
 
     @property
     def is_selected(self) -> bool:
@@ -353,6 +346,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @property
     def is_powered(self) -> bool:
         return self.power_ratio > 0
+
+    @property
+    def is_power_plant(self) -> bool:
+        return self.produced_resource == ENERGY
 
     def place_building_properly_on_the_grid(self) -> Point:
         """
@@ -416,16 +413,16 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         friendly_building = self.is_controlled_by_player
         free_space = len(self.garrisoned_soldiers) < self.garrison_size
         if (friendly_building and free_space) or not friendly_building:
-            self.game.cursor.force_cursor(index=CURSOR_ENTER_TEXTURE)
+            self.game.mouse.force_cursor(index=CURSOR_ENTER_TEXTURE)
 
     def on_mouse_exit(self):
         selected_building = self.game.units_manager.selected_building
         if self.selection_marker is not None and self is not selected_building:
             self.game.units_manager.remove_from_selection_markers(entity=self)
-        if self.game.cursor.forced_cursor == CURSOR_ENTER_TEXTURE:
-            self.game.cursor.force_cursor(index=None)
+        if self.game.mouse.forced_cursor == CURSOR_ENTER_TEXTURE:
+            self.game.mouse.force_cursor(index=None)
 
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self, delta_time: float = 1 / 60):
         super().on_update(delta_time)
         self.update_production(delta_time)
         self.update_observed_area()
@@ -440,7 +437,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         # TODO: gradually remove garrisoned Soldiers from Building
 
     def draw(self):
-        pass
+        ...
 
     def update_production(self, delta_time):
         if self.produced_units is not None:
@@ -581,7 +578,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def change_player(self, new_player: Player):
         self.detach(self.player)
         self.attach(new_player)
-        self.player.update_energy_balance()
+        self.player.recalculate_energy_balance()
 
     def update_garrison_button(self):
         if self.player.is_local_human_player and self.is_selected:
@@ -673,10 +670,11 @@ class ConstructionSite(Building):
         self.construction_progress = 0
 
         self.construction_progress_bar = ProgressBar(
-            self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK, CONSTRUCTION_BAR_COLOR
+            self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK,
+            CONSTRUCTION_BAR_COLOR
         )
 
-    def on_update(self, delta_time: float = 1/60):
+    def on_update(self, delta_time: float = 1 / 60):
         super().on_update(delta_time)
         self.construction_progress += 1
         if self.construction_progress >= self.maximum_construction_progress:

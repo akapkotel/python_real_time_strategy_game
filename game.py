@@ -250,14 +250,15 @@ class GameWindow(Window, EventsCreator):
         self.menu_view: Menu = Menu()
         self.game_view: Optional[Game] = None
 
-        # cursor-related:
-        self.cursor = MouseCursor(self, self.resources_manager.get('normal.png'))
-        # store viewport data to avoid redundant get_viewport() calls and call
-        # get_viewport only when viewport is actually changed:
-        self.current_viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
+        # Mouse-related:
+        self.mouse = MouseCursor(self, self.resources_manager.get('normal.png'))
 
         # keyboard-related:
         self.keyboard = KeyboardHandler(self, self.menu_view)
+
+        # store viewport data to avoid redundant get_viewport() calls and call
+        # get_viewport only when viewport is actually changed:
+        self.current_viewport = 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT
 
         self.show_view(LoadingScreen(loaded_view=self.menu_view))
 
@@ -282,7 +283,7 @@ class GameWindow(Window, EventsCreator):
     def updated(self, value: List[Updateable]):
         self._updated = value
         try:
-            self.cursor.updated_spritelists = value
+            self.mouse.updated_spritelists = value
         except AttributeError:
             pass  # MouseCursor is not initialised yet
 
@@ -317,7 +318,7 @@ class GameWindow(Window, EventsCreator):
 
         self.current_view.on_update(delta_time)
 
-        for controller in (self.cursor, self.keyboard):
+        for controller in (self.mouse, self.keyboard):
             if controller.active:
                 controller.update()
 
@@ -328,7 +329,7 @@ class GameWindow(Window, EventsCreator):
     def on_draw(self):
         self.clear()
         self.current_view.on_draw()
-        if (cursor := self.cursor).visible:
+        if (cursor := self.mouse).visible:
             cursor.draw()
         if self.settings.draw_fps_counter:
             self.draw_current_fps_on_screen()
@@ -341,35 +342,35 @@ class GameWindow(Window, EventsCreator):
         )
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        if self.cursor.active:
+        if self.mouse.active:
             if self.current_view is self.game_view:
                 left, _, bottom, _ = self.current_view.viewport
-                self.cursor.on_mouse_motion(x + left, y + bottom, dx, dy)
+                self.mouse.on_mouse_motion(x + left, y + bottom, dx, dy)
             else:
-                self.cursor.on_mouse_motion(x, y, dx, dy)
+                self.mouse.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        if self.cursor.active:
-            self.cursor.on_mouse_press(x, y, button, modifiers)
+        if self.mouse.active:
+            self.mouse.on_mouse_press(x, y, button, modifiers)
 
     def on_mouse_release(self, x: float, y: float, button: int,
                          modifiers: int):
-        if self.cursor.active:
+        if self.mouse.active:
             left, _, bottom, _ = self.current_view.viewport
-            self.cursor.on_mouse_release(x + left, y + bottom, button)
+            self.mouse.on_mouse_release(x + left, y + bottom, button)
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
-        if self.cursor.active:
-            if self.current_view is self.game_view and self.cursor.pointed_ui_element:
+        if self.mouse.active:
+            if self.current_view is self.game_view and self.mouse.pointed_ui_element:
                 return
             left, _, bottom, _ = self.current_view.viewport
-            self.cursor.on_mouse_motion(x, y, dx, dy)
-            self.cursor.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
+            self.mouse.on_mouse_motion(x, y, dx, dy)
+            self.mouse.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        if self.cursor.active:
-            self.cursor.on_mouse_scroll(x, y, scroll_x, scroll_y)
+        if self.mouse.active:
+            self.mouse.on_mouse_scroll(x, y, scroll_x, scroll_y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
@@ -387,8 +388,8 @@ class GameWindow(Window, EventsCreator):
 
     def toggle_mouse_and_keyboard(self, value: bool, only_mouse=False):
         try:
-            self.cursor.active = value
-            self.cursor.visible = value
+            self.mouse.active = value
+            self.mouse.visible = value
             if not only_mouse:
                 self.keyboard.active = value
         except AttributeError:
@@ -581,7 +582,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
 
-        self.units_manager = UnitsManager(cursor=self.cursor)
+        self.units_manager = UnitsManager(mouse=self.mouse, keyboard=self.window.keyboard)
 
         self.current_campaign: Optional[Campaign] = None
         self.current_scenario: Optional[Scenario] = None
@@ -615,8 +616,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return self.window.settings
 
     @property
-    def cursor(self) -> MouseCursor:
-        return self.window.cursor
+    def mouse(self) -> MouseCursor:
+        return self.window.mouse
+
+    @property
+    def keyboard(self) -> KeyboardHandler:
+        return self.window.keyboard
 
     @property
     def configs(self):
@@ -626,7 +631,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         game = self.__class__.__name__.lower()
         for _class in (c for c in globals().values() if hasattr(c, game)):
             setattr(_class, game, self)
-        Game.instance = self.window.cursor.game = self
+        Game.instance = self.window.mouse.game = self
 
     def find_object_by_class_and_id(self,
                                     name_and_id: Union[str, Tuple[str, int]]):
@@ -709,10 +714,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ui_units_panel = UiElementsBundle(
             name=UI_UNITS_PANEL,
             elements=[
-                Button('game_button_stop.png', ui_x - 100, ui_y + 50,
-                       functions=self.stop_all_units),
-                Button('game_button_attack.png', ui_x, ui_y + 50,
-                       functions=partial(self.window.cursor.force_cursor, 2))
+                # Button('game_button_stop.png', ui_x - 100, ui_y + 50,
+                #        functions=self.stop_all_units),
+                # Button('game_button_attack.png', ui_x, ui_y + 50,
+                #        functions=partial(self.window.cursor.force_cursor, 2))
+                # Button('game_button_waypoints.png', ui_x + 100, ui_y + 50,
+                #        functions=partial())
             ],
             register_to=self
         )
@@ -743,17 +750,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.update_not_displayed_bundles_positions(diff_x, diff_y)
         self.mini_map.update_position(diff_x, diff_y)
 
-    def change_interface_content(self, context=None):
+    def change_interface_content(self, context_gameobjects=None):
         """
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
         """
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        if context:
-            if isinstance(context, Building):
-                self.configure_building_interface(context)
+        if context_gameobjects is not None:
+            if isinstance(context_gameobjects, Building):
+                self.configure_building_interface(context_gameobjects)
             else:
-                self.configure_units_interface(context)
+                self.configure_units_interface(context_gameobjects)
 
     @ignore_in_editor_mode
     def configure_building_interface(self, context_building: Building):
@@ -768,10 +775,49 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
-        self.load_bundle(name=UI_UNITS_PANEL)
-        bundle = self.get_bundle(UI_BUILDINGS_PANEL)
-        if all(isinstance(u, Engineer) for u in context_units):
-            bundle.extend(Engineer.create_ui_buttons(*self.ui_position))
+        self.create_selected_units_panel(context_units)
+        self.load_bundle(UI_UNITS_PANEL)
+
+    def create_selected_units_panel(self, context_units):
+        """
+        Create UI elements for selected units. Top element is a list of units icons, if there are many. Each icon is
+        a little button allowing player to select it.
+        If there is only one unit selected, instead of a list of buttons, it is its name and health and fuel bars.
+        Then thera are custom buttons for each action the unit can perform.
+        """
+        selected_units_bundle = self.get_bundle(UI_UNITS_PANEL)
+        selected_units_bundle.clear()
+
+        # if only one unit is selected, show its name and health and fuel bars:
+        if len(context_units) == 1:
+            ...
+        # if all units are of the same type, show a button for each one:
+        if len(self.units_manager.selected_units_types) == 1:
+            self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle)
+
+        # 2. find the types of units currently selected and make a set of unique classes
+        # 3. create UiElements universal for all types of units (stop, waypoints, retreat)
+
+        # 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
+
+        # if len(context_units) == 1:
+        #     # 3 create description for this unit (name, health and other data)
+        #     unit = context_units[0]
+        #     return bundle.extend(unit.create_ui_elements(*self.ui_position))
+        #
+        # for unit in (u for u in context_units if u.object_name not in all_units_types):
+        #     bundle.extend(unit.create_ui_elements(*self.ui_position))
+
+    def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle):
+        x, y = self.ui_position
+        icon_scale = 0.75
+        positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75 * icon_scale, 75 * icon_scale)
+        # 1. Create list of all units icons for easy selection of a specific unit
+        for i, unit in enumerate(context_units):
+            column, row = positions[i]
+            selected_units_bundle.elements.append(Button(f'{unit.object_name}_icon.png', column, row, unit.object_name,
+                                                         functions=partial(self.units_manager.select_units, unit),
+                                                         scale=icon_scale))
 
     def show_construction_options(self, which: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
@@ -787,17 +833,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         for i, building_name in enumerate(self.local_human_player.buildings_possible_to_build):
             log(building_name, True)  # TODO: real logic instead of test log
 
-    def show_units_construction_options(self):
-        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        self.create_units_constructions_options()
-        self.load_bundle(UI_UNITS_CONSTRUCTION_PANEL)
-
     def create_units_constructions_options(self):
         x, y = self.ui_position
         units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
-        units_construction_bundle.elements.clear()
+        units_construction_bundle.clear()
         positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
         for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
+            print(unit_name)
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
             hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=0.5)
@@ -1067,6 +1109,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.factions.clear()
         self.players.clear()
         self.window.game_view = None
+
 
 def run_profiled_game(settings: Settings):
     from pyprofiler import start_profile, end_profile

@@ -103,4 +103,4 @@ class ScenarioEditor:
 
     def attach_gameobject_to_cursor(self, gameobject_name: str):
         placeable = PlaceableGameObject(gameobject_name)
-        self.game.window.cursor.placeable_gameobject = placeable
+        self.game.window.mouse.placeable_gameobject = placeable
