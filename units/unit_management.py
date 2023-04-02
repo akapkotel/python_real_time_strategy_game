@@ -276,12 +276,22 @@ class UnitsManager(EventsCreator):
         # updated to check the task status, if Unit finished its task etc.
         self.units_tasks: List[UnitTask] = []
 
+        self.waypoints_mode = False
+
     def __contains__(self, unit) -> bool:
         return unit in self.selected_units or unit is self.selected_building
 
     @property
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
+
+    def enter_waypoints_mode(self):
+        self.waypoints_mode = True
+
+    def close_waypoints_mode(self):
+        self.waypoints_mode = False
+        if self.game.pathfinder.created_waypoints_queue is not None:
+            self.game.pathfinder.finish_waypoints_queue()
 
     @ignore_in_menu
     def on_left_click_no_selection(self, x, y):
@@ -302,7 +312,7 @@ class UnitsManager(EventsCreator):
             unit.assign_enemy(None)
 
     def create_movement_order(self, units, x, y):
-        if LCTRL in self.keyboard.keys_pressed:
+        if self.waypoints_mode:
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)

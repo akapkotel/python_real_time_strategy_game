@@ -34,23 +34,24 @@ class KeyboardHandler(ToggledElement):
 
     def on_key_release(self, symbol: int):
         if symbol == LCTRL and self.window.is_game_running:
-            self.window.game_view.pathfinder.finish_waypoints_queue()
+            self.window.game.units_manager.close_waypoints_mode()
         self.keys_pressed.discard(symbol)
 
     def evaluate_pressed_key(self, symbol: int):
         if symbol == P and self.window.is_game_running:
-            self.window.game_view.toggle_pause()
+            self.window.game.toggle_pause()
         elif symbol == U and self.window.is_game_running:
-            self.window.game_view.show_construction_options(UNITS)
+            self.window.game.show_construction_options(UNITS)
         elif symbol == B and self.window.is_game_running:
-            self.window.game_view.show_construction_options(BUILDINGS)
+            self.window.game.show_construction_options(BUILDINGS)
         elif symbol == D:
-            if self.window.settings.developer_mode:
-                breakpoint()
-        elif symbol == C and self.window.game_view.settings.developer_mode:
+            ...
+        elif symbol == C and self.window.game.settings.developer_mode:
             self.window.cursor.attach_placeable_gameobject('command_center')
         elif symbol == ESCAPE:
             self.on_escape_pressed()
+        elif symbol == LCTRL:
+            self.window.game.units_manager.enter_waypoints_mode()
         elif (digit := chr(symbol)).isdigit():
             self.on_numeric_key_press(int(digit))
 
@@ -64,7 +65,7 @@ class KeyboardHandler(ToggledElement):
             self.window.show_view(self.window.menu_view)
 
     def on_numeric_key_press(self, digit: int):
-        manager = self.window.cursor.units_manager
+        manager = self.window.mouse.units_manager
         if LCTRL in self.keys_pressed:
             manager.create_new_permanent_units_group(digit)
         else:

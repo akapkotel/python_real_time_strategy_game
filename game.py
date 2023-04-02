@@ -792,21 +792,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if len(context_units) == 1:
             ...
         # if all units are of the same type, show a button for each one:
-        if len(self.units_manager.selected_units_types) == 1:
+        elif len(self.units_manager.selected_units_types) == 1:
             self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle)
 
-        # 2. find the types of units currently selected and make a set of unique classes
         # 3. create UiElements universal for all types of units (stop, waypoints, retreat)
-
+        self.create_ui_universal_units_buttons(selected_units_bundle)
         # 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
-
-        # if len(context_units) == 1:
-        #     # 3 create description for this unit (name, health and other data)
-        #     unit = context_units[0]
-        #     return bundle.extend(unit.create_ui_elements(*self.ui_position))
-        #
-        # for unit in (u for u in context_units if u.object_name not in all_units_types):
-        #     bundle.extend(unit.create_ui_elements(*self.ui_position))
 
     def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle):
         x, y = self.ui_position
@@ -818,6 +809,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             selected_units_bundle.elements.append(Button(f'{unit.object_name}_icon.png', column, row, unit.object_name,
                                                          functions=partial(self.units_manager.select_units, unit),
                                                          scale=icon_scale))
+            # TODO: add health bars for each unit icon
+
+    def create_ui_universal_units_buttons(self, selected_units_bundle: UiElementsBundle):
+        x, y = self.ui_position
+        # buttons = [
+        #     Button('game_button_stop.png', x - 100, y + 50, functions=self.stop_all_units),
+        #     Button('game_button_waypoints.png', x + 100, y + 50, functions=partial(self.units_manager.enter_waypoints_mode)),
+        # ]
 
     def show_construction_options(self, which: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])

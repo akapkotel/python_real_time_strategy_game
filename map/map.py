@@ -660,22 +660,22 @@ class Pathfinder(EventsCreator):
     def update(self):
         self.update_waypoints_queues()
         self.update_navigating_groups()
-        self.process_next_path_request()
+        if self.requests_for_paths:
+            self.process_next_path_request()
 
     def process_next_path_request(self):
         """
         Each frame get first request from queue and try to find path for it,
         if successful, return the path, else enqueue the request again.
         """
-        if self.requests_for_paths:
-            unit, start, destination = self.requests_for_paths.pop()
-            # to avoid infinite attempts to find path to the Node blocked by
-            # other Unit from the same navigating groups pathfinding to the
-            # same place TODO: find a better way to not mutually-block nodes
-            if self.map.grid_to_node(destination).is_walkable:
-                if path := a_star(self.map, start, destination):
-                    return unit.follow_new_path(path)
-            self.request_path(unit, start, destination)
+        unit, start, destination = self.requests_for_paths.pop()
+        # to avoid infinite attempts to find path to the Node blocked by
+        # other Unit from the same navigating groups pathfinding to the
+        # same place TODO: find a better way to not mutually-block nodes
+        if self.map.grid_to_node(destination).is_walkable:
+            if path := a_star(self.map, start, destination):
+                return unit.follow_new_path(path)
+        self.request_path(unit, start, destination)
 
     def update_waypoints_queues(self):
         for queue in (q for q in self.waypoints_queues if q.active):
