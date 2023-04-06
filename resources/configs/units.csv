@@ -8,8 +8,8 @@ sniper,U004,Soldier,35,8,0,(sniper_rifle),0,10,20,1,5,15,6,0,25,15,13
 at_specialist,U005,Soldier,30,7,0,(at_spg),0,12,20,1,15,20,10,0,25,10,6
 scout_car,U006,Vehicle,70,8,0.00025,(machinegun),0.15,2,7,2,50,35,20,40,35,10,5
 apc,U014,VehicleWithTurret,60,8,0.00045,(machinegun),0.50,5,3,2,65,45,35,20,50,8,5
-tank_light,U007,VehicleWithTurret,50,6,0.001,(light_tank_gun;machinegun),0.65,5,15,3,100,100,75,100,100,8,6
-tank_medium,U008,VehicleWithTurret,40,4,0.003,(medium_tank_gun;machinegun),0.85,10,25,4,200,150,100,150,150,9,7
-heavy_tank,U009,VehicleWithTurret,30,2,0.006,(heavy_tank_gun;machinegun),1.25,20,45,6,350,200,120,300,250,9,8
+tank_light,U007,VehicleWithTurret,50,6,0.001,(light_tank_gun),0.65,5,15,3,100,100,75,100,100,8,6
+tank_medium,U008,VehicleWithTurret,40,4,0.003,(medium_tank_gun),0.85,10,25,4,200,150,100,150,150,9,7
+heavy_tank,U009,VehicleWithTurret,30,2,0.006,(heavy_tank_gun),1.25,20,45,6,350,200,120,300,250,9,8
 truck,U010,Vehicle,50,5,0.0005,None,0.15,2,10,2,30,30,0,75,45,8,0
 light_sp_artillery,U011,VehicleWithTurret,30,1,0.002,(light_artillery),0.15,12,12,5,125,125,100,100,85,8,0

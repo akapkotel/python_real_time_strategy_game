@@ -95,7 +95,7 @@ class EventsScheduler:
 
     @logger()
     def schedule(self, event: ScheduledEvent):
-        delay = (event.delay_left or event.delay) + self.game.timer.total
+        delay = (event.delay_left or event.delay) + self.game.timer.total_game_time
         self.scheduled_events.append(event)
         self.execution_times.append(delay)
 
@@ -111,7 +111,7 @@ class EventsScheduler:
             log(f'Failed to unschedule ScheduledEvent due to: {e}', True)
 
     def update(self):
-        time = self.game.timer.total
+        time = self.game.timer.total_game_time
         for i, event in enumerate(self.scheduled_events):
             if time >= self.execution_times[i]:
                 event.execute()
@@ -121,7 +121,7 @@ class EventsScheduler:
                 else:
                     self._unschedule(i)
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
-        return self.execution_times[self.scheduled_events.index(event)] - self.game.timer.total
+        return self.execution_times[self.scheduled_events.index(event)] - self.game.timer.total_game_time
 
     def save(self) -> List[Dict]:
         return self.shelve_scheduled_events()

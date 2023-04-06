@@ -46,10 +46,10 @@ class Weapon:
         self.ammo_left_in_magazine = self.magazine_size
 
     def reloaded(self) -> bool:
-        return self.owner.timer.total >= self.next_firing_time and self.ammunition
+        return self.owner.timer.total_game_time >= self.next_firing_time and self.ammunition
 
     def shoot(self, target: PlayerEntity):
-        self.next_firing_time = self.owner.timer.total + self.rate_of_fire
+        self.next_firing_time = self.owner.timer.total_game_time + self.rate_of_fire
         self.consume_ammunition()
         if self.check_if_target_was_hit(target):
             target.on_being_damaged(self.damage, self.penetration)

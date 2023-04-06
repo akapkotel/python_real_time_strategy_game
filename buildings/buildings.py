@@ -160,7 +160,7 @@ class UnitsProducer:
         self.spawn_finished_unit(finished_unit_name)
         if self.player.is_local_human_player:
             self.update_ui_units_construction_section()
-            self.game.window.sound_player.play_random(UNIT_PRODUCTION_FINISHED)
+            self.game.window.sound_player.play_random_sound(UNIT_PRODUCTION_FINISHED)
 
     def clear_spawning_point_for_new_unit(self):
         if (unit := self.game.map.position_to_node(*self.spawn_point).unit) is not None:
@@ -410,7 +410,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.check_soldiers_garrisoning_possibility()
 
     def check_soldiers_garrisoning_possibility(self):
-        friendly_building = self.is_controlled_by_player
+        friendly_building = self.is_controlled_by_local_human_player
         free_space = len(self.garrisoned_soldiers) < self.garrison_size
         if (friendly_building and free_space) or not friendly_building:
             self.game.mouse.force_cursor(index=CURSOR_ENTER_TEXTURE)
@@ -456,7 +456,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             if self.autodestruction_progress:
                 self.update_demolish_button(panel)
 
-            if self.is_controlled_by_player and self.produced_units is not None:
+            if self.is_controlled_by_local_human_player and self.produced_units is not None:
                 self.update_production_buttons(panel)
 
     def create_ui_elements(self, x, y) -> List[UiElement]:
@@ -469,13 +469,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :return: List[uiElement] -- buttons, icons and widgets available for this Building
         """
         ui_elements = self.create_building_ui_information(x, y)
-        if self.is_controlled_by_player:
+        if self.is_controlled_by_local_human_player:
             buttons = self.create_building_ui_buttons(x, y)
             ui_elements.extend(buttons)
         return ui_elements
 
     def create_building_ui_information(self, x, y) -> List[UiElement]:
-        text_color = GREEN if self.is_controlled_by_player else RED
+        text_color = GREEN if self.is_controlled_by_local_human_player else RED
         return [
             UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
             UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
@@ -679,11 +679,11 @@ class ConstructionSite(Building):
         self.construction_progress += 1
         if self.construction_progress >= self.maximum_construction_progress:
             self.finish_construction()
-        elif self.is_controlled_by_player:
+        elif self.is_controlled_by_local_human_player:
             self.construction_progress_bar.update()
 
     def draw(self):
-        if self.is_controlled_by_player:
+        if self.is_controlled_by_local_human_player:
             self.construction_progress_bar.draw()
 
     def finish_construction(self):

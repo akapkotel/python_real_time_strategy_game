@@ -47,7 +47,7 @@ class ScenarioEditor:
         buttton_name = 'small_button_none.png'
         self.game.selectable_groups['colors'] = group = SelectableGroup()
         for i, (color_name, color) in enumerate(self.available_colors.items()):
-            self.ui_elements.add(
+            self.ui_elements.append(
                 Button(buttton_name,
                        (ui_x - 100) + 60 * i,
                        ui_y * 1.5,

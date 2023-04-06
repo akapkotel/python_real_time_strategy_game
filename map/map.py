@@ -532,7 +532,7 @@ class NavigatingUnitsGroup:
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
         self.reverse_units_paths()
-        if units[0].is_controlled_by_player:
+        if units[0].is_controlled_by_local_human_player:
             self.add_visible_indicators_of_destinations(destinations)
 
     def __str__(self) -> str:

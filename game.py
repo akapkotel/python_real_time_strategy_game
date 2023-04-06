@@ -32,6 +32,7 @@ from effects.sound import AudioPlayer
 from gameobjects.constants import UNITS, BUILDINGS
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
+from persistency.resources_manager import ResourcesManager
 from user_interface.constants import (
     EDITOR,
     MAIN_MENU,
@@ -173,47 +174,6 @@ class Settings:
                     continue
                 else:
                     self.__setattr__(attribute, eval(value))
-
-
-class ResourcesManager:
-    """
-    This class finds paths to all audio files and textures used in game and caches them in internal dict for easy and
-    fast access. Later on instead of searching a texture each time, when a new gameObject is instantiated, its
-    constructor just query this manager for the proper path to the file.
-    """
-    instance = None
-
-    def __init__(self, extensions: Tuple[str] = ('png', 'wav'), resources_path: Optional[str] = None):
-        self.extensions = extensions
-        self.resources_path = resources_path or os.path.abspath('resources')
-        self.resources = {}
-        for extension in self.extensions:
-            names_to_paths = find_paths_to_all_files_of_type(extension, self.resources_path)
-            self.resources[extension] = {name: pathlib.Path(path, name) for name, path in names_to_paths.items()}
-        ResourcesManager.instance = self
-        log(f'ResourceManager found {sum(len(paths) for paths in self.resources.values())} files.', console=True)
-
-    def get(self, file_name_or_extension: str) -> Union[str, Dict[str, str]]:
-        """
-        Fetch a full path to the single game file (texture, sound, etc.) providing the name of this file, or paths to
-        all files of a particular type by providing the extension only.
-        """
-        if file_name_or_extension in self.extensions:
-            return self._get_paths_to_all_files_of_type(extension=file_name_or_extension)
-        return self._get_path_to_single_file(file_name=file_name_or_extension)
-
-    def _get_path_to_single_file(self, file_name: str) -> Union[Dict[str, str], str]:
-        extension = file_name.split('.')[-1]
-        try:
-            return self.resources[extension][file_name]
-        except KeyError:
-            raise FileNotFoundError(f'File {file_name} was not found in {self.resources_path} and its subdirectories!')
-
-    def _get_paths_to_all_files_of_type(self, extension: str):
-            try:
-                return self.resources[extension]
-            except KeyError:
-                raise FileNotFoundError(f'There are no files with {extension} extensions in {self.resources_path}!')
 
 
 class GameWindow(Window, EventsCreator):
@@ -505,31 +465,31 @@ class GameWindow(Window, EventsCreator):
 class Timer:
 
     def __init__(self):
-        self.start = time.time()
-        self.total = self.frames = self.seconds = self.minutes = self.hours = 0
-        self.formatted = None
+        self.game_start_time = time.time()
+        self.total_game_time = self.frames = self.seconds = self.minutes = self.hours = 0
+        self.formatted_time = None
 
     def update(self):
-        self.total = seconds = time.time() - self.start
+        self.total_game_time = seconds = time.time() - self.game_start_time
         gmtime = time.gmtime(seconds)
         self.frames += 1
         self.seconds = s = gmtime.tm_sec
         self.minutes = m = gmtime.tm_min
         self.hours = h = gmtime.tm_hour
         f = format
-        self.formatted = f"{f(h, '02')}:{f(m, '02')}:{f(s, '02')}"
+        self.formatted_time = f"{f(h, '02')}:{f(m, '02')}:{f(s, '02')}"
 
     def draw(self):
         _, right, bottom, _ = Game.instance.viewport
         x, y = right - 270, bottom + 840
-        draw_text(f"Time:{self.formatted}", x, y, GREEN, 15)
+        draw_text(f"Time:{self.formatted_time}", x, y, GREEN, 15)
 
     def save(self):
-        self.total = time.time() - self.start
+        self.total_game_time = time.time() - self.game_start_time
         return self
 
     def load(self):
-        self.start = time.time() - self.total
+        self.game_start_time = time.time() - self.total_game_time
 
 
 class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
@@ -577,7 +537,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.players: Dict[int, Player] = {}
 
         self.local_human_player: Optional[Player] = None
-        # We only draw those Units and Buildings, which are 'known" to the
+        # We only draw those Units and Buildings, which are "known" to the
         # local human Player's Faction or belong to it, the rest of entities
         # is hidden. This set is updated each frame:
         self.local_drawn_units_and_buildings: Set[PlayerEntity] = set()
@@ -769,9 +729,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.get_bundle(UI_BUILDINGS_PANEL).extend(ui_elements)
 
     @property
-    def ui_position(self) -> Tuple[float, float]:
+    def ui_position(self) -> Tuple[int, int]:
         _, right, bottom, _ = self.viewport
-        return right - UI_WIDTH / 2, bottom + SCREEN_Y
+        return right - UI_WIDTH // 2, bottom + SCREEN_Y
 
     @ignore_in_editor_mode
     def configure_units_interface(self, context_units: List[Unit]):
@@ -787,36 +747,55 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         """
         selected_units_bundle = self.get_bundle(UI_UNITS_PANEL)
         selected_units_bundle.clear()
+        x, y = self.ui_position
 
         # if only one unit is selected, show its name and health and fuel bars:
         if len(context_units) == 1:
-            ...
+            unit_informations = context_units[-1].create_ui_information_about_unit(x, y)
+            selected_units_bundle.extend(unit_informations)
         # if all units are of the same type, show a button for each one:
         elif len(self.units_manager.selected_units_types) == 1:
-            self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle)
-
+                self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle, x, y)
+        else:
+            self.create_ui_selection_buttons_for_many_units_types(context_units, selected_units_bundle, x, y)
         # 3. create UiElements universal for all types of units (stop, waypoints, retreat)
-        self.create_ui_universal_units_buttons(selected_units_bundle)
+        self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
         # 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
 
-    def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle):
-        x, y = self.ui_position
+    def create_ui_panel_for_single_selected_unit(self, selected_unit, selected_units_bundle, x, y):
+        selected_units_bundle.append(
+            [UiTextLabel(x, y, selected_unit.object_name.title(), 15, GREEN, 'unit name title', active=False),
+             UiTextLabel(x, y - 25, f'HP: {selected_unit.health}/{selected_unit.max_health}', 12, GREEN, active=False)]
+        )
+
+    def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle, x, y):
         icon_scale = 0.75
         positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75 * icon_scale, 75 * icon_scale)
         # 1. Create list of all units icons for easy selection of a specific unit
         for i, unit in enumerate(context_units):
             column, row = positions[i]
-            selected_units_bundle.elements.append(Button(f'{unit.object_name}_icon.png', column, row, unit.object_name,
+            selected_units_bundle.append(Button(f'{unit.object_name}_icon.png', column, row, unit.object_name,
                                                          functions=partial(self.units_manager.select_units, unit),
                                                          scale=icon_scale))
             # TODO: add health bars for each unit icon
 
-    def create_ui_universal_units_buttons(self, selected_units_bundle: UiElementsBundle):
-        x, y = self.ui_position
-        # buttons = [
-        #     Button('game_button_stop.png', x - 100, y + 50, functions=self.stop_all_units),
-        #     Button('game_button_waypoints.png', x + 100, y + 50, functions=partial(self.units_manager.enter_waypoints_mode)),
-        # ]
+    def create_ui_selection_buttons_for_many_units_types(self, context_units, selected_units_bundle, x, y):
+        positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75, 75)
+        for i, (unit_type, units_count) in enumerate(self.units_manager.selected_units_types.items()):
+             column, row = positions[i]
+             selected_units_bundle.append(
+                 ProgressButton(
+                     f'{unit_type}_icon.png', column, row, unit_type,
+                     functions=partial(self.units_manager.select_units_of_type, unit_type),
+                     counter=units_count
+                 )
+             )
+
+    def create_ui_universal_units_buttons(self, selected_units_bundle: UiElementsBundle, x, y):
+        selected_units_bundle.extend([
+            Button('game_button_stop.png', x - 125, y - 165, functions=self.units_manager.stop_all_units),
+            Button('game_button_waypoints.png', x - 50, y - 165, functions=self.units_manager.toggle_waypoint_mode),
+        ])
 
     def show_construction_options(self, which: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
@@ -838,14 +817,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         units_construction_bundle.clear()
         positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
         for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
-            print(unit_name)
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
             hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=0.5)
             b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
                                functions=partial(producer.start_production, unit_name)).add_hint(hint)
             b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
-            units_construction_bundle.elements.append(b)
+            units_construction_bundle.append(b)
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -1018,12 +996,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        for thing in (self.events_scheduler, self.fog_of_war, self.pathfinder, self.mini_map, self.timer, self.current_scenario):
+        for thing in (self.timer, self.events_scheduler, self.fog_of_war, self.pathfinder, self.mini_map, self.current_scenario):
             if thing is not None:
                 thing.update()
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
-        self.update_factions_and_players()
+        self.update_factions_and_players(delta_time)
 
     def after_loading(self):
         self.window.show_view(self)
@@ -1038,7 +1016,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def save_timer(self):
         """Before saving timer, recalculate total time game was played."""
-        self.timer.total = time.time() - self.timer.start
+        self.timer.total_game_time = time.time() - self.timer.game_start_time
         return self.timer
 
     @logger()
@@ -1049,7 +1027,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         last time.
         """
         self.timer = loaded_timer
-        self.timer.start = time.time() - self.timer.total
+        self.timer.game_start_time = time.time() - self.timer.total_game_time
 
     def update_local_drawn_units_and_buildings(self):
         """
@@ -1064,9 +1042,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 local_faction.known_enemies
             )
 
-    def update_factions_and_players(self):
+    def update_factions_and_players(self, delta_time):
         for faction in self.factions.values():
-            faction.update()
+            faction.update(delta_time)
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
@@ -1095,10 +1073,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.dialog = None
         else:
             self.dialog = (text, txt_color, color)
-
-    def stop_all_units(self):
-        for unit in self.units_manager.selected_units:
-            unit.stop_completely()
 
     def unload(self):
         self.updated.clear()

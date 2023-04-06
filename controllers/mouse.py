@@ -42,6 +42,8 @@ from user_interface.user_interface import (
 from utils.functions import get_path_to_file, ignore_in_menu
 from utils.game_logging import logger
 
+MOUSE_CURSOR_SIZE = 60
+
 DrawnAndUpdated = Union[SpriteList, LayeredSpriteList, 'MouseCursor']
 
 
@@ -62,7 +64,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.window = window
 
         # textures-related:
-        self.all_frames_lists: List[List[AnimationKeyframe]] = []
+        self.animations_keyframes: List[List[AnimationKeyframe]] = []
         self.load_textures()
 
         # cache currently updated and drawn spritelists of the active View:
@@ -119,11 +121,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         on_animation_update method.
         """
         for i, texture in enumerate(self.textures):
-            frames_count = texture.width // 60
-            locations_list = [(60 * j, 0, 60, 60) for j in range(frames_count)]
+            frames_count = texture.width // MOUSE_CURSOR_SIZE
+            locations_list = [(MOUSE_CURSOR_SIZE * j, 0, MOUSE_CURSOR_SIZE, MOUSE_CURSOR_SIZE) for j in range(frames_count)]
             frames = load_textures(get_path_to_file(names[i]), locations_list)
             duration = 1 // frames_count
-            self.all_frames_lists.append(
+            self.animations_keyframes.append(
                 self.new_frames_list(frames, duration)
             )
 
@@ -308,7 +310,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def set_pointed_gameobject(self, pointed):
         self.pointed_gameobject = pointed
-        self.text_hint_delay += self.game.timer.total
+        self.text_hint_delay += self.game.timer.total_game_time
         self.show_hint = True
         pointed.on_mouse_enter()
         self.set_cursor_cross_color(pointed)
@@ -320,7 +322,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.cross_color = self.cursor_default_color
 
     def set_cursor_cross_color(self, pointed: PlayerEntity):
-        if pointed.is_controlled_by_player:
+        if pointed.is_controlled_by_local_human_player:
             self.cross_color = GREEN
         else:
             self.cross_color = RED
@@ -390,7 +392,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.cursor_on_terrain_with_selected_units()
 
     def cursor_on_entity_with_selected_units(self, entity):
-        if entity.is_controlled_by_player:
+        if entity.is_controlled_by_local_human_player:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         elif entity.is_enemy(self.units_manager.selected_units[0]):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
@@ -403,7 +405,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
-        if entity.is_controlled_by_player:
+        if entity.is_controlled_by_local_human_player:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
@@ -412,7 +414,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # we override the original method to work with AnimationKeyframe
         # lists which we set up at cursor initialization. Instead of
         # displaying static texture we switch updated cursor animation:
-        self.frames = self.all_frames_lists[index]
+        self.frames = self.animations_keyframes[index]
 
     def force_cursor(self, index: Optional[int]):
         self.forced_cursor = index
@@ -442,7 +444,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def draw(self):
         self.draw_cross_cursor()
 
-        if self.show_hint and self.text_hint_delay <= self.game.timer.total:
+        if self.show_hint and self.text_hint_delay <= self.game.timer.total_game_time:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
 
         if (selection := self.mouse_drag_selection) is not None:
@@ -520,7 +522,7 @@ class MouseDragSelection:
         'selected' and units outside the shape are not selected.
         """
         new = {
-            u for u in self.all_selectable_units if u.is_controlled_by_player
+            u for u in self.all_selectable_units if u.is_controlled_by_local_human_player
             and self._inside_selection_rect(*u.position)
         }
         added = new.difference(self.units)

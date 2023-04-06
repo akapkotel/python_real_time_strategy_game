@@ -165,7 +165,7 @@ class AudioPlayer:
         if self._music_on:
             self._play_music_track(name, loop, volume)
 
-    def play_random(self, sounds_list: List[str], volume: Optional[float]=None):
+    def play_random_sound(self, sounds_list: List[str], volume: Optional[float]=None):
         """Play sound randomly chosen from list of sounds names."""
         self.play_sound(random.choice(sounds_list), volume or self.effects_volume)
 

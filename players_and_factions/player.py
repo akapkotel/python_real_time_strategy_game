@@ -112,7 +112,7 @@ class Faction(EventsCreator, Observer, Observed):
         if propagate:
             other.start_alliance(self, propagate=False)
 
-    def update(self):
+    def update(self, delta_time: float):
         self.known_enemies.clear()
         for player in self.players:
             player.update()
@@ -510,9 +510,11 @@ class PlayerEntity(GameObject):
         self.fire_covered: Set[MapNode] = set()
 
         self._weapons: List[Weapon] = []
+        if (weapons := self.configs['weapons_names']) is not None:
+            self._weapons.extend(Weapon(name=name, owner=self) for name in weapons)
+        self.max_ammunition = self.ammunition_count
 
         self.experience = 0
-        self.kill_experience = 0
 
         self.attach_observers(observers=[self.game, self.player])
 
@@ -530,6 +532,7 @@ class PlayerEntity(GameObject):
 
     @property
     def configs(self):
+        # changed into property because the values could be modified during the game
         return self.game.configs[self.object_name]
 
     @property
@@ -543,7 +546,7 @@ class PlayerEntity(GameObject):
 
     @property
     def should_reveal_map(self) -> bool:
-        return self.is_controlled_by_player
+        return self.is_controlled_by_local_human_player
         # TODO: use this when multiplayer is implemented
         #  flag used to avoid enemy units revealing map for human player, only
         #  player's units and his allies units reveal map for him:
@@ -571,6 +574,10 @@ class PlayerEntity(GameObject):
     @property
     def ammunition(self) -> bool:
         return any(w.ammunition for w in self._weapons)
+
+    @property
+    def ammunition_count(self) -> int:
+        return sum(w.ammunition for w in self._weapons)
 
     def assign_enemy(self, enemy: Optional[PlayerEntity]):
         # used when Player orders this Entity to attack the particular enemy
@@ -675,17 +682,16 @@ class PlayerEntity(GameObject):
 
     def check_if_enemy_destroyed(self, enemy: PlayerEntity):
         if not enemy.is_alive:
-            self.experience += enemy.kill_experience
-            self.known_enemies.discard(enemy)
             if self._enemy_assigned_by_player is enemy:
                 self._enemy_assigned_by_player = None
+            self.known_enemies.discard(enemy)
             self._targeted_enemy = None
 
     def is_enemy(self, other: PlayerEntity) -> bool:
         return self.faction.is_enemy(other.faction)
 
     @property
-    def is_controlled_by_player(self) -> bool:
+    def is_controlled_by_local_human_player(self) -> bool:
         return self.player.is_local_human_player
 
     @property

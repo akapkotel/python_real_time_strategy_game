@@ -1022,7 +1022,7 @@ class UiElementsBundle(Observed):
     owner = None
     _on_load: Optional[Callable] = None
     _on_unload: Optional[Callable] = None
-    displayed_in_manager: Optional[UiBundlesHandler] = None
+    ui_bundles_handler: Optional[UiBundlesHandler] = None
     displayed: bool = True
     observed_attributes = defaultdict(list)
 
@@ -1036,20 +1036,20 @@ class UiElementsBundle(Observed):
 
     def extend(self, elements):
         for element in elements:
-            self.add(element)
+            self.append(element)
 
-    def add(self, element: UiElement):
+    def append(self, element: UiElement):
         self.elements.append(element)
         element.bundle = self
-        if self.displayed_in_manager is not None:
-            self.displayed_in_manager.append(element)
+        if self.ui_bundles_handler is not None:
+            self.ui_bundles_handler.append(element)
 
     def remove(self, name: str):
         if (element := self.find_by_name(name)) is not None:
             self._remove(element)
             element.bundle = None
-            if self.displayed_in_manager is not None:
-                self.displayed_in_manager.remove(element)
+            if self.ui_bundles_handler is not None:
+                self.ui_bundles_handler.remove(element)
 
     def __iter__(self):
         return self.elements.__iter__()
@@ -1120,6 +1120,7 @@ class UiElementsBundle(Observed):
 
     def on_unload(self):
         self.displayed = False
+        self.ui_bundles_handler = None
         if self._on_unload is not None:
             self._on_unload()
 
@@ -1261,7 +1262,7 @@ class UiBundlesHandler(Observer):
         if clear:
             bundle.elements.clear()
         bundle.on_load()
-        bundle.displayed_in_manager = self
+        bundle.ui_bundles_handler = self
         self.active_bundles.add(bundle.name)
         self.ui_elements_spritelist.extend(bundle.elements)
         self.bind_ui_elements_with_ui_spritelist(bundle.elements)
@@ -1283,8 +1284,8 @@ class UiBundlesHandler(Observer):
     def _unload_bundle(self, bundle: UiElementsBundle):
         self.active_bundles.discard(bundle.name)
         for element in (e for e in self.ui_elements_spritelist if e.bundle == bundle):
-            bundle.displayed_in_manager = None
             self.remove(element)
+        bundle.ui_bundles_handler = None
         bundle.on_unload()
 
     @singledispatchmethod

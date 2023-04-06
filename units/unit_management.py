@@ -285,13 +285,10 @@ class UnitsManager(EventsCreator):
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
 
-    def enter_waypoints_mode(self):
-        self.waypoints_mode = True
-
-    def close_waypoints_mode(self):
-        self.waypoints_mode = False
-        if self.game.pathfinder.created_waypoints_queue is not None:
+    def toggle_waypoint_mode(self, forced_mode: Optional[bool] = None):
+        if self.waypoints_mode and self.game.pathfinder.created_waypoints_queue is not None:
             self.game.pathfinder.finish_waypoints_queue()
+        self.waypoints_mode = not self.waypoints_mode if forced_mode is None else forced_mode
 
     @ignore_in_menu
     def on_left_click_no_selection(self, x, y):
@@ -316,13 +313,13 @@ class UnitsManager(EventsCreator):
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)
-        self.window.sound_player.play_random(UNITS_MOVE_ORDERS_CONFIRMATIONS)
+        self.window.sound_player.play_random_sound(UNITS_MOVE_ORDERS_CONFIRMATIONS)
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if clicked.is_controlled_by_player:
+        if clicked.is_controlled_by_local_human_player:
             self.on_friendly_player_entity_clicked(clicked)
         else:
             self.on_hostile_player_entity_clicked(clicked)
@@ -395,7 +392,10 @@ class UnitsManager(EventsCreator):
         self.create_units_selection_markers(units)
         self.update_types_of_selected_units(units)
         self.game.change_interface_content(context_gameobjects=units)
-        self.window.sound_player.play_random(UNITS_SELECTION_CONFIRMATIONS)
+        self.window.sound_player.play_random_sound(UNITS_SELECTION_CONFIRMATIONS)
+
+    def select_units_of_type(self, units_type: str):
+        self.select_units(*[u for u in self.selected_units if u.object_name == units_type])
 
     def update_types_of_selected_units(self, units: Collection[Unit]):
         for unit in units:
@@ -430,7 +430,11 @@ class UnitsManager(EventsCreator):
         self.update_interface_on_selection_change()
 
     def update_interface_on_selection_change(self):
-        if not self.selected_units and self.selected_building is None:
+        if self.selected_units:
+            self.game.change_interface_content(context_gameobjects=self.selected_units)
+        elif self.selected_building is not None:
+            self.game.change_interface_content(context_gameobjects=self.selected_building)
+        else:
             self.game.change_interface_content(context_gameobjects=None)
 
     @ignore_in_menu
@@ -467,6 +471,10 @@ class UnitsManager(EventsCreator):
                 self.select_units(*group.units)
         except KeyError:
             pass
+
+    def stop_all_units(self):
+        for unit in self.selected_units:
+            unit.stop_completely()
 
 
 class HashedList(list):

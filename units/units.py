@@ -21,7 +21,7 @@ from map.map import (
     position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
-from user_interface.user_interface import UiElement
+from user_interface.user_interface import UiElement, UiTextLabel
 from utils.colors import GREEN
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
@@ -81,9 +81,6 @@ class Unit(PlayerEntity):
 
         self.permanent_units_group: int = 0
         self.navigating_group = None
-
-        if (weapons := self.configs['weapons_names']) is not None:
-            self._weapons.extend(Weapon(name=name, owner=self) for name in weapons)
 
         self.tasks = []
         self.current_task = None
@@ -435,11 +432,14 @@ class Unit(PlayerEntity):
         super().after_respawn(loaded_data)
         self.path = deque(loaded_data['path'])
 
-    def create_ui_elements(self, x, y) -> List[UiElement]:
-        """Create UI elements for unit."""
-        ui_elements = []
-        # TODO: add unit-specific UI elements
-        return ui_elements
+    def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
+        informations = [
+            UiTextLabel(x, y + 50, self.object_name.title(), 15, GREEN, 'unit name title', active=False),
+            UiTextLabel(x, y + 25, f'HP: {int(self.health)}/{self.max_health}', 12, GREEN, active=False),
+        ]
+        if self.weapons:
+            informations.append(UiTextLabel(x, y - 25, f'Ammunition: {self.ammunition_count}/{self.max_ammunition}', 12, GREEN, active=False))
+        return informations
 
     def create_actions_buttons_specific_for_this_unit(self, x, y) -> List[UiElement]:
         ...
@@ -462,7 +462,7 @@ class Vehicle(Unit):
         # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
-        self.fuel = self.configs['fuel']
+        self.max_fuel = self.fuel = self.configs['fuel']
         self.fuel_consumption = self.configs['fuel_consumption']
 
     @cached_property
@@ -499,6 +499,11 @@ class Vehicle(Unit):
 
     def spawn_wreck(self):
         self.game.spawn(f'{self.object_name}_wreck.png', None, self.position, self.facing_direction)
+
+    def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
+        return super().create_ui_information_about_unit(x, y) + [
+            UiTextLabel(x, y, f'Fuel: {int(self.fuel)}/100', 12, GREEN, active=False),
+        ]
 
 
 class VehicleThreads(Sprite):
@@ -662,7 +667,7 @@ class Soldier(Unit):
         return self.outside and super().should_be_rendered
 
     @property
-    def is_controlled_by_player(self) -> bool:
+    def is_controlled_by_local_human_player(self) -> bool:
         return self.player.is_local_human_player and self.outside  # selecting Soldiers inside Buildings is forbidden
 
     def on_update(self, delta_time=1/60):

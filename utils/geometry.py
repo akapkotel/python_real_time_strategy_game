@@ -174,7 +174,11 @@ def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None) -> Set[Tup
 
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will be larger than min and less than max."""
-    return max(minimum, min(value, maximum))
+    if value < minimum:
+        return minimum
+    if value > maximum:
+        return maximum
+    return value
 
 
 def average_position_of_points_group(positions: Sequence[Point]) -> Point:

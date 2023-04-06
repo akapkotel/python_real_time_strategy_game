@@ -34,7 +34,7 @@ class KeyboardHandler(ToggledElement):
 
     def on_key_release(self, symbol: int):
         if symbol == LCTRL and self.window.is_game_running:
-            self.window.game.units_manager.close_waypoints_mode()
+            self.window.game.units_manager.toggle_waypoint_mode(False)
         self.keys_pressed.discard(symbol)
 
     def evaluate_pressed_key(self, symbol: int):
@@ -45,13 +45,13 @@ class KeyboardHandler(ToggledElement):
         elif symbol == B and self.window.is_game_running:
             self.window.game.show_construction_options(BUILDINGS)
         elif symbol == D:
-            ...
+            x = 1
         elif symbol == C and self.window.game.settings.developer_mode:
             self.window.cursor.attach_placeable_gameobject('command_center')
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif symbol == LCTRL:
-            self.window.game.units_manager.enter_waypoints_mode()
+            self.window.game.units_manager.toggle_waypoint_mode()
         elif (digit := chr(symbol)).isdigit():
             self.on_numeric_key_press(int(digit))
 
