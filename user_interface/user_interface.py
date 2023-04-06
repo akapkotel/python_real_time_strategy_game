@@ -1055,12 +1055,12 @@ class UiElementsBundle(Observed):
         return self.elements.__iter__()
 
     def get_elements(self) -> List[UiElement]:
-        elements = []
-        for element in self.elements:
-            elements.append(element)
+        # elements = []
+        # for element in self.elements:
+        #     elements.append(element)
             # if (children := element.children) is not None:
             #     elements.extend(children)
-        return elements
+        return self.elements
 
     def toggle_element(self, name: str, state: bool):
         if (element := self.find_by_name(name)) is not None:
@@ -1139,8 +1139,8 @@ class UiBundlesHandler(Observer):
     def __init__(self, use_spatial_hash=False):
         """
         To add UiElementsBundle to this handler you need only to initialize
-        this bundle inside of the class inheriting from the handler and it
-        will automatically add itself to the list of bundles and it's all
+        this bundle inside the class inheriting from the handler, and it
+        will automatically add itself to the list of bundles, and it's all
         elements will .
         """
         Observer.__init__(self)

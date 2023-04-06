@@ -47,7 +47,7 @@ class KeyboardHandler(ToggledElement):
         elif symbol == D:
             x = 1
         elif symbol == C and self.window.game.settings.developer_mode:
-            self.window.cursor.attach_placeable_gameobject('command_center')
+            self.window.mouse.attach_placeable_gameobject('command_center')
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif symbol == LCTRL:

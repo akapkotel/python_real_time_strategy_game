@@ -21,8 +21,10 @@ from map.map import (
     position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
-from user_interface.user_interface import UiElement, UiTextLabel
-from utils.colors import GREEN
+from user_interface.constants import UI_UNITS_PANEL
+from user_interface.user_interface import UiElement, UiTextLabel, UiElementsBundle
+from utils.colors import GREEN, value_to_color
+from utils.data_types import Number
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
 from utils.geometry import (
@@ -414,7 +416,6 @@ class Unit(PlayerEntity):
     def create_death_animation(self):
         if not self.is_infantry:  # particular Soldiers dying instead
             self.game.create_effect(Explosion, 'EXPLOSION', *self.position)
-            # self.game.window.sound_player.play_sound('explosion.wav')
 
     def save(self) -> Dict:
         saved_unit = super().save()
@@ -433,13 +434,27 @@ class Unit(PlayerEntity):
         self.path = deque(loaded_data['path'])
 
     def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
+        health_color = value_to_color(self.health, self.max_health)
+        ammo_color = value_to_color(self.ammunition, self.max_ammunition)
         informations = [
-            UiTextLabel(x, y + 50, self.object_name.title(), 15, GREEN, 'unit name title', active=False),
-            UiTextLabel(x, y + 25, f'HP: {int(self.health)}/{self.max_health}', 12, GREEN, active=False),
+            UiTextLabel(x, y + 20, self.object_name.title(), 15, GREEN, 'unit name', active=False),
+            UiTextLabel(x, y -5, f'Health: {int(self.health)}/{self.max_health}', 12, health_color, 'health', active=False),
         ]
         if self.weapons:
-            informations.append(UiTextLabel(x, y - 25, f'Ammunition: {self.ammunition_count}/{self.max_ammunition}', 12, GREEN, active=False))
+            informations.append(UiTextLabel(x, y - 55, f'Ammunition: {self.ammunition}/{self.max_ammunition}', 12, ammo_color, 'ammunition', active=False))
         return informations
+
+    def update_ui_information_about_unit(self):
+        selected_units_bundle = self.game.get_bundle(UI_UNITS_PANEL)
+        for attribute in ('health', 'fuel', 'ammunition'):
+            try:
+                value = getattr(self, attribute)
+                max_value = getattr(self, f'max_{attribute}')
+                info_label = selected_units_bundle.find_by_name(attribute)
+                info_label.text = f'{attribute.title()}: {int(value)}/{max_value}'
+                info_label.text_color = value_to_color(value, max_value)
+            except AttributeError:
+                continue
 
     def create_actions_buttons_specific_for_this_unit(self, x, y) -> List[UiElement]:
         ...
@@ -502,7 +517,7 @@ class Vehicle(Unit):
 
     def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
         return super().create_ui_information_about_unit(x, y) + [
-            UiTextLabel(x, y, f'Fuel: {int(self.fuel)}/100', 12, GREEN, active=False),
+            UiTextLabel(x, y - 30, f'Fuel: {int(self.fuel)}/{self.max_fuel}', 12, value_to_color(self.fuel, self.max_fuel), 'fuel', active=False),
         ]
 
 

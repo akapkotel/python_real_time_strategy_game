@@ -54,3 +54,10 @@ def add_transparency(original_color: Color, transparency: int) -> Color:
     """
     r, g, b = original_color[:3]
     return r, g, b, clamp(transparency, 255, 0)
+
+
+def value_to_color(value, max_value) -> Color:
+    one_third = max_value / 3
+    if value > max_value - one_third:
+        return GREEN
+    return YELLOW if value > one_third else RED

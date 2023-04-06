@@ -734,11 +734,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return right - UI_WIDTH // 2, bottom + SCREEN_Y
 
     @ignore_in_editor_mode
-    def configure_units_interface(self, context_units: List[Unit]):
+    def configure_units_interface(self, context_units: tuple[Unit]):
         self.create_selected_units_panel(context_units)
         self.load_bundle(UI_UNITS_PANEL)
 
-    def create_selected_units_panel(self, context_units):
+    def create_selected_units_panel(self, context_units: tuple[Unit]):
         """
         Create UI elements for selected units. Top element is a list of units icons, if there are many. Each icon is
         a little button allowing player to select it.
@@ -749,10 +749,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         selected_units_bundle.clear()
         x, y = self.ui_position
 
+        selected_units_bundle.extend(
+            [UiTextLabel(x, y + 60, 'Selected units:', 13, WHITE, active=False),
+             UiTextLabel(x, y - 130, 'Available actions:', 13, WHITE, active=False)]
+        )
+
         # if only one unit is selected, show its name and health and fuel bars:
         if len(context_units) == 1:
-            unit_informations = context_units[-1].create_ui_information_about_unit(x, y)
-            selected_units_bundle.extend(unit_informations)
+            selected_units_bundle.extend(context_units[0].create_ui_information_about_unit(x, y))
         # if all units are of the same type, show a button for each one:
         elif len(self.units_manager.selected_units_types) == 1:
                 self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle, x, y)
@@ -761,12 +765,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         # 3. create UiElements universal for all types of units (stop, waypoints, retreat)
         self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
         # 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
-
-    def create_ui_panel_for_single_selected_unit(self, selected_unit, selected_units_bundle, x, y):
-        selected_units_bundle.append(
-            [UiTextLabel(x, y, selected_unit.object_name.title(), 15, GREEN, 'unit name title', active=False),
-             UiTextLabel(x, y - 25, f'HP: {selected_unit.health}/{selected_unit.max_health}', 12, GREEN, active=False)]
-        )
 
     def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle, x, y):
         icon_scale = 0.75
@@ -793,8 +791,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_ui_universal_units_buttons(self, selected_units_bundle: UiElementsBundle, x, y):
         selected_units_bundle.extend([
-            Button('game_button_stop.png', x - 125, y - 165, functions=self.units_manager.stop_all_units),
-            Button('game_button_waypoints.png', x - 50, y - 165, functions=self.units_manager.toggle_waypoint_mode),
+            Button('game_button_stop.png', x - 125, y - 175, functions=self.units_manager.stop_all_units),
+            Button('game_button_waypoints.png', x - 50, y - 175, functions=self.units_manager.toggle_waypoint_mode),
         ])
 
     def show_construction_options(self, which: str):

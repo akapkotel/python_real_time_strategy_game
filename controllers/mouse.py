@@ -39,7 +39,7 @@ from user_interface.user_interface import (
     TextInputField
 )
 
-from utils.functions import get_path_to_file, ignore_in_menu
+from utils.functions import ignore_in_menu
 from utils.game_logging import logger
 
 MOUSE_CURSOR_SIZE = 60
@@ -109,7 +109,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         names = ('normal.png', 'forbidden.png', 'attack.png', 'select.png',
                  'move.png', 'enter.png')
         self.textures.extend(
-            [load_texture(get_path_to_file(name)) for name in names[1:]]
+            [load_texture(self.window.resources_manager.get(name)) for name in names[1:]]
         )  # without 'normal.png' since it is already loaded
         self.create_cursor_animations_frames(names)
         self.set_texture(CURSOR_NORMAL_TEXTURE)
@@ -123,7 +123,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         for i, texture in enumerate(self.textures):
             frames_count = texture.width // MOUSE_CURSOR_SIZE
             locations_list = [(MOUSE_CURSOR_SIZE * j, 0, MOUSE_CURSOR_SIZE, MOUSE_CURSOR_SIZE) for j in range(frames_count)]
-            frames = load_textures(get_path_to_file(names[i]), locations_list)
+            frames = load_textures(self.window.resources_manager.get(names[i]), locations_list)
             duration = 1 // frames_count
             self.animations_keyframes.append(
                 self.new_frames_list(frames, duration)

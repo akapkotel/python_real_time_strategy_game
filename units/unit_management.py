@@ -281,6 +281,9 @@ class UnitsManager(EventsCreator):
     def __contains__(self, unit) -> bool:
         return unit in self.selected_units or unit is self.selected_building
 
+    def __len__(self) -> int:
+        return len(self.selected_units)
+
     @property
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
@@ -453,6 +456,8 @@ class UnitsManager(EventsCreator):
     def update(self):
         for marker in self.selection_markers:
             marker.update() if marker.selected.is_alive else marker.kill()
+        if len(self.selected_units) == 1:
+            self.selected_units[0].update_ui_information_about_unit()
 
     def create_new_permanent_units_group(self, digit: int):
         units = self.selected_units.copy()

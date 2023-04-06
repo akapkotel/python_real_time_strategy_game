@@ -128,8 +128,7 @@ def move_along_vector(start: Point,
     :return: tuple -- (optional)position of the vector end
     """
     if target is None and angle is None:
-        raise ValueError(
-            "You MUST pass current_waypoint position or vector angle!")
+        raise ValueError("You MUST pass current_waypoint position or vector angle!")
     p1 = (start[0], start[1])
     if target:
         p2 = (target[0], target[1])

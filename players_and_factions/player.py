@@ -512,7 +512,7 @@ class PlayerEntity(GameObject):
         self._weapons: List[Weapon] = []
         if (weapons := self.configs['weapons_names']) is not None:
             self._weapons.extend(Weapon(name=name, owner=self) for name in weapons)
-        self.max_ammunition = self.ammunition_count
+        self.max_ammunition = self.ammunition
 
         self.experience = 0
 
@@ -572,11 +572,7 @@ class PlayerEntity(GameObject):
         return not not self._weapons
 
     @property
-    def ammunition(self) -> bool:
-        return any(w.ammunition for w in self._weapons)
-
-    @property
-    def ammunition_count(self) -> int:
+    def ammunition(self) -> int:
         return sum(w.ammunition for w in self._weapons)
 
     def assign_enemy(self, enemy: Optional[PlayerEntity]):
