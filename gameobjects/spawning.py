@@ -7,7 +7,7 @@ from arcade.arcade_types import Point
 
 from buildings.buildings import Building
 from players_and_factions.player import Player
-from units.units import Unit, Soldier, VehicleWithTurret, Vehicle
+from units.units import *
 
 from utils.game_logging import log
 from gameobjects.constants import (
@@ -15,7 +15,6 @@ from gameobjects.constants import (
     CORPSE,
     WRECK,
     TREE,
-    UNIT,
     VEHICLE_WITH_TURRET,
     VEHICLE,
     SOLDIER,
@@ -51,13 +50,7 @@ class GameObjectsSpawner:
         return Building(name, player, position, **kwargs)
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
-        class_name = self.configs[name][CLASS]
-        spawned_object_class = {
-            UNIT: Unit,
-            VEHICLE: Vehicle,
-            VEHICLE_WITH_TURRET: VehicleWithTurret,
-            SOLDIER: Soldier
-        }[class_name]
+        spawned_object_class = eval(self.configs[name][CLASS])
         unit = spawned_object_class(name, player, 1, position, **kwargs)
         return self._get_attributes_from_configs_file(name, unit)
 

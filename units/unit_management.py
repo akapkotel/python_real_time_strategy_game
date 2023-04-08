@@ -7,7 +7,6 @@ from typing import (
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
 from arcade.arcade_types import Color, Point
-from arcade.key import LCTRL
 
 from buildings.buildings import Building
 from effects.sound import (
@@ -281,7 +280,8 @@ class UnitsManager(EventsCreator):
     def __contains__(self, unit) -> bool:
         return unit in self.selected_units or unit is self.selected_building
 
-    def __len__(self) -> int:
+    @property
+    def selected_units_count(self) -> int:
         return len(self.selected_units)
 
     @property

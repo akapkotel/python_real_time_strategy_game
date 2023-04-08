@@ -5,8 +5,7 @@ from typing import Set, Optional
 from arcade import Window
 from arcade.key import *
 
-from gameobjects.constants import UNITS, BUILDINGS
-from gameobjects.gameobject import PlaceableGameObject
+from user_interface.constants import UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL
 from user_interface.user_interface import (
     ToggledElement, TextInputField, UiBundlesHandler
 )
@@ -41,9 +40,9 @@ class KeyboardHandler(ToggledElement):
         if symbol == P and self.window.is_game_running:
             self.window.game.toggle_pause()
         elif symbol == U and self.window.is_game_running:
-            self.window.game.show_construction_options(UNITS)
+            self.window.game.show_construction_options(UI_UNITS_CONSTRUCTION_PANEL)
         elif symbol == B and self.window.is_game_running:
-            self.window.game.show_construction_options(BUILDINGS)
+            self.window.game.show_construction_options(UI_BUILDINGS_CONSTRUCTION_PANEL)
         elif symbol == D:
             x = 1
         elif symbol == C and self.window.game.settings.developer_mode:

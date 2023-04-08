@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, dist
-from typing import Optional, Sequence, Tuple, List, Set
+from typing import Optional, Sequence, Tuple, List, Set, Literal
 
 from numba import njit
 
@@ -197,8 +197,8 @@ def generate_2d_grid(start_x: float, start_y: float, rows: int, columns: int, it
     """
     grid = []
     for column in range(columns):
-        shift_x = column * (item_width + padding)
+        shifted_x = start_x + column * (item_width + padding)
         for row in range(rows):
             shift_y = (row % rows) * (item_height + padding)
-            grid.append((start_x + shift_x, start_y - shift_y))
+            grid.append((shifted_x, start_y - shift_y))
     return grid

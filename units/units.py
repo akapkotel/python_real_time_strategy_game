@@ -14,7 +14,7 @@ from typing import Deque, List, Dict, Optional, Union
 from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture
 from arcade.arcade_types import Point
 
-from effects.constants import SHOT_BLAST, EXPLOSION
+from effects.constants import EXPLOSION
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, MapNode, MapPath, Pathfinder, normalize_position,
@@ -22,16 +22,17 @@ from map.map import (
 )
 from players_and_factions.player import Player, PlayerEntity
 from user_interface.constants import UI_UNITS_PANEL
-from user_interface.user_interface import UiElement, UiTextLabel, UiElementsBundle
+from user_interface.user_interface import UiElement, UiTextLabel
 from utils.colors import GREEN, value_to_color
-from utils.data_types import Number
 from utils.functions import (get_path_to_file, get_texture_size)
 from utils.game_logging import log
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS
 )
-from units.weapons import Weapon
+
+
+__all__ = ['Unit', 'Vehicle', 'VehicleWithTurret', 'Boat', 'BoatWithTurret', 'AirUnit', 'Soldier']
 
 
 CLOSE_ENOUGH_DISTANCE = 0.1
@@ -57,9 +58,9 @@ class Unit(PlayerEntity):
                  position: Point,
                  object_id: Optional[int] = None):
         PlayerEntity.__init__(self, unit_name, player, position, object_id=object_id)
-        # Since we do not rotate actual Sprite, but change its texture to show
-        # the correctly rotated Units on the screen, use 'virtual' rotation to
-        # keep track of the Unit rotation angle without rotating actual Sprite:
+        # since we can not rotate actual sprite when Unit rotates, we replace its texture each time the Unit rotates for
+        # texture showing Unit rotated in actual direction. We calculate a virtual 'angle' Unit is rotated, and use it
+        # to pick one of the 16 possible rotations among its textures
         self.current_activity = UnitActivity.IDLE
         self.facing_direction = random.randint(0, ROTATIONS - 1)
         self.virtual_angle = int(ROTATION_STEP * self.facing_direction) % 360
@@ -294,22 +295,22 @@ class Unit(PlayerEntity):
 
     def rotate_towards_target(self, angle_to_target):
         """
-        Virtually Rotate Unit sprite before it starts movement toward it's
+        Virtually Rotate Unit sprite before it starts movement toward its
         current destination. We do not rotate actual Sprite, but change the
         current sprite-sheet index to display correct image of unit rotated \
         the correct direction.
         """
-        self.calculate_unit_virtual_angle(angle_to_target)
+        self.virtual_angle = self.calculate_virtual_angle(angle_to_target)
         self.set_rotated_texture()
 
-    def calculate_unit_virtual_angle(self, angle_to_target):
+    def calculate_virtual_angle(self, angle_to_target) -> int:
         angular_difference = abs(self.virtual_angle - angle_to_target)
         rotation = min(angular_difference, self.rotation_speed)
         if angular_difference < 180:
             direction = 1 if self.virtual_angle < angle_to_target else -1
         else:
             direction = -1 if self.virtual_angle < angle_to_target else 1
-        self.virtual_angle = int((self.virtual_angle + (rotation * direction)) % 360)
+        return int((self.virtual_angle + (rotation * direction)) % 360)
 
     def set_rotated_texture(self):
         self.angle_to_texture(self.virtual_angle)
@@ -364,15 +365,21 @@ class Unit(PlayerEntity):
     def update_battle_behaviour(self):
         if not self.weapons or not self.ammunition:
             return self.run_away()
-        # we know that this method is called only if there is known_enemy or player-assigned enemy:
-        enemies = (e for e in [self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()] if e is not None)
-        for enemy in enemies:
-            if self.in_attack_range(enemy):
-                self.fight_enemy(enemy)
-                if enemy is self._enemy_assigned_by_player:
-                    self.stop_completely()
-            else:
-                self.move_toward_enemy(enemy)
+        enemy = self._enemy_assigned_by_player or self.targeted_enemy or self.select_enemy_from_known_enemies()
+        if self.in_attack_range(enemy):
+            self.fight_enemy(enemy)
+            if enemy is self._enemy_assigned_by_player:
+                self.stop_completely()
+        else:
+            self.move_toward_enemy(enemy)
+        # enemies = (e for e in [self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()] if e is not None)
+        # for enemy in enemies:
+        #     if self.in_attack_range(enemy):
+        #         self.fight_enemy(enemy)
+        #         if enemy is self._enemy_assigned_by_player:
+        #             self.stop_completely()
+        #     else:
+        #         self.move_toward_enemy(enemy)
 
     def move_toward_enemy(self, enemy: PlayerEntity):
         if not (enemy is self._enemy_assigned_by_player or self.has_destination):
@@ -390,6 +397,7 @@ class Unit(PlayerEntity):
             self.targeted_enemy = None
 
     def kill(self):
+        self.assign_enemy(None)
         self.stop_completely()
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()

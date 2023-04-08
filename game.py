@@ -14,7 +14,6 @@ __credits__ = {'Coding': __author__,
                'Music': [],
                'Sounds': []}
 
-import os
 import random
 import time
 import pathlib
@@ -29,7 +28,6 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from effects.sound import AudioPlayer
-from gameobjects.constants import UNITS, BUILDINGS
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from persistency.resources_manager import ResourcesManager
@@ -60,7 +58,7 @@ from user_interface.user_interface import (
     UiTextLabel,
     UiElement,
     ProgressButton,
-    Checkbox, UnitProductionCostsHint
+    Checkbox, UnitProductionCostsHint, Hint
 )
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba, YELLOW
@@ -165,8 +163,11 @@ class Settings:
         self.tile_width: int = TILE_WIDTH
         self.tile_height: int = TILE_HEIGHT
 
-        self.hints_delay_seconds: int = 1
+        self.hints_delay_seconds: float = 0.6
 
+        self.load_settings_from_file()
+
+    def load_settings_from_file(self):
         with open('settings.txt', 'r') as file:
             for line in file.readlines():
                 attribute, value = line.split(' = ')
@@ -639,9 +640,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 Checkbox('menu_checkbox.png', ui_x - 170, ui_y + 370, '', 10,
                          ticked=self.settings.show_minimap, variable=(self.settings, 'show_minimap')),
                 Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
-                       functions=partial(self.show_construction_options, BUILDINGS)),
+                       functions=partial(self.show_construction_options, UI_BUILDINGS_CONSTRUCTION_PANEL)),
                 Button('ui_units_construction_options.png', ui_x + 90, ui_y + 153,
-                       functions=partial(self.show_construction_options, UNITS)),
+                       functions=partial(self.show_construction_options, UI_UNITS_CONSTRUCTION_PANEL)),
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
                                           self.window.menu_view),
@@ -761,7 +762,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         elif len(self.units_manager.selected_units_types) == 1:
                 self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle, x, y)
         else:
-            self.create_ui_selection_buttons_for_many_units_types(context_units, selected_units_bundle, x, y)
+            self.create_ui_selection_buttons_for_many_units_types(selected_units_bundle, x, y)
         # 3. create UiElements universal for all types of units (stop, waypoints, retreat)
         self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
         # 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
@@ -777,31 +778,32 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                                          scale=icon_scale))
             # TODO: add health bars for each unit icon
 
-    def create_ui_selection_buttons_for_many_units_types(self, context_units, selected_units_bundle, x, y):
-        positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75, 75)
+    def create_ui_selection_buttons_for_many_units_types(self, selected_units_bundle, x, y):
+        positions = generate_2d_grid(x - 135, y + 10, 2, 6, 75, 75)
         for i, (unit_type, units_count) in enumerate(self.units_manager.selected_units_types.items()):
-             column, row = positions[i]
-             selected_units_bundle.append(
-                 ProgressButton(
-                     f'{unit_type}_icon.png', column, row, unit_type,
-                     functions=partial(self.units_manager.select_units_of_type, unit_type),
-                     counter=units_count
-                 )
-             )
+            if units_count:
+                column, row = positions[i]
+                selected_units_bundle.append(
+                    ProgressButton(
+                        f'{unit_type}_icon.png', column, row, unit_type,
+                        functions=partial(self.units_manager.select_units_of_type, unit_type),
+                        counter=units_count
+                    )
+                )
 
     def create_ui_universal_units_buttons(self, selected_units_bundle: UiElementsBundle, x, y):
         selected_units_bundle.extend([
-            Button('game_button_stop.png', x - 125, y - 175, functions=self.units_manager.stop_all_units),
-            Button('game_button_waypoints.png', x - 50, y - 175, functions=self.units_manager.toggle_waypoint_mode),
+            Button('game_button_stop.png', x - 125, y - 175, functions=self.units_manager.stop_all_units,
+                   hint=Hint('button_hint_stop.png', delay=self.settings.hints_delay_seconds)),
+            Button('game_button_waypoints.png', x - 50, y - 175, functions=self.units_manager.toggle_waypoint_mode,
+                   hint=Hint('button_hint_waypoints.png', delay=self.settings.hints_delay_seconds)),
         ])
 
-    def show_construction_options(self, which: str):
+    def show_construction_options(self, construction_bundle: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        if which is UNITS:
-            construction_bundle = UI_UNITS_CONSTRUCTION_PANEL
+        if construction_bundle is UI_UNITS_CONSTRUCTION_PANEL:
             self.create_units_constructions_options()
         else:
-            construction_bundle = UI_BUILDINGS_CONSTRUCTION_PANEL
             self.create_buildings_construction_options()
         self.load_bundle(construction_bundle)
 
@@ -814,12 +816,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
         units_construction_bundle.clear()
         positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
+        delay = self.settings.hints_delay_seconds
         for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
             column, row = positions[i]
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-            hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=0.5)
+            hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
             b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
-                               functions=partial(producer.start_production, unit_name)).add_hint(hint)
+                               functions=partial(producer.start_production, unit_name),
+                               hint=hint)
             b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
             units_construction_bundle.append(b)
 

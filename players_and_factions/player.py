@@ -653,15 +653,12 @@ class PlayerEntity(GameObject):
     def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
         if not self.known_enemies:
             return None
-        if sorted_by_health := sorted(self.known_enemies, key=lambda e: e.health):
+        # if there are many enemies, prioritize armed enemies
+        if not (sorted_enemies := [e for e in self.known_enemies if e.weapons]):
+            sorted_enemies = self.known_enemies
+        # then filter the weakest enemy to destroy it fast
+        if sorted_by_health := sorted(sorted_enemies, key=lambda e: e.health):
             return sorted_by_health[0]
-
-        # in_range = self.in_attack_range
-        # sorted_by_health = sorted(self.known_enemies, key=lambda e: e.health)
-        # if enemies_in_range := [e for e in sorted_by_health if in_range(e)]:
-        #     return enemies_in_range[0]
-        # else:
-        #     return sorted_by_health[0]
 
     def in_attack_range(self, other: PlayerEntity) -> bool:
         if other.is_unit:

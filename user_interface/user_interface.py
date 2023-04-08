@@ -24,7 +24,7 @@ from controllers.constants import HORIZONTAL, VERTICAL
 from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.observer import Observed, Observer
 from utils.geometry import clamp
-from utils.colors import rgb_to_rgba, GREEN, RED
+from utils.colors import rgb_to_rgba
 from utils.improved_spritelists import UiSpriteList
 from utils.functions import get_path_to_file, get_texture_size
 from utils.game_logging import log
@@ -32,6 +32,7 @@ from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
 PLACEHOLDER_TEXTURE = 'placeholder.png'
+NO_TEXTURE = 'no_texture'
 
 
 def make_texture(width: int, height: int, color: Color) -> Texture:
@@ -285,7 +286,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,
-                 scale: float = 1.0):
+                 scale: float = 1.0,
+                 hint: Optional[Hint] = None):
 
         full_texture_name = get_path_to_file(texture_name)
 
@@ -295,7 +297,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         Selectable.__init__(self, selectable_group=selectable_group)
         self.name = name
         self._bundle = None
-        self.hint = None
+        self.hint = hint
         self.subgroup = subgroup
         self.ui_spritelist = None
 
@@ -342,7 +344,6 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         super().on_mouse_enter(cursor)
         if self.hint is not None:
             self.hint.set_position(self.left - self.hint.width // 2, self.center_y)
-            self.hint.reset_delay()
             self.hint.show()
         if (sound := self.sound_on_mouse_enter) is not None and self._active:
             cursor.window.sound_player.play_sound(sound)
@@ -400,10 +401,11 @@ class Frame(UiElement):
                  active: bool = True,
                  visible: bool = True,
                  parent: Optional[Hierarchical] = None,
-                 subgroup: Optional[int] = None
+                 subgroup: Optional[int] = None,
+                 hint: Optional[Hint] = None
                  ):
         super().__init__(texture_name, x, y, name, active, visible, parent,
-                         subgroup=subgroup)
+                         subgroup=subgroup, hint=hint)
         if not texture_name:
             self.textures = [make_texture(width, height, color or WHITE)]
             self.set_texture(0)
@@ -425,11 +427,12 @@ class Button(UiElement):
                  subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,
                  color: Optional[Color] = None,
-                 scale: float = 1.0):
-        super().__init__('', x, y, name, active, visible, parent, functions, subgroup=subgroup,
-                         selectable_group=selectable_group, scale=scale)
+                 scale: float = 1.0,
+                 hint: Optional[Hint] = None):
+        super().__init__(NO_TEXTURE, x, y, name, active, visible, parent, functions, subgroup=subgroup,
+                         selectable_group=selectable_group, scale=scale, hint=hint)
         # we load 2 textures for button: normal and for 'highlighted' button:
-        full_texture_name = get_path_to_file(texture_name)
+        full_texture_name = get_path_to_file(texture_name) or get_path_to_file('placeholder_icon.png')
         image = PIL.Image.open(full_texture_name)
         width, height = image.size[0] // 2, image.size[1]
         self.textures = [
@@ -438,7 +441,6 @@ class Button(UiElement):
         ]
         self.set_texture(0)
         self.button_color = color
-        # self.scale = scale
 
     def draw(self):
         super().draw()
@@ -466,8 +468,9 @@ class ProgressButton(Button):
                  subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,
                  color: Optional[Color] = None,
-                 counter: Optional[int] = None):
-        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color)
+                 counter: Optional[int] = None,
+                 hint: Optional[Hint] = None):
+        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color, hint=hint)
         self._counter = counter
         self._progress = 0
 
@@ -524,9 +527,10 @@ class Tab(Button):
                  visible: bool = True, parent: Optional[Hierarchical] = None,
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  subgroup: Optional[int] = None,
-                 other_tabs: Tuple[Tab, ...] = ()):
+                 other_tabs: Tuple[Tab, ...] = (),
+                 hint: Optional[Hint] = None):
         super().__init__(texture_name, x, y, name, active, visible, parent,
-                         functions, subgroup)
+                         functions, subgroup, hint=hint)
         self.other_tabs = [tab for tab in other_tabs]
         for tab in other_tabs:
             if self not in tab.other_tabs:
@@ -565,7 +569,8 @@ class Checkbox(UiElement):
                  functions: Optional[Callable] = None,
                  ticked: bool = False, variable: Tuple[object, str] = None,
                  subgroup: Optional[int] = None,
-                 selectable_group: Optional[SelectableGroup] = None):
+                 selectable_group: Optional[SelectableGroup] = None,
+                 hint: Optional[Hint] = None):
         """
 
         :param texture_name:
@@ -584,7 +589,7 @@ class Checkbox(UiElement):
         """
         super().__init__(texture_name, x, y, name, active, visible,
                          parent, functions, subgroup=subgroup,
-                         selectable_group=selectable_group)
+                         selectable_group=selectable_group, hint=hint)
         self.ticked = ticked
         self.variable = variable
         full_texture_name = get_path_to_file(texture_name)
@@ -635,8 +640,9 @@ class UiTextLabel(UiElement):
 
     def __init__(self, x: int, y: int, text: str, font_size: int = 10, text_color: Color = WHITE,
                  name: Optional[str] = None, active: bool = False, align_x: str = 'center', align_y: str = 'center',
-                 visible: bool = True, parent: Optional[Hierarchical] = None, subgroup: Optional[int] = None):
-        super().__init__('', x, y, name, active, visible, parent, subgroup)
+                 visible: bool = True, parent: Optional[Hierarchical] = None, subgroup: Optional[int] = None,
+                 hint: Optional[Hint] = None):
+        super().__init__('', x, y, name, active, visible, parent, subgroup, hint=hint)
         self.text = text
         self.size = font_size
         self.text_color = text_color
@@ -902,7 +908,6 @@ class Slider(UiElement):
         draw_text(str(self._value), x, self.center_y, WHITE, 20, anchor_y='center')
 
 
-
 class _SliderHandle(UiElement):
     """Used internally by the Slider class."""
 
@@ -953,29 +958,27 @@ class _SliderHandle(UiElement):
 
 class Hint(Sprite, ToggledElement):
 
-    def __init__(self, texture_name: str, text: str=None, x=0, y=0, text_position: Tuple[int, int]=None,
-                 text_color: Color=WHITE, text_size: int=10, text_align: str='left', delay: float=0):
-        super().__init__(get_path_to_file(texture_name), center_x=x, center_y=y)
+    def __init__(self, texture_name: str, align: str='left', delay: float=0):
+        super().__init__(get_path_to_file(texture_name), center_x=0, center_y=0)
         ToggledElement.__init__(self, visible=False, active=True)
-        self.delay = delay
-        self.text = text
-        self.text_x, self.text_y = text_position or 0, 0
-        self.text_attributes = (text_color, text_size, text_align)
         self.time_since_triggered = 0
+        self.delay = delay
+        self.align = align
 
-    def reset_delay(self):
+    def _reset_delay(self):
         self.time_since_triggered = time.time() + self.delay
 
     @property
     def should_show(self) -> bool:
         return time.time() >= self.time_since_triggered
 
+    def show(self):
+        self._reset_delay()
+        super().show()
+
     def draw(self):
         if self._visible:
             super().draw()
-            x, y = self.position[0] + self.text_x, self.position[1] + self.text_y
-            if self.text is not None:
-                draw_text(self.text, x, y, *self.text_attributes)
 
 
 class UnitProductionCostsHint(Hint):
@@ -1130,10 +1133,35 @@ class UiElementsBundle(Observed):
 
 class UiBundlesHandler(Observer):
     """
-    This class keeps track of currently is_loaded and displayed UiElements,
-    allowing switching between different groups of buttons, checkboxes etc.
-    and dynamically compose content of the screen eg. in game menu or player
-    interface.
+    The UiBundlesHandler class is responsible for managing and displaying different groups of UI elements, such as
+    buttons and checkboxes.
+
+    It keeps track of currently loaded and displayed UiElements, allowing for dynamic composition of the screen.
+
+    The class has a list of UiElementsBundle objects, which are groups of UI elements that can be loaded and displayed
+    together.
+
+    The UiSpriteList class is used as a wrapper for spritelists containing UiElements, allowing for quick identification
+    of the spritelists that should be collided with the MouseCursor.
+
+    The class has a set of active_bundles, which is used to quickly check if a bundle is displayed or not.
+
+    The class has a dictionary of selectable_groups, which allows for grouping together a bunch of same-context UI
+    elements and providing a convenient way to communicate between them.
+
+    The class has methods for loading and unloading UiElementsBundle objects, as well as switching between them.
+
+    The class has methods for appending and removing UiElement and UiElementsBundle objects from the UiSpriteList.
+
+    The class has a method for updating the positions of UI elements that are not currently displayed.
+
+    The class implements the Observer pattern, with methods for being attached, notified, and detached.
+
+    The main methods of the class include set_keyboard_handler, open_confirmation_dialog, switch_to_bundle, load_bundle,
+     unload_bundle, and update_not_displayed_bundles_positions.
+
+    The main fields of the class include ui_elements_bundles, ui_elements_spritelist, active_bundles, and
+    selectable_groups.
     """
 
     def __init__(self, use_spatial_hash=False):
@@ -1220,6 +1248,7 @@ class UiBundlesHandler(Observer):
         """
         Only add UiElementsBundle elements to the current list, without
         removing anything from it.
+        TODO: change this method to three methods using singledispatch
         """
         if name is not None:
             bundle = self.ui_elements_bundles.get(name, None)
@@ -1258,7 +1287,7 @@ class UiBundlesHandler(Observer):
             return
 
     def _load_bundle(self, bundle: UiElementsBundle, clear: bool = False):
-        log(f'LOADING BUNDLE: {bundle.name}')
+        log(f'Loading Ui_Elemnts_Bundle: {bundle.name}')
         if clear:
             bundle.elements.clear()
         bundle.on_load()

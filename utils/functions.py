@@ -21,8 +21,8 @@ def get_path_to_file(filename: str, extension: str = 'png') -> Path:
     for dirpath, dirnames, filenames in os.walk(os.getcwd()):
         if correct_filename in filenames:
             return Path(dirpath, correct_filename)
-            # return os.path.join(dirpath, correct_filename)
-    log(f'File {filename} does not exist!')
+    log(f'File {filename} does not exist!', console=True)
+
 
 @lru_cache
 def get_object_name(filename: str) -> str:

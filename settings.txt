@@ -12,4 +12,4 @@ resources_abundance = 0.01
 starting_resources = 0.5
 screen_width = 1920
 screen_height = 1080
-hints_delay_seconds = 1
+hints_delay_seconds = 0.6
