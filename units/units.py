@@ -137,7 +137,7 @@ class Unit(PlayerEntity):
 
     def on_mouse_exit(self):
         if self.selection_marker is not None and not self.is_selected:
-            self.game.units_manager.remove_from_selection_markers(entity=self)
+            self.game.units_manager.remove_from_selection_markers(self.selection_marker)
 
     @property
     def is_selected(self) -> bool:

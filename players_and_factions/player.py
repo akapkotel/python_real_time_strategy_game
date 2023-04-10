@@ -33,7 +33,6 @@ from utils.geometry import (
 from utils.scheduling import EventsCreator, ScheduledEvent
 
 
-
 def new_id(objects: Dict) -> int:
     if objects:
         return max(objects.keys()) << 1
@@ -566,6 +565,8 @@ class PlayerEntity(GameObject):
     @health.setter
     def health(self, value: float):
         self._health = clamp(value, self._max_health, 0)
+        if self.selection_marker is not None:
+            self.selection_marker.update_health_percentage(self.health_percentage)
 
     @property
     def weapons(self) -> bool:

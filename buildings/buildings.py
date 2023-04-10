@@ -418,7 +418,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def on_mouse_exit(self):
         selected_building = self.game.units_manager.selected_building
         if self.selection_marker is not None and self is not selected_building:
-            self.game.units_manager.remove_from_selection_markers(entity=self)
+            self.game.units_manager.remove_from_selection_markers(self.selection_marker)
         if self.game.mouse.forced_cursor == CURSOR_ENTER_TEXTURE:
             self.game.mouse.force_cursor(index=None)
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import (
-    Optional, Sequence, Set, Dict, Iterator, Union, Collection, List, Callable
+    Optional, Sequence, Set, Dict, Iterator, Union, Collection, List, Callable, Iterable
 )
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
@@ -74,28 +74,27 @@ class SelectedEntityMarker:
     def __init__(self, selected: PlayerEntity):
         self.selected = selected
         self.position = x, y = selected.position
-        self.health = selected.health_percentage
+        self.health_percentage = selected.health_percentage
         self.bars_ratio = 100 // self.bars_count
         self.borders = Sprite(center_x=x, center_y=y)
+        self.health_bars = self.generate_health_bars(color=self.health_to_color())
         # store our own references to Sprites to kill them when marker is
         # killed after it's Entity was unselected:
-        self.health_bars = self.generate_health_bars()
         self.sprites = sprites = [self.borders] + self.health_bars
         self.game.selection_markers_sprites.extend(sprites)
 
         selected.selection_marker = self
 
-    def generate_health_bars(self):
-        color = self.health_to_color()
+    def generate_health_bars(self, color: Color) -> list[SpriteSolidColor]:
         return [
             SpriteSolidColor(self.single_bar_width, self.health_bar_height, color)
             for _ in range(self.selected.health_percentage // self.bars_ratio)
         ]
 
     def health_to_color(self) -> Color:
-        if self.health > 66:
+        if self.health_percentage > 66:
             return GREEN
-        return YELLOW if self.health > 33 else RED
+        return YELLOW if self.health_percentage > 33 else RED
 
     def update(self):
         self.position = x, y = self.selected.position
@@ -104,24 +103,23 @@ class SelectedEntityMarker:
         if self.health_bars:
             self.update_health_bars()
 
-    def update_health_bars(self):
-        if (health := self.selected.health_percentage) != self.health:
-            if self.health_to_color() != self.health_bars[0].color:
-                self.replace_health_bar_with_new_color()
-            self.health = health
+    def update_health_percentage(self, new_health_percentage: int):
+        self.health_percentage = new_health_percentage
+        if self.health_bars and self.health_bars[0].color != (color := self.health_to_color()):
+            self.replace_health_bar_with_new_color(color)
 
-        shift = self.single_bar_width / 2
-        left = self.borders.left + shift
+    def update_health_bars(self):
+        left = self.borders.left + (self.single_bar_width / 2)
         width = self.single_bar_width
         distance = self.bars_distance
         y = self.borders.top
         for i, bar in enumerate(self.health_bars):
             bar.position =  left + (width * i) + (distance * (i + 1)), y
 
-    def replace_health_bar_with_new_color(self):
+    def replace_health_bar_with_new_color(self, color: Color):
         for bar in self.health_bars:
             bar.kill()
-        self.health_bars = self.generate_health_bars()
+        self.health_bars = self.generate_health_bars(color)
         self.sprites.extend(self.health_bars)
         self.game.selection_markers_sprites.extend(self.health_bars)
 
@@ -130,6 +128,7 @@ class SelectedEntityMarker:
         for sprite in self.sprites:
             sprite.kill()
         self.sprites.clear()
+        self.selected = None
 
 
 class SelectedUnitMarker(SelectedEntityMarker):
@@ -230,6 +229,7 @@ class PermanentUnitsGroup:
     def __del__(self):
         for unit in self.units:
             unit.permanent_units_group = 0
+        del self
 
 
 class UnitsManager(EventsCreator):
@@ -244,7 +244,7 @@ class UnitsManager(EventsCreator):
 
     def __init__(self, mouse, keyboard):
         """
-        :param cursor: MouseCursor -- reference to the cursor used in game
+        :param mouse: MouseCursor -- reference to the cursor used in game
         """
         super().__init__()
         self.mouse = mouse
@@ -254,7 +254,7 @@ class UnitsManager(EventsCreator):
         # after left button is released, Units from drag-selection are selected
         # permanently, and will be cleared after new selection or deselecting
         # them with right-button click:
-        self.selected_units: HashedList[Unit] = HashedList()
+        self.selected_units: HashedUnitsList[Unit] = HashedUnitsList()
         self.selected_building: Optional[Building] = None
 
         self.selected_units_types: Dict[str, int] = {}
@@ -414,14 +414,9 @@ class UnitsManager(EventsCreator):
         marker = SelectedBuildingMarker(building)
         self.selection_markers.add(marker)
 
-    def remove_from_selection_markers(self, entity: PlayerEntity):
-        for marker in self.selection_markers.copy():
-            if marker.selected is entity:
-                self.kill_selection_marker(marker)
-
-    def kill_selection_marker(self, marker):
-        self.selection_markers.discard(marker)
-        marker.kill()
+    def remove_from_selection_markers(self, selection_marker: SelectedEntityMarker):
+        self.selection_markers.discard(selection_marker)
+        selection_marker.kill()
 
     def unselect(self, entity: PlayerEntity):
         if entity.is_building:
@@ -429,7 +424,7 @@ class UnitsManager(EventsCreator):
         else:
             self.selected_units.remove(entity)
             self.selected_units_types[entity.object_name] -= 1
-        self.remove_from_selection_markers(entity)
+        self.remove_from_selection_markers(entity.selection_marker)
         self.update_interface_on_selection_change()
 
     def update_interface_on_selection_change(self):
@@ -448,16 +443,16 @@ class UnitsManager(EventsCreator):
         self.selected_units_types.clear()
         self.game.change_interface_content(context_gameobjects=None)
 
-    def clear_selection_markers(self, killed: Set[SelectedUnitMarker] = None):
-        killed = self.selection_markers.copy() if killed is None else killed
-        for marker in killed:
-            self.kill_selection_marker(marker)
+    def clear_selection_markers(self, killed_markers: Set[SelectedUnitMarker] = None):
+        killed_markers = self.selection_markers.copy() if killed_markers is None else killed_markers
+        for selection_marker in killed_markers:
+            self.remove_from_selection_markers(selection_marker)
 
     def update(self):
         for marker in self.selection_markers:
-            marker.update() if marker.selected.is_alive else marker.kill()
+            marker.update()
         if len(self.selected_units) == 1:
-            self.selected_units[0].update_ui_information_about_unit()
+            self.selected_units.first.update_ui_information_about_unit()
 
     def create_new_permanent_units_group(self, digit: int):
         units = self.selected_units.copy()
@@ -469,7 +464,7 @@ class UnitsManager(EventsCreator):
     def select_permanent_units_group(self, group_id: int):
         try:
             group = self.permanent_units_groups[group_id]
-            if (selected := self.selected_units) and set(selected) == group.units:
+            if set(self.selected_units) == group.units:
                 x, y = group.position
                 self.game.window.move_viewport_to_the_position(x + UI_WIDTH / 2, y)
             else:
@@ -482,52 +477,56 @@ class UnitsManager(EventsCreator):
             unit.stop_completely()
 
 
-class HashedList(list):
+class HashedUnitsList(list):
     """
     Wrapper for a list of currently selected Units. Adds fast look-up by using
     of set containing triggers id's.
     To work, it requires added triggers to have a unique 'id' attribute.
     """
 
-    def __init__(self, iterable=None):
+    def __init__(self, iterable: Optional[Iterable[Unit]] = None):
         super().__init__()
-        self.elements_ids = set()
+        self.units_ids = set()
         if iterable is not None:
             self.extend(iterable)
 
-    def __contains__(self, item) -> bool:
-        return item.id in self.elements_ids
+    def __contains__(self, unit: Unit) -> bool:
+        return unit.id in self.units_ids
 
-    def append(self, item):
+    @property
+    def first(self) -> Unit:
+        return self[0]
+
+    def append(self, unit: Unit):
         try:
-            self.elements_ids.add(item.id)
-            super().append(item)
+            self.units_ids.add(unit.id)
+            super().append(unit)
         except AttributeError:
             print("Item must have 'id' attribute which is hashable.")
 
-    def remove(self, item):
-        self.elements_ids.discard(item.id)
+    def remove(self, unit: Unit):
+        self.units_ids.discard(unit.id)
         try:
-            super().remove(item)
+            super().remove(unit)
         except ValueError:
             pass
 
-    def pop(self, index=-1):
+    def pop(self, index=-1) -> Unit:
         popped = super().pop(index)
-        self.elements_ids.discard(popped.id)
+        self.units_ids.discard(popped.id)
         return popped
 
-    def extend(self, iterable) -> None:
-        self.elements_ids.update(i.id for i in iterable)
+    def extend(self, iterable: Iterable[Unit]) -> None:
+        self.units_ids.update(i.id for i in iterable)
         super().extend(iterable)
 
-    def insert(self, index, item) -> None:
-        self.elements_ids.add(item.id)
-        super().insert(index, item)
+    def insert(self, index: int, unit: Unit) -> None:
+        self.units_ids.add(unit.id)
+        super().insert(index, unit)
 
     def clear(self) -> None:
-        self.elements_ids.clear()
+        self.units_ids.clear()
         super().clear()
 
-    def where(self, condition: Callable) -> HashedList:
-        return HashedList([e for e in self if condition(e)])
+    def where(self, condition: Callable) -> HashedUnitsList:
+        return HashedUnitsList([e for e in self if condition(e)])
