@@ -753,7 +753,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if len(context_units) == 1:
             selected_units_bundle.extend(context_units[0].create_ui_information_about_unit(x, y))
         elif len(self.units_manager.selected_units_types) == 1:
-                self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle, x, y)
+            self.create_ui_selection_buttons_for_units_of_the_same_type(context_units, selected_units_bundle, x, y)
         else:
             self.create_ui_selection_buttons_for_many_units_types(selected_units_bundle, x, y)
         self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
@@ -769,21 +769,19 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         icon_scale = 0.75
         positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75 * icon_scale, 75 * icon_scale)
         # 1. Create list of all units icons for easy selection of a specific unit
-        for i, unit in enumerate(context_units):
-            column, row = positions[i]
-            selected_units_bundle.append(Button(f'{unit.object_name}_icon.png', column, row, unit.object_name,
+        for (col, row), unit in zip(positions, context_units):
+            selected_units_bundle.append(Button(f'{unit.object_name}_icon.png', col, row, unit.object_name,
                                                          functions=partial(self.units_manager.select_units, unit),
                                                          scale=icon_scale))
             # TODO: add health bars for each unit icon
 
     def create_ui_selection_buttons_for_many_units_types(self, selected_units_bundle, x, y):
         positions = generate_2d_grid(x - 135, y + 10, 2, 6, 75, 75)
-        for i, (unit_type, units_count) in enumerate(self.units_manager.selected_units_types.items()):
+        for (col, row), (unit_type, units_count) in zip(positions, self.units_manager.selected_units_types.items()):
             if units_count:
-                column, row = positions[i]
                 selected_units_bundle.append(
                     ProgressButton(
-                        f'{unit_type}_icon.png', column, row, unit_type,
+                        f'{unit_type}_icon.png', col, row, unit_type,
                         functions=partial(self.units_manager.select_units_of_type, unit_type),
                         counter=units_count
                     )
@@ -797,33 +795,39 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                    hint=Hint('button_hint_waypoints.png', delay=self.settings.hints_delay_seconds)),
         ])
 
-    def show_construction_options(self, construction_bundle: str):
+    def show_construction_options(self, construction_bundle_name: str):
         self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
-        if construction_bundle is UI_UNITS_CONSTRUCTION_PANEL:
-            self.create_units_constructions_options()
-        else:
-            self.create_buildings_construction_options()
-        self.load_bundle(construction_bundle)
 
-    def create_buildings_construction_options(self):
-        for i, building_name in enumerate(self.local_human_player.buildings_possible_to_build):
-            log(building_name, True)  # TODO: real logic instead of test log
+        construction_bundle = self.get_bundle(construction_bundle_name)
+        construction_bundle.clear()
 
-    def create_units_constructions_options(self):
         x, y = self.ui_position
-        units_construction_bundle = self.get_bundle(UI_UNITS_CONSTRUCTION_PANEL)
-        units_construction_bundle.clear()
         positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
-        delay = self.settings.hints_delay_seconds
-        for i, unit_name in enumerate(set(self.local_human_player.units_possible_to_build)):
+
+        if construction_bundle_name is UI_UNITS_CONSTRUCTION_PANEL:
+            self.populate_construction_options_with_available_units(construction_bundle, positions)
+        else:
+            self.populate_construction_options_with_available_buildings(construction_bundle, positions)
+
+        self.load_bundle(construction_bundle_name)
+
+    def populate_construction_options_with_available_buildings(self, construction_bundle, positions):
+        for i, building_name in enumerate(set(self.local_human_player.buildings_possible_to_build)):
+            log(building_name, True)  # TODO: real logic instead of test log
             column, row = positions[i]
+            button = Button(f'{building_name}_icon.png', column, row, building_name,
+                            functions=partial(self.mouse.attach_placeable_gameobject, building_name))
+            construction_bundle.append(button)
+
+    def populate_construction_options_with_available_units(self, units_construction_bundle, positions):
+        delay = self.settings.hints_delay_seconds
+        for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
             producer = self.local_human_player.get_default_producer_of_unit(unit_name)
             hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
-            b = ProgressButton(f'{unit_name}_icon.png', column, row, unit_name,
-                               functions=partial(producer.start_production, unit_name),
-                               hint=hint)
-            b.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
-            units_construction_bundle.append(b)
+            button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
+                                    functions=partial(producer.start_production, unit_name), hint=hint)
+            button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
+            units_construction_bundle.append(button)
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -879,9 +883,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
               *args,
               **kwargs) -> Optional[GameObject]:
         player = self.players.get(player, player)
-        if position is None:
-            position = self.map.get_random_position()
-        return self.spawner.spawn(object_name, player, position, *args, **kwargs)
+        return self.spawner.spawn(object_name, player, self.map.get_valid_position(position), *args, **kwargs)
 
     def spawn_group(self,
                     names: List[str],
@@ -890,9 +892,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                     *args,
                     **kwargs) -> List[Unit]:
         player = self.players.get(player, player)
-        if position is None:
-            position = self.map.get_random_position()
-        positions = self.pathfinder.get_group_of_waypoints(*position, len(names))
+        positions = self.pathfinder.get_group_of_waypoints(*self.map.get_valid_position(position), len(names))
         return [
             self.spawner.spawn(name, player, map_grid_to_position(position), *args, **kwargs)
             for name, position in zip(names, positions)
@@ -906,8 +906,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             for player in (self.players.values()):
                 node = random.choice(walkable)
                 walkable.remove(node)
-                amount = PLAYER_UNITS if player.is_local_human_player else CPU_UNITS
-                names = [unit_name] * amount
+                names = [unit_name] * (PLAYER_UNITS if player.is_local_human_player else CPU_UNITS)
                 self.spawn_group(names, player, node.position)
 
     def test_scenarios(self):

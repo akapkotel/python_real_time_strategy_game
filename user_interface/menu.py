@@ -121,7 +121,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
 
-        if self.window.settings.developer_mode:
+        if self.window.settings.developer_mode:  # cheats!
             options_menu.extend(
                 (Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
                          20, ticked=window.settings.immortal_player_units,
@@ -215,6 +215,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
         y = (i for i in range(300, 675, 75))
         skirmish_menu = UiElementsBundle(
             name=SKIRMISH_MENU,
@@ -222,18 +223,17 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 # TODO: create background image
                 # Background('background.png', SCREEN_X, SCREEN_Y),
                 self.create_back_to_menu_button(),
-                Button('menu_button_play.png', SCREEN_X, next(y),
-                       functions=window.start_new_game),
-                Slider('slider.png', SCREEN_X, next(y), 'Trees density:', 200,
+                Button('menu_button_play.png', SCREEN_X, 300, functions=window.start_new_game),
+                Slider('slider.png',  *next(positions), 'Trees density:', 200,
                        variable=(window.settings, 'percent_chance_for_spawning_tree'),
                        min_value=0.01, max_value=0.1),
-                Slider('slider.png', SCREEN_X, next(y), 'Start resources:', 200,
+                Slider('slider.png',  *next(positions), 'Start resources:', 200,
                        variable=(window.settings, 'starting_resources'),
                        min_value=0.25, max_value=1.0),
-                Slider('slider.png', SCREEN_X, next(y), 'Map width:', 200,
+                Slider('slider.png',  *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
-                Slider('slider.png', SCREEN_X, next(y), 'Map height:', 200,
+                Slider('slider.png',  *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
             ],

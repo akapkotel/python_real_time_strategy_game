@@ -174,7 +174,7 @@ class SelectedVehicleMarker(SelectedUnitMarker):
         self.update_fuel_bar(x)
 
     def update_fuel_bar(self, x):
-        pass
+        ...
 
 
 class SelectedBuildingMarker(SelectedEntityMarker):

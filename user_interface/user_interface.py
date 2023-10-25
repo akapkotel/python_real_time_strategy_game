@@ -982,8 +982,12 @@ class Hint(Sprite, ToggledElement):
 
 
 class UnitProductionCostsHint(Hint):
+    """
+    This monit is shown to the player when the player hoovers the mouse over the button in construction panel, and
+    displays the cost of the construction.
+    """
 
-    def __init__(self, local_human_player: Player, production_costs: Dict[str, int], delay: float=0):
+    def __init__(self, local_human_player: Player, production_costs: Dict[str, int], delay: float = 0):
         super().__init__('unit_production_hint.png', delay=delay)
         self.local_human_player = local_human_player
         self.production_costs = production_costs

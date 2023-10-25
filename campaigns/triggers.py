@@ -32,6 +32,7 @@ class EventTrigger:
 
 
 class PlayerSelectedUnitsTrigger(EventTrigger):
+    """This Trigger is useful for tutorials."""
 
     def __init__(self, player: Player, *units_to_select_names: str):
         super().__init__(player)

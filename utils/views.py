@@ -93,14 +93,10 @@ class LoadableWindowView(View):
         self.window.set_viewport(*self.viewport)
 
     def on_update(self, delta_time: float):
-        if not self.is_loaded:
+        if self.loading_progress < 1.0:
             return self.update_loading()
         if not self.paused:
             self.update_view(delta_time)
-
-    @property
-    def is_loaded(self):
-        return self.loading_progress >= 1.0
 
     @logger(console=False)
     def update_loading(self):

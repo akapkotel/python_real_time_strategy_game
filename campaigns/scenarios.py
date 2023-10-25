@@ -77,8 +77,7 @@ class Scenario:
         return self
 
     def unlock_buildings_for_player(self, player: Player, *buildings: str) -> Scenario:
-        for building_name in buildings:
-            player.buildings_possible_to_build.append(building_name)
+        player.buildings_possible_to_build.extend(buildings)
         return self
 
     def add_events(self, *triggered_events: Event) -> Scenario:

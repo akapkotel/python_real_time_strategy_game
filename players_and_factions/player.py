@@ -321,6 +321,12 @@ class Player(EventsCreator, Observer, Observed):
             building.power_ratio = power_ratio
 
     def update_construction_options(self, building: Building):
+        # self.buildings_possible_to_build.clear()
+        # self.units_possible_to_build.clear()
+        # for building in self.buildings:
+        #     self.buildings_possible_to_build.update(self.game.configs[building.object_name]['allows_construction'])
+        #     if (produced_units := building.produced_units) is not None:
+        #         self.units_possible_to_build.update(produced_units)
         if (produced_units := building.produced_units) is not None:
             for unit_name in produced_units:
                 self.units_possible_to_build.remove(unit_name)

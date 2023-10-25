@@ -32,13 +32,14 @@ def get_object_name(filename: str) -> str:
     name_with_extension = remove_path_from_name(filename)
     return name_with_extension.split('.', 1)[0]
 
+
 @lru_cache
 def remove_path_from_name(filename: str):
     return filename.rpartition('/')[-1]
 
 
 def add_extension(object_name: str, extension: str = 'png') -> str:
-    return '.'.join((object_name, extension)) if not object_name.endswith(extension) else object_name
+    return object_name if object_name.endswith(extension) else '.'.join((object_name, extension))
 
 
 def all_files_of_type_named(extension: str,
@@ -63,6 +64,7 @@ def find_paths_to_all_files_of_type(extension: str,
             names_to_paths[file_name] = path
     return names_to_paths
 
+
 @lru_cache
 def add_player_color_to_name(name: str, color: Color) -> str:
     color_name = colors_names[color]
@@ -74,7 +76,7 @@ def add_player_color_to_name(name: str, color: Color) -> str:
 # def get_enemies(war: int) -> Tuple[int, int]:
 #     """
 #     Since each Player id attribute is a power of 2, id's can
-#     be combined to sum, being an unique identifier, for eg.
+#     be combined to sum, being a unique identifier, for eg.
 #     Player with id 8 and Player with id 128 make unique sum
 #     136. To save pairs of hostile Players you can sum their
 #     id's and this functions allows to retrieve pair from the

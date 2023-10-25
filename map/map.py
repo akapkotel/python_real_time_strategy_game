@@ -325,6 +325,14 @@ class Map:
     def get_random_position(self) -> NormalizedPoint:
         return random.choice([n.position for n in self.all_walkable_nodes])
 
+    def get_valid_position(self, position: Optional[NormalizedPoint] = None) -> NormalizedPoint:
+        """
+
+        :param position: Optional[NormalizedPoint] -- if left to default None, returns random, valid position
+        :return: NormalizedPoint
+        """
+        return position or self.get_random_position()
+
     def node(self, grid: GridPosition) -> MapNode:
         return self.nodes.get(grid, self.nonexistent_node)
 

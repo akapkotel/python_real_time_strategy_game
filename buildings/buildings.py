@@ -61,7 +61,7 @@ class UnitsProducer:
         self.spawn_point = self.center_x, self.bottom
         # Point on the Map for finished Units to go after being spawned:
         self.deployment_point = None
-        # used to pick one building to produce new units if player has more such factories:
+        # used to decide if this building should be default producer of units if player has more such factories:
         self.default_producer = sum(1 for b in self.player.buildings if b.produced_units is produced_units) < 2
 
     def build_units_productions_costs_dict(self, produced_units: Tuple[str]) -> Dict[str, Dict[str: int]]:
@@ -83,8 +83,10 @@ class UnitsProducer:
     def _start_production(self, unit_name: str, confirmation=False):
         self.set_production_progress_and_speed(unit_name)
         self._set_currently_produced_to(unit_name)
-        if self.player.is_local_human_player and confirmation:
-            self.game.window.sound_player.play_sound('production_started.wav')
+        if self.player.is_local_human_player:
+            self.update_ui_units_construction_section()
+            if confirmation:
+                self.game.window.sound_player.play_sound('production_started.wav')
 
     def consume_resources_from_the_pool(self, unit_name: str):
         for resource in (STEEL, ELECTRONICS, AMMUNITION, CONSCRIPTS):
@@ -345,7 +347,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     @property
     def is_powered(self) -> bool:
-        return self.power_ratio > 0
+        return self.power_ratio > 0 or self.player.unlimited_resources
 
     @property
     def is_power_plant(self) -> bool:
