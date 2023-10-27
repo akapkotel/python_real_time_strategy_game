@@ -24,10 +24,12 @@ class EventTrigger:
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.player = self.game.players[self.player]
+        self.game = self.player.game
 
     def __getstate__(self):
         state = self.__dict__.copy()
         state['player'] = self.player.id
+        state['game'] = None
         return state
 
 

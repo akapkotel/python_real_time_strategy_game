@@ -259,11 +259,14 @@ class GameWindow(Window, EventsCreator):
         return self.current_view is self.game_view
 
     def start_new_game(self):
-        scenarios = self.menu_view.selectable_groups[SCENARIOS]
+        scenarios = self.menu_view.selectable_groups.get(SCENARIOS)
         if scenarios.currently_selected is not None:
             self.load_saved_game_or_scenario(scenarios=scenarios)
         if self.game_view is None:
             self.game_view = Game(loader=None)
+        self.show_view(self.game_view)
+
+    def continue_game(self):
         self.show_view(self.game_view)
 
     def open_scenario_editor(self):
@@ -562,6 +565,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
         ] if self.loader is None else []
 
+        self.random_scenario = self.loader is None
+
         log('Game initialized successfully', console=True)
 
     @property
@@ -845,11 +850,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.change_interface_content()
 
     def create_random_scenario(self):
-        if self.loader is None:
-            self.test_factions_and_players_creation()
-            self.test_buildings_spawning()
-            self.test_units_spawning()
-            self.test_scenarios()
+        self.test_factions_and_players_creation()
+        self.test_buildings_spawning()
+        self.test_units_spawning()
+        self.test_scenarios()
 
     def place_viewport_at_players_base_or_starting_position(self):
         if self.local_human_player.buildings:
@@ -1003,23 +1007,24 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.update_factions_and_players(delta_time)
 
     def after_loading(self):
+        self.window.menu_view.update_ui_elements_from_variables()
         self.window.show_view(self)
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
         self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
         super().after_loading()
-        if self.loader is None:
+        if self.random_scenario:
             self.create_random_scenario()
         self.place_viewport_at_players_base_or_starting_position()
         self.update_interface_position(self.viewport[1], self.viewport[3])
 
-    def save_timer(self):
+    def save_timer(self) -> Timer:
         """Before saving timer, recalculate total time game was played."""
         self.timer.total_game_time = time.time() - self.timer.game_start_time
         return self.timer
 
     @logger()
-    def load_timer(self, loaded_timer):
+    def load_timer(self, loaded_timer: Timer):
         """
         Subtract total time played from loading time to correctly reset timer
         after loading game and continue time-counting from where it was stopped

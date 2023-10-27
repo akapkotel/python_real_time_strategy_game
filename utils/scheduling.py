@@ -7,7 +7,6 @@ from typing import List, Tuple, Dict, Any, Optional, Callable, Union, Iterator
 from utils.game_logging import log, logger
 
 
-
 class ScheduledEvent:
     """
     This event is an alternative to the pyglet.clock.schedule. ScheduledEvent
@@ -120,6 +119,7 @@ class EventsScheduler:
                     self.execution_times[i] = time + event.delay
                 else:
                     self._unschedule(i)
+
     def time_left_to_event_execution(self, event: ScheduledEvent) -> float:
         return self.execution_times[self.scheduled_events.index(event)] - self.game.timer.total_game_time
 

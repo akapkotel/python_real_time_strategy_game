@@ -329,8 +329,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         self.autodestruction_progress = 0
 
-        if garrison:
-            self.spawn_soldiers_for_garrison(garrison)
+        # if garrison:
+        #     self.spawn_soldiers_for_garrison(garrison)
 
         if (buildings := self.configs.get('allows_construction')) is not None:
             self.player.buildings_possible_to_build.extend(buildings)

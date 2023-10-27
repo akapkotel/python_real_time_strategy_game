@@ -612,6 +612,10 @@ class Checkbox(UiElement):
     def _func_on_mouse_exit(self):
         pass
 
+    def update_from_variable(self):
+        self.ticked = getattr(self.variable[0], self.variable[1])
+        self.set_texture(int(self.ticked))
+
     def on_mouse_press(self, button: int):
         super().on_mouse_press(button)
         self.ticked = not self.ticked
@@ -715,7 +719,7 @@ class ScrollableContainer(UiElement):
 
 class EditorPlaceableObject(Button):
     """
-    Used to pick objects from ScenarioEditor panel in the UI in ditor mode and
+    Used to pick objects from ScenarioEditor panel in the UI in editor mode and
     place them on the map.
     """
 
@@ -858,6 +862,9 @@ class Slider(UiElement):
             if step is not None:
                 value = int((value // step) * step)
         return round(value, 2)
+
+    def update_from_variable(self):
+        ...
 
     @property
     def active(self):
@@ -1354,6 +1361,12 @@ class UiBundlesHandler(Observer):
         for bundle in self.ui_elements_bundles.values():
             if bundle.name not in self.active_bundles:
                 bundle.update_elements_positions(dx, dy)
+
+    def update_ui_elements_from_variables(self):
+        for bundle in self.ui_elements_bundles.values():
+            for element in bundle:
+                if hasattr(element, 'variable') and element.variable is not None:
+                    element.update_from_variable()
 
 
 # To avoid circular imports

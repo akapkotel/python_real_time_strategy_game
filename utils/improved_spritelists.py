@@ -47,7 +47,6 @@ class SpriteListWithSwitch(SpriteList):
         self.draw_on = not self.draw_on
 
 
-
 # noinspection PyUnresolvedReferences
 class LayeredSpriteList(SpriteList):
     """
@@ -198,6 +197,7 @@ class UiSpriteList(SpriteList):
         # noinspection PyUnresolvedReferences
         for ui_element in (u for u in self if u.active):
             ui_element.on_update()
+
 
 if __name__ == '__main__':
     from gameobjects.gameobject import GameObject

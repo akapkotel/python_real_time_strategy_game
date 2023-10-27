@@ -6,6 +6,7 @@ import time
 
 from typing import List, Dict, Callable, Any, Generator
 
+import game
 from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log, logger
 from utils.data_types import SavedGames
@@ -20,6 +21,14 @@ from effects.explosions import ExplosionsPool
 MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
+
+
+def rename_bak_save_file_to_sav_file(full_save_path):
+    """
+    On Windows Shelve library saves its data as 3 different files with .bak, 'dat and .dir extensions. The correct
+    file to load saved data is that with 'bak extension.
+    """
+    os.rename(full_save_path + '.bak', full_save_path)
 
 
 class SaveManager:
@@ -59,6 +68,7 @@ class SaveManager:
 
     def update_saves(self, extension: str, saves_path: str):
         self.saved_games = self.find_all_files(extension, saves_path)
+        print(self.saved_games, os.name)
 
     @staticmethod
     def find_all_files(extension: str, path: str) -> SavedGames:
@@ -84,11 +94,13 @@ class SaveManager:
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
             file['mission_descriptor'] = game.current_scenario.get_descriptor
-            file['mission'] = game.current_scenario
+            file['scenario'] = game.current_scenario
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
             file['scheduled_events'] = self.game.events_scheduler.save()
+        if os.name == 'nt':
+            rename_bak_save_file_to_sav_file(full_save_path)
         self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
@@ -112,16 +124,16 @@ class SaveManager:
         with shelve.open(full_save_path) as file:
             loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
-                      'mission_descriptor', 'mission', 'permanent_units_groups', 'fog_of_war',
-                      'mini_map', 'scheduled_events']
+                      'mission_descriptor', 'permanent_units_groups', 'fog_of_war',
+                      'mini_map', 'scenario', 'scheduled_events']
             progress = 1 / len(loaded)
             for name in loaded:
                 log(f'Loading: {name}...', console=True)
                 self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
-                log(f'Loaded {name} successfully!', console=True)
+                log(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
         self.loaded = True
-        log(f'Game {file_name} loaded successfully!', console=True)
+        log(f'Saved game: {file_name} was loaded successfully!', console=True)
 
     @staticmethod
     def loading_step(function: Callable, argument: Any):
@@ -137,7 +149,7 @@ class SaveManager:
         self.game.timer = loaded_timer
 
     def load_settings(self, settings):
-        self.window.settings = settings
+        self.window.settings.__dict__.update(settings.__dict__)
         # recalculating rendering layers is required since settings changed and
         # LayeredSpriteList instances where instantiated with settings values
         # from the menu, not from the loaded file
@@ -179,13 +191,13 @@ class SaveManager:
         """
         if self.game.spawner is None:
             self.game.spawner = GameObjectsSpawner()
-            self.game.explosions_pool = ExplosionsPool()
+            self.game.explosions_pool = ExplosionsPool(self.game)
         for e in entities:
-            entity = self.game.spawn(e['object_name'], e['player'], e['position'], id=e['id'])
+            entity = self.game.spawn(e['object_name'], e['player'], e['position'], object_id=e['id'])
             entity.after_respawn(e)
 
-    def load_mission(self, mission):
-        self.game.current_scenario = mission
+    def load_scenario(self, scenario):
+        self.game.current_scenario = scenario
 
     def load_permanent_units_groups(self, groups):
         self.game.units_manager.permanent_units_groups = groups

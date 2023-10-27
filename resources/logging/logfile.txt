@@ -1,865 +1,128 @@
-INFO: 10/26/2023 12:23:02 AM ResourceManager found 131 files.
-INFO: 10/26/2023 12:23:02 AM Loaded 29 sounds.
-INFO: 10/26/2023 12:23:02 AM Found 2 playlists
-INFO: 10/26/2023 12:23:02 AM Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
-INFO: 10/26/2023 12:23:02 AM Found 0 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
-INFO: 10/26/2023 12:23:02 AM File no_texture does not exist!
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745681408 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745682880 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745689408 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745689088 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745693696 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745709696 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745711104 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745720320 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745721024 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745701248 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745703296 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745776896 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745778816 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745779904 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM File  does not exist!
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745781120 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745805440 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745804608 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745825792 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745824960 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745819328 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745819008 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745818368 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745783808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745859776 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745836928 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745837568 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745838784 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745839680 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745840832 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745841728 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745826560 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745827456 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745828608 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745829504 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745867584 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745870080 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745869760 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM Mouse button 1 clicked on Tab id: 1692745870080
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745883008 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745882560 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745879808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745895744 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745892672 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745907328 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745907712 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745910272 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745831616 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745912256 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745921408 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745925120 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745926336 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745893504 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745935040 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745936128 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745938368 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745940800 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745927808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745951424 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745953216 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745957824 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM UiElement 1692745959744 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:02 AM Switched to View: LoadingScreen
-INFO: 10/26/2023 12:23:02 AM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x0000018A1F857B50>,), kwargs: {}
-INFO: 10/26/2023 12:23:02 AM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x0000018A1F80B970>,), kwargs: {}
-INFO: 10/26/2023 12:23:02 AM Switched to View: Menu
-INFO: 10/26/2023 12:23:02 AM Switched to submenu main menu
-INFO: 10/26/2023 12:23:02 AM Loading Ui_Elemnts_Bundle: main menu
-INFO: 10/26/2023 12:23:03 AM Called function: on_mouse_press, args: (MouseCursor, 891, 711, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:03 AM Called function: on_left_button_press, args: (MouseCursor, 891, 711), kwargs: {}
-INFO: 10/26/2023 12:23:03 AM Mouse button 1 clicked on Button id: 1692745721024
-INFO: 10/26/2023 12:23:03 AM Switched to submenu skirmish menu
-INFO: 10/26/2023 12:23:03 AM Loading Ui_Elemnts_Bundle: skirmish menu
-INFO: 10/26/2023 12:23:05 AM Called function: on_mouse_press, args: (MouseCursor, 893, 640, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:05 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:06 AM Called function: on_mouse_press, args: (MouseCursor, 680, 469, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:06 AM Called function: on_left_button_press, args: (MouseCursor, 680, 469), kwargs: {}
-INFO: 10/26/2023 12:23:08 AM Called function: on_mouse_press, args: (MouseCursor, 926, 467, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:08 AM Called function: on_left_button_press, args: (MouseCursor, 926, 467), kwargs: {}
-INFO: 10/26/2023 12:23:10 AM Called function: on_mouse_press, args: (MouseCursor, 998, 546, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:10 AM Called function: on_left_button_press, args: (MouseCursor, 998, 546), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: on_mouse_press, args: (MouseCursor, 1010, 302, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: on_left_button_press, args: (MouseCursor, 1010, 302), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Mouse button 1 clicked on Button id: 1692745926336
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665953088 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665953152 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665954048 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665948992 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665895488 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665975168 was unable to register its parent of type <class 'str'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665977024 was unable to register its parent of type <class 'str'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692665978176 was unable to register its parent of type <class 'str'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666050688 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666050880 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666050432 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666052544 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666054528 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666055808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM UiElement 1692666057152 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:11 AM Game initialized successfully
-INFO: 10/26/2023 12:23:11 AM Switched to View: LoadingScreen
-INFO: 10/26/2023 12:23:11 AM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x0000018A1AC1FD00>,), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: load, args: (<__main__.Game object at 0x0000018A1AC143A0>, 'map', <class 'map.map.Map'>, 0.35, {'rows': 100, 'columns': 100, 'grid_width': 60, 'grid_height': 50}), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Generated QuadTree of depth: 0
-INFO: 10/26/2023 12:23:11 AM Called function: generate_map_nodes_and_tiles, args: (<map.map.Map object at 0x0000018A1AC1FFD0>,), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Generated 10000 map nodes.
-INFO: 10/26/2023 12:23:11 AM Map was initialized successfully...
-INFO: 10/26/2023 12:23:11 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: load, args: (<__main__.Game object at 0x0000018A1AC143A0>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x0000018A1F8E2790>), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:11 AM Called function: load, args: (<__main__.Game object at 0x0000018A1AC143A0>, 'fog_of_war', <class 'map.fog_of_war.FogOfWar'>, 0.15), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: load, args: (<__main__.Game object at 0x0000018A1AC143A0>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
-INFO: 10/26/2023 12:23:12 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: load, args: (<__main__.Game object at 0x0000018A1AC143A0>, 'mini_map', <class 'user_interface.minimap.MiniMap'>, 0.15, ((1920, 1080), (388, 197), (60, 50), 100)), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: update_loading, args: (<__main__.Game object at 0x0000018A1AC143A0>,), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Switched to View: Game
-INFO: 10/26/2023 12:23:12 AM Called function: load_timer, args: (<__main__.Game object at 0x0000018A1AC143A0>, <__main__.Timer object at 0x0000018A1AC14340>), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:12 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:12 AM Called function: plant_trees, args: (<map.map.Map object at 0x0000018A1AC1FFD0>,), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:12 AM Destroying GameObject: tree_leaf_2 id: 34
-INFO: 10/26/2023 12:23:12 AM Destroying GameObject: tree_leaf_2 id: 85
-INFO: 10/26/2023 12:23:12 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:13 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:13 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:13 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:13 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:14 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:14 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:14 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:14 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: on_mouse_press, args: (MouseCursor, 1697, 1066, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Called function: on_left_button_press, args: (MouseCursor, 1697, 1066), kwargs: {}
-INFO: 10/26/2023 12:23:15 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:16 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:16 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:16 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:16 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:17 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:17 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:17 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:17 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: on_mouse_press, args: (MouseCursor, 1765, 1047, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: on_left_button_press, args: (MouseCursor, 1765, 1047), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:18 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: on_mouse_press, args: (MouseCursor, 1029, 597, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:18 AM Called function: on_left_button_press, args: (MouseCursor, 1029, 597), kwargs: {}
-INFO: 10/26/2023 12:23:19 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:19 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:19 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:19 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995723392 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995770624 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995773184 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM File truck_icon.png does not exist!
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995779456 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995777536 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995779200 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995778880 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995842816 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM UiElement 1692995941888 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:19 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:23:19 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:19 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:19 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:19 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: on_mouse_press, args: (MouseCursor, 1608, 908, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: on_left_button_press, args: (MouseCursor, 1608, 908), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:20 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: on_mouse_press, args: (MouseCursor, 1116, 640, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:20 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:21 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:21 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:21 AM Destroying GameObject: truck(id: 532, player.id: 4)
-INFO: 10/26/2023 12:23:22 AM Called function: on_mouse_press, args: (MouseCursor, 1820, 902, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Called function: on_left_button_press, args: (MouseCursor, 1820, 902), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:22 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:22 AM Destroying GameObject: construction_site(id: 502, player.id: 2)
-INFO: 10/26/2023 12:23:22 AM Sound: construction_complete.wav not found!
-INFO: 10/26/2023 12:23:23 AM Called function: on_mouse_press, args: (MouseCursor, 1222, 786, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Called function: on_left_button_press, args: (MouseCursor, 1222, 786), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:23 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:23 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:23 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:23 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:23 AM UiElement 1692995723392 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692998950336 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692998961280 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692998962624 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692999201728 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692999223552 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692999224768 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM UiElement 1692999223744 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:23 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:23:24 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Called function: on_mouse_press, args: (MouseCursor, 1532, 761, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Called function: on_left_button_press, args: (MouseCursor, 1532, 761), kwargs: {}
-INFO: 10/26/2023 12:23:24 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:25 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:25 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:25 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:25 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: on_mouse_press, args: (MouseCursor, 1508, 776, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: on_left_button_press, args: (MouseCursor, 1508, 776), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:26 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:27 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:27 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:27 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:27 AM UiElement 1692999222976 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1692995723392 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001026432 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001023808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001023872 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001055872 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001052672 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001052416 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM UiElement 1693001091136 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:27 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:23:27 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:27 AM Destroying GameObject: truck(id: 530, player.id: 4)
-INFO: 10/26/2023 12:23:28 AM Called function: on_mouse_press, args: (MouseCursor, 1639, 899, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:28 AM Called function: on_left_button_press, args: (MouseCursor, 1639, 899), kwargs: {}
-INFO: 10/26/2023 12:23:28 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:28 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:28 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:28 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:28 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Called function: on_mouse_press, args: (MouseCursor, 1221, 754, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:29 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:29 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:29 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: on_mouse_press, args: (MouseCursor, 1705, 1065, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Called function: on_left_button_press, args: (MouseCursor, 1705, 1065), kwargs: {}
-INFO: 10/26/2023 12:23:30 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:23:31 AM Called function: on_mouse_press, args: (MouseCursor, 1120, 906, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:31 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:31 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:31 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:31 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:31 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:32 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:32 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:32 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:32 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:33 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:33 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:33 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:33 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:34 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:34 AM Destroying GameObject: truck(id: 528, player.id: 4)
-INFO: 10/26/2023 12:23:34 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:34 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:34 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:34 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:35 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:35 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:35 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:35 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:36 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:36 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:36 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:36 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:37 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:37 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:37 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:37 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:38 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:38 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:38 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:38 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:39 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:39 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:39 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:39 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: on_mouse_press, args: (MouseCursor, 940, 1003, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Called function: on_left_button_press, args: (MouseCursor, 940, 1003), kwargs: {}
-INFO: 10/26/2023 12:23:40 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:40 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:40 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:40 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:40 AM UiElement 1692999222976 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1692998960256 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1693065371328 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1693065371200 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1693065371392 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1692995723392 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1693065365824 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM UiElement 1693065366336 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:40 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:23:41 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:41 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:41 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:41 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:42 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:42 AM Destroying GameObject: truck(id: 529, player.id: 4)
-INFO: 10/26/2023 12:23:42 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:42 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:42 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:42 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:43 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:43 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:43 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:43 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:44 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:44 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:44 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:44 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:45 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:45 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:45 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:45 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:46 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:46 AM Sound: unit_lost.vaw not found!
-INFO: 10/26/2023 12:23:46 AM Destroying GameObject: truck(id: 524, player.id: 2)
-INFO: 10/26/2023 12:23:46 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:46 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:46 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:46 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:47 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:47 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:47 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:47 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:48 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:48 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:48 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:48 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:49 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:49 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:49 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:49 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:50 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:50 AM Destroying GameObject: truck(id: 531, player.id: 4)
-INFO: 10/26/2023 12:23:50 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:50 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:50 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:50 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:51 AM Destroying GameObject: Wreck(id: 533)
-INFO: 10/26/2023 12:23:52 AM Called function: on_mouse_press, args: (MouseCursor, 1082, 897, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:52 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:52 AM Called function: on_mouse_press, args: (MouseCursor, 1092, 1048, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: on_left_button_press, args: (MouseCursor, 1092, 1048), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:52 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:53 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:53 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:53 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:53 AM UiElement 1692999222976 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693065379008 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693065371328 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM File apc_icon.png does not exist!
-INFO: 10/26/2023 12:23:53 AM UiElement 1693065371200 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693065363776 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693127903808 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693127870848 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1693127871424 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM UiElement 1692907000640 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:23:53 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:23:53 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Called function: on_mouse_press, args: (MouseCursor, 1094, 646, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:23:53 AM Called function: on_left_button_press, args: (MouseCursor, 1094, 646), kwargs: {}
-INFO: 10/26/2023 12:23:54 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:54 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:54 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:54 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:55 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:55 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:55 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:55 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:56 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:56 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:56 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:56 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:57 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:57 AM Destroying GameObject: Wreck(id: 535)
-INFO: 10/26/2023 12:23:57 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:57 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:57 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:57 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:58 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:58 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:58 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:58 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Called function: on_mouse_press, args: (MouseCursor, 1272, 816, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:23:59 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:23:59 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Destroying GameObject: apc(id: 520, player.id: 4)
-INFO: 10/26/2023 12:23:59 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:23:59 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Called function: on_mouse_press, args: (MouseCursor, 1746, 892, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Called function: on_left_button_press, args: (MouseCursor, 1746, 892), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:24:00 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:00 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:01 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:01 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:01 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:01 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:02 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:02 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:02 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:02 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:03 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:24:03 AM Destroying GameObject: apc(id: 521, player.id: 4)
-INFO: 10/26/2023 12:24:03 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:03 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:03 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:03 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:04 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:04 AM Destroying GameObject: Wreck(id: 536)
-INFO: 10/26/2023 12:24:04 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:04 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:04 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:04 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:05 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:05 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:05 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:05 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:06 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:06 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:06 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:06 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:07 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:24:07 AM Destroying GameObject: apc(id: 519, player.id: 4)
-INFO: 10/26/2023 12:24:07 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:07 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:07 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:07 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:08 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:08 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:08 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:08 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:09 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:09 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:09 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:09 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:10 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:24:10 AM Destroying GameObject: apc(id: 522, player.id: 4)
-INFO: 10/26/2023 12:24:10 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:10 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:10 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:10 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:12 AM Destroying GameObject: Wreck(id: 537)
-INFO: 10/26/2023 12:24:13 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:13 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:13 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:13 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Called function: schedule, args: (<utils.scheduling.EventsScheduler object at 0x0000018A1AC1FC10>, ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None), kwargs: {}
-INFO: 10/26/2023 12:24:14 AM Destroying GameObject: apc(id: 518, player.id: 4)
-INFO: 10/26/2023 12:24:15 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:15 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:15 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:15 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:15 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:15 AM Destroying GameObject: Wreck(id: 538)
-INFO: 10/26/2023 12:24:16 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:16 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:16 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:16 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:17 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:17 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:17 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:17 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:18 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:18 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:18 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:18 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:19 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:19 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:19 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:19 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:20 AM Destroying GameObject: Wreck(id: 539)
-INFO: 10/26/2023 12:24:21 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:21 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:21 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:21 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:22 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:22 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:22 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:22 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:23 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:23 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:23 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:23 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:24 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:24 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:24 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:24 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:25 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:25 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:25 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:25 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:26 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:26 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:26 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:26 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:27 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:27 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:27 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:27 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:28 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:28 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:28 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:28 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:29 AM Destroying GameObject: Wreck(id: 540)
-INFO: 10/26/2023 12:24:30 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:30 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:30 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:30 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:31 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:31 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:31 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:31 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:32 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:32 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:32 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:32 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:33 AM Destroying GameObject: Wreck(id: 541)
-INFO: 10/26/2023 12:24:34 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Called function: on_mouse_press, args: (MouseCursor, 1655, 897, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Called function: on_left_button_press, args: (MouseCursor, 1655, 897), kwargs: {}
-INFO: 10/26/2023 12:24:34 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:24:35 AM Called function: on_mouse_press, args: (MouseCursor, 801, 811, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:24:35 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:24:35 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:35 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:35 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:35 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: on_mouse_press, args: (MouseCursor, 495, 699, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Called function: on_left_button_press, args: (MouseCursor, 495, 699), kwargs: {}
-INFO: 10/26/2023 12:24:36 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:24:36 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:24:36 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:24:36 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:24:36 AM UiElement 1692999222976 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1692907053376 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1692904760704 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1693215148352 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1693064349504 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1693215045952 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1693064131648 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM UiElement 1693215382464 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:36 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:24:37 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Destroying GameObject: Wreck(id: 542)
-INFO: 10/26/2023 12:24:37 AM Called function: on_mouse_press, args: (MouseCursor, 398, 297, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:37 AM Called function: on_left_button_press, args: (MouseCursor, 398, 297), kwargs: {}
-INFO: 10/26/2023 12:24:38 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:38 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:38 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:38 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:39 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:39 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:39 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:39 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:40 AM Destroying GameObject: Wreck(id: 543)
-INFO: 10/26/2023 12:24:41 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:41 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:41 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:41 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: on_mouse_press, args: (MouseCursor, 656, 311, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: on_left_button_press, args: (MouseCursor, 656, 311), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:42 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: on_mouse_press, args: (MouseCursor, 756, 324, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:24:43 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: on_mouse_press, args: (MouseCursor, 497, 577, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Called function: on_left_button_press, args: (MouseCursor, 497, 577), kwargs: {}
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:24:43 AM Loading Ui_Elemnts_Bundle: ui_building_panel
-INFO: 10/26/2023 12:24:43 AM UiElement 1693215064896 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:43 AM UiElement 1693215067648 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:43 AM UiElement 1693215141248 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:43 AM UiElement 1693216899456 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:43 AM UiElement 1693216950720 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:24:44 AM Called function: execute, args: (ScheduledEvent(creator: Wreck, function: kill, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:44 AM Destroying GameObject: Wreck(id: 544)
-INFO: 10/26/2023 12:24:44 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:44 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:44 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:44 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:45 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:45 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:45 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:45 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:46 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:46 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:46 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:46 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:47 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:47 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:47 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:47 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:48 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:48 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:48 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:48 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:49 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:49 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:49 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:49 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:50 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:50 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:50 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:50 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:51 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:51 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:51 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:51 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:52 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:52 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:52 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:52 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:53 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:53 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:53 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:53 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:54 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:54 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:54 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:54 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:55 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:55 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:55 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:55 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:56 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:56 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:56 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:56 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:57 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:57 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:57 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:57 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:58 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:58 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:58 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:58 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: on_mouse_press, args: (MouseCursor, 1317, 579, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:24:59 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:25:00 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:00 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:00 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:00 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:01 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:01 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:01 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:01 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:02 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:02 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:02 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:02 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: on_mouse_press, args: (MouseCursor, 847, 581, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:25:03 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:25:04 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:04 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:04 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:04 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: on_mouse_press, args: (MouseCursor, 1706, 1058, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: on_left_button_press, args: (MouseCursor, 1706, 1058), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Mouse button 1 clicked on Frame id: 1692665953088
-INFO: 10/26/2023 12:25:05 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: on_mouse_press, args: (MouseCursor, 1292, 840, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:25:05 AM Called function: on_left_button_press, args: (MouseCursor, 1292, 840), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:25:06 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:25:06 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:25:06 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:25:06 AM UiElement 1692999222976 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693207371520 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238397184 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238106496 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238114496 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238318656 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238330048 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238115840 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM UiElement 1693238368192 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:06 AM Loading Ui_Elemnts_Bundle: ui_units_panel
-INFO: 10/26/2023 12:25:06 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Called function: on_mouse_press, args: (MouseCursor, 846, 363, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:25:06 AM Called function: on_left_button_press, args: (MouseCursor, 846, 363), kwargs: {}
-INFO: 10/26/2023 12:25:07 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:07 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:07 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:07 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:08 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:08 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:08 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:08 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:09 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:09 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:09 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:09 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: on_mouse_press, args: (MouseCursor, 1102, 448, 4, 0), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: on_right_button_press, args: (MouseCursor,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:10 AM Loading Ui_Elemnts_Bundle: ui_options_panel
-INFO: 10/26/2023 12:25:10 AM Loading Ui_Elemnts_Bundle: ui_resources_section
-INFO: 10/26/2023 12:25:11 AM Called function: execute, args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:11 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:11 AM Called function: execute, args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:11 AM Called function: execute, args: (ScheduledEvent(creator: Scenario, function: evaluate_events, args: (), kwargs: {}, time left: None,), kwargs: {}
-INFO: 10/26/2023 12:25:12 AM Pressed key: 65307, other pressed keys: set()
-INFO: 10/26/2023 12:25:12 AM Switched to View: Menu
-INFO: 10/26/2023 12:25:12 AM Switched to submenu main menu
-INFO: 10/26/2023 12:25:12 AM Loading Ui_Elemnts_Bundle: main menu
-INFO: 10/26/2023 12:25:12 AM Called function: on_mouse_press, args: (MouseCursor, 293, 127, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:25:12 AM Called function: on_left_button_press, args: (MouseCursor, 293, 127), kwargs: {}
-INFO: 10/26/2023 12:25:12 AM Mouse button 1 clicked on Button id: 1692745681408
-INFO: 10/26/2023 12:25:12 AM UiElement 1693240046272 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:12 AM UiElement 1693240047040 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:12 AM UiElement 1693240048768 was unable to register its parent of type <class 'NoneType'>
-INFO: 10/26/2023 12:25:12 AM Switched to submenu Confirmaton dialog
-INFO: 10/26/2023 12:25:12 AM Loading Ui_Elemnts_Bundle: Confirmaton dialog
-INFO: 10/26/2023 12:25:13 AM Called function: on_mouse_press, args: (MouseCursor, 585, 517, 1, 0), kwargs: {}
-INFO: 10/26/2023 12:25:13 AM Called function: on_left_button_press, args: (MouseCursor, 585, 517), kwargs: {}
-INFO: 10/26/2023 12:25:13 AM Mouse button 1 clicked on Button id: 1693240047040
-INFO: 10/26/2023 12:25:13 AM Terminating application...
-INFO: 10/26/2023 12:25:13 AM Switched to submenu main menu
-INFO: 10/26/2023 12:25:13 AM Loading Ui_Elemnts_Bundle: main menu
+INFO: 10/28/2023 12:11:16 AM ResourceManager found 131 files.
+INFO: 10/28/2023 12:11:16 AM Loaded 29 sounds.
+INFO: 10/28/2023 12:11:16 AM Found 2 playlists
+INFO: 10/28/2023 12:11:16 AM Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 10/28/2023 12:11:16 AM Found 9 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 10/28/2023 12:11:16 AM File no_texture does not exist!
+INFO: 10/28/2023 12:11:16 AM UiElement 2750251544256 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750105901888 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251564928 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251575552 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251576832 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251586368 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251585728 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251587520 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251589504 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251614016 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251617216 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750251657408 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268256576 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268257664 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM File  does not exist!
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268258176 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268267840 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268266560 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268309440 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268308160 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268307968 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268276864 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268278720 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268278272 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268288192 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268314816 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268315456 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268316608 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268317504 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268298240 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268299136 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268300288 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268301184 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268294208 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268295104 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268296256 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268258688 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268335552 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM Mouse button 1 clicked on Tab id: 2750268258688
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268336768 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268344640 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268344896 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268352960 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268354240 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268364672 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268366208 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268365760 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268286592 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268377664 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268378496 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268386432 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268384256 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268375808 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268389952 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268397568 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268403840 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268406272 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268407680 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268408704 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268410496 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268410944 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM UiElement 2750268411328 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:17 AM Switched to View: LoadingScreen
+INFO: 10/28/2023 12:11:17 AM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x0000028058C54F10>,), kwargs: {}
+INFO: 10/28/2023 12:11:17 AM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x0000028057C3BD90>,), kwargs: {}
+INFO: 10/28/2023 12:11:17 AM Switched to View: Menu
+INFO: 10/28/2023 12:11:17 AM Switched to submenu main menu
+INFO: 10/28/2023 12:11:17 AM Loading Ui_Elemnts_Bundle: main menu
+INFO: 10/28/2023 12:11:20 AM Called function: on_mouse_press, args: (MouseCursor, 274, 490, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:20 AM Called function: on_left_button_press, args: (MouseCursor, 274, 490), kwargs: {}
+INFO: 10/28/2023 12:11:20 AM Mouse button 1 clicked on Button id: 2750251575552
+INFO: 10/28/2023 12:11:20 AM Switched to submenu loading menu
+INFO: 10/28/2023 12:11:20 AM Loading Ui_Elemnts_Bundle: loading menu
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151363840 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151292352 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151319744 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151319936 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151425920 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151422528 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151364032 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151424000 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:20 AM UiElement 2750151450368 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:22 AM Called function: on_mouse_press, args: (MouseCursor, 527, 482, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:22 AM Called function: on_left_button_press, args: (MouseCursor, 527, 482), kwargs: {}
+INFO: 10/28/2023 12:11:22 AM Mouse button 1 clicked on GenericTextButton id: 2750151319936
+INFO: 10/28/2023 12:11:23 AM Called function: on_mouse_press, args: (MouseCursor, 569, 541, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:23 AM Called function: on_left_button_press, args: (MouseCursor, 569, 541), kwargs: {}
+INFO: 10/28/2023 12:11:23 AM Mouse button 1 clicked on GenericTextButton id: 2750151425920
+INFO: 10/28/2023 12:11:24 AM Called function: on_mouse_press, args: (MouseCursor, 568, 597, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:24 AM Called function: on_left_button_press, args: (MouseCursor, 568, 597), kwargs: {}
+INFO: 10/28/2023 12:11:24 AM Mouse button 1 clicked on GenericTextButton id: 2750151422528
+INFO: 10/28/2023 12:11:24 AM Called function: on_mouse_press, args: (MouseCursor, 562, 673, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:24 AM Called function: on_left_button_press, args: (MouseCursor, 562, 673), kwargs: {}
+INFO: 10/28/2023 12:11:24 AM Mouse button 1 clicked on GenericTextButton id: 2750151364032
+INFO: 10/28/2023 12:11:25 AM Called function: on_mouse_press, args: (MouseCursor, 566, 712, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:25 AM Called function: on_left_button_press, args: (MouseCursor, 566, 712), kwargs: {}
+INFO: 10/28/2023 12:11:25 AM Mouse button 1 clicked on GenericTextButton id: 2750151424000
+INFO: 10/28/2023 12:11:25 AM Called function: on_mouse_press, args: (MouseCursor, 568, 770, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:25 AM Called function: on_left_button_press, args: (MouseCursor, 568, 770), kwargs: {}
+INFO: 10/28/2023 12:11:25 AM Mouse button 1 clicked on GenericTextButton id: 2750151450368
+INFO: 10/28/2023 12:11:26 AM Called function: on_mouse_press, args: (MouseCursor, 612, 305, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:26 AM Called function: on_left_button_press, args: (MouseCursor, 612, 305), kwargs: {}
+INFO: 10/28/2023 12:11:26 AM Mouse button 1 clicked on GenericTextButton id: 2750151363840
+INFO: 10/28/2023 12:11:27 AM Called function: on_mouse_press, args: (MouseCursor, 1023, 127, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:27 AM Called function: on_left_button_press, args: (MouseCursor, 1023, 127), kwargs: {}
+INFO: 10/28/2023 12:11:27 AM Mouse button 1 clicked on Button id: 2750268336768
+INFO: 10/28/2023 12:11:27 AM Switched to submenu main menu
+INFO: 10/28/2023 12:11:27 AM Loading Ui_Elemnts_Bundle: main menu
+INFO: 10/28/2023 12:11:30 AM Called function: on_mouse_press, args: (MouseCursor, 286, 113, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:30 AM Called function: on_left_button_press, args: (MouseCursor, 286, 113), kwargs: {}
+INFO: 10/28/2023 12:11:30 AM Mouse button 1 clicked on Button id: 2750251544256
+INFO: 10/28/2023 12:11:30 AM UiElement 2750174995584 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:30 AM UiElement 2750174996416 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:30 AM UiElement 2750174998208 was unable to register its parent of type <class 'NoneType'>
+INFO: 10/28/2023 12:11:30 AM Switched to submenu Confirmaton dialog
+INFO: 10/28/2023 12:11:30 AM Loading Ui_Elemnts_Bundle: Confirmaton dialog
+INFO: 10/28/2023 12:11:31 AM Called function: on_mouse_press, args: (MouseCursor, 568, 529, 1, 0), kwargs: {}
+INFO: 10/28/2023 12:11:31 AM Called function: on_left_button_press, args: (MouseCursor, 568, 529), kwargs: {}
+INFO: 10/28/2023 12:11:31 AM Mouse button 1 clicked on Button id: 2750174996416
+INFO: 10/28/2023 12:11:31 AM Terminating application...
+INFO: 10/28/2023 12:11:31 AM Switched to submenu main menu
+INFO: 10/28/2023 12:11:31 AM Loading Ui_Elemnts_Bundle: main menu

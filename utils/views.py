@@ -38,7 +38,7 @@ class LoadableWindowView(View):
         This View subclass works with LoadingScreen class to allow displaying
         the loading-progress bar and load content behind the scenes.
 
-        :param loader: Generator -- function yielding None but on each yield
+        :param loader: Generator -- function yielding loading progress value and on each yield
         calling another function to retrieve from save-file next chunk of data
         associated with loaded Game instance. Use it only for loading Game!
         """
@@ -94,6 +94,7 @@ class LoadableWindowView(View):
 
     def on_update(self, delta_time: float):
         if self.loading_progress < 1.0:
+            print(f'loading progress... {self.loading_progress}')
             return self.update_loading()
         if not self.paused:
             self.update_view(delta_time)
@@ -192,6 +193,7 @@ class LoadingScreen(LoadableWindowView):
         self.progress += update
         if self.progress >= 100:
             self.window.show_view(self.loaded_view)
+
 
 class ProgressBar:
 

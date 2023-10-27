@@ -138,6 +138,17 @@ class Scenario:
             campaign.update(finished_scenario=self)
         self.game.window.quit_current_game(ignore_confirmation=True)
 
+    def __setstate__(self, state):
+        print('State recovering...')
+        self.__dict__.update(state)
+        self.events = []
+        print('Scenario state recovered from saved state')
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['events'] = []
+        state['allowed_technologies'] = {}
+        return state
 
 
 class Campaign:

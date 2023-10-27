@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from campaigns.triggers import EventTrigger
 from players_and_factions.player import Player
@@ -36,6 +36,13 @@ class Event:
     def execute(self):
         raise NotImplementedError
 
+    def save(self) -> Dict:
+        return {
+            'class_name': self.__class__.__name__,
+            'player': self.player.id,
+            'triggers': [trigger.save() for trigger in self.triggers]
+        }
+
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.player = self.scenario.game.players[self.player]
@@ -43,6 +50,7 @@ class Event:
     def __getstate__(self):
         state = self.__dict__.copy()
         state['player'] = self.player.id
+        state['scenario'] = None
         return state
 
 

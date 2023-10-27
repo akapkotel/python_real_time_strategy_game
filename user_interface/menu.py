@@ -17,7 +17,6 @@ from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
 
 
-
 class Menu(LoadableWindowView, UiBundlesHandler):
 
     def __init__(self):
@@ -50,7 +49,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        functions=partial(switch_menu, NEW_GAME_MENU)),
                 Button('menu_button_continue.png', x, next(y),
                        name=('%s' % CONTINUE_BUTTON), active=False,
-                       functions=window.start_new_game),
+                       functions=window.continue_game),
                 Button('menu_button_quit.png', x, next(y),
                        name=('%s' % QUIT_GAME_BUTTON), active=False,
                        functions=window.quit_current_game),

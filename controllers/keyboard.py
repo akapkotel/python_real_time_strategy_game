@@ -51,6 +51,8 @@ class KeyboardHandler(ToggledElement):
             self.on_escape_pressed()
         elif symbol == LCTRL:
             self.window.game.units_manager.toggle_waypoint_mode()
+        elif symbol == SPACE:
+            print(self.window.game.settings.unlimited_player_resources)
         elif (digit := chr(symbol)).isdigit():
             self.on_numeric_key_press(int(digit))
 
