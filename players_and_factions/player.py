@@ -20,6 +20,7 @@ from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
+from utils.game_logging import log
 from utils.observer import Observed, Observer
 from utils.priority_queue import PriorityQueue
 from utils.colors import GREEN, RED
@@ -351,7 +352,6 @@ class Player(EventsCreator, Observer, Observed):
 
 
 class HumanPlayer(Player):
-    cpu = False
 
     def update_ui_resource_panel(self):
         bundle = self.game.get_bundle(UI_RESOURCES_SECTION)
@@ -389,7 +389,7 @@ class CpuPlayer(Player):
         self.time_to_update_logic = self.game.settings.fps
         self.current_strategy = None
         self.construction_priorities = PriorityQueue()
-        self.schedule_event(ScheduledEvent(self, 1, self.update_logic, repeat=-1))
+        self.schedule_event(ScheduledEvent(self, 6 - self.game.settings.difficulty, self.update_logic, repeat=-1))
 
     def update_logic(self):
         """
@@ -402,6 +402,7 @@ class CpuPlayer(Player):
         """
         if self.game.settings.ai_sleep:
             return
+        log('Updating CPU player decisions', console=True)
         if self.construction_priorities:
             self.build_unit_or_building()
         else:

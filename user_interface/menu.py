@@ -109,11 +109,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                     subgroup=2
                 ),
                 Slider('slider.png', *next(positions), 'Sound volume:', 200,
-                       variable=(window.sound_player, 'volume'), subgroup=2),
+                       variable=(window.settings, 'volume'), subgroup=2),
                 Slider('slider.png', *next(positions), 'Effects volume:', 200,
-                       variable=(window.sound_player, 'effects_volume'), subgroup=2),
+                       variable=(window.settings, 'effects_volume'), subgroup=2),
                 Slider('slider.png', *next(positions), 'Music volume:', 200,
-                       variable=(window.sound_player, 'music_volume'),
+                       variable=(window.settings, 'music_volume'),
                        subgroup=2),
             ]
         )

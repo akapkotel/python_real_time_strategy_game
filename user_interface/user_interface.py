@@ -843,7 +843,7 @@ class Slider(UiElement):
 
         self.show_value = show_value
 
-        self.handle = _SliderHandle('slider_handle.png', x, y, axis, self)
+        self.handle = _SliderHandle('slider_handle.png', x, y, axis, parent=self)
 
     @property
     def value(self):
@@ -864,7 +864,7 @@ class Slider(UiElement):
         return round(value, 2)
 
     def update_from_variable(self):
-        ...
+        self.handle.value_to_position(self.value)
 
     @property
     def active(self):

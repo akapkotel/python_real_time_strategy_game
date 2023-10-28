@@ -41,9 +41,9 @@ class AudioPlayer:
         self._music_on = music_on
         self._sound_effects_on = sound_effects_on
 
-        self.volume: float = 0.5
-        self.music_volume = self.volume
-        self.effects_volume = self.volume
+        # self.volume: float = 0.5
+        # self.music_volume = self.volume
+        # self.effects_volume = self.volume
 
         self.sounds: Dict[str, Sound] = self._preload_sounds()
         self.currently_played: List[Player] = []
@@ -62,6 +62,18 @@ class AudioPlayer:
         AudioPlayer.instance = self
 
         log(f'Found {len(self.playlists)} playlists', console=True)
+
+    @property
+    def volume(self):
+        return self.window.settings.volume
+
+    @property
+    def music_volume(self):
+        return self.window.settings.music_volume
+
+    @property
+    def effects_volume(self):
+        return self.window.settings.effects_volume
 
     def _preload_sounds(self) -> Dict[str, Sound]:
         names_to_paths = self.window.resources_manager.get(SOUNDS_EXTENSION)

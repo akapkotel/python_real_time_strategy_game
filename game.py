@@ -134,8 +134,14 @@ class Settings:
         self.update_rate = 1 / (self.fps * self.game_speed)
         self.draw_fps_counter: bool = self.developer_mode and not self.editor_mode
 
+        self.volume: float = 0.5
+        self.music_volume: float = 1.0
+        self.effects_volume: float = 1.0
+
         self.full_screen: bool = False
         self.pyprofiler: bool = False
+
+        self.difficulty: int = 3
 
         self.immortal_player_units: bool = False
         self.ai_sleep: bool = False
@@ -168,9 +174,10 @@ class Settings:
         self.load_settings_from_file()
 
     def load_settings_from_file(self):
-        with open('settings.txt', 'r') as file:
+        with open('settings.cfg', 'r') as file:
             for line in file.readlines():
-                attribute, value = line.split(' = ')
+                uncommented = line.split(' #')[0]
+                attribute, value = uncommented.split(' = ')
                 if 'self' in value or '(' in value or ')' in value:
                     continue
                 else:

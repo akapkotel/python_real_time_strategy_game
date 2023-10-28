@@ -23,7 +23,7 @@ SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
 
 
-def rename_bak_save_file_to_sav_file(full_save_path):
+def replace_bak_save_extension_with_sav(full_save_path):
     """
     On Windows Shelve library saves its data as 3 different files with .bak, 'dat and .dir extensions. The correct
     file to load saved data is that with 'bak extension.
@@ -68,7 +68,6 @@ class SaveManager:
 
     def update_saves(self, extension: str, saves_path: str):
         self.saved_games = self.find_all_files(extension, saves_path)
-        print(self.saved_games, os.name)
 
     @staticmethod
     def find_all_files(extension: str, path: str) -> SavedGames:
@@ -100,7 +99,7 @@ class SaveManager:
             file['mini_map'] = game.mini_map.save()
             file['scheduled_events'] = self.game.events_scheduler.save()
         if os.name == 'nt':
-            rename_bak_save_file_to_sav_file(full_save_path)
+            replace_bak_save_extension_with_sav(full_save_path)
         self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
