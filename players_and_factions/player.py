@@ -402,7 +402,7 @@ class CpuPlayer(Player):
         """
         if self.game.settings.ai_sleep:
             return
-        log('Updating CPU player decisions', console=True)
+        log(f'Updating CPU logic of player: {self}')
         if self.construction_priorities:
             self.build_unit_or_building()
         else:

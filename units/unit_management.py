@@ -418,7 +418,7 @@ class UnitsManager(EventsCreator):
         self.selection_markers.discard(selection_marker)
         selection_marker.kill()
 
-    def unselect(self, entity: PlayerEntity):
+    def unselect(self, entity: Unit | Building):
         if entity.is_building:
             self.selected_building = None
         else:

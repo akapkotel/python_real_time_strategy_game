@@ -317,15 +317,16 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if research_facility:
             ResearchFacility.__init__(self)
 
-        self.energy_consumption = self.configs['energy_consumption']
-        self.power_ratio = 0
-
-        self.position = self.place_building_properly_on_the_grid()
+        if object_id is None:
+            self.place_building_properly_on_the_grid()
         self.occupied_nodes: Set[MapNode] = self.find_occupied_nodes()
         self.block_map_nodes(self.occupied_nodes)
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
+
+        self.energy_consumption = self.configs['energy_consumption']
+        self.power_ratio = 0
 
         self.autodestruction_progress = 0
 
