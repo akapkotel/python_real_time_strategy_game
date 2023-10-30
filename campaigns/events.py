@@ -8,7 +8,7 @@ from players_and_factions.player import Player
 
 
 class Event:
-    """Event is executed when its Trigger is fired."""
+    """Event is executed by EventTrigger."""
 
     def __init__(self, player: Player):
         self.player = player
@@ -19,15 +19,8 @@ class Event:
     def execute(self):
         raise NotImplementedError
 
-    def save(self) -> Dict:
-        return {
-            'class_name': self.__class__.__name__,
-            'player': self.player.id,
-        }
-
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.player = self.scenario.game.players[self.player]
 
     def __getstate__(self):
         state = self.__dict__.copy()

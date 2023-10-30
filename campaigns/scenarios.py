@@ -84,7 +84,7 @@ class Scenario:
     def add_events_triggers(self, *events_triggers: EventTrigger) -> Scenario:
         for trigger in events_triggers:
             self.events_triggers.append(trigger)
-            trigger.bind_scenario(self)
+            trigger.bind_game_and_scenario(self)
         return self
 
     def add_players(self, *players: Player) -> Scenario:
@@ -113,7 +113,7 @@ class Scenario:
             self.end_scenario(winner=self.game.players[winner_id])
 
     def update(self):
-        pass
+        ...
 
     def evaluate_events_triggers(self):
         for event_trigger in (t for t in self.events_triggers if t.active):
@@ -147,12 +147,12 @@ class Scenario:
     def __setstate__(self, state):
         print('State recovering...')
         self.__dict__.update(state)
-        self.events_triggers = []
+        for event_trigger in self.events_triggers:
+            event_trigger.bind_game_and_scenario(self)
         print('Scenario state recovered from saved state')
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        state['events_triggers'] = []
         state['allowed_technologies'] = {}
         return state
 

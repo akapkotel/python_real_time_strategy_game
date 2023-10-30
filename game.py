@@ -929,7 +929,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         events = (
             NoUnitsLeftTrigger(human).triggers(Defeat(human)),
             NoUnitsLeftTrigger(cpu_player).triggers(Victory(human)),
-            TimePassedTrigger(human, 10).triggers(Victory(human)),
+            TimePassedTrigger(human, 3).triggers(Victory(human)),
             MapRevealedTrigger(human).triggers(Victory(human)),
         )
         self.current_scenario = Scenario('Test Mission', 'Map 1')\

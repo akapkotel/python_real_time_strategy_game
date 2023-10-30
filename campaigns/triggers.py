@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from campaigns.events import Event
 from players_and_factions.player import Player, Faction
 
 
 class EventTrigger:
-    """EventTrigger is used for TriggeredEvents to control if they should happen."""
+    """
+    EventTrigger is checked regularly in the Scenario update() to evaluate if Events attached to it should be executed.
+    """
 
     def __init__(self, player: Player):
         self.player = player
@@ -26,10 +28,16 @@ class EventTrigger:
             self.events.append(event)
         return self
 
-    def bind_scenario(self, scenario):
+    def bind_game_and_scenario(self, scenario):
         self.scenario = scenario
+        if self.game is None:
+            self.game = scenario.game
+        if isinstance(self.player, int):
+            self.player = self.game.players[self.player]
         for event in self.events:
             event.scenario = scenario
+            if isinstance(event.player, int):
+                event.player = self.game.players[event.player]
 
     def evaluate_condition(self):
         if self.condition_fulfilled():
@@ -42,27 +50,26 @@ class EventTrigger:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.player = self.game.players[self.player]
-        self.game = self.player.game
 
     def __getstate__(self):
         state = self.__dict__.copy()
         state['player'] = self.player.id
         state['game'] = None
-        state['events'] = []
+        state['scenario'] = None
         return state
 
 
 class PlayerSelectedUnitsTrigger(EventTrigger):
     """This Trigger is useful for tutorials."""
 
-    def __init__(self, player: Player, *units_to_select_names: str):
+    def __init__(self, player: Player, units_to_select_name: Optional[str] = None):
         super().__init__(player)
-        self.units_to_select_names = units_to_select_names
+        self.units_to_select_name = units_to_select_name
 
     def condition_fulfilled(self) -> bool:
-        if not self.units_to_select_names:
+        if not self.units_to_select_name:
             return len(self.game.units_manager.selected_units) > 0
+        return len(self.game.units_manager.selected_units_types[self.units_to_select_name]) > 0
 
 
 class PlayerSelectedBuildingTrigger(EventTrigger):
@@ -77,16 +84,16 @@ class PlayerSelectedBuildingTrigger(EventTrigger):
 
 class TimePassedTrigger(EventTrigger):
 
-    def __init__(self, player: Player, required_time: int):
+    def __init__(self, player: Player, required_time_minutes: int):
         super().__init__(player)
-        self.required_time = required_time
+        self.required_time_minutes = required_time_minutes
 
     def condition_fulfilled(self) -> bool:
-        return self.game.timer.minutes >= self.required_time
+        return self.game.timer.minutes >= self.required_time_minutes
 
     def __getstate__(self):
         saved = super().__getstate__()
-        saved['required_time'] = self.required_time
+        saved['required_time'] = self.required_time_minutes
         return saved
 
     def __setstate__(self, state):
