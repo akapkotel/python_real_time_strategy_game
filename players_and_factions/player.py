@@ -34,7 +34,7 @@ from utils.geometry import (
 from utils.scheduling import EventsCreator, ScheduledEvent
 
 
-def new_id(objects: Dict) -> int:
+def new_player_or_faction_id(objects: Dict) -> int:
     if objects:
         return max(objects.keys()) << 1
     else:
@@ -56,7 +56,7 @@ class Faction(EventsCreator, Observer, Observed):
         EventsCreator.__init__(self)
         Observer.__init__(self)
         Observed.__init__(self)
-        self.id = id or new_id(self.game.factions)
+        self.id = id or new_player_or_faction_id(self.game.factions)
         self.name = name or f'Faction {self.id}'
 
         self.friendly_factions: Set[FactionId] = friends or set()
@@ -147,7 +147,7 @@ class Player(EventsCreator, Observer, Observed):
         EventsCreator.__init__(self)
         Observer.__init__(self)
         Observed.__init__(self)
-        self.id = id or new_id(self.game.players)
+        self.id = id or new_player_or_faction_id(self.game.players)
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color

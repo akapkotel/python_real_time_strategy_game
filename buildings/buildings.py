@@ -95,8 +95,8 @@ class UnitsProducer:
 
     def cancel_production(self, unit_name: str):
         if unit_name in (queue := self.production_queue):
-            self.production_queue.remove(unit_name)
             self.return_resources_to_the_pool(unit_name)
+            self.production_queue.remove(unit_name)
             if unit_name == self.currently_produced and unit_name not in queue:
                 self._set_currently_produced_to(None)
                 self.production_progress = 0.0
@@ -108,9 +108,10 @@ class UnitsProducer:
         If production was already started, some resources would be lost. Only
         resources 'reserved' for enqueued production are fully returned.
         """
-        returned = 1
-        if unit_name not in self.production_queue:
+        if unit_name in self.production_queue:
             returned = 1
+        else:
+            returned = self.production_time - self.production_progress
         for resource in (STEEL, ELECTRONICS, AMMUNITION, FUEL, CONSCRIPTS):
             required_amount = self.produced_units[unit_name][resource]
             self.player.add_resource(resource, required_amount * returned)

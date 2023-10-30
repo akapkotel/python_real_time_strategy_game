@@ -51,8 +51,6 @@ class GameObjectsSpawner:
 
     def _spawn_unit(self, name: str, player, position, **kwargs) -> Unit:
         spawned_object_class = eval(self.configs[name][CLASS])
-        if kwargs == {}:
-            print(name, kwargs)
         unit = spawned_object_class(name, player, 1, position, **kwargs)
         return self._get_attributes_from_configs_file(name, unit)
 

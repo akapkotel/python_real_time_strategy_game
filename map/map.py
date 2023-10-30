@@ -535,13 +535,14 @@ class NavigatingUnitsGroup:
 
     def __init__(self, units: List[Unit], x: Number, y: Number):
         self.map = Map.instance
+        self.leader = units[0]
         self.destination = position_to_map_grid(x, y)
-        self.units_paths: Dict[Unit, list] = {unit: [] for unit in units}
+        self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
         self.reverse_units_paths()
-        if units[0].is_controlled_by_local_human_player:
-            self.add_visible_indicators_of_destinations(destinations)
+        if self.leader.is_controlled_by_local_human_player:
+            self.add_visible_indicators_of_destinations(destinations, units)
 
     def __str__(self) -> str:
         return f'NavigatingUnitsGroup(units:{len(self.units_paths)})'
@@ -564,7 +565,7 @@ class NavigatingUnitsGroup:
             unit.set_navigating_group(navigating_group=self)
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
-        start = units[0].current_node.grid
+        start = self.leader.current_node.grid
         path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
@@ -592,9 +593,9 @@ class NavigatingUnitsGroup:
             if len(steps) > 1:
                 steps.pop()
 
-    def add_visible_indicators_of_destinations(self, destinations):
+    def add_visible_indicators_of_destinations(self, destinations, units):
         positions = [map_grid_to_position(g) for g in destinations]
-        self.map.game.units_ordered_destinations.new_destinations(positions)
+        self.map.game.units_ordered_destinations.new_destinations(positions, units)
 
     def update(self):
         to_remove = []

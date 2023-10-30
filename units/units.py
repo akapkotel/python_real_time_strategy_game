@@ -11,7 +11,7 @@ from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture
+from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line
 from arcade.arcade_types import Point
 
 from effects.constants import EXPLOSION
@@ -723,8 +723,7 @@ class Soldier(Unit):
         building.on_soldier_enter(soldier=self)
 
     def leave_building(self, building):
-        # TODO: replace this with Building exit position
-        x, y = building.position
+        x, y = building.position  # TODO: replace this with Building exit position
         self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
         self.insert_to_map_quadtree()
         self.outside = True
@@ -753,20 +752,20 @@ class Engineer(Soldier):
 
 class UnitsOrderedDestinations:
     """
-    When Player sends hos Units somewhere on the map by mouse-clicking there,
+    When Player sends his Units somewhere on the map by mouse-clicking there,
     this class stores all positions each Unit was assigned as it's final
     destination by the Pathfinder. Game uses these positions to display on the
     ordered destinations on the screen for the Player convenience.
     """
-    size = 2
+    size = 1
 
     def __init__(self):
         self.destinations = []
         self.seconds_left = 0
 
-    def new_destinations(self, destinations: List[Point]):
+    def new_destinations(self, destinations: List[Point], units: List[Unit]):
         self.seconds_left = 3
-        self.destinations = [[x, y, self.size, GREEN, 4] for (x, y) in destinations]
+        self.destinations = [[x, y, self.size, GREEN, 4, unit] for ((x, y), unit) in zip(destinations, units)]
 
     def on_update(self, delta_time):
         if self.seconds_left > 0:
@@ -778,4 +777,7 @@ class UnitsOrderedDestinations:
 
     def draw(self):
         for destination in self.destinations:
-            draw_circle_filled(*destination)
+            draw_circle_filled(*destination[:-1])
+            x1, y1 = destination[:2]
+            x2, y2 = destination[-1].position
+            draw_line(x1, y1, x2, y2, GREEN)

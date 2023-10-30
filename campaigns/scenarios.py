@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 import shelve
 
-from campaigns.events import Event
+from campaigns.events import Event, EventTrigger
 from utils.colors import CLEAR_GREEN, RED
 
 from typing import List, Set, Dict
@@ -43,6 +43,7 @@ class Scenario:
         self.required_victory_points: Dict[int, int] = defaultdict(int)
 
         self.events: List[Event] = []
+        self.events_triggers: List[EventTrigger] = []
 
         self.ended = False
         self.winner = None

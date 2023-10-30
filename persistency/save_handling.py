@@ -190,6 +190,7 @@ class SaveManager:
         """
         if self.game.spawner is None:
             self.game.spawner = GameObjectsSpawner()
+        if self.game.explosions_pool is None:
             self.game.explosions_pool = ExplosionsPool(self.game)
         for e in entities:
             entity = self.game.spawn(e['object_name'], e['player'], e['position'], object_id=e['id'])
