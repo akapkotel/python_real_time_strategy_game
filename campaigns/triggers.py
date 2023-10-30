@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import List
 
+from campaigns.events import Event
 from players_and_factions.player import Player, Faction
 
 
@@ -12,10 +14,27 @@ class EventTrigger:
     def __init__(self, player: Player):
         self.player = player
         self.game = self.player.game
+        self.scenario = None
+        self.events: List[Event] = []
         self.active = True
 
     def __str__(self):
         return f'{self.__class__.__name__} for player: {self.player}'
+
+    def triggers(self, *events: Event) -> EventTrigger:
+        for event in (e for e in events if e.active):
+            self.events.append(event)
+        return self
+
+    def bind_scenario(self, scenario):
+        self.scenario = scenario
+        for event in self.events:
+            event.scenario = scenario
+
+    def evaluate_condition(self):
+        if self.condition_fulfilled():
+            for event in self.events:
+                event.execute()
 
     @abstractmethod
     def condition_fulfilled(self) -> bool:
@@ -30,6 +49,7 @@ class EventTrigger:
         state = self.__dict__.copy()
         state['player'] = self.player.id
         state['game'] = None
+        state['events'] = []
         return state
 
 

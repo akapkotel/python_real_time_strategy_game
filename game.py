@@ -927,17 +927,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         human = self.local_human_player
         cpu_player = self.players[4]
         events = (
-            Defeat(human).add_triggers(NoUnitsLeftTrigger(human)),
-            Victory(human).add_triggers(
-                NoUnitsLeftTrigger(cpu_player),
-                TimePassedTrigger(human, 10),
-                MapRevealedTrigger(human),
-                # PlayerSelectedUnitsTrigger(human)
-            )
+            NoUnitsLeftTrigger(human).triggers(Defeat(human)),
+            NoUnitsLeftTrigger(cpu_player).triggers(Victory(human)),
+            TimePassedTrigger(human, 10).triggers(Victory(human)),
+            MapRevealedTrigger(human).triggers(Victory(human)),
         )
         self.current_scenario = Scenario('Test Mission', 'Map 1')\
             .add_players(human, cpu_player)\
-            .add_events(*events)\
+            .add_events_triggers(*events)\
             .unlock_technologies_for_player(human, 'technology_1')\
             .unlock_buildings_for_player(human, 'command_center')
 

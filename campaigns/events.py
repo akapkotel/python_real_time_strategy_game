@@ -4,7 +4,6 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Optional, List, Dict
 
-from campaigns.triggers import EventTrigger
 from players_and_factions.player import Player
 
 
@@ -15,22 +14,6 @@ class Event:
         self.player = player
         self.scenario = None
         self.active = True
-        self.triggers: List[EventTrigger] = []
-
-    def bind_scenario(self, scenario):
-        self.scenario = scenario
-
-    def add_triggers(self, *triggers: EventTrigger) -> Event:
-        for trigger in (t for t in triggers if t.active):
-            self.triggers.append(trigger)
-        return self
-
-    def update(self):
-        if self.should_be_triggered():
-            self.execute()
-
-    def should_be_triggered(self) -> bool:
-        return any(trigger.condition_fulfilled() for trigger in self.triggers)
 
     @abstractmethod
     def execute(self):
@@ -40,7 +23,6 @@ class Event:
         return {
             'class_name': self.__class__.__name__,
             'player': self.player.id,
-            'triggers': [trigger.save() for trigger in self.triggers]
         }
 
     def __setstate__(self, state):

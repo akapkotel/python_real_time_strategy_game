@@ -4,7 +4,8 @@ from __future__ import annotations
 import os
 import shelve
 
-from campaigns.events import Event, EventTrigger
+from campaigns.events import Event
+from campaigns.triggers import EventTrigger
 from utils.colors import CLEAR_GREEN, RED
 
 from typing import List, Set, Dict
@@ -42,13 +43,12 @@ class Scenario:
         self.victory_points: Dict[int, int] = defaultdict(int)
         self.required_victory_points: Dict[int, int] = defaultdict(int)
 
-        self.events: List[Event] = []
         self.events_triggers: List[EventTrigger] = []
 
         self.ended = False
         self.winner = None
 
-        self.game.schedule_event(ScheduledEvent(self, 1, self.evaluate_events, repeat=-1))
+        self.game.schedule_event(ScheduledEvent(self, 1, self.evaluate_events_triggers, repeat=-1))
 
     @property
     def is_playable(self) -> bool:
@@ -81,10 +81,10 @@ class Scenario:
         player.buildings_possible_to_build.extend(buildings)
         return self
 
-    def add_events(self, *triggered_events: Event) -> Scenario:
-        for event in triggered_events:
-            self.events.append(event)
-            event.bind_scenario(scenario=self)
+    def add_events_triggers(self, *events_triggers: EventTrigger) -> Scenario:
+        for trigger in events_triggers:
+            self.events_triggers.append(trigger)
+            trigger.bind_scenario(self)
         return self
 
     def add_players(self, *players: Player) -> Scenario:
@@ -93,14 +93,19 @@ class Scenario:
             self.allowed_technologies[player.id] = {}
         return self
 
-    def remove_event(self, event: Event) -> Scenario:
-        self.events.remove(event)
+    def remove_event_trigger(self, event_trigger: EventTrigger) -> Scenario:
+        self.events_triggers.remove(event_trigger)
         return self
 
     def eliminate_player(self, player: Player):
         player.kill()
         self.players.discard(player.id)
+        self.remove_event_triggers_for_player(player)
         self.check_for_last_survivor()
+
+    def remove_event_triggers_for_player(self, player):
+        for trigger in [t for t in self.events_triggers if t.player == player]:
+            self.events_triggers.remove(trigger)
 
     def check_for_last_survivor(self):
         if len(self.players) == 1:
@@ -110,9 +115,9 @@ class Scenario:
     def update(self):
         pass
 
-    def evaluate_events(self):
-        for event in (c for c in self.events if c.active):
-            event.update()
+    def evaluate_events_triggers(self):
+        for event_trigger in (t for t in self.events_triggers if t.active):
+            event_trigger.evaluate_condition()
 
     def add_victory_points(self, player: Player, points: int):
         self.victory_points[player.id] += points
@@ -142,12 +147,12 @@ class Scenario:
     def __setstate__(self, state):
         print('State recovering...')
         self.__dict__.update(state)
-        self.events = []
+        self.events_triggers = []
         print('Scenario state recovered from saved state')
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        state['events'] = []
+        state['events_triggers'] = []
         state['allowed_technologies'] = {}
         return state
 
