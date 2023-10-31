@@ -6,7 +6,6 @@ from typing import Dict, Optional, Union, Iterable, Iterator
 from arcade import SpriteList, Sprite
 
 
-
 class SpriteListWithSwitch(SpriteList):
     """
     This is a arcade Spritelist improved with parameters: update_on, draw_on

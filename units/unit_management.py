@@ -310,13 +310,23 @@ class UnitsManager(EventsCreator):
 
     @ignore_in_menu
     def on_terrain_click_with_units(self, x, y, units):
-        self.clear_units_assigned_enemies()
-        x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
-        self.create_movement_order(units, x, y)
+        if self.game.editor_mode:
+            self.teleport_units_to_location(x, y, units)
+        else:
+            self.clear_units_assigned_enemies()
+            x, y = self.game.pathfinder.get_closest_walkable_position(x, y)
+            self.create_movement_order(units, x, y)
 
     def clear_units_assigned_enemies(self):
         for unit in self.selected_units:
             unit.assign_enemy(None)
+
+    def teleport_units_to_location(self, x, y, units: List[Unit]):
+        positions = self.game.pathfinder.get_group_of_waypoints(x, y, len(units))
+        for position, unit in zip(positions, units):
+            new_map_node = self.game.map.node(position)
+            unit.swap_blocked_nodes(unit.current_node, new_map_node)
+            unit.position = new_map_node.position
 
     def create_movement_order(self, units, x, y):
         if self.waypoints_mode:
@@ -402,7 +412,8 @@ class UnitsManager(EventsCreator):
         self.create_units_selection_markers(units)
         self.update_types_of_selected_units(units)
         self.game.change_interface_content(context_gameobjects=units)
-        self.window.sound_player.play_random_sound(UNITS_SELECTION_CONFIRMATIONS)
+        if not self.game.editor_mode:
+            self.window.sound_player.play_random_sound(UNITS_SELECTION_CONFIRMATIONS)
 
     def select_units_of_type(self, units_type: str):
         self.select_units(*[u for u in self.selected_units if u.object_name == units_type])

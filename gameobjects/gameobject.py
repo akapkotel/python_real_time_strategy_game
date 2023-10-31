@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 from PIL import Image
 
@@ -229,7 +229,7 @@ class PlaceableGameObject:
         self.grids = None
         self.drawn_gizmo_data = None
 
-    def snap_to_the_map_grid(self, gx, gy, forced=False):
+    def snap_to_the_map_grid(self, gx: int, gy: int, forced=False):
         """
         Create dictionary of map positions and their boolean 'availabilities' for constructing Building. This dict would
         be used to draw colored gizmo on the screen when player seek a proper position for placing the Building.
@@ -237,7 +237,7 @@ class PlaceableGameObject:
         if not forced and self.last_grid == (gx, gy):
             return
         from map.map import map_grid_to_position
-        self.position = map_grid_to_position((gx + 1, gy + 1))
+        self.position = map_grid_to_position((gx + 1, gy + 1))  # TODO: find why and where this offset happens
         self.grids = {
             map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).available_for_construction
             for y in range(self.grid_height) for x in range(self.grid_width)
@@ -263,9 +263,9 @@ class PlaceableGameObject:
 
     @property
     def is_location_available(self) -> bool:
-        if not self.grids:
-            return False
-        return all(bool(availability) for availability in self.grids.values())
+        if self.grids:
+            return all(bool(availability) for availability in self.grids.values())
+        return False
 
     def build(self):
         if self.game.scenario_editor is None:

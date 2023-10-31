@@ -490,7 +490,7 @@ class Vehicle(Unit):
 
     @cached_property
     def threads_frequency(self):
-        return 100 / self.max_speed
+        return 200 / self.max_speed
 
     def _load_textures(self):
         width, height = get_texture_size(self.full_name, columns=ROTATIONS)

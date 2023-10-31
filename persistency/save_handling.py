@@ -76,7 +76,7 @@ class SaveManager:
             name: os.path.join(path, name).replace('.bak', '') for name, path in names_to_paths.items()
         }
 
-    def save_game(self, save_name: str, game: 'Game', scenario: bool = False):
+    def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
         extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
         path = self.scenarios_path if scenario else self.saves_path
         full_save_path = os.path.join(path, save_name if extension in save_name else save_name + extension)
@@ -95,6 +95,8 @@ class SaveManager:
             file['mission_descriptor'] = game.current_scenario.get_descriptor
             file['scenario'] = game.current_scenario
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
+            if game.editor_mode and finished:
+                game.fog_of_war.create_dark_sprites(forced=True)
             file['fog_of_war'] = game.fog_of_war
             file['mini_map'] = game.mini_map.save()
             file['scheduled_events'] = self.game.events_scheduler.save()

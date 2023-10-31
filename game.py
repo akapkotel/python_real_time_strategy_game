@@ -41,6 +41,7 @@ from user_interface.constants import (
     UI_BUILDINGS_PANEL,
     UI_UNITS_CONSTRUCTION_PANEL,
     UI_BUILDINGS_CONSTRUCTION_PANEL,
+    UI_TERRAIN_EDITING_PANEL,
     UI_OPTIONS_PANEL,
     MINIMAP_WIDTH,
     MINIMAP_HEIGHT,
@@ -272,10 +273,9 @@ class GameWindow(Window, EventsCreator):
 
     def start_new_game(self):
         scenarios = self.menu_view.selectable_groups.get(SCENARIOS)
-        if scenarios.currently_selected is not None:
+        if scenarios is not None and scenarios.currently_selected is not None:
             self.load_saved_game_or_scenario(scenarios=scenarios)
-        if self.game_view is None:
-            self.game_view = Game(loader=None)
+        self.game_view = Game(loader=None)
         self.show_view(self.game_view)
 
     def continue_game(self):
@@ -284,7 +284,7 @@ class GameWindow(Window, EventsCreator):
     def open_scenario_editor(self):
         self.settings.editor_mode = True
         # TODO: starting new Game in editor mode
-        # self.scenario_editor = ScenarioEditor(SCREEN_WIDTH * 0.9, SCREEN_Y)
+        self.start_new_game()
 
     # @timer(level=1, global_profiling_level=PROFILING_LEVEL, forced=False)
     def on_update(self, delta_time: float):
@@ -314,8 +314,7 @@ class GameWindow(Window, EventsCreator):
         draw_text(f'FPS: {self.current_fps}',
                   self.current_view.viewport[0] + 30,
                   self.current_view.viewport[3] - 30,
-                  GREEN if self.current_fps > 24 else YELLOW if self.current_fps > 20 else RED
-        )
+                  GREEN if self.current_fps > 24 else YELLOW if self.current_fps > 20 else RED)
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         if self.mouse.active:
@@ -464,6 +463,7 @@ class GameWindow(Window, EventsCreator):
     def quit_current_game(self):
         self.game_view.unload()
         self.show_view(self.menu_view)
+        self.settings.editor_mode = False
         self.menu_view.toggle_game_related_buttons()
 
     @ask_player_for_confirmation(SCREEN_CENTER, LOADING_MENU)
@@ -528,9 +528,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.dead_bodies = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
-        self.units = LayeredSpriteList()
+        self.units = LayeredSpriteList(update_on=not self.editor_mode)
         self.static_objects = SpriteListWithSwitch(is_static=True, update_on=False)
-        self.buildings = LayeredSpriteList()
+        self.buildings = LayeredSpriteList(update_on=not self.editor_mode)
         self.explosions_pool: Optional[ExplosionsPool] = ExplosionsPool(game=self)
         self.selection_markers_sprites = SpriteList()
         self.interface: UiSpriteList() = self.create_user_interface()
@@ -538,7 +538,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.events_scheduler = EventsScheduler(game=self)
 
-        self.scenario_editor = None
         self.map: Optional[Map] = None
         self.mini_map: Optional[MiniMap] = None
         self.fog_of_war: Optional[FogOfWar] = None
@@ -572,7 +571,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.15],
             ['spawner', GameObjectsSpawner, 0.05],
-            # ['explosions_pool', ExplosionsPool, 0.10],
             ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), rows)],
@@ -593,6 +591,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @property
     def settings(self) -> Settings:
         return self.window.settings
+
+    @property
+    def editor_mode(self) -> bool:
+        return self.window.settings.editor_mode
 
     @property
     def mouse(self) -> MouseCursor:
@@ -657,9 +659,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                 Frame('ui_right_panel.png', ui_x, ui_y, *ui_size, name='right_panel'),
                 Checkbox('menu_checkbox.png', ui_x - 170, ui_y + 370, '', 10,
                          ticked=self.settings.show_minimap, variable=(self.settings, 'show_minimap')),
-                Button('ui_buildings_construction_options.png', ui_x - 89, ui_y + 153,
+                Button('ui_buildings_construction_options.png', ui_x - 117, ui_y + 153,
                        functions=partial(self.show_construction_options, UI_BUILDINGS_CONSTRUCTION_PANEL)),
-                Button('ui_units_construction_options.png', ui_x + 90, ui_y + 153,
+                Button('ui_units_construction_options.png', ui_x, ui_y + 153,
                        functions=partial(self.show_construction_options, UI_UNITS_CONSTRUCTION_PANEL)),
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
@@ -674,6 +676,17 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ],
             register_to=self
         )
+        if self.editor_mode:
+            ui_options_section.append(
+                Button('ui_terrain_editing_options.png', ui_x + 117, ui_y + 153,
+                       functions=partial(self.show_construction_options, UI_TERRAIN_EDITING_PANEL))
+            )
+            ui_terrain_editing_panel = UiElementsBundle(
+                name=UI_TERRAIN_EDITING_PANEL,
+                elements=[],
+                register_to=self
+            )
+
         y = SCREEN_HEIGHT * 0.79075
         x = SCREEN_WIDTH - UI_WIDTH + 90
         resources = (r for r in Player.resources)
@@ -692,29 +705,19 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         )
         ui_units_panel = UiElementsBundle(
             name=UI_UNITS_PANEL,
-            elements=[
-                # Button('game_button_stop.png', ui_x - 100, ui_y + 50,
-                #        functions=self.stop_all_units),
-                # Button('game_button_attack.png', ui_x, ui_y + 50,
-                #        functions=partial(self.window.cursor.force_cursor, 2))
-                # Button('game_button_waypoints.png', ui_x + 100, ui_y + 50,
-                #        functions=partial())
-            ],
+            elements=[],
             register_to=self
         )
-
         ui_buildings_panel = UiElementsBundle(
             name=UI_BUILDINGS_PANEL,
             elements=[],
             register_to=self
         )
-
         ui_units_construction_panel = UiElementsBundle(
             name=UI_UNITS_CONSTRUCTION_PANEL,
             elements=[],
             register_to=self
         )
-
         ui_buildingss_construction_panel = UiElementsBundle(
             name=UI_BUILDINGS_CONSTRUCTION_PANEL,
             elements=[],
@@ -824,8 +827,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         if construction_bundle_name is UI_UNITS_CONSTRUCTION_PANEL:
             self.populate_construction_options_with_available_units(construction_bundle, positions)
-        else:
+        elif construction_bundle_name is UI_BUILDINGS_CONSTRUCTION_PANEL:
             self.populate_construction_options_with_available_buildings(construction_bundle, positions)
+        else:
+            self.populate_construction_options_with_terrain_features(construction_bundle, positions)
 
         self.load_bundle(construction_bundle_name)
 
@@ -847,6 +852,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                     functions=partial(producer.start_production, unit_name), hint=hint)
             button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
             units_construction_bundle.append(button)
+
+    def populate_construction_options_with_terrain_features(self, terrain_features_bundle, positions):
+        # TODO: implement terrain tiles as PlaceAble objects to place on the map in editor mode
+        ...
 
     def create_effect(self, effect_type: Any, name: str, x, y):
         """
@@ -1012,7 +1021,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         pass
 
     def update_view(self, delta_time):
-        for thing in (self.timer, self.events_scheduler, self.fog_of_war, self.pathfinder, self.mini_map, self.current_scenario):
+        if not self.editor_mode and self.timer is not None:
+            self.timer.update()
+        for thing in (self.events_scheduler, self.fog_of_war, self.pathfinder, self.mini_map, self.current_scenario):
             if thing is not None:
                 thing.update()
         super().update_view(delta_time)

@@ -154,7 +154,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.position = x, y
         if self.placeable_gameobject is not None:
             grid_x, grid_y = position_to_map_grid(x, y)
-            self.placeable_gameobject.snap_to_the_map_grid(grid_x - 1, grid_y - 1)
+            self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
 
     def attach_placeable_gameobject(self, gameobject_name: str):
         self.placeable_gameobject = PlaceableGameObject(gameobject_name, self.game.local_human_player, *self.position)
@@ -492,7 +492,7 @@ class MouseDragSelection:
         self.top = y
         self.bottom = y
         self.units: Set[Unit] = set()
-        self.all_selectable_units = self.game.local_human_player.units
+        self.all_selectable_units = self.game.units if self.game.editor_mode else self.game.local_human_player.units
 
     def __contains__(self, item: PlayerEntity) -> bool:
         return item in self.units
@@ -519,10 +519,7 @@ class MouseDragSelection:
         the selection rectangle: units inside the shape are considered as
         'selected' and units outside the shape are not selected.
         """
-        new = {
-            u for u in self.all_selectable_units if u.is_controlled_by_local_human_player
-            and self._inside_selection_rect(*u.position)
-        }
+        new = {u for u in self.all_selectable_units if self._inside_selection_rect(*u.position)}
         added = new.difference(self.units)
         old = self.units.difference(new)
         self.units = new

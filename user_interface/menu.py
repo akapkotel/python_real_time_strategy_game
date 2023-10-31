@@ -257,11 +257,21 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             register_to=self
         )
 
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
+        y = (i for i in range(300, 675, 75))
+
         scenario_editor_menu = UiElementsBundle(
             name=SCENARIO_EDITOR_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
+                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
+                Button('menu_button_create.png', SCREEN_X, 300, functions=window.open_scenario_editor),
+                Slider('slider.png', *next(positions), 'Map width:', 200,
+                       variable=(window.settings, 'map_width'),
+                       min_value=60, max_value=260, step=20),
+                Slider('slider.png', *next(positions), 'Map height:', 200,
+                       variable=(window.settings, 'map_height'),
+                       min_value=60, max_value=260, step=20),
             ],
             register_to=self
         )

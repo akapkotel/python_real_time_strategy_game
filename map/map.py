@@ -727,9 +727,9 @@ class Pathfinder(EventsCreator):
         return [d[0] for d in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self, x, y) -> NormalizedPoint:
-        nearest_walkable = None
         if (node := self.map.position_to_node(x, y)).is_walkable:
             return node.position
+        nearest_walkable = None
         while nearest_walkable is None:
             adjacent = node.adjacent_nodes
             for adjacent_node in (n for n in adjacent if n.is_walkable):

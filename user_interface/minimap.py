@@ -55,6 +55,7 @@ class MiniMap:
         self.shapes_lists = self.create_shapes_lists()
 
         self.visible = set()
+
         self.reveal_minimap_area(self.game.fog_of_war.explored)
 
     def set_map_to_mini_map_ratio(self) -> float:

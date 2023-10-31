@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from functools import lru_cache
-from typing import Dict, KeysView, Optional, Set
+from typing import Dict, KeysView, Optional, Set, Tuple
 
 from arcade import Sprite, SpriteList, make_soft_circle_texture
 
@@ -60,7 +60,7 @@ class FogOfWar(Rect):
     def in_bounds(self, item) -> bool:
         return self.left <= item[0] <= self.right and self.bottom <= item[1] <= self.top
 
-    def create_dark_sprites(self):
+    def create_dark_sprites(self, forced: bool = False) -> Dict[Tuple[int, int], SpriteList]:
         """
         Fill whole map with black tiles representing unexplored, hidden area.
         """
@@ -69,13 +69,13 @@ class FogOfWar(Rect):
         for col in range(cols+1):
             for row in range(rows+1):
                 sprite_lists[(col, row)] = SpriteList(is_static=True)
-
-        get_tile_position = self.get_tile_position
-        for x, y in self.unexplored:
-            sprite_list = sprite_lists[(x // FOG_SPRITELIST_SIZE, y // FOG_SPRITELIST_SIZE)]
-            sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
-            self.grids_to_sprites[(x, y)] = sprite
-            sprite_list.append(sprite)
+        if (not self.game.editor_mode) or forced:
+            get_tile_position = self.get_tile_position
+            for x, y in self.unexplored:
+                sprite_list = sprite_lists[(x // FOG_SPRITELIST_SIZE, y // FOG_SPRITELIST_SIZE)]
+                sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
+                self.grids_to_sprites[(x, y)] = sprite
+                sprite_list.append(sprite)
         return sprite_lists
 
     def reveal_nodes(self, revealed: Set[GridPosition]):
@@ -114,6 +114,8 @@ class FogOfWar(Rect):
         return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
 
     def draw(self):
+        if self.game.editor_mode:
+            return
         left, right, bottom, top = self.game.viewport
         screen_width, screen_height = left - right, top - bottom
 
