@@ -73,11 +73,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         columns = 4
         rows = 10
         col_width = SCREEN_WIDTH // (columns + 1)
-        row_height = SCREEN_HEIGHT // (rows + 1)
+        row_height = SCREEN_HEIGHT // (rows + 1) * 0.75
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
 
-        x, y = SCREEN_X, (i for i in range(300, SCREEN_HEIGHT, 75))
         options_menu = UiElementsBundle(
             name=OPTIONS_SUBMENU,
             elements=[
@@ -91,6 +90,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Checkbox('menu_checkbox.png', *next(positions), 'Full screen:',
                          20, ticked=window.fullscreen,
                          functions=window.toggle_full_screen, subgroup=1),
+                Checkbox('menu_checkbox.png', *next(positions), 'Simplified health bars:',
+                         20, ticked=window.settings.simplified_health_bars,
+                         variable=(window.settings, 'simplified_health_bars'), subgroup=1),
             ],
             register_to=self
         )
@@ -99,50 +101,46 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         # sound:
         options_menu.extend(
             [
-                Checkbox('menu_checkbox.png', *next(positions),  # x, next(y)
-                    'Music:', 20, ticked=window.sound_player.music_on,
-                    variable=(window.sound_player, 'music_on'), subgroup=2
-                ),
-                Checkbox('menu_checkbox.png', *next(positions),  # x, next(y)
-                    'Sound effects:', 20, ticked=window.sound_player.sound_effects_on,
-                    variable=(window.sound_player, 'sound_effects_on'),
-                    subgroup=2
-                ),
+                Checkbox('menu_checkbox.png', *next(positions),
+                         text='Sound:', font_size=20, ticked=window.settings.sound_on,
+                         variable=(window.sound_player, 'sound_on'), subgroup=2),
                 Slider('slider.png', *next(positions), 'Sound volume:', 200,
-                       variable=(window.settings, 'volume'), subgroup=2),
-                Slider('slider.png', *next(positions), 'Effects volume:', 200,
-                       variable=(window.settings, 'effects_volume'), subgroup=2),
+                       variable=(window.sound_player, 'sound_volume'), subgroup=2),
+                Checkbox('menu_checkbox.png', *next(positions),
+                         text='Music:', font_size=20, ticked=window.settings.music_on,
+                         variable=(window.sound_player, 'music_on'), subgroup=2),
                 Slider('slider.png', *next(positions), 'Music volume:', 200,
-                       variable=(window.settings, 'music_volume'),
-                       subgroup=2),
+                       variable=(window.sound_player, 'music_volume'), subgroup=2),
+                Checkbox('menu_checkbox.png', *next(positions), text='Sound effects:', font_size=20,
+                         ticked=window.settings.sound_effects_on,
+                         variable=(window.sound_player, 'sound_effects_on'), subgroup=2),
+                Slider('slider.png', *next(positions), 'Effects volume:', 200,
+                       variable=(window.sound_player, 'effects_volume'), subgroup=2),
             ]
         )
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
 
-        if self.window.settings.developer_mode:  # cheats!
+        if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
             options_menu.extend(
-                (Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
-                         20, ticked=window.settings.immortal_player_units,
-                         variable=(window.settings, 'immortal_player_units'),
-                         subgroup=3),
-                Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
-                         20, ticked=window.settings.ai_sleep,
-                         variable=(window.settings, 'ai_sleep'),
-                         subgroup=3),
-                 Checkbox('menu_checkbox.png', *next(positions), 'Unlimited player resources:',
-                          20, ticked=window.settings.unlimited_player_resources,
-                          variable=(window.settings, 'unlimited_player_resources'),
-                          subgroup=3),
-                 Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources',
-                          20, ticked=window.settings.unlimited_cpu_resources,
-                          variable=(window.settings, 'unlimited_cpu_resources'),
-                          subgroup=3),
-                 Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
-                          20, ticked=window.settings.instant_production_time,
-                          variable=(window.settings, 'instant_production_time'),
-                          subgroup=3),
-                )
+                [
+                    UiTextLabel(*next(positions), text='Cheats:', font_size=18, align_x='right', subgroup=3),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
+                             20, ticked=window.settings.immortal_player_units,
+                             variable=(window.settings, 'immortal_player_units'), subgroup=3),
+                    Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
+                             20, ticked=window.settings.ai_sleep,
+                             variable=(window.settings, 'ai_sleep'), subgroup=3),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Unlimited player resources:',
+                              20, ticked=window.settings.unlimited_player_resources,
+                              variable=(window.settings, 'unlimited_player_resources'), subgroup=3),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources',
+                              20, ticked=window.settings.unlimited_cpu_resources,
+                              variable=(window.settings, 'unlimited_cpu_resources'), subgroup=3),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
+                              20, ticked=window.settings.instant_production_time,
+                              variable=(window.settings, 'instant_production_time'), subgroup=3),
+                ]
             )
 
         # tabs switching what groups of elements are visible by

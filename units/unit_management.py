@@ -67,6 +67,7 @@ class SelectedEntityMarker:
     """
     game: Optional[Game] = None
     health_bar_height = 0
+    health_bar_length = 0
     single_bar_width = 0
     bars_distance = 0
     bars_count = 10
@@ -74,7 +75,7 @@ class SelectedEntityMarker:
     def __init__(self, selected: PlayerEntity):
         self.selected = selected
         self.position = x, y = selected.position
-        self.health_percentage = selected.health_percentage
+        self.health_ratio = selected.health_ratio
         self.bars_ratio = 100 // self.bars_count
         self.borders = Sprite(center_x=x, center_y=y)
         self.health_bars = self.generate_health_bars(color=self.health_to_color())
@@ -82,19 +83,20 @@ class SelectedEntityMarker:
         # killed after it's Entity was unselected:
         self.sprites = sprites = [self.borders] + self.health_bars
         self.game.selection_markers_sprites.extend(sprites)
-
         selected.selection_marker = self
 
     def generate_health_bars(self, color: Color) -> list[SpriteSolidColor]:
+        if self.game.settings.simplified_health_bars:
+            return [SpriteSolidColor(int(self.health_bar_length * self.health_ratio), self.health_bar_height, color)]
         return [
             SpriteSolidColor(self.single_bar_width, self.health_bar_height, color)
-            for _ in range(self.selected.health_percentage // self.bars_ratio)
+            for _ in range(int(self.health_ratio * 100 / self.bars_ratio))
         ]
 
     def health_to_color(self) -> Color:
-        if self.health_percentage > 66:
+        if self.health_ratio > 0.6:
             return GREEN
-        return YELLOW if self.health_percentage > 33 else RED
+        return YELLOW if self.health_ratio > 0.3 else RED
 
     def update(self):
         self.position = x, y = self.selected.position
@@ -104,17 +106,21 @@ class SelectedEntityMarker:
             self.update_health_bars()
 
     def update_health_percentage(self, new_health_percentage: int):
-        self.health_percentage = new_health_percentage
+        self.health_ratio = new_health_percentage
         if self.health_bars and self.health_bars[0].color != (color := self.health_to_color()):
             self.replace_health_bar_with_new_color(color)
 
     def update_health_bars(self):
-        left = self.borders.left + (self.single_bar_width / 2)
-        width = self.single_bar_width
-        distance = self.bars_distance
-        y = self.borders.top
-        for i, bar in enumerate(self.health_bars):
-            bar.position =  left + (width * i) + (distance * (i + 1)), y
+        if self.game.settings.simplified_health_bars:
+            shift = self.health_bar_length * (1 - self.health_ratio)
+            self.health_bars[0].position = self.borders.left + (self.borders.width - shift) * 0.5, self.borders.top
+        else:
+            left = self.borders.left + (self.single_bar_width / 2)
+            width = self.single_bar_width
+            distance = self.bars_distance
+            y = self.borders.top
+            for i, bar in enumerate(self.health_bars):
+                bar.position = left + (width * i) + (distance * (i + 1)), y
 
     def replace_health_bar_with_new_color(self, color: Color):
         for bar in self.health_bars:
@@ -134,7 +140,7 @@ class SelectedEntityMarker:
 class SelectedUnitMarker(SelectedEntityMarker):
     health_bar_height = UNIT_HEALTH_BARS_HEIGHT
     health_bar_length = UNIT_SELECTION_MARKER_SIZE
-    single_bar_width =  UNIT_SINGLE_BAR_WIDTH
+    single_bar_width = UNIT_SINGLE_BAR_WIDTH
     bars_distance = UNIT_BARS_DISTANCE
     bars_count = UNIT_BARS_COUNT
 
@@ -148,7 +154,7 @@ class SelectedUnitMarker(SelectedEntityMarker):
 
 class SelectedSoldierMarker(SelectedEntityMarker):
     health_bar_height = SOLDIER_HEALTH_BARS_HEIGHT
-    single_bar_width =  SOLDIER_SINGLE_BAR_WIDTH
+    single_bar_width = SOLDIER_SINGLE_BAR_WIDTH
     bars_distance = SOLDIER_BARS_DISTANCE
     bars_count = UNIT_BARS_COUNT
 
@@ -179,7 +185,8 @@ class SelectedVehicleMarker(SelectedUnitMarker):
 
 class SelectedBuildingMarker(SelectedEntityMarker):
     health_bar_height = BUILDING_HEALTH_BARS_HEIGHT
-    single_bar_width =  BUILDING_SINGLE_BAR_WIDTH
+    health_bar_length = BUILDING_SELECTION_MARKER_SIZE
+    single_bar_width = BUILDING_SINGLE_BAR_WIDTH
     bars_distance = BUILDING_BARS_DISTANCE
     bars_count = BUILDING_BARS_COUNT
 

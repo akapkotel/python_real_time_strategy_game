@@ -89,7 +89,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         ]
         self.update_visibility()
 
-        if self.is_rendered and self.frames:
+        if self.frames and self.is_rendered:
             self.update_animation(delta_time)
 
     def update_visibility(self):
@@ -178,7 +178,6 @@ class Tree(TerrainObject):
         return int(self.object_name[-1])
 
 
-
 class Wreck(TerrainObject):
 
     def __init__(self, filename: str, durability: int, position: Point, texture_index: Union[tuple, int]):
@@ -230,21 +229,24 @@ class PlaceableGameObject:
         self.grids = None
         self.drawn_gizmo_data = None
 
-    def snap_to_the_map_grid(self, gx, gy):
+    def snap_to_the_map_grid(self, gx, gy, forced=False):
         """
         Create dictionary of map positions and their boolean 'availabilities' for constructing Building. This dict would
         be used to draw colored gizmo on the screen when player seek a proper position for placing the Building.
         """
-        if self.last_grid == (gx, gy):
+        if not forced and self.last_grid == (gx, gy):
             return
         from map.map import map_grid_to_position
-        self.position = map_grid_to_position((gx, gy))
+        self.position = map_grid_to_position((gx + 1, gy + 1))
         self.grids = {
             map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).available_for_construction
             for y in range(self.grid_height) for x in range(self.grid_width)
         }
+        self.last_grid = gx, gy
 
     def update(self):
+        if not self.grids:
+            return
         self.drawn_gizmo_data = (
             (gx, gy, TILE_WIDTH, TILE_HEIGHT, add_transparency(GREEN if is_available else RED, 64))
             for (gx, gy), is_available in self.grids.items()
@@ -255,10 +257,14 @@ class PlaceableGameObject:
             draw_rectangle_filled(*grid_data)
 
     def is_construction_possible(self) -> bool:
-        return self.is_location_available and self.player.enough_resources_for(self.gameobject_name)
+        if self.is_location_available:
+            return self.game.settings.editor_mode or self.player.enough_resources_for(self.gameobject_name)
+        return False
 
     @property
     def is_location_available(self) -> bool:
+        if not self.grids:
+            return False
         return all(bool(availability) for availability in self.grids.values())
 
     def build(self):
@@ -267,3 +273,4 @@ class PlaceableGameObject:
             ConstructionSite(self.gameobject_name, self.player, self.position)
         else:
             self.game.spawn(self.gameobject_name, self.player, self.position)
+        self.snap_to_the_map_grid(*self.last_grid, forced=True)

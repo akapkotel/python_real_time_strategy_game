@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 import shelve
 
-from campaigns.events import Event
 from campaigns.triggers import EventTrigger
 from utils.colors import CLEAR_GREEN, RED
 

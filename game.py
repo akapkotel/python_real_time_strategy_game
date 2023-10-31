@@ -27,7 +27,7 @@ from arcade import (
 )
 from arcade.arcade_types import Color, Point
 
-from effects.sound import AudioPlayer
+from effects.sound import SoundPlayer
 from map.constants import TILE_WIDTH, TILE_HEIGHT
 from persistency.configs_handling import read_csv_files
 from persistency.resources_manager import ResourcesManager
@@ -134,7 +134,11 @@ class Settings:
         self.update_rate = 1 / (self.fps * self.game_speed)
         self.draw_fps_counter: bool = self.developer_mode and not self.editor_mode
 
-        self.volume: float = 0.5
+        self.sound_on: bool = True
+        self.music_on: bool = True
+        self.sound_effects_on: bool = True
+
+        self.sound_volume: float = 0.5
         self.music_volume: float = 1.0
         self.effects_volume: float = 1.0
 
@@ -151,6 +155,7 @@ class Settings:
 
         self.vehicles_threads: bool = True
         self.threads_fadeout_seconds: int = 2
+        self.simplified_health_bars: bool = True
 
         self.shot_blasts: bool = True
         self.remove_wrecks_after_seconds: int = 30
@@ -204,7 +209,7 @@ class GameWindow(Window, EventsCreator):
         self.campaigns: Dict[str, Campaign] = load_campaigns()
         self.missions: List[MissionDescriptor] = []
 
-        self.sound_player = AudioPlayer(window=self)
+        self.sound_player = SoundPlayer(window=self)
 
         self.save_manager = SaveManager('saved_games', 'scenarios', self)
 
@@ -421,9 +426,9 @@ class GameWindow(Window, EventsCreator):
         x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
         self.menu_view.selectable_groups[SAVED_GAMES] = group = SelectableGroup()
         loading_menu.extend(
-            GenericTextButton('blank_file_button.png', x, next(y), file,
+            GenericTextButton('blank_file_button.png', x, next(y), file_name,
                               None, subgroup=4, selectable_group=group)
-            for file in self.save_manager.saved_games
+            for file_name in self.save_manager.saved_games
         )
 
     def open_saving_menu(self):
@@ -444,6 +449,7 @@ class GameWindow(Window, EventsCreator):
         elif not (save_name := text_input_field.get_text()):
             save_name = f'saved_game({time.asctime()})'
         self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
+        self.update_saved_games_list(SAVING_MENU)
 
     def load_saved_game_or_scenario(self, scenarios=None):
         if self.game_view is not None:
@@ -581,7 +587,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         return self.window.resources_manager
 
     @property
-    def sound_player(self) -> AudioPlayer:
+    def sound_player(self) -> SoundPlayer:
         return self.window.sound_player
 
     @property
@@ -828,6 +834,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             log(building_name, True)  # TODO: real logic instead of test log
             column, row = positions[i]
             button = Button(f'{building_name}_icon.png', column, row, building_name,
+                            active=self.local_human_player.enough_resources_for(building_name),
                             functions=partial(self.mouse.attach_placeable_gameobject, building_name))
             construction_bundle.append(button)
 

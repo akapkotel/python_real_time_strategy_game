@@ -20,35 +20,32 @@ UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
 UNIT_PRODUCTION_FINISHED = [f'unit_{suffix}.wav' for suffix in ("ready", "complete")]
 
 
-class AudioPlayer:
+class SoundPlayer:
     window = None
     game = None
     instance = None
 
-    def __init__(self,
-                 window,
-                 sounds_directory: str = SOUNDS_DIRECTORY,
-                 sound_on: bool = True,
-                 music_on: bool = True,
-                 sound_effects_on: bool = True):
+    def __init__(self, window):
         """
-        AudioPlayer is a singleton.
+        SoundPlayer manages and plays sounds, and music in game.
 
-        :param sounds_directory: str -- name of the directory without path
+        :param window: GameWindow
         :param sound_on: bool -- if sounds should be played or not
+        :param music_on: bool -- if music should be played or not
+        :param sound_effects_on: bool -- if sound effects should be played or not
         """
         self.window = window
-        self._music_on = music_on
-        self._sound_effects_on = sound_effects_on
+        self._sound_on = window.settings.sound_on
+        self._music_on = window.settings.music_on
+        self._sound_effects_on = window.settings.sound_effects_on
 
-        # self.volume: float = 0.5
-        # self.music_volume = self.volume
-        # self.effects_volume = self.volume
+        self._sound_volume: float = window.settings.sound_volume
+        self._music_volume: float = window.settings.music_volume
+        self._effects_volume: float = window.settings.effects_volume
 
         self.sounds: Dict[str, Sound] = self._preload_sounds()
         self.currently_played: List[Player] = []
         self.current_music: Optional[Player] = None
-        log(f'Loaded {len(self.sounds)} sounds.', console=True)
 
         self.paused_track_name: Optional[str] = None
         self.paused_track_time: Optional[float] = None
@@ -59,21 +56,10 @@ class AudioPlayer:
 
         self.max_sound_distance: Optional[float] = None
 
-        AudioPlayer.instance = self
+        SoundPlayer.instance = self
 
+        log(f'Loaded {len(self.sounds)} sounds.', console=True)
         log(f'Found {len(self.playlists)} playlists', console=True)
-
-    @property
-    def volume(self):
-        return self.window.settings.volume
-
-    @property
-    def music_volume(self):
-        return self.window.settings.music_volume
-
-    @property
-    def effects_volume(self):
-        return self.window.settings.effects_volume
 
     def _preload_sounds(self) -> Dict[str, Sound]:
         names_to_paths = self.window.resources_manager.get(SOUNDS_EXTENSION)
@@ -94,36 +80,74 @@ class AudioPlayer:
         return MUSIC_TRACK_SUFFIX in sound_name
 
     @property
+    def sound_on(self) -> bool:
+        return self._sound_on
+
+    @sound_on.setter
+    def sound_on(self, value: bool):
+        self._sound_on = self.window.settings.sound_on = value
+        self.pause_or_resume_playing_music()
+
+    @property
     def music_on(self) -> bool:
-        return self._music_on
+        return self._sound_on and self._music_on
 
     @music_on.setter
     def music_on(self, value: bool):
-        self._music_on = value
-        if value and self.paused_track_name is not None:
-            self._play_paused_music_track()
+        self._music_on = self.window.settings.music_on = value
+        self.pause_or_resume_playing_music()
+
+    def pause_or_resume_playing_music(self):
+        if self.music_on and self.paused_track_name is not None:
+            self._resume_playing_paused_music_track()
         else:
             self._pause_current_music_track()
 
-    def _play_paused_music_track(self):
-        self.play_music(self.paused_track_name, False)
-        self.current_music.seek(self.paused_track_time)
+    @property
+    def sound_effects_on(self):
+        return self._sound_on and self._sound_effects_on
+
+    @sound_effects_on.setter
+    def sound_effects_on(self, value: bool):
+        self._sound_effects_on = self.window.settings.sound_effects_on = value * 2
+
+    @property
+    def sound_volume(self):
+        return self._sound_volume
+
+    @sound_volume.setter
+    def sound_volume(self, value: float):
+        self._sound_volume = self.window.settings.sound_volume = value
+        self.pause_or_resume_playing_music()
+
+    @property
+    def music_volume(self):
+        return self._sound_volume * self._music_volume
+
+    @music_volume.setter
+    def music_volume(self, value: float):
+        self._music_volume = self.window.settings.music_volume = value
+        self.pause_or_resume_playing_music()
+
+    @property
+    def effects_volume(self):
+        return self._sound_volume * self._effects_volume
+
+    @effects_volume.setter
+    def effects_volume(self, value: float):
+        self._effects_volume = self.window.settings.effects_volume = value
 
     def _pause_current_music_track(self):
         self.paused_track_time = self.current_music.time
         self.paused_track_name = self._current_track_name()
         self.current_music.pause()
 
+    def _resume_playing_paused_music_track(self):
+        self.play_music(self.paused_track_name, False)
+        self.current_music.seek(self.paused_track_time)
+
     def _current_track_name(self) -> str:
         return self.current_playlist[self.playlist_index]
-
-    @property
-    def sound_effects_on(self):
-        return self._sound_effects_on
-
-    @sound_effects_on.setter
-    def sound_effects_on(self, value: bool):
-        self._sound_effects_on = value
 
     def on_update(self):
         if self.max_sound_distance is None and self.game is not None and self.game.is_running:
@@ -151,9 +175,9 @@ class AudioPlayer:
         if name not in self.sounds:
             log(f'Sound: {name} not found!', console=True)
             return
-        elif self.is_music(name) and not self._music_on:
+        elif self.is_music(name) and not self.music_on:
             return
-        elif not self._sound_effects_on:
+        elif not self.sound_effects_on:
             return
 
         if volume is None and sound_position is not None and self.max_sound_distance is not None:
@@ -170,14 +194,14 @@ class AudioPlayer:
         player_position = (viewport[0] + viewport[1] / 2, viewport[2] + viewport[3] / 2)
         return 1 - dist(sound_position, player_position) / self.max_sound_distance
 
-    def play_music(self, name: str, loop=True, volume: Optional[float]=None):
+    def play_music(self, name: str, loop=True, volume: Optional[float] = None):
         """Use this for background sound-themes."""
         if self.current_music is not None:
             self._stop_music_track()
-        if self._music_on:
-            self._play_music_track(name, loop, volume)
+        if self.music_on:
+            self._play_music_track(name, loop, volume or self.music_volume)
 
-    def play_random_sound(self, sounds_list: List[str], volume: Optional[float]=None):
+    def play_random_sound(self, sounds_list: List[str], volume: Optional[float] = None):
         """Play sound randomly chosen from list of sounds names."""
         self.play_sound(random.choice(sounds_list), volume or self.effects_volume)
 
@@ -190,7 +214,7 @@ class AudioPlayer:
             self.current_music = None
 
     def _play_music_track(self, name, loop, volume):
-        volume = self.music_volume * volume if volume is not None else self.music_volume
+        # volume = self.music_volume * volume if volume is not None else self.music_volume
         player = self._get_player(name, loop, volume)
         self.current_music = player
 
@@ -200,7 +224,7 @@ class AudioPlayer:
         self.currently_played.append(player)
 
     def _get_player(self, name, loop, volume) -> Player:
-        volume = min(volume, self.volume)
+        volume = min(volume, self.sound_volume)
         return play_sound(self.sounds[name], volume, looping=loop)
 
     def play(self):

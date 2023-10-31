@@ -166,7 +166,7 @@ class Player(EventsCreator, Observer, Observed):
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
             setattr(self, resource_name, amount)
-            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 0.0 if resource_name is not ENERGY else 0.0)
+            setattr(self, f"{resource_name}{YIELD_PER_SECOND}", 0)
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
             if resource_name != ENERGY:
                 setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
@@ -285,11 +285,11 @@ class Player(EventsCreator, Observer, Observed):
         except KeyError:
             raise KeyError(f'No such name ({expense}) in configs files!')
 
-    def resource(self, resource: str) -> int:
+    def get_resource_amount(self, resource: str) -> int:
         return getattr(self, resource, 0)
 
     def has_resource(self, resource: str, amount: int = 1) -> bool:
-        return self.resource(resource) >= amount or self.unlimited_resources
+        return self.get_resource_amount(resource) >= amount or self.unlimited_resources
 
     def notify_player_of_resource_deficit(self, resource: str):
         self.game.sound_player.play_sound(f'not_enough_{resource}.wav')
@@ -322,18 +322,15 @@ class Player(EventsCreator, Observer, Observed):
             building.power_ratio = power_ratio
 
     def update_construction_options(self, building: Building):
-        # self.buildings_possible_to_build.clear()
-        # self.units_possible_to_build.clear()
-        # for building in self.buildings:
-        #     self.buildings_possible_to_build.update(self.game.configs[building.object_name]['allows_construction'])
-        #     if (produced_units := building.produced_units) is not None:
-        #         self.units_possible_to_build.update(produced_units)
         if (produced_units := building.produced_units) is not None:
             for unit_name in produced_units:
                 self.units_possible_to_build.remove(unit_name)
         if (constructions := self.game.configs[building.object_name]['allows_construction']) is not None:
             for building_name in constructions:
                 self.buildings_possible_to_build.remove(building_name)
+
+    def get_players_base_position(self) -> Point:
+        raise NotImplementedError
 
     def __getstate__(self) -> Dict:
         saved_player = {k: v for (k, v) in self.__dict__.items()}
@@ -357,7 +354,7 @@ class HumanPlayer(Player):
         bundle = self.game.get_bundle(UI_RESOURCES_SECTION)
         for resource in self.resources:
             label = bundle.find_by_name(name=resource)
-            value = int(self.resource(resource))
+            value = int(self.get_resource_amount(resource))
             label.text = str(value)
             label.text_color = RED if not value else GREEN
 
@@ -566,14 +563,14 @@ class PlayerEntity(GameObject):
         return self._health
 
     @property
-    def health_percentage(self) -> int:
-        return int((self._health / self._max_health) * 100)
+    def health_ratio(self) -> float:
+        return self._health / self._max_health
 
     @health.setter
     def health(self, value: float):
         self._health = clamp(value, self._max_health, 0)
         if self.selection_marker is not None:
-            self.selection_marker.update_health_percentage(self.health_percentage)
+            self.selection_marker.update_health_percentage(self.health_ratio)
 
     @property
     def weapons(self) -> bool:

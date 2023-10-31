@@ -320,7 +320,7 @@ class Unit(PlayerEntity):
 
     def move_to_current_waypoint(self, destination, distance_left):
         angle = calculate_angle(*self.position, *destination)
-        self.change_x, self.change_y = vector_2d(angle, self.max_speed)
+        self.change_x, self.change_y = vector_2d(angle, self.max_speed * self.health_ratio)
 
     def move_to(self, destination: GridPosition, force_destination=True):
         self.cancel_path_requests()

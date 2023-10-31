@@ -293,7 +293,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
 
         super().__init__(full_texture_name, scale=scale, center_x=x, center_y=y)
         ToggledElement.__init__(self, active, visible)
-        CursorInteractive.__init__(self, can_be_dragged, functions, parent=parent)
+        CursorInteractive.__init__(self, can_be_dragged, functions=functions, parent=parent)
         Selectable.__init__(self, selectable_group=selectable_group)
         self.name = name
         self._bundle = None
@@ -646,7 +646,7 @@ class UiTextLabel(UiElement):
                  name: Optional[str] = None, active: bool = False, align_x: str = 'center', align_y: str = 'center',
                  visible: bool = True, parent: Optional[Hierarchical] = None, subgroup: Optional[int] = None,
                  hint: Optional[Hint] = None):
-        super().__init__('', x, y, name, active, visible, parent, subgroup, hint=hint)
+        super().__init__('', x, y, name, active, visible, parent, subgroup=subgroup, hint=hint)
         self.text = text
         self.size = font_size
         self.text_color = text_color

@@ -154,12 +154,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.position = x, y
         if self.placeable_gameobject is not None:
             grid_x, grid_y = position_to_map_grid(x, y)
-            self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
+            self.placeable_gameobject.snap_to_the_map_grid(grid_x - 1, grid_y - 1)
 
     def attach_placeable_gameobject(self, gameobject_name: str):
         self.placeable_gameobject = PlaceableGameObject(gameobject_name, self.game.local_human_player, *self.position)
-        grid_x, grid_y = position_to_map_grid(*self.position)
-        self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
 
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
@@ -442,7 +440,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
-        self.draw_cross_cursor()
+        if self.placeable_gameobject is None:
+            self.draw_cross_cursor()
 
         if self.show_hint and self.text_hint_delay <= self.game.timer.total_game_time:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
@@ -470,7 +469,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         draw_lrtb_rectangle_filled(x, right, top, bottom, BLACK)
         draw_lrtb_rectangle_outline(x, right, top, bottom, WHITE)
         draw_text(text_hint, x + 5, y, WHITE, 11, anchor_y='center')
-
 
 
 class MouseDragSelection:
