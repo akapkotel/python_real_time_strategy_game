@@ -27,11 +27,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         self.create_submenus()
 
     def create_back_to_menu_button(self) -> Button:
-        return Button('menu_button_back.png', SCREEN_X, 150, functions=partial(self.switch_to_bundle_of_name, MAIN_MENU))
+        return Button('menu_button_back.png', SCREEN_X, 150, functions=partial(self.switch_to_bundle, MAIN_MENU))
 
     def create_submenus(self):
         window = self.window
-        switch_menu = self.switch_to_bundle_of_name
+        switch_menu = self.switch_to_bundle
 
         x, y = SCREEN_X * 0.25, (i for i in range(125, SCREEN_HEIGHT, 125))
         main_menu = UiElementsBundle(
@@ -80,12 +80,12 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=OPTIONS_SUBMENU,
             elements=[
                 self.create_back_to_menu_button(),
-                Tab('menu_tab_graphics.png', 960, SCREEN_HEIGHT - 34,
-                    functions=(partial(switch_menu, GRAPHICS_TAB, (SOUND_TAB, GAME_TAB)))),
-                Tab('menu_tab_sound.png', 320, SCREEN_HEIGHT - 34,
-                    functions=(partial(switch_menu, SOUND_TAB, (GRAPHICS_TAB, GAME_TAB)))),
-                Tab('menu_tab_game.png', 1600, SCREEN_HEIGHT - 34,
-                    functions=(partial(switch_menu, GAME_TAB, (SOUND_TAB, GRAPHICS_TAB))))
+                Button('menu_tab_graphics.png', 960, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, GRAPHICS_TAB, (OPTIONS_SUBMENU,)))),
+                Button('menu_tab_sound.png', 320, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, SOUND_TAB, (OPTIONS_SUBMENU,)))),
+                Button('menu_tab_game.png', 1600, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, GAME_TAB, (OPTIONS_SUBMENU,))))
             ],
             register_to=self
         )
@@ -96,14 +96,13 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[
                 Checkbox('menu_checkbox.png', *next(positions), 'Vehicles threads:',
                          20, ticked=window.settings.vehicles_threads,
-                         variable=(window.settings, 'vehicles_threads'),
-                         subgroup=1),
+                         variable=(window.settings, 'vehicles_threads')),
                 Checkbox('menu_checkbox.png', *next(positions), 'Full screen:',
                          20, ticked=window.fullscreen,
-                         functions=window.toggle_full_screen, subgroup=1),
+                         functions=window.toggle_full_screen),
                 Checkbox('menu_checkbox.png', *next(positions), 'Simplified health bars:',
                          20, ticked=window.settings.simplified_health_bars,
-                         variable=(window.settings, 'simplified_health_bars'), subgroup=1),
+                         variable=(window.settings, 'simplified_health_bars')),
             ],
             register_to=self
         )
@@ -114,19 +113,19 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[
                 Checkbox('menu_checkbox.png', *next(positions),
                          text='Sound:', font_size=20, ticked=window.settings.sound_on,
-                         variable=(window.sound_player, 'sound_on'), subgroup=2),
+                         variable=(window.sound_player, 'sound_on')),
                 Slider('slider.png', *next(positions), 'Sound volume:', 200,
-                       variable=(window.sound_player, 'sound_volume'), subgroup=2),
+                       variable=(window.sound_player, 'sound_volume')),
                 Checkbox('menu_checkbox.png', *next(positions),
                          text='Music:', font_size=20, ticked=window.settings.music_on,
-                         variable=(window.sound_player, 'music_on'), subgroup=2),
+                         variable=(window.sound_player, 'music_on')),
                 Slider('slider.png', *next(positions), 'Music volume:', 200,
-                       variable=(window.sound_player, 'music_volume'), subgroup=2),
+                       variable=(window.sound_player, 'music_volume')),
                 Checkbox('menu_checkbox.png', *next(positions), text='Sound effects:', font_size=20,
                          ticked=window.settings.sound_effects_on,
-                         variable=(window.sound_player, 'sound_effects_on'), subgroup=2),
+                         variable=(window.sound_player, 'sound_effects_on')),
                 Slider('slider.png', *next(positions), 'Effects volume:', 200,
-                       variable=(window.sound_player, 'effects_volume'), subgroup=2),
+                       variable=(window.sound_player, 'effects_volume')),
             ],
             register_to=self
         )
@@ -140,40 +139,24 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
             game_tab.extend(
                 [
-                    UiTextLabel(*next(positions), text='Cheats:', font_size=18, align_x='right', subgroup=3),
+                    UiTextLabel(*next(positions), text='Cheats:', font_size=18, align_x='right'),
                     Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
                              20, ticked=window.settings.immortal_player_units,
-                             variable=(window.settings, 'immortal_player_units'), subgroup=3),
+                             variable=(window.settings, 'immortal_player_units')),
                     Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
                              20, ticked=window.settings.ai_sleep,
-                             variable=(window.settings, 'ai_sleep'), subgroup=3),
+                             variable=(window.settings, 'ai_sleep')),
                     Checkbox('menu_checkbox.png', *next(positions), 'Unlimited player resources:',
                               20, ticked=window.settings.unlimited_player_resources,
-                              variable=(window.settings, 'unlimited_player_resources'), subgroup=3),
+                              variable=(window.settings, 'unlimited_player_resources')),
                     Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources',
                               20, ticked=window.settings.unlimited_cpu_resources,
-                              variable=(window.settings, 'unlimited_cpu_resources'), subgroup=3),
+                              variable=(window.settings, 'unlimited_cpu_resources')),
                     Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
                               20, ticked=window.settings.instant_production_time,
-                              variable=(window.settings, 'instant_production_time'), subgroup=3),
+                              variable=(window.settings, 'instant_production_time')),
                 ]
             )
-
-        # tabs switching what groups of elements are visible by
-        # switching between subgroups:
-        graphics_tab = Tab('menu_tab_graphics.png', 960,
-                           SCREEN_HEIGHT - 34, functions=partial(
-                           options_menu.switch_to_subgroup, 1))
-        sound_tab = Tab('menu_tab_sound.png', 320,
-                        SCREEN_HEIGHT - 34, functions=partial(
-                        options_menu.switch_to_subgroup, 2),
-                        other_tabs=(graphics_tab,))
-        game_tab = Tab('menu_tab_game.png', 1600,
-                        SCREEN_HEIGHT - 34, functions=partial(
-                        options_menu.switch_to_subgroup, 3),
-                        other_tabs=(graphics_tab, sound_tab))
-        options_menu.extend((sound_tab, graphics_tab, game_tab))
-        sound_tab.on_mouse_press(1)
 
         x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
         loading_menu = UiElementsBundle(
@@ -279,7 +262,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=SCENARIO_EDITOR_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
+                # UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
                 Button('menu_button_create.png', SCREEN_X, 300, functions=window.open_scenario_editor),
                 Slider('slider.png', *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
@@ -314,7 +297,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         if (game := self.window.game_view) is not None:
             game.save_timer()
         self.window.toggle_mouse_and_keyboard(True)
-        self.switch_to_bundle_of_name(MAIN_MENU)
+        self.switch_to_bundle(MAIN_MENU)
         self.toggle_game_related_buttons()
         self.window.sound_player.play_playlist('menu')
 

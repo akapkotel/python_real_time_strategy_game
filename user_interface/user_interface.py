@@ -1218,7 +1218,7 @@ class UiBundlesHandler(Observer):
         ))
 
     def close_confirmation_dialog(self, after_switch_to_bundle: str):
-        self.switch_to_bundle_of_name(name=after_switch_to_bundle)
+        self.switch_to_bundle(after_switch_to_bundle)
         self.remove(self.ui_elements_bundles[CONFIRMATION_DIALOG])
 
     def on_being_attached(self, attached: Observed):
@@ -1230,32 +1230,18 @@ class UiBundlesHandler(Observer):
     def on_being_detached(self, detached: Observed):
         self.remove(detached)
 
-    @singledispatchmethod
-    def switch_to_bundle(self, bundle):
-        raise NotImplementedError
-
-    @switch_to_bundle.register
-    def _(self, bundle: UiElementsBundle):
-        self._switch_to_bundle(bundle)
-
-    @switch_to_bundle.register
-    def _(self, bundle: str):
-        try:
-            self._switch_to_bundle(self.ui_elements_bundles[bundle])
-        except KeyError:
-            raise KeyError(bundle)
-
-    def switch_to_bundle_of_name(self, name: str, unload: Optional[Tuple[str, ...]] = None):
-        if name in self.ui_elements_bundles:
-            self._switch_to_bundle(self.ui_elements_bundles[name], unload)
-
-    def _switch_to_bundle(self, bundle: UiElementsBundle, unload: Optional[Tuple[str, ...]] = None):
-        log(f'Switched to submenu {bundle.name}')
-        if unload is None:
-            self._unload_all()
+    def switch_to_bundle(self, bundle: Union[str, UiElementsBundle], exceptions: Union[Tuple[str], None] = None):
+        if isinstance(bundle, UiElementsBundle):
+            self._switch_to_bundle(bundle, exceptions)
         else:
-            for bundle_name in unload:
-                self._unload_bundle(self.get_bundle(bundle_name))
+            try:
+                self._switch_to_bundle(self.ui_elements_bundles[bundle], exceptions)
+            except KeyError:
+                raise KeyError(bundle)
+
+    def _switch_to_bundle(self, bundle: UiElementsBundle, exceptions: Optional[Tuple[str, ...]] = None):
+        log(f'Switched to submenu {bundle.name}')
+        self._unload_all(exceptions)
         self._load_bundle(bundle)
 
     def bind_ui_elements_with_ui_spritelist(self, elements):
@@ -1332,6 +1318,7 @@ class UiBundlesHandler(Observer):
             self.remove(element)
         bundle.ui_bundles_handler = None
         bundle.on_unload()
+        print(f'Bundle {bundle.name} unloaded!')
 
     @singledispatchmethod
     def remove(self, element):
@@ -1346,21 +1333,17 @@ class UiBundlesHandler(Observer):
         self._unload_bundle(element)
         del self.ui_elements_bundles[element.name]
 
-    def _unload_all(self,
-                    exception: Optional[str] = None,
-                    exceptions: Optional[List[str]] = None):
+    def _unload_all(self, exceptions: Optional[Tuple[str]] = None):
         for bundle in self.ui_elements_bundles.values():
             bundle.on_unload()
         self.active_bundles.clear()
         self.ui_elements_spritelist.clear()
-        self._reload_exceptions_bundles(exception, exceptions)
+        if exceptions is not None:
+            self._reload_exceptions_bundles(exceptions)
 
-    def _reload_exceptions_bundles(self, exception, exceptions):
-        if exception is not None:
-            self.load_bundle(name=exception)
-        elif exceptions is not None:
-            for exception in exceptions:
-                self.load_bundle(exception)
+    def _reload_exceptions_bundles(self, exceptions: Tuple[str]):
+        for exception in exceptions:
+            self.load_bundle(exception)
 
     def update_not_displayed_bundles_positions(self, dx, dy):
         for bundle in self.ui_elements_bundles.values():
