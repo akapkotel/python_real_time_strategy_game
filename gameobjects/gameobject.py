@@ -268,9 +268,9 @@ class PlaceableGameObject:
         return False
 
     def build(self):
-        if self.game.scenario_editor is None:
+        if self.game.editor_mode:
+            self.game.spawn(self.gameobject_name, self.player, self.position)
+        else:
             from buildings.buildings import ConstructionSite
             ConstructionSite(self.gameobject_name, self.player, self.position)
-        else:
-            self.game.spawn(self.gameobject_name, self.player, self.position)
         self.snap_to_the_map_grid(*self.last_grid, forced=True)
