@@ -1,117 +1,125 @@
-INFO: 11/01/2023 11:57:15 AM ResourceManager found 133 files.
-INFO: 11/01/2023 11:57:16 AM Loaded 29 sounds.
-INFO: 11/01/2023 11:57:16 AM Found 2 playlists
-INFO: 11/01/2023 11:57:16 AM Found 1 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
-INFO: 11/01/2023 11:57:16 AM Found 4 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
-INFO: 11/01/2023 11:57:16 AM File no_texture does not exist!
-INFO: 11/01/2023 11:57:16 AM UiElement 3001218412480 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001217630464 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001218412864 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001218415424 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001218412800 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354557760 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354566208 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354565696 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354564672 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354571456 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354578496 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354637056 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354639296 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354640448 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM File  does not exist!
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354638272 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354654912 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354655744 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354656640 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354658816 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354662400 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354662464 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354663616 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354614016 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354691840 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354695488 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354697600 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354670464 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354672000 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354701888 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354701952 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354728256 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354729408 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354730304 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354731456 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354736512 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354737664 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354738560 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354739776 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354740672 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354741824 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354743744 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354691584 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM Mouse button 1 clicked on Tab id: 3001354743744
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354751872 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001191614592 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354755904 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354761856 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354762112 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354766080 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354767040 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354755328 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354768256 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354786496 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354787264 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354791104 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354792128 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354753408 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354797632 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354800256 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354803200 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354810944 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354797696 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354813312 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354812352 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354822592 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354815360 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354824704 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354787584 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM UiElement 3001354834688 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:16 AM Switched to View: LoadingScreen
-INFO: 11/01/2023 11:57:16 AM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x000002BACEB04A90>,), kwargs: {}
-INFO: 11/01/2023 11:57:16 AM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x000002BAC68E2E50>,), kwargs: {}
-INFO: 11/01/2023 11:57:16 AM Switched to View: Menu
-INFO: 11/01/2023 11:57:16 AM Switched to submenu main menu
-INFO: 11/01/2023 11:57:16 AM Loading Ui_Elemnts_Bundle: main menu
-INFO: 11/01/2023 11:57:17 AM Called function: on_mouse_press, args: (MouseCursor, 376, 356, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:17 AM Called function: on_left_button_press, args: (MouseCursor, 376, 356), kwargs: {}
-INFO: 11/01/2023 11:57:17 AM Mouse button 1 clicked on Button id: 3001218412864
-INFO: 11/01/2023 11:57:17 AM Switched to submenu options
-INFO: 11/01/2023 11:57:17 AM Loading Ui_Elemnts_Bundle: options
-INFO: 11/01/2023 11:57:18 AM Called function: on_mouse_press, args: (MouseCursor, 1111, 1018, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:18 AM Called function: on_left_button_press, args: (MouseCursor, 1111, 1018), kwargs: {}
-INFO: 11/01/2023 11:57:18 AM Mouse button 1 clicked on Tab id: 3001354741824
-INFO: 11/01/2023 11:57:18 AM Called function: on_mouse_press, args: (MouseCursor, 396, 986, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:18 AM Called function: on_left_button_press, args: (MouseCursor, 396, 986), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Called function: on_mouse_press, args: (MouseCursor, 440, 1020, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Called function: on_left_button_press, args: (MouseCursor, 440, 1020), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Mouse button 1 clicked on Tab id: 3001354743744
-INFO: 11/01/2023 11:57:19 AM Called function: on_mouse_press, args: (MouseCursor, 1650, 1024, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Called function: on_left_button_press, args: (MouseCursor, 1650, 1024), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Mouse button 1 clicked on Tab id: 3001354691584
-INFO: 11/01/2023 11:57:19 AM Called function: on_mouse_press, args: (MouseCursor, 1098, 178, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Called function: on_left_button_press, args: (MouseCursor, 1098, 178), kwargs: {}
-INFO: 11/01/2023 11:57:19 AM Mouse button 1 clicked on Button id: 3001354639296
-INFO: 11/01/2023 11:57:19 AM Switched to submenu main menu
-INFO: 11/01/2023 11:57:19 AM Loading Ui_Elemnts_Bundle: main menu
-INFO: 11/01/2023 11:57:20 AM Called function: on_mouse_press, args: (MouseCursor, 373, 127, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:20 AM Called function: on_left_button_press, args: (MouseCursor, 373, 127), kwargs: {}
-INFO: 11/01/2023 11:57:20 AM Mouse button 1 clicked on Button id: 3001218412480
-INFO: 11/01/2023 11:57:20 AM UiElement 3001221826880 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:20 AM UiElement 3001221827520 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:20 AM UiElement 3001221741184 was unable to register its parent of type <class 'NoneType'>
-INFO: 11/01/2023 11:57:20 AM Switched to submenu Confirmaton dialog
-INFO: 11/01/2023 11:57:20 AM Loading Ui_Elemnts_Bundle: Confirmaton dialog
-INFO: 11/01/2023 11:57:21 AM Called function: on_mouse_press, args: (MouseCursor, 574, 533, 1, 0), kwargs: {}
-INFO: 11/01/2023 11:57:21 AM Called function: on_left_button_press, args: (MouseCursor, 574, 533), kwargs: {}
-INFO: 11/01/2023 11:57:21 AM Mouse button 1 clicked on Button id: 3001221827520
-INFO: 11/01/2023 11:57:21 AM Terminating application...
-INFO: 11/01/2023 11:57:21 AM Switched to submenu main menu
-INFO: 11/01/2023 11:57:21 AM Loading Ui_Elemnts_Bundle: main menu
+INFO: 11/01/2023 05:21:09 PM ResourceManager found 133 files.
+INFO: 11/01/2023 05:21:09 PM Loaded 29 sounds.
+INFO: 11/01/2023 05:21:09 PM Found 2 playlists
+INFO: 11/01/2023 05:21:09 PM Found 1 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 11/01/2023 05:21:09 PM Found 4 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 11/01/2023 05:21:09 PM File no_texture does not exist!
+INFO: 11/01/2023 05:21:09 PM UiElement 2245276778880 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245276184960 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429577472 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429578048 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429577344 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429561984 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429563264 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245276782144 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245276781312 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429575360 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429604096 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429635520 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429650240 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429650944 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM File  does not exist!
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429651648 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429653568 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429655936 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429655488 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429654208 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429695872 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429697344 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429697792 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429652224 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429699712 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429702528 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429671168 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429673408 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429678912 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429729280 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429729344 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429731008 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429732224 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429733120 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429734272 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429735168 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429740480 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429741376 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429742528 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429743424 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429744960 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429745024 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429747392 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM Mouse button 1 clicked on Tab id: 2245429745024
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429750400 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429751616 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429750016 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429752000 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429752256 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429755200 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429773760 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429759488 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429698880 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429776192 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429781760 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429789824 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429783488 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429792192 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429792704 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429799040 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429806080 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429801536 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429792064 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429803904 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429803264 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429817216 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245429813952 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245446412288 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245446413888 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM UiElement 2245446413504 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:09 PM Switched to View: LoadingScreen
+INFO: 11/01/2023 05:21:09 PM Called function: update_loading, args: (<utils.views.LoadingScreen object at 0x0000020ACF093A00>,), kwargs: {}
+INFO: 11/01/2023 05:21:09 PM Called function: update_loading, args: (<user_interface.menu.Menu object at 0x0000020AC4EB4DC0>,), kwargs: {}
+INFO: 11/01/2023 05:21:09 PM Switched to View: Menu
+INFO: 11/01/2023 05:21:09 PM Switched to submenu main menu
+INFO: 11/01/2023 05:21:09 PM Loading Ui_Elemnts_Bundle: main menu
+INFO: 11/01/2023 05:21:10 PM Called function: on_mouse_press, args: (MouseCursor, 289, 331, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:10 PM Called function: on_left_button_press, args: (MouseCursor, 289, 331), kwargs: {}
+INFO: 11/01/2023 05:21:10 PM Mouse button 1 clicked on Button id: 2245429577472
+INFO: 11/01/2023 05:21:10 PM Switched to submenu options
+INFO: 11/01/2023 05:21:10 PM Loading Ui_Elemnts_Bundle: options
+INFO: 11/01/2023 05:21:11 PM Called function: on_mouse_press, args: (MouseCursor, 410, 1042, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:11 PM Called function: on_left_button_press, args: (MouseCursor, 410, 1042), kwargs: {}
+INFO: 11/01/2023 05:21:11 PM Called function: on_mouse_press, args: (MouseCursor, 845, 1040, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:11 PM Called function: on_left_button_press, args: (MouseCursor, 845, 1040), kwargs: {}
+INFO: 11/01/2023 05:21:11 PM Mouse button 1 clicked on Tab id: 2245429744960
+INFO: 11/01/2023 05:21:12 PM Called function: on_mouse_press, args: (MouseCursor, 377, 1059, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:12 PM Called function: on_left_button_press, args: (MouseCursor, 377, 1059), kwargs: {}
+INFO: 11/01/2023 05:21:12 PM Mouse button 1 clicked on Tab id: 2245429745024
+INFO: 11/01/2023 05:21:13 PM Called function: on_mouse_press, args: (MouseCursor, 902, 1047, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:13 PM Called function: on_left_button_press, args: (MouseCursor, 902, 1047), kwargs: {}
+INFO: 11/01/2023 05:21:13 PM Mouse button 1 clicked on Tab id: 2245429744960
+INFO: 11/01/2023 05:21:14 PM Called function: on_mouse_press, args: (MouseCursor, 500, 1069, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:14 PM Called function: on_left_button_press, args: (MouseCursor, 500, 1069), kwargs: {}
+INFO: 11/01/2023 05:21:14 PM Mouse button 1 clicked on Tab id: 2245429745024
+INFO: 11/01/2023 05:21:15 PM Called function: on_mouse_press, args: (MouseCursor, 1654, 1032, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:15 PM Called function: on_left_button_press, args: (MouseCursor, 1654, 1032), kwargs: {}
+INFO: 11/01/2023 05:21:15 PM Mouse button 1 clicked on Tab id: 2245429747392
+INFO: 11/01/2023 05:21:16 PM Called function: on_mouse_press, args: (MouseCursor, 991, 132, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:16 PM Called function: on_left_button_press, args: (MouseCursor, 991, 132), kwargs: {}
+INFO: 11/01/2023 05:21:16 PM Mouse button 1 clicked on Button id: 2245429650240
+INFO: 11/01/2023 05:21:16 PM Switched to submenu main menu
+INFO: 11/01/2023 05:21:16 PM Loading Ui_Elemnts_Bundle: main menu
+INFO: 11/01/2023 05:21:20 PM Called function: on_mouse_press, args: (MouseCursor, 280, 83, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:20 PM Called function: on_left_button_press, args: (MouseCursor, 280, 83), kwargs: {}
+INFO: 11/01/2023 05:21:20 PM Mouse button 1 clicked on Button id: 2245276778880
+INFO: 11/01/2023 05:21:20 PM UiElement 2245301408128 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:20 PM UiElement 2245301269824 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:20 PM UiElement 2245301222720 was unable to register its parent of type <class 'NoneType'>
+INFO: 11/01/2023 05:21:20 PM Switched to submenu Confirmaton dialog
+INFO: 11/01/2023 05:21:20 PM Loading Ui_Elemnts_Bundle: Confirmaton dialog
+INFO: 11/01/2023 05:21:21 PM Called function: on_mouse_press, args: (MouseCursor, 435, 581, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:21 PM Called function: on_left_button_press, args: (MouseCursor, 435, 581), kwargs: {}
+INFO: 11/01/2023 05:21:21 PM Called function: on_mouse_press, args: (MouseCursor, 436, 547, 1, 0), kwargs: {}
+INFO: 11/01/2023 05:21:21 PM Called function: on_left_button_press, args: (MouseCursor, 436, 547), kwargs: {}
+INFO: 11/01/2023 05:21:21 PM Mouse button 1 clicked on Button id: 2245301269824
+INFO: 11/01/2023 05:21:21 PM Terminating application...
+INFO: 11/01/2023 05:21:21 PM Switched to submenu main menu
+INFO: 11/01/2023 05:21:21 PM Loading Ui_Elemnts_Bundle: main menu
