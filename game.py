@@ -408,12 +408,12 @@ class GameWindow(Window, EventsCreator):
         return self.current_view.viewport
 
     def update_scenarios_list(self, menu: str):
-        campaign_menu = self.menu_view.get_bundle(menu)
+        scenarios_list: UiElementsBundle = self.menu_view.get_bundle(menu)
         self.menu_view.selectable_groups[SCENARIOS] = group = SelectableGroup()
-        campaign_menu.remove_subgroup(5)
+        scenarios_list.remove_subgroup(5)
 
         x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, 60))
-        campaign_menu.extend(  # refresh saved-games list
+        scenarios_list.extend(  # refresh saved-games list
             GenericTextButton('blank_file_button.png', x, next(y), file,
                               None, subgroup=5, selectable_group=group)
             for file in self.save_manager.scenarios

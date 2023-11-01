@@ -6,7 +6,7 @@ import time
 from enum import IntEnum
 
 from math import dist
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
@@ -45,7 +45,7 @@ class UnitActivity(IntEnum):
     DIE = 3
 
 
-class Unit(PlayerEntity):
+class Unit(PlayerEntity, ABC):
     """
     Unit is a PlayerEntity which can move on map.
     """

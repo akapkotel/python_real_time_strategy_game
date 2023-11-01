@@ -7,11 +7,11 @@ from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
     CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
-    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION
+    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION, SCENARIOS
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
-    UiTextLabel, Slider, Background, Frame
+    UiTextLabel, Slider, Background, Frame, SelectableGroup, GenericTextButton
 )
 from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
@@ -48,13 +48,13 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_newgame.png', x, next(y),
                        functions=partial(switch_menu, NEW_GAME_MENU)),
                 Button('menu_button_continue.png', x, next(y),
-                       name=('%s' % CONTINUE_BUTTON), active=False,
+                       name=CONTINUE_BUTTON, active=False,
                        functions=window.continue_game),
                 Button('menu_button_quit.png', x, next(y),
-                       name=('%s' % QUIT_GAME_BUTTON), active=False,
+                       name=QUIT_GAME_BUTTON, active=False,
                        functions=window.quit_current_game),
                 Button('menu_button_savegame.png', x, next(y),
-                       name=('%s' % SAVE_GAME_BUTTON),
+                       name=SAVE_GAME_BUTTON,
                        functions=partial(switch_menu, SAVING_MENU),
                        active=False),
                 # buttons in center:
@@ -235,7 +235,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        min_value=60, max_value=260, step=20),
             ],
             register_to=self,
-            _on_load=partial(window.update_scenarios_list, SKIRMISH_MENU)
+            _on_load=partial(self.update_scenarios_or_saves_list, SKIRMISH_MENU)
         )
 
         campaign_menu = UiElementsBundle(
@@ -245,7 +245,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
             ],
             register_to=self,
-            _on_load=partial(window.update_scenarios_list, CAMPAIGN_MENU)
+            _on_load=partial(self.update_scenarios_or_saves_list, CAMPAIGN_MENU)
         )
 
         multiplayer_menu = UiElementsBundle(
@@ -274,6 +274,24 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        min_value=60, max_value=260, step=20),
             ],
             register_to=self
+        )
+
+    def update_scenarios_or_saves_list(self, ui_elements_bundle_name: str):
+        """
+        Populate the list of scenarios or saved games to display in the screen.
+
+        :param ui_elements_bundle_name:
+        :return:
+        """
+        scenarios_list: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
+        self.window.menu_view.selectable_groups[SCENARIOS] = group = SelectableGroup()
+        scenarios_list.remove_subgroup(5)
+
+        x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, SCREEN_HEIGHT // len(scenarios_list.elements)))
+        scenarios_list.extend(  # refresh saved-games list
+            GenericTextButton('blank_file_button.png', x, next(y), file,
+                              None, subgroup=5, selectable_group=group)
+            for file in self.window.save_manager.scenarios
         )
 
     def on_show_view(self):

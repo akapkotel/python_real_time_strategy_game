@@ -1246,7 +1246,6 @@ class UiBundlesHandler(Observer):
         log(f'Switched to submenu {bundle.name}')
         self._unload_all()
         self._load_bundle(bundle)
-        self.active_bundles.add(bundle.name)
 
     def bind_ui_elements_with_ui_spritelist(self, elements):
         for ui_element in elements:
@@ -1273,12 +1272,7 @@ class UiBundlesHandler(Observer):
     def unload_bundle(self,
                       name: Optional[str] = None,
                       index: Optional[int] = None):
-        if name is not None:
-            bundle = self.ui_elements_bundles.get(name, None)
-        elif index is not None:
-            bundle = self.get_bundle_of_index(index)
-        else:
-            return
+        bundle = self.ui_elements_bundles.get(name, None) or self.get_bundle_of_index(index)
         if bundle is not None:
             self._unload_bundle(bundle)
 
