@@ -1230,21 +1230,32 @@ class UiBundlesHandler(Observer):
     def on_being_detached(self, detached: Observed):
         self.remove(detached)
 
-    def switch_to_bundle(self,
-                         bundle: UiElementsBundle = None,
-                         name: str = None):
-        if bundle is not None:
-            return self._switch_to_bundle(bundle)
-        elif name in self.ui_elements_bundles:
-            return self._switch_to_bundle(self.ui_elements_bundles[name])
+    @singledispatchmethod
+    def switch_to_bundle(self, bundle):
+        raise NotImplementedError
 
-    def switch_to_bundle_of_name(self, name: str):
+    @switch_to_bundle.register
+    def _(self, bundle: UiElementsBundle):
+        self._switch_to_bundle(bundle)
+
+    @switch_to_bundle.register
+    def _(self, bundle: str):
+        try:
+            self._switch_to_bundle(self.ui_elements_bundles[bundle])
+        except KeyError:
+            raise KeyError(bundle)
+
+    def switch_to_bundle_of_name(self, name: str, unload: Optional[Tuple[str, ...]] = None):
         if name in self.ui_elements_bundles:
-            self._switch_to_bundle(self.ui_elements_bundles[name])
+            self._switch_to_bundle(self.ui_elements_bundles[name], unload)
 
-    def _switch_to_bundle(self, bundle: UiElementsBundle):
+    def _switch_to_bundle(self, bundle: UiElementsBundle, unload: Optional[Tuple[str, ...]] = None):
         log(f'Switched to submenu {bundle.name}')
-        self._unload_all()
+        if unload is None:
+            self._unload_all()
+        else:
+            for bundle_name in unload:
+                self._unload_bundle(self.get_bundle(bundle_name))
         self._load_bundle(bundle)
 
     def bind_ui_elements_with_ui_spritelist(self, elements):

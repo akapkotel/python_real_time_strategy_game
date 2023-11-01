@@ -432,7 +432,7 @@ class GameWindow(Window, EventsCreator):
 
     def open_saving_menu(self):
         self.show_view(self.menu_view)
-        self.menu_view.switch_to_bundle(name=SAVING_MENU)
+        self.menu_view.switch_to_bundle(SAVING_MENU)
 
     def save_game(self, text_input_field: Optional[TextInputField] = None):
         """

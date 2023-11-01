@@ -7,7 +7,8 @@ from controllers.constants import MULTIPLAYER_MENU
 from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
     CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
-    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION, SCENARIOS
+    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION, SCENARIOS, GRAPHICS_TAB, SOUND_TAB,
+    GAME_TAB
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
@@ -75,14 +76,24 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         col_width = SCREEN_WIDTH // (columns + 1)
         row_height = SCREEN_HEIGHT // (rows + 1) * 0.75
 
-        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
-
         options_menu = UiElementsBundle(
             name=OPTIONS_SUBMENU,
             elements=[
                 self.create_back_to_menu_button(),
-                # set 'subgroup' index for each element to assign it to the
-                # proper tab in options sub-menu:
+                Tab('menu_tab_graphics.png', 960, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, GRAPHICS_TAB, (SOUND_TAB, GAME_TAB)))),
+                Tab('menu_tab_sound.png', 320, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, SOUND_TAB, (GRAPHICS_TAB, GAME_TAB)))),
+                Tab('menu_tab_game.png', 1600, SCREEN_HEIGHT - 34,
+                    functions=(partial(switch_menu, GAME_TAB, (SOUND_TAB, GRAPHICS_TAB))))
+            ],
+            register_to=self
+        )
+
+        positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
+        graphics_tab = UiElementsBundle(
+            name=GRAPHICS_TAB,
+            elements=[
                 Checkbox('menu_checkbox.png', *next(positions), 'Vehicles threads:',
                          20, ticked=window.settings.vehicles_threads,
                          variable=(window.settings, 'vehicles_threads'),
@@ -98,9 +109,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         )
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
-        # sound:
-        options_menu.extend(
-            [
+        sound_tab = UiElementsBundle(
+            name=SOUND_TAB,
+            elements=[
                 Checkbox('menu_checkbox.png', *next(positions),
                          text='Sound:', font_size=20, ticked=window.settings.sound_on,
                          variable=(window.sound_player, 'sound_on'), subgroup=2),
@@ -116,13 +127,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                          variable=(window.sound_player, 'sound_effects_on'), subgroup=2),
                 Slider('slider.png', *next(positions), 'Effects volume:', 200,
                        variable=(window.sound_player, 'effects_volume'), subgroup=2),
-            ]
+            ],
+            register_to=self
         )
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
-
+        game_tab = UiElementsBundle(
+            name=GAME_TAB,
+            elements=[],
+            register_to=self
+        )
         if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
-            options_menu.extend(
+            game_tab.extend(
                 [
                     UiTextLabel(*next(positions), text='Cheats:', font_size=18, align_x='right', subgroup=3),
                     Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
@@ -160,7 +176,6 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         sound_tab.on_mouse_press(1)
 
         x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
-
         loading_menu = UiElementsBundle(
             name=LOADING_MENU,
             elements=[
