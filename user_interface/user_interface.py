@@ -185,11 +185,17 @@ class CursorInteractive(Hierarchical):
     def on_mouse_release(self, button: int):
         self.dragged = False
 
-    def on_mouse_drag(self, x: float = None, y: float = None):
-        if x is not None:
-            setattr(self, 'center_x', x)
-        if y is not None:
-            setattr(self, 'center_y', y)
+    # def on_mouse_drag(self, x: float = None, y: float = None):
+    #     if x is not None:
+    #         setattr(self, 'center_x', x)
+    #     if y is not None:
+    #         setattr(self, 'center_y', y)
+
+    def on_mouse_drag(self, dx: float, dy: float):
+        if dx is not None:
+            setattr(self, 'center_x', getattr(self, 'center_x') + dx)
+        if dy is not None:
+            setattr(self, 'center_y', getattr(self, 'center_y') + dy)
 
 
 class ToggledElement:
@@ -712,6 +718,7 @@ class ScrollableContainer(UiElement):
         """
         self.scrollbar.set_scale_y(1 / ratio)
         self.scrollbar.set_position(self.right, self.bottom + (self.height / 2) * (1 / ratio))
+        self.scrollbar.set_movement_range(self.top, self.bottom)
 
     def add_child(self, child: UiElement):
         super().add_child(child)
@@ -735,10 +742,10 @@ class ScrollableContainer(UiElement):
         super()._func_on_mouse_exit()
         self.cursor.pointed_scrollable = None
 
-    def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
+    def on_mouse_scroll(self, scroll_x: float, scroll_y: float):
         if self.more_children_than_space:
             for child in self._children:
-                child.center_y -= scroll_y * 15
+                child.center_y -= scroll_y
                 self._manage_child_visibility(child)
 
     def this_or_child(self, cursor) -> UiElement:
@@ -863,11 +870,16 @@ class ScrollBar(UiElement):
     def __init__(self, texture_name: str, x: int, y: int, scrollable: ScrollableContainer):
         super().__init__(texture_name, x, y, can_be_dragged=True)
         self.scrollable = scrollable
-        self.relative_position_y = 0
+        self.max_y = 0
+        self.min_y = 0
 
     @property
     def movement_range(self):
         return self.scrollable.items_stack_size - self.scrollable.height
+
+    @property
+    def movement_speed(self) -> float:
+        return self.scrollable.height / self.scrollable.items_stack_size
 
     def set_scale_y(self, new_value: float):
         """ Set the center x coordinate of the sprite. """
@@ -882,6 +894,10 @@ class ScrollBar(UiElement):
             for sprite_list in self.sprite_lists:
                 sprite_list.update_size(self)
 
+    def set_movement_range(self, top, bottom):
+        self.max_y = top - self.height / 2
+        self.min_y = bottom + self.height / 2
+
     def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
         super().on_mouse_enter(cursor)
         self.cursor.pointed_scrollable = self
@@ -890,14 +906,23 @@ class ScrollBar(UiElement):
         super().on_mouse_exit()
         self.cursor.pointed_scrollable = None
 
-    def on_mouse_drag(self, x: float = None, y: float = None):
-        self.center_y = clamp(y, self.scrollable.top - self.height / 2, self.scrollable.bottom + self.height / 2)
-        # TODO: !!!!!!!!!!!!!!!!
+    def on_mouse_drag(self, dx: float, dy: float):
+        self.move_scrollable_content(dy)
+        self.move_scrollbar(dy)
 
     def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
-        self.center_y += scroll_y * 10
-        self.center_y = clamp(self.center_y, self.scrollable.top - self.height / 2, self.scrollable.bottom + self.height / 2)
-        self.scrollable.on_mouse_scroll(scroll_x, scroll_y)
+        self.move_scrollable_content(scroll_y * 16.6)
+        self.move_scrollbar(scroll_y * 16.6)
+
+    def move_scrollable_content(self, dy: float):
+        clamped_dy = clamp(dy, self.max_y - self.center_y, self.min_y - self.center_y)
+        if dy > 0 and self.center_y < self.max_y:
+            self.scrollable.on_mouse_scroll(0, clamped_dy)
+        elif self.center_y > self.min_y:
+            self.scrollable.on_mouse_scroll(0, clamped_dy)
+
+    def move_scrollbar(self, dy: float):
+        self.center_y = clamp(self.center_y + dy * self.movement_speed, self.max_y, self.min_y)
 
 
 class Slider(UiElement):
@@ -1015,9 +1040,9 @@ class _SliderHandle(UiElement):
         self.range_y = self.max_y - self.min_y
         self.value_to_position(self.parent.value)
 
-    def on_mouse_drag(self, x: float = None, y: float = None):
-        self.center_x = clamp(x, self.max_x, self.min_x)
-        self.center_y = clamp(y, self.max_y, self.min_y)
+    def on_mouse_drag(self, dx: float, dy: float):
+        self.center_x = clamp(self.center_x + dx, self.max_x, self.min_x)
+        self.center_y = clamp(self.center_y + dy, self.max_y, self.min_y)
         self.update_value()
 
     def update_value(self):

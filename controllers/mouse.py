@@ -243,7 +243,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.window.is_game_running:
             self.left_mouse_drag_in_game(dx, dy, x, y)
         elif (ui_element := self.dragged_ui_element) is not None:
-            ui_element.on_mouse_drag(x, y)
+            ui_element.on_mouse_drag(dx, dy)
 
     def left_mouse_drag_in_game(self, dx, dy, x, y):
         if self.game.map.on_map_area(x, y):
