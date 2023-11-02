@@ -77,7 +77,10 @@ class Hierarchical:
     @parent.setter
     def parent(self, parent: Optional[Hierarchical]):
         if parent is None:
-            self._parent.discard_child(self)
+            try:
+                self._parent.discard_child(self)
+            except AttributeError:
+                pass
         else:
             parent.add_child(self)
         self._parent = parent
@@ -92,7 +95,14 @@ class Hierarchical:
         self._children.add(child)
 
     def discard_child(self, child: Hierarchical):
-        self._children.discard(child)
+        if self._children:
+            self._children.discard(child)
+
+    def clear_children(self):
+        if self._children:
+            for child in [c for c in self._children]:
+                child.parent = None
+            self._children.clear()
 
     @property
     def level(self):
@@ -113,6 +123,7 @@ class CursorInteractive(Hierarchical):
         Hierarchical.__init__(self, parent)
         self.pointed = False
         self.dragged = False
+        self.is_scrollable = False
         self.can_be_dragged = can_be_dragged
 
         self.functions = {MOUSE_BUTTON_LEFT: [], MOUSE_BUTTON_RIGHT: []}
@@ -136,7 +147,7 @@ class CursorInteractive(Hierarchical):
             self._func_on_mouse_enter(cursor)
 
     def _func_on_mouse_enter(self, cursor):
-        pass
+        ...
 
     def on_mouse_exit(self):
         if self.pointed:
@@ -145,7 +156,12 @@ class CursorInteractive(Hierarchical):
             self.cursor = None
 
     def _func_on_mouse_exit(self):
-        pass
+        if self.parent.is_scrollable:
+            self.cursor.pointed_scrollable = None
+
+    def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
+        if self.parent.is_scrollable:
+            self.parent.on_mouse_scroll(scroll_x, scroll_y)
 
     def on_mouse_press(self, button: int):
         log(f'Mouse button {button} clicked on {self}')
@@ -502,15 +518,15 @@ class ProgressButton(Button):
 
 class GenericTextButton(Button):
 
-    def __init__(self, texture_name: str, x: int, y: int, name: str, functions,
-                 subgroup, selectable_group: Optional[SelectableGroup] = None):
+    def __init__(self, texture_name: str, x: int, y: int, name: str, functions: Optional[Tuple[Callable]] = None,
+                 subgroup: Optional[int] = None, selectable_group: Optional[SelectableGroup] = None):
         super().__init__(texture_name, x, y, name, functions=functions, subgroup=subgroup,
                          selectable_group=selectable_group)
 
     def draw(self):
         super().draw()
         x, y = self.position
-        draw_text(self.name, x, y, BLACK, 15, anchor_x='center', anchor_y='center')
+        draw_text(self.name, x, y, GREEN if self.pointed else BLACK, 15, anchor_x='center', anchor_y='center')
 
 
 class Tab(Button):
@@ -677,18 +693,39 @@ class ScrollableContainer(UiElement):
                  functions: Optional[Union[Callable, Tuple[Callable]]] = None,
                  can_be_dragged: bool = False, subgroup: Optional[int] = None,
                  max_scroll_x=None, min_scroll_x=None, max_scroll_y=None,
-                 min_scroll_y=None):
+                 min_scroll_y=None, scrollbar: ScrollBar = None):
         super().__init__(texture_name, x, y, name, active, visible, parent,
                          functions, can_be_dragged, subgroup)
         self.max_scroll_x = max_scroll_x or self.right
         self.min_scroll_x = min_scroll_x or self.left
         self.max_scroll_y = max_scroll_y or self.top
         self.min_scroll_y = min_scroll_y or self.bottom
-        self.invisible_children = []
+        self.is_scrollable = True
+        self.items_stack_size = 0
+        self.more_children_than_space = False  # flag used to determine if scrolling is required
+        self.scrollbar = ScrollBar('ui_scrollbar.png', 0, 0, scrollable=self)
+        self.configure_scrollbar()
+
+    def configure_scrollbar(self, ratio=1.0):
+        """
+        Change ScrollBar size and position according to the current fullness of the Container space.
+        """
+        self.scrollbar.set_scale_y(1 / ratio)
+        self.scrollbar.set_position(self.right, self.bottom + (self.height / 2) * (1 / ratio))
 
     def add_child(self, child: UiElement):
         super().add_child(child)
+        child.set_position(self.center_x, self.min_scroll_y + child.height * 1.1 * len(self._children))
         self._manage_child_visibility(child)
+        self.update_items_stack_size()
+        self.more_children_than_space = (ratio := self.get_items_stack_size_to_space_ratio()) > 1
+        self.configure_scrollbar(max(ratio, 1))
+
+    def update_items_stack_size(self):
+        self.items_stack_size = sum(c.height for c in self._children) * 1.1
+
+    def get_items_stack_size_to_space_ratio(self) -> float:
+        return self.items_stack_size / self.height
 
     def _func_on_mouse_enter(self, cursor):
         super()._func_on_mouse_enter(cursor)
@@ -699,12 +736,24 @@ class ScrollableContainer(UiElement):
         self.cursor.pointed_scrollable = None
 
     def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
-        for child in self._children:
-            child.center_y -= scroll_y * 15
-            self._manage_child_visibility(child)
+        if self.more_children_than_space:
+            for child in self._children:
+                child.center_y -= scroll_y * 15
+                self._manage_child_visibility(child)
+
+    def this_or_child(self, cursor) -> UiElement:
+        """
+        If UiElement has children UiElements, first iterate through them, to
+        check if any child is pointed by cursor instead, otherwise, this
+        UiElement is pointed.
+        """
+        if check_for_collision(cursor, self.scrollbar):
+            return self.scrollbar
+        return super().this_or_child(cursor)
 
     def draw(self):
         super().draw()
+        self.scrollbar.draw()
         draw_rectangle_outline(*self.position, self.width, self.height, WHITE)
 
     def inside_scrollable_area(self, child) -> bool:
@@ -810,7 +859,45 @@ class TextInputField(UiElement):
 class ScrollBar(UiElement):
     sound_on_mouse_enter = None
     sound_on_mouse_click = None
-    ...
+
+    def __init__(self, texture_name: str, x: int, y: int, scrollable: ScrollableContainer):
+        super().__init__(texture_name, x, y, can_be_dragged=True)
+        self.scrollable = scrollable
+        self.relative_position_y = 0
+
+    @property
+    def movement_range(self):
+        return self.scrollable.items_stack_size - self.scrollable.height
+
+    def set_scale_y(self, new_value: float):
+        """ Set the center x coordinate of the sprite. """
+        if new_value != self._scale:
+            self.clear_spatial_hashes()
+            self._point_list_cache = None
+            self._scale = new_value
+            if self._texture:
+                self._height = self._texture.height * self._scale
+            self.add_spatial_hashes()
+
+            for sprite_list in self.sprite_lists:
+                sprite_list.update_size(self)
+
+    def on_mouse_enter(self, cursor: Optional['MouseCursor'] = None):
+        super().on_mouse_enter(cursor)
+        self.cursor.pointed_scrollable = self
+
+    def on_mouse_exit(self):
+        super().on_mouse_exit()
+        self.cursor.pointed_scrollable = None
+
+    def on_mouse_drag(self, x: float = None, y: float = None):
+        self.center_y = clamp(y, self.scrollable.top - self.height / 2, self.scrollable.bottom + self.height / 2)
+        # TODO: !!!!!!!!!!!!!!!!
+
+    def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
+        self.center_y += scroll_y * 10
+        self.center_y = clamp(self.center_y, self.scrollable.top - self.height / 2, self.scrollable.bottom + self.height / 2)
+        self.scrollable.on_mouse_scroll(scroll_x, scroll_y)
 
 
 class Slider(UiElement):

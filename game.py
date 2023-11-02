@@ -176,6 +176,7 @@ class Settings:
         self.tile_height: int = TILE_HEIGHT
 
         self.hints_delay_seconds: float = 0.6
+        self.scrolling_speed_factor: int = 15
 
         self.load_settings_from_file()
 
@@ -420,12 +421,12 @@ class GameWindow(Window, EventsCreator):
         )
 
     def update_saved_games_list(self, menu: str):
-        loading_menu = self.menu_view.get_bundle(menu)
+        loading_menu: UiElementsBundle = self.menu_view.get_bundle(menu)
         loading_menu.remove_subgroup(4)
         x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
         self.menu_view.selectable_groups[SAVED_GAMES] = group = SelectableGroup()
         loading_menu.extend(
-            GenericTextButton('blank_file_button.png', x, next(y), file_name,
+            GenericTextButton('generic_text_button.png', x, next(y), file_name,
                               None, subgroup=4, selectable_group=group)
             for file_name in self.save_manager.saved_games
         )
@@ -448,7 +449,7 @@ class GameWindow(Window, EventsCreator):
         elif not (save_name := text_input_field.get_text()):
             save_name = f'saved_game({time.asctime()})'
         self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
-        self.update_saved_games_list(SAVING_MENU)
+        self.menu_view.update_scenarios_or_saves_list(SAVING_MENU, SAVED_GAMES)
 
     def load_saved_game_or_scenario(self, scenarios=None):
         if self.game_view is not None:
