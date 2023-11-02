@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-
 from typing import Optional, Tuple, List, Set, Union, Dict, Iterable
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
-                    create_rectangle_filled, TShape)
+                    create_rectangle_filled, TShape, draw_texture_rectangle, Texture)
 from arcade.arcade_types import Color
 
 from game import Game
 
-from utils.colors import WHITE, SAND, RED
+from utils.colors import WHITE, SAND, RED, BLACK
 from utils.data_types import GridPosition
 
 
@@ -29,6 +28,7 @@ class MiniMap:
         file, eg. when player loads saved game, list contains 6 elements, or 4
         otherwise.
         """
+        self.texture: Optional[Texture] = None
         self.loaded = loaded
         screen_size, minimap_size, tile_size, rows = data[:4]
 
@@ -40,7 +40,9 @@ class MiniMap:
 
         self.ratio = ratio = self.set_map_to_mini_map_ratio()
         self.width = self.game.map.width * ratio
+        self.half_width = self.width // 2
         self.height = self.game.map.height * ratio
+        self.half_height = self.height // 2
 
         self.position = self.get_position()
 
@@ -78,7 +80,7 @@ class MiniMap:
         }
         if self.loaded:
             r, t = self.screen_width - MARGIN_RIGHT, self.screen_height - MARGIN_TOP
-            dx, dy = r - (self.max_width // 2) - (self.width // 2), t - self.max_height
+            dx, dy = r - (self.max_width // 2) - self.half_width, t - self.max_height
         else:
             dx, dy, *_ = self.minimap_bounds
         self.move_shapes_lists(dx + 9, dy + 60)
@@ -89,6 +91,7 @@ class MiniMap:
             self.update_drawn_units()
             self.update_revealed_areas()
             self.visible.clear()
+            self.texture = self.create_minimap_texture()
 
     def update_position(self, dx: float, dy: float):
         self.move_shapes_lists(dx, dy)
@@ -117,9 +120,10 @@ class MiniMap:
 
     def update_drawn_units(self):
         left, bottom, *_ = self.minimap_bounds
+        ratio = self.ratio
         self.drawn_entities = [
-            [left + (entity.center_x * self.ratio),
-             bottom + (entity.center_y * self.ratio),
+            [left + (entity.center_x * ratio),
+             bottom + (entity.center_y * ratio),
              entity.player.color, 4 if entity.is_building else 2]
             for entity in self.game.local_drawn_units_and_buildings
         ]
@@ -127,10 +131,10 @@ class MiniMap:
 
     @property
     def minimap_bounds(self) -> Tuple[float, float, float, float]:
-        return (self.position[0] - (self.width // 2),
-                self.position[1] - (self.height // 2),
-                self.position[0] + (self.width // 2),
-                self.position[1] + (self.height // 2))
+        return (self.position[0] - self.half_width,
+                self.position[1] - self.half_height,
+                self.position[0] + self.half_width,
+                self.position[1] + self.half_height)
 
     def update_revealed_areas(self):
         revealed_this_time = self.visible.difference(self.drawn_area)
@@ -145,14 +149,18 @@ class MiniMap:
              for (grid_x, grid_y) in [grid for grid in revealed_this_time if grid[1] is row]]
 
     def draw(self):
-        # draw revealed map areas:
-        for shapes_list in self.shapes_lists.values():
-            shapes_list.draw()
-        for entity in self.drawn_entities:
-            draw_point(*entity)
-        # draw current viewport position on the game map:
-        draw_rectangle_outline(*self.viewport, color=WHITE)
-        draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
+        if self.texture:
+            x, y = self.get_position()
+            draw_texture_rectangle(x, y, self.width, self.height, self.texture)
+        else:
+            # draw revealed map areas:
+            for shapes_list in self.shapes_lists.values():
+                shapes_list.draw()
+            for entity in self.drawn_entities:
+                draw_point(*entity)
+            # draw current viewport position on the game map:
+            draw_rectangle_outline(*self.viewport, color=WHITE)
+            draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
 
     def cursor_over_minimap(self, x: float, y: float) -> Optional[Tuple[float, float]]:
         """
@@ -162,6 +170,32 @@ class MiniMap:
         left, bottom, right, top = self.minimap_bounds
         if left < x < right and bottom < y < bottom + top:
             return (x - left) // self.ratio, (y - bottom) // self.ratio
+
+    def create_minimap_texture(self):
+        from PIL import Image, ImageDraw
+        image = Image.new(mode='RGBA', size=(int(self.width), int(self.height)), color=(75, 75, 75, 255))
+        draw = ImageDraw.Draw(image)
+
+        # create texture once for static objects
+
+        # redraw fog of war only when it changed
+        # if self.changed:
+        #     draw.point(
+        #         [(x, y) for x in range(int(image.width)) for y in range(int(image.height))], fill=BLACK
+        #     )
+
+        # redraw units only when they moved
+        left, bottom, *_ = self.minimap_bounds
+        for entity in self.drawn_entities:
+            xy = (int(entity[0] - left), int(entity[1] - bottom))
+            color = entity[2]
+            image.putpixel(xy, color)
+        image.resize((int(self.width), int(self.height * self.ratio)))
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+        return Texture('map_miniature.png', image)
+
+    def save_minimap_texture(self, path: str):
+        self.texture.image.save(path + '.png', bitmap_format='png')
 
     def save(self):
         return [

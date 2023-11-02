@@ -9,13 +9,14 @@ import PIL
 
 from dataclasses import dataclass
 from typing import (
-    Dict, List, Optional, Callable, Set, Tuple, Union, Type, Any
+    Dict, List, Optional, Callable, Set, Tuple, Union, Type, Any, Iterable
 )
 
+from PIL.Image import Image
 from arcade import (
     Sprite, Texture, load_texture, draw_rectangle_outline, draw_text,
     draw_rectangle_filled, draw_scaled_texture_rectangle, check_for_collision,
-    draw_lrtb_rectangle_filled, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT
+    draw_lrtb_rectangle_filled, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, draw_texture_rectangle
 )
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
@@ -97,6 +98,10 @@ class Hierarchical:
     def discard_child(self, child: Hierarchical):
         if self._children:
             self._children.discard(child)
+
+    def extend_children(self, new_children: Iterable[Hierarchical]):
+        for child in new_children:
+            self.add_child(child)
 
     def clear_children(self):
         if self._children:
@@ -635,7 +640,7 @@ class Checkbox(UiElement):
         pass
 
     def update_from_variable(self):
-        self.ticked = getattr(self.variable[0], self.variable[1])
+        self.ticked = getattr(*self.variable)
         self.set_texture(int(self.ticked))
 
     def on_mouse_press(self, button: int):
@@ -647,10 +652,9 @@ class Checkbox(UiElement):
 
     def toggle_variable(self):
         log(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
-        setattr(self.variable[0], self.variable[1], self.ticked)
+        setattr(*self.variable, self.ticked)
 
     def draw(self):
-        # self.text_label.draw()
         self.draw_text()
         super().draw()
 
@@ -1018,8 +1022,8 @@ class Slider(UiElement):
             self.draw_value()
 
     def draw_text(self):
-        x = self.center_x
-        y = self.top + PADDING_Y
+        x = self.left - PADDING_X
+        y = self.center_y #self.top+ PADDING_Y
         draw_text(str(self.text), x, y, WHITE, 20, anchor_x='right', anchor_y='center')
 
     def draw_value(self):
@@ -1129,6 +1133,24 @@ class UnitProductionCostsHint(Hint):
         super().draw()
         for label in self.labels:
             draw_text(*label, anchor_x='left', anchor_y='center')
+
+
+class ImageSlot(UiElement):
+    active = False
+    image = None
+
+    def __init__(self, texture_name: str, x: int, y: int, name, image: Any):
+        super().__init__(texture_name, x, y, name)
+        self.image = None
+        self.set_image(image)
+
+    def set_image(self, image):
+        self.image = Texture('', image) if image is not None else None
+
+    def draw(self):
+        super().draw()
+        if self.image is not None:
+            draw_texture_rectangle(*self.position, self.image.width, self.image.height, self.image)
 
 
 @dataclass

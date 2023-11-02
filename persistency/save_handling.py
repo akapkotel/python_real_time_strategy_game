@@ -4,9 +4,9 @@ import os
 import shelve
 import time
 
-from typing import List, Dict, Callable, Any, Generator
+from typing import List, Dict, Callable, Any, Generator, Tuple, Optional
+from PIL import Image
 
-import game
 from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log, logger
 from utils.data_types import SavedGames
@@ -29,6 +29,14 @@ def replace_bak_save_extension_with_sav(full_save_path):
     file to load saved data is that with 'bak extension.
     """
     os.rename(full_save_path + '.bak', full_save_path)
+
+
+def add_extension_to_file_name_if_required(path: str, save_name: str, extension: str):
+    return os.path.join(path, save_name if extension in save_name else save_name + extension)
+
+
+def save_minimap_texture(game, path, save_name):
+    game.mini_map.save_minimap_texture(os.path.join(path, save_name))
 
 
 class SaveManager:
@@ -76,11 +84,15 @@ class SaveManager:
             name: os.path.join(path, name).replace('.bak', '') for name, path in names_to_paths.items()
         }
 
-    def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
-        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+    def set_correct_path_and_extension(self, scenario: bool) -> Tuple[str, str]:
         path = self.scenarios_path if scenario else self.saves_path
-        full_save_path = os.path.join(path, save_name if extension in save_name else save_name + extension)
-        self.delete_file(save_name, scenario)  # to avoid 'adding' to existing file
+        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+        return path, extension
+
+    def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
+        path, extension = self.set_correct_path_and_extension(scenario)
+        full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
+        self.delete_file(save_name, scenario)  # to avoid 'adding data' to existing file
         with shelve.open(full_save_path) as file:
             file['saved_date'] = time.localtime()
             file['timer'] = game.save_timer()
@@ -92,7 +104,8 @@ class SaveManager:
             file['local_human_player'] = game.local_human_player.id
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
-            file['mission_descriptor'] = game.current_scenario.get_descriptor
+            file['scenario_descriptor'] = game.current_scenario.get_descriptor
+            file['scenario_miniature'] = game.mini_map.texture.image
             file['scenario'] = game.current_scenario
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             if game.editor_mode and finished:
@@ -102,6 +115,7 @@ class SaveManager:
             file['scheduled_events'] = self.game.events_scheduler.save()
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
+        save_minimap_texture(game, path, save_name)
         self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
@@ -120,12 +134,21 @@ class SaveManager:
         else:
             return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
 
+    def extract_miniature_from_save(self, file_name: str) -> Image:
+        path = self.get_full_path_to_file_with_extension(file_name)
+        with shelve.open(path) as file:
+            try:
+                image = file['scenario_miniature']
+            except KeyError:
+                return None
+        return image
+
     def load_game(self, file_name: str) -> Generator[float, Any, None]:
         full_save_path = self.get_full_path_to_file_with_extension(file_name)
         with shelve.open(full_save_path) as file:
             loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
-                      'mission_descriptor', 'permanent_units_groups', 'fog_of_war',
+                      'scenario_descriptor', 'permanent_units_groups', 'fog_of_war',
                       'mini_map', 'scenario', 'scheduled_events']
             progress = 1 / len(loaded)
             for name in loaded:
@@ -140,7 +163,7 @@ class SaveManager:
     def loading_step(function: Callable, argument: Any):
         function(argument)
 
-    def load_mission_descriptor(self, descriptor):
+    def load_scenario_descriptor(self, descriptor):
         pass
 
     def load_saved_date(self, date):

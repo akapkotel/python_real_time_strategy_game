@@ -12,7 +12,8 @@ from user_interface.constants import (
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
-    UiTextLabel, Slider, Background, Frame, SelectableGroup, GenericTextButton, ScrollableContainer, ScrollBar
+    UiTextLabel, Slider, Background, Frame, SelectableGroup, GenericTextButton, ScrollableContainer, ScrollBar,
+    ImageSlot
 )
 from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
@@ -72,7 +73,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         )
 
         columns = 4
-        rows = 10
+        rows = 18
         col_width = SCREEN_WIDTH // (columns + 1)
         row_height = SCREEN_HEIGHT // (rows + 1) * 0.75
 
@@ -139,7 +140,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
             game_tab.extend(
                 [
-                    UiTextLabel(*next(positions), text='Cheats:', font_size=18, align_x='right'),
+                    UiTextLabel(*next(positions), text='Cheats:', font_size=20, align_x='right'),
                     Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
                              20, ticked=window.settings.immortal_player_units,
                              variable=(window.settings, 'immortal_player_units')),
@@ -158,24 +159,23 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 ]
             )
 
-        x, y = SCREEN_X * 1.5, (i for i in range(300, SCREEN_HEIGHT, 125))
-        # scrollbar = ScrollBar('ui_scrollbar.png', 0, 0)
+        x, y = SCREEN_X, (i for i in range(300, SCREEN_HEIGHT, 125))
         loading_menu = UiElementsBundle(
             name=LOADING_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                # left column - ui-buttons:
                 Button('menu_button_loadgame.png', x, next(y),
                        functions=window.load_saved_game_or_scenario),
                 Button('menu_button_deletesave.png', x, next(y),
                        functions=window.delete_saved_game),
-                ScrollableContainer('ui_scrollable_frame.png', 400, 475, 'scrollable')
+                ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, LOADING_MENU, SAVED_GAMES)
         )
 
-        y = (i for i in range(675, 300, -125))
+        y = (i for i in range(300, SCREEN_HEIGHT, 125))
         text_input = TextInputField('text_input_field.png', x, next(y), 'input_field')
         saving_menu = UiElementsBundle(
             name=SAVING_MENU,
@@ -183,10 +183,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 self.create_back_to_menu_button(),
                 Button('menu_button_savegame.png', x, next(y),
                        functions=partial(window.save_game, text_input)),
-                text_input
+                text_input,
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable'),
             ],
             register_to=self,
-            _on_load=partial(window.update_saved_games_list, SAVING_MENU)
+            _on_load=partial(self.update_scenarios_or_saves_list, SAVING_MENU, SAVED_GAMES)
         )
 
         x, y = SCREEN_WIDTH * 0.25, SCREEN_Y
@@ -233,6 +234,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Slider('slider.png',  *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, SKIRMISH_MENU, SCENARIOS)
@@ -242,7 +244,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=CAMPAIGN_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20)
+                UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, CAMPAIGN_MENU, SCENARIOS)
@@ -272,6 +275,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Slider('slider.png', *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, SCENARIO_EDITOR_MENU, SCENARIOS)
@@ -281,19 +285,28 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         """
         Populate the list of scenarios or saved games to display in the screen.
         """
-        files_list: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
+        bundle: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
         self.window.menu_view.selectable_groups[files_type] = group = SelectableGroup()
         subgroup = 5 if files_type == SCENARIOS else 4
-        files_list.remove_subgroup(subgroup)
+        bundle.remove_subgroup(subgroup)
         x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
         files = self.window.save_manager.scenarios if files_type == SCENARIOS else self.window.save_manager.saved_games
-        labels = [GenericTextButton('generic_text_button.png', x, next(y), file, subgroup=subgroup,
+        labels = [GenericTextButton('generic_text_button.png', x, next(y), file,
+                                    functions=partial(self.set_scenario_miniature, bundle, file), subgroup=subgroup,
                                     selectable_group=group) for file in files]
-        scrollable = files_list.find_by_name('scrollable')
+        scrollable = bundle.find_by_name('scrollable')
         scrollable.clear_children()
-        for label in labels:
-            scrollable.add_child(label)
-        files_list.extend(labels)
+        scrollable.extend_children(labels)
+        # for label in labels:
+        #     scrollable.add_child(label)
+        bundle.extend(labels)
+
+    def set_scenario_miniature(self, bundle: UiElementsBundle, save_file_name: str):
+        if (image_slot := bundle.find_by_name('miniature_slot')) is None:
+            return
+        image_slot: ImageSlot
+        if (image := self.window.save_manager.extract_miniature_from_save(save_file_name)) is not None:
+            image_slot.set_image(image)
 
     def on_show_view(self):
         super().on_show_view()

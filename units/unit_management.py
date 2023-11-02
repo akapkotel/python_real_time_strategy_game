@@ -339,7 +339,7 @@ class UnitsManager(EventsCreator):
         self.game.pathfinder.navigate_units_to_destination(units, x, y)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if clicked.is_controlled_by_local_human_player:
+        if self.game.editor_mode or clicked.is_controlled_by_local_human_player:
             self.on_friendly_player_entity_clicked(clicked)
         else:
             self.on_hostile_player_entity_clicked(clicked)
