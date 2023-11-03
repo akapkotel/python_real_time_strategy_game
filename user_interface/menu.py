@@ -18,6 +18,8 @@ from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
 from players_and_factions.constants import PlayerColor
 
+LOADER = 'loader'
+
 
 class Menu(LoadableWindowView, UiBundlesHandler):
 
@@ -165,7 +167,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[
                 self.create_back_to_menu_button(),
                 Button('menu_button_loadgame.png', x, next(y),
-                       functions=window.load_saved_game_or_scenario),
+                       functions=window.load_game),
                 Button('menu_button_deletesave.png', x, next(y),
                        functions=window.delete_saved_game),
                 ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
@@ -186,6 +188,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 text_input,
                 ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable'),
+                # TODO: add checkbox to set the 'finished' flag
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, SAVING_MENU, SAVED_GAMES)
@@ -272,43 +275,45 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 self.create_back_to_menu_button(),
                 # UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
                 Button('menu_button_create.png', SCREEN_X, 300,
-                       functions=partial(window.open_scenario_editor, True)),
-                Button('menu_button_load_project.png', SCREEN_X, 450,
-                       functions=partial(window.open_scenario_editor, False)),
+                       functions=window.open_scenario_editor),
+                Button('menu_button_delete_project.png', SCREEN_X, 450,
+                       functions=window.delete_scenario),
+                Button('menu_button_load_project.png', SCREEN_X, 600,
+                       functions=window.load_scenario),
                 Slider('slider.png', *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
                 Slider('slider.png', *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
-                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable')
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable'),
+                ImageSlot('image_slot.png', SCREEN_X, 850, 'miniature_slot', None),
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, SCENARIO_EDITOR_MENU, SCENARIOS)
+            _on_load=partial(self.update_scenarios_or_saves_list, SCENARIO_EDITOR_MENU, PROJECTS)
         )
 
-    def update_scenarios_or_saves_list(self, ui_elements_bundle_name: str, files_type: str):
+    def update_scenarios_or_saves_list(self, bundle_name: str, files_type: str):
         """
         Populate the list of scenarios or saved games to display in the screen.
         """
-        bundle: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
+        self.window.mouse.select_ui_element(None)
+        bundle: UiElementsBundle = self.window.menu_view.get_bundle(bundle_name)
+        bundle.remove_subgroup(1)
 
-        self.window.menu_view.selectable_groups[files_type] = group = SelectableGroup()
-        subgroup = 5 if files_type in (SCENARIOS, PROJECTS) else 4
-        bundle.remove_subgroup(subgroup)
-
-        x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
-
-        files = self.get_saved_files(ui_elements_bundle_name, files_type)
-
-        labels = [GenericTextButton('generic_text_button.png', x, next(y), file,
-                                    functions=(partial(self.set_scenario_miniature, bundle, file),),
-                                    subgroup=subgroup, selectable_group=group) for file in files]
+        file_selection_buttons = self.create_files_selection_buttons(bundle, files_type, bundle_name)
 
         scrollable = bundle.find_by_name('scrollable')
         scrollable.clear_children()
-        scrollable.extend_children(labels)
-        bundle.extend(labels)
+        scrollable.extend_children(file_selection_buttons)
+
+    def create_files_selection_buttons(self, bundle, files_type, bundle_name):
+        x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
+        files = self.get_saved_files(bundle_name, files_type)
+        return [
+            GenericTextButton('generic_text_button.png', x, next(y), file,
+                              functions=(partial(self.select_button, bundle, file),), subgroup=1) for file in files
+        ]
 
     def get_saved_files(self, bundle_name: str, files_type: str):
         manager = self.window.save_manager
@@ -318,12 +323,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             return manager.projects if self.window.settings.editor_mode else manager.scenarios
         return manager.projects if self.window.settings.editor_mode else manager.saved_games
 
+    def select_button(self, bundle, file):
+        if (input_field := bundle.find_by_name('input_field')) is not None:
+            input_field.set_text(file)
+        self.window.mouse.select_ui_element(self.window.mouse.pointed_ui_element)
+        self.set_scenario_miniature(bundle, file)
+
     def set_scenario_miniature(self, bundle: UiElementsBundle, save_file_name: str):
         if (image_slot := bundle.find_by_name('miniature_slot')) is None:
             return
         image_slot: ImageSlot
         if (image := self.window.save_manager.extract_miniature_from_save(save_file_name)) is not None:
-            image_slot.set_image(image)
+            image_slot.image = image
 
     def on_show_view(self):
         super().on_show_view()

@@ -76,6 +76,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
         self.dragged_ui_element: Optional[UiElement] = None
         self.pointed_ui_element: Optional[UiElement] = None
+        self.selected_ui_element: Optional[UiElement] = None
         self.pointed_gameobject: Optional[GameObject] = None
         self.pointed_scrollable: Optional[ScrollableContainer] = None
         self.bound_text_input_field: Optional[TextInputField] = None
@@ -158,6 +159,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def attach_placeable_gameobject(self, gameobject_name: str):
         self.placeable_gameobject = PlaceableGameObject(gameobject_name, self.game.local_human_player, *self.position)
+
+    def select_ui_element(self, element: Optional[UiElement] = None):
+        self.selected_ui_element = element
 
     @logger()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):

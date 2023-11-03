@@ -346,6 +346,11 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         self.hint = None
         return self
 
+    def add_child(self, child: Hierarchical):
+        super().add_child(child)
+        if child not in self._bundle.elements:
+            self._bundle.append(child)
+
     def this_or_child(self, cursor) -> UiElement:
         """
         If UiElement has children UiElements, first iterate through them, to
@@ -858,6 +863,10 @@ class TextInputField(UiElement):
     def get_text(self) -> str:
         return self._raw_text().strip()
 
+    def set_text(self, text):
+        self.input_characters.clear()
+        self.input_characters.extend(c for c in str(text).split())
+
     def draw(self):
         super().draw()
         if self.input_characters:
@@ -1142,15 +1151,18 @@ class UnitProductionCostsHint(Hint):
 
 class ImageSlot(UiElement):
     active = False
-    image = None
 
     def __init__(self, texture_name: str, x: int, y: int, name, image: Any):
         super().__init__(texture_name, x, y, name)
-        self.image = None
-        self.set_image(image)
+        self._image = image
 
-    def set_image(self, image):
-        self.image = Texture('', image) if image is not None else None
+    @property
+    def image(self) -> Image | None:
+        return self._image
+
+    @image.setter
+    def image(self, image: Image | None):
+        self._image = Texture('', image) if image is not None else None
         if image is not None:
             self.old_width = self.width
             self.old_height = self.height
@@ -1159,11 +1171,11 @@ class ImageSlot(UiElement):
 
     def draw(self):
         super().draw()
-        if self.image is not None:
+        if self._image is not None:
             draw_texture_rectangle(*self.position, self.image.width, self.image.height, self.image)
 
     def on_being_removed(self):
-        if self.image is not None:
+        if self._image is not None:
             self.width = self.old_width
             self.height = self.old_height
 
@@ -1287,8 +1299,12 @@ class UiElementsBundle(Observed):
         if self._on_unload is not None:
             self._on_unload()
 
-    def clear(self):
-        self.elements.clear()
+    def clear(self, elements: Optional[Iterable[UiElement]] = None):
+        if elements is None:
+            self.elements.clear()
+        else:
+            for element in elements:
+                self.elements.remove(element)
 
 
 class UiBundlesHandler(Observer):

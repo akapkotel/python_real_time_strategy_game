@@ -46,7 +46,7 @@ from user_interface.constants import (
     MINIMAP_WIDTH,
     MINIMAP_HEIGHT,
     SCENARIOS,
-    SAVED_GAMES,
+    SAVED_GAMES, SCENARIO_EDITOR_MENU, PROJECTS,
 )
 from user_interface.user_interface import (
     Frame,
@@ -272,20 +272,30 @@ class GameWindow(Window, EventsCreator):
     def is_game_running(self) -> bool:
         return self.current_view is self.game_view
 
-    def start_new_game(self, editor_mode: bool = False, new_scenario: bool = False):
-        scenarios = self.menu_view.selectable_groups.get(SCENARIOS)
-        if not new_scenario and scenarios is not None and scenarios.currently_selected is not None:
-            self.load_saved_game_or_scenario(scenarios, editor_mode)
+    def create_new_game(self, editor_mode: bool):
+        self.settings.editor_mode = editor_mode
+        self.game_view = Game(loader=None)
+
+    def start_new_game(self, editor_mode: bool = False):
+        if (selected := self.mouse.selected_ui_element) is not None:
+            self.load_saved_game_or_scenario(selected, editor_mode)
         else:
-            self.settings.editor_mode = editor_mode
-            self.game_view = Game(loader=None)
-        self.show_view(self.game_view)
+            self.create_new_game(editor_mode)
+            self.show_view(self.game_view)
+
+    def load_game(self):
+        if self.mouse.selected_ui_element is not None:
+            self.start_new_game()
 
     def continue_game(self):
         self.show_view(self.game_view)
 
-    def open_scenario_editor(self, new_scenario: bool):
-        self.start_new_game(True, new_scenario)
+    def open_scenario_editor(self):
+        self.start_new_game(editor_mode=True)
+
+    def load_scenario(self):
+        if self.mouse.selected_ui_element is not None:
+            self.open_scenario_editor()
 
     # @timer(level=1, global_profiling_level=PROFILING_LEVEL, forced=False)
     def on_update(self, delta_time: float):
@@ -420,22 +430,18 @@ class GameWindow(Window, EventsCreator):
         new saved-game file should be read. If field is empty, automatic save
         name would be generated
         """
-        saves = self.menu_view.selectable_groups[SAVED_GAMES]
-        if (selected_save := saves.currently_selected) is not None:
+        if (selected_save := self.mouse.selected_ui_element) is not None:
             save_name = selected_save.name
         elif not (save_name := text_input_field.get_text()):
-            save_name = f'saved_game({time.asctime()})'
+            now = time.gmtime()
+            save_name = f'saved_game_({now.tm_year}_{now.tm_yday}_{now.tm_hour}_{now.tm_min}_{now.tm_sec})'
         self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
         self.menu_view.update_scenarios_or_saves_list(SAVING_MENU, SAVED_GAMES)
 
-    def load_saved_game_or_scenario(self, scenarios=None, editor_mode: bool = False):
-        if self.game_view is not None:
-            self.quit_current_game(self)
-        files = scenarios or self.menu_view.selectable_groups[SAVED_GAMES]
-        if (selected_save := files.currently_selected) is not None:
-            loader = self.save_manager.load_game(filename=selected_save.name, editor_mode=editor_mode)
-            self.game_view = game = Game(loader=loader)
-            self.show_view(game)
+    def load_saved_game_or_scenario(self, selected=None, editor_mode: bool = False):
+        loader = self.save_manager.load_game(filename=selected.name, editor_mode=editor_mode)
+        self.game_view = game = Game(loader=loader)
+        self.show_view(game)
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def quit_current_game(self):
@@ -446,7 +452,12 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, LOADING_MENU)
     def delete_saved_game(self):
-        saves = self.menu_view.selectable_groups[SAVED_GAMES]
+        if (selected := self.mouse.selected_ui_element) is not None:
+            self.save_manager.delete_file(selected.name, False)
+
+    @ask_player_for_confirmation(SCREEN_CENTER, SCENARIO_EDITOR_MENU)
+    def delete_scenario(self):
+        saves = self.menu_view.selectable_groups[SCENARIOS]
         if (selected := saves.currently_selected) is not None:
             self.save_manager.delete_file(selected.name, False)
 

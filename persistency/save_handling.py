@@ -29,6 +29,8 @@ def replace_bak_save_extension_with_sav(full_save_path):
     On Windows Shelve library saves its data as 3 different files with .bak, 'dat and .dir extensions. The correct
     file to load saved data is that with 'bak extension.
     """
+    if os.path.exists(full_save_path):
+        os.remove(full_save_path)
     os.rename(full_save_path + '.bak', full_save_path)
 
 
@@ -169,12 +171,10 @@ class SaveManager:
 
     def load_game(self, filename: str, editor_mode: bool = False) -> Generator[float, Any, None]:
         full_save_path = self.get_full_path_to_file_with_extension(filename)
-        print(full_save_path)
+        loaded = ['timer', 'settings', 'viewports', 'map', 'factions', 'players', 'local_human_player', 'units',
+                  'buildings', 'scenario_descriptor', 'permanent_units_groups', 'fog_of_war', 'mini_map', 'scenario',
+                  'scheduled_events']
         with shelve.open(full_save_path) as file:
-            loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
-                      'players', 'local_human_player', 'units', 'buildings',
-                      'scenario_descriptor', 'permanent_units_groups', 'fog_of_war',
-                      'mini_map', 'scenario', 'scheduled_events']
             progress = 1 / len(loaded)
             for name in loaded:
                 log(f'Loading: {name}...', console=True)
