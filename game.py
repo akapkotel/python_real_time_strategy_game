@@ -408,29 +408,6 @@ class GameWindow(Window, EventsCreator):
         # so there is no need for redundant call to the Window method
         return self.current_view.viewport
 
-    def update_scenarios_list(self, menu: str):
-        scenarios_list: UiElementsBundle = self.menu_view.get_bundle(menu)
-        self.menu_view.selectable_groups[SCENARIOS] = group = SelectableGroup()
-        scenarios_list.remove_subgroup(5)
-
-        x, y = SCREEN_X * 0.35, (i for i in range(300, SCREEN_HEIGHT, 60))
-        scenarios_list.extend(  # refresh saved-games list
-            GenericTextButton('blank_file_button.png', x, next(y), file,
-                              None, subgroup=5, selectable_group=group)
-            for file in self.save_manager.scenarios
-        )
-
-    def update_saved_games_list(self, menu: str):
-        loading_menu: UiElementsBundle = self.menu_view.get_bundle(menu)
-        loading_menu.remove_subgroup(4)
-        x, y = SCREEN_X // 2, (i for i in range(300, SCREEN_HEIGHT, 60))
-        self.menu_view.selectable_groups[SAVED_GAMES] = group = SelectableGroup()
-        loading_menu.extend(
-            GenericTextButton('generic_text_button.png', x, next(y), file_name,
-                              None, subgroup=4, selectable_group=group)
-            for file_name in self.save_manager.saved_games
-        )
-
     def open_saving_menu(self):
         self.show_view(self.menu_view)
         self.menu_view.switch_to_bundle(SAVING_MENU)

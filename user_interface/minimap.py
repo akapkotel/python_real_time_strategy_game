@@ -28,7 +28,6 @@ class MiniMap:
         file, eg. when player loads saved game, list contains 6 elements, or 4
         otherwise.
         """
-        self.texture: Optional[Texture] = None
         self.loaded = loaded
         screen_size, minimap_size, tile_size, rows = data[:4]
 
@@ -168,12 +167,18 @@ class MiniMap:
             return (x - left) // self.ratio, (y - bottom) // self.ratio
 
     def create_minimap_texture(self):
+        """
+        Generate a texture for the minimap, which will be saved in the saved game or scenario file to be used as a
+        miniature in the game menu, when player is browsing saved games and scenarios.
+        """
         from PIL import Image, ImageDraw
         image = Image.new(mode='RGBA', size=(int(self.width), int(self.height)), color=(75, 75, 75, 50))
         draw = ImageDraw.Draw(image, 'RGBA')
+
         # draw revealed map area
         width, height = self.tile_size
         [draw.regular_polygon((x * width, y * height, 2), 4, fill=(0, 255, 0, 50)) for (x, y) in self.drawn_area]
+
         # draw viewport:
         x, y, width, height = (int(x) for x in self.viewport)
         lt = x - width / 2, y + height / 2
@@ -181,6 +186,7 @@ class MiniMap:
         rb = x + width / 2, y - height / 2
         lb = x - width / 2, y - height / 2
         draw.line([lt, rt, rt, rb, rb, lb, lb, lt], fill=WHITE)
+
         # draw units
         left, bottom, *_ = self.minimap_bounds
         for color in (GREEN, RED):
