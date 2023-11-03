@@ -8,7 +8,7 @@ from user_interface.constants import (
     LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
     CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
     QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION, SCENARIOS, GRAPHICS_TAB, SOUND_TAB,
-    GAME_TAB, SAVED_GAMES
+    GAME_TAB, SAVED_GAMES, PROJECTS
 )
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Checkbox, TextInputField, UiTextLabel, Slider, SelectableGroup,
@@ -184,6 +184,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Button('menu_button_savegame.png', x, next(y),
                        functions=partial(window.save_game, text_input)),
                 text_input,
+                ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable'),
             ],
             register_to=self,
@@ -234,7 +235,8 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 Slider('slider.png',  *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
-                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable')
+                ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable'),
+                ImageSlot('image_slot.png', SCREEN_X, 650, 'miniature_slot', None),
                 # TODO: create and add ColorPicker using PlayerColor enum
             ],
             register_to=self,
@@ -269,7 +271,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[
                 self.create_back_to_menu_button(),
                 # UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
-                Button('menu_button_create.png', SCREEN_X, 300, functions=window.open_scenario_editor),
+                Button('menu_button_create.png', SCREEN_X, 300,
+                       functions=partial(window.open_scenario_editor, True)),
+                Button('menu_button_load_project.png', SCREEN_X, 450,
+                       functions=partial(window.open_scenario_editor, False)),
                 Slider('slider.png', *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
@@ -286,21 +291,32 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         """
         Populate the list of scenarios or saved games to display in the screen.
         """
-        manager = self.window.save_manager
         bundle: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
+
         self.window.menu_view.selectable_groups[files_type] = group = SelectableGroup()
-        subgroup = 5 if files_type == SCENARIOS else 4
+        subgroup = 5 if files_type in (SCENARIOS, PROJECTS) else 4
         bundle.remove_subgroup(subgroup)
+
         x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
-        files = manager.scenarios if files_type == SCENARIOS else self.window.save_manager.saved_games
-        # files = manager.sort_saves_by_date()
+
+        files = self.get_saved_files(ui_elements_bundle_name, files_type)
+
         labels = [GenericTextButton('generic_text_button.png', x, next(y), file,
                                     functions=(partial(self.set_scenario_miniature, bundle, file),),
                                     subgroup=subgroup, selectable_group=group) for file in files]
+
         scrollable = bundle.find_by_name('scrollable')
         scrollable.clear_children()
         scrollable.extend_children(labels)
         bundle.extend(labels)
+
+    def get_saved_files(self, bundle_name: str, files_type: str):
+        manager = self.window.save_manager
+        if bundle_name == SCENARIO_EDITOR_MENU:
+            return manager.projects
+        if files_type == SCENARIOS:
+            return manager.projects if self.window.settings.editor_mode else manager.scenarios
+        return manager.projects if self.window.settings.editor_mode else manager.saved_games
 
     def set_scenario_miniature(self, bundle: UiElementsBundle, save_file_name: str):
         if (image_slot := bundle.find_by_name('miniature_slot')) is None:

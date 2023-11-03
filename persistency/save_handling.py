@@ -21,6 +21,7 @@ from effects.explosions import ExplosionsPool
 MAP_EXTENSION = '.map'
 SAVE_EXTENSION = '.sav'
 SCENARIO_EXTENSION = '.scn'
+PROJECT_EXTENSION = '.proj'
 
 
 def replace_bak_save_extension_with_sav(full_save_path):
@@ -31,7 +32,7 @@ def replace_bak_save_extension_with_sav(full_save_path):
     os.rename(full_save_path + '.bak', full_save_path)
 
 
-def add_extension_to_file_name_if_required(path: str, save_name: str, extension: str):
+def add_extension_to_file_name_if_required(path: str, save_name: str, extension: str, finished: bool = False):
     return os.path.join(path, save_name if extension in save_name else save_name + extension)
 
 
@@ -48,15 +49,19 @@ class SaveManager:
         self.window = window
         self.scenarios_path = os.path.abspath(scenarios_path)
         self.saves_path = os.path.abspath(saves_path)
+        self.projects_path = os.path.join(self.scenarios_path, 'projects')
 
         self.scenarios: SavedGames = {}
         self.saved_games: SavedGames = {}
+        self.projects: SavedGames = {}
 
         self.update_scenarios(SCENARIO_EXTENSION, self.scenarios_path)
         self.update_saves(SAVE_EXTENSION, self.saves_path)
+        self.update_projects(PROJECT_EXTENSION, self.projects_path)
 
-        log(f'Found {len(self.scenarios)} scenarios in {self.saves_path}.')
-        log(f'Found {len(self.saved_games)} saved games in {self.saves_path}.')
+        log(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
+        log(f'Found {len(self.projects)} scenarios in {self.projects_path}.', True)
+        log(f'Found {len(self.saved_games)} saved games in {self.saves_path}.', True)
 
         self.loaded = False
 
@@ -66,9 +71,11 @@ class SaveManager:
     def update_scenarios(self, extension: str, scenarios_path: str):
         self.scenarios = self.find_all_files(extension, scenarios_path)
         for name, path in self.scenarios.items():
-            full_scenario_path = os.path.join(scenarios_path, name)
-            with shelve.open(full_scenario_path, 'r') as scenario_file:
+            with shelve.open(path, 'r') as scenario_file:
                 self.window.scenarios.append(scenario_file['scenario_descriptor'])
+
+    def update_projects(self, extension: str, projects_path: str):
+        self.projects = self.find_all_files(extension, projects_path)
 
     def update_saves(self, extension: str, saves_path: str):
         self.saved_games = self.find_all_files(extension, saves_path)
@@ -80,17 +87,21 @@ class SaveManager:
             name: os.path.join(path, name).replace('.bak', '') for name, path in names_to_paths.items()
         }
 
-    def set_correct_path_and_extension(self, scenario: bool) -> Tuple[str, str]:
-        path = self.scenarios_path if scenario else self.saves_path
-        extension = SCENARIO_EXTENSION if scenario else SAVE_EXTENSION
+    def set_correct_path_and_extension(self, scenario: bool, finished: bool) -> Tuple[str, str]:
+        if scenario:
+            path = self.scenarios_path if finished else self.projects_path
+            extension = SCENARIO_EXTENSION if finished else PROJECT_EXTENSION
+        else:
+            path = self.saves_path
+            extension = SAVE_EXTENSION
         return path, extension
 
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
-        path, extension = self.set_correct_path_and_extension(scenario)
+        path, extension = self.set_correct_path_and_extension(scenario, finished)
         full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
         self.delete_file(full_save_path, scenario)  # to avoid 'adding data' to existing file
         with shelve.open(full_save_path) as file:
-            file['save_date'] = time.gmtime(game.timer.seconds)
+            file['save_date'] = time.gmtime()
             file['timer'] = game.save_timer()
             file['settings'] = game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
@@ -117,8 +128,10 @@ class SaveManager:
     def update_files(self, extension, path):
         if extension is SAVE_EXTENSION:
             self.update_saves(extension, path)
-        else:
+        elif extension is SCENARIO_EXTENSION:
             self.update_scenarios(extension, path)
+        else:
+            self.update_projects(extension, path)
 
     def get_full_path_to_file_with_extension(self, filename: str) -> str:
         """
@@ -130,8 +143,12 @@ class SaveManager:
             return os.path.join(self.saves_path, filename)
         elif SCENARIO_EXTENSION in filename:
             return os.path.join(self.scenarios_path, filename)
+        elif PROJECT_EXTENSION in filename:
+            return os.path.join(self.projects_path, filename)
         elif (full_name := filename + SCENARIO_EXTENSION) in self.scenarios:
             return os.path.join(self.scenarios_path, full_name)
+        elif (full_name := filename + PROJECT_EXTENSION) in self.projects:
+            return os.path.join(self.projects_path, full_name)
         else:
             return os.path.join(self.saves_path, filename + SAVE_EXTENSION)
 
@@ -150,8 +167,9 @@ class SaveManager:
             date = file['save_date']
         return date
 
-    def load_game(self, filename: str) -> Generator[float, Any, None]:
+    def load_game(self, filename: str, editor_mode: bool = False) -> Generator[float, Any, None]:
         full_save_path = self.get_full_path_to_file_with_extension(filename)
+        print(full_save_path)
         with shelve.open(full_save_path) as file:
             loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
@@ -163,6 +181,7 @@ class SaveManager:
                 self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
                 log(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
+            self.game.settings.editor_mode = editor_mode
         self.loaded = True
         log(f'Saved game: {filename} was loaded successfully!', console=True)
 

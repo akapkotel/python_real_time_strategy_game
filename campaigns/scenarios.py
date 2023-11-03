@@ -17,6 +17,7 @@ from players_and_factions.player import Player
 
 ScenarioDescriptor = namedtuple('ScenarioDescriptor',
                                 ['name',
+                                 'finished',
                                 'campaign_name',
                                 'map_name',
                                 'triggers',
@@ -32,6 +33,7 @@ class Scenario:
     def __init__(self, scenario_name: str, map_name: str, campaign_name: str = None, index: int = 0):
         self.scenario_name = scenario_name
         self.campaign_name = campaign_name
+        self.finished = False
         self.description = ''
         self.map_name = map_name
         self.index = index
@@ -63,9 +65,10 @@ class Scenario:
     def get_descriptor(self) -> ScenarioDescriptor:
         return ScenarioDescriptor(
             self.scenario_name,
+            self.finished,
             self.campaign_name,
             self.map_name,
-            [],  # self.triggers
+            [],  # TODO: convert self.triggers to readable, safe format
             self.description
         )
 

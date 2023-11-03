@@ -1,5 +1,6 @@
 EDITOR = 'editor'
 SCENARIOS = 'scenarios'
+PROJECTS = 'projects'
 SAVED_GAMES = 'saves'
 SCENARIO_EDITOR_MENU = 'scenario editor menu'
 NEW_GAME_MENU = 'new game menu'

@@ -886,7 +886,9 @@ class ScrollBar(UiElement):
 
     @property
     def movement_speed(self) -> float:
-        return self.scrollable.height / self.scrollable.items_stack_size
+        if self.scrollable.items_stack_size:
+            return self.scrollable.height / self.scrollable.items_stack_size
+        return 0
 
     def set_scale_y(self, new_value: float):
         """ Set the center x coordinate of the sprite. """

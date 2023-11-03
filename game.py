@@ -272,20 +272,20 @@ class GameWindow(Window, EventsCreator):
     def is_game_running(self) -> bool:
         return self.current_view is self.game_view
 
-    def start_new_game(self):
+    def start_new_game(self, editor_mode: bool = False, new_scenario: bool = False):
         scenarios = self.menu_view.selectable_groups.get(SCENARIOS)
-        if scenarios is not None and scenarios.currently_selected is not None:
-            self.load_saved_game_or_scenario(scenarios=scenarios)
-        self.game_view = Game(loader=None)
+        if not new_scenario and scenarios is not None and scenarios.currently_selected is not None:
+            self.load_saved_game_or_scenario(scenarios, editor_mode)
+        else:
+            self.settings.editor_mode = editor_mode
+            self.game_view = Game(loader=None)
         self.show_view(self.game_view)
 
     def continue_game(self):
         self.show_view(self.game_view)
 
-    def open_scenario_editor(self):
-        self.settings.editor_mode = True
-        # TODO: starting new Game in editor mode
-        self.start_new_game()
+    def open_scenario_editor(self, new_scenario: bool):
+        self.start_new_game(True, new_scenario)
 
     # @timer(level=1, global_profiling_level=PROFILING_LEVEL, forced=False)
     def on_update(self, delta_time: float):
@@ -428,12 +428,12 @@ class GameWindow(Window, EventsCreator):
         self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
         self.menu_view.update_scenarios_or_saves_list(SAVING_MENU, SAVED_GAMES)
 
-    def load_saved_game_or_scenario(self, scenarios=None):
+    def load_saved_game_or_scenario(self, scenarios=None, editor_mode: bool = False):
         if self.game_view is not None:
             self.quit_current_game(self)
         files = scenarios or self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected_save := files.currently_selected) is not None:
-            loader = self.save_manager.load_game(filename=selected_save.name)
+            loader = self.save_manager.load_game(filename=selected_save.name, editor_mode=editor_mode)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
 
@@ -462,7 +462,7 @@ class Timer:
     def __init__(self):
         self.game_start_time = time.time()
         self.total_game_time = self.frames = self.seconds = self.minutes = self.hours = 0
-        self.formatted_time = None
+        self.formatted_time = f'00:00:00'
 
     def update(self):
         self.total_game_time = seconds = time.time() - self.game_start_time
