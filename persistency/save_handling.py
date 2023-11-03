@@ -4,7 +4,7 @@ import os
 import shelve
 import time
 
-from typing import List, Dict, Callable, Any, Generator, Tuple, Optional
+from typing import List, Dict, Callable, Any, Generator, Tuple
 from PIL import Image
 
 from utils.functions import find_paths_to_all_files_of_type
@@ -111,8 +111,14 @@ class SaveManager:
             file['scheduled_events'] = self.game.events_scheduler.save()
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
-        self.update_saves(extension, path)
+        self.update_files(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
+
+    def update_files(self, extension, path):
+        if extension is SAVE_EXTENSION:
+            self.update_saves(extension, path)
+        else:
+            self.update_scenarios(extension, path)
 
     def get_full_path_to_file_with_extension(self, filename: str) -> str:
         """
@@ -237,17 +243,13 @@ class SaveManager:
     def load_scheduled_events(self, scheduled_events: List[Dict]):
         self.game.events_scheduler.load(scheduled_events)
 
-    def delete_file(self, file_path: str, scenario: bool):
-        # paths = self.scenarios if scenario else self.saved_games
+    def delete_file(self, save_name: str, scenario: bool):
+        paths = self.scenarios if scenario else self.saved_games
         try:
-            os.remove(file_path)
+            os.remove(paths[save_name])
+            del paths[save_name]
         except Exception as e:
             log(f'{str(e)}', console=True)
-        finally:
-            if scenario:
-                self.update_scenarios(SCENARIO_EXTENSION, self.saves_path)
-            else:
-                self.update_saves(SAVE_EXTENSION, self.scenarios_path)
 
     def rename_saved_game(self, old_name: str, new_name: str):
         try:
