@@ -15,8 +15,8 @@ from utils.scheduling import ScheduledEvent
 from campaigns.research import Technology
 from players_and_factions.player import Player
 
-MissionDescriptor = namedtuple('MissionDescriptor',
-                               ['name',
+ScenarioDescriptor = namedtuple('ScenarioDescriptor',
+                                ['name',
                                 'campaign_name',
                                 'map_name',
                                 'triggers',
@@ -60,8 +60,8 @@ class Scenario:
         return self.game.window.campaigns[self.campaign_name]
 
     @property
-    def get_descriptor(self) -> MissionDescriptor:
-        return MissionDescriptor(
+    def get_descriptor(self) -> ScenarioDescriptor:
+        return ScenarioDescriptor(
             self.scenario_name,
             self.campaign_name,
             self.map_name,

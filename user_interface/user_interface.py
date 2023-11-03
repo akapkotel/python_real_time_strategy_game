@@ -405,6 +405,9 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         self._func_on_mouse_exit()
         super().deactivate()
 
+    def on_being_removed(self):
+        ...
+
 
 class Background(UiElement):
     """Use this to put a static background wherever You need it."""
@@ -1146,11 +1149,21 @@ class ImageSlot(UiElement):
 
     def set_image(self, image):
         self.image = Texture('', image) if image is not None else None
+        if image is not None:
+            self.old_width = self.width
+            self.old_height = self.height
+            self.width = self.image.width
+            self.height = self.image.height
 
     def draw(self):
         super().draw()
         if self.image is not None:
             draw_texture_rectangle(*self.position, self.image.width, self.image.height, self.image)
+
+    def on_being_removed(self):
+        if self.image is not None:
+            self.width = self.old_width
+            self.height = self.old_height
 
 
 @dataclass
@@ -1452,7 +1465,6 @@ class UiBundlesHandler(Observer):
             self.remove(element)
         bundle.ui_bundles_handler = None
         bundle.on_unload()
-        print(f'Bundle {bundle.name} unloaded!')
 
     @singledispatchmethod
     def remove(self, element):

@@ -7,7 +7,7 @@ from arcade.arcade_types import Color
 
 from game import Game
 
-from utils.colors import WHITE, SAND, RED, BLACK
+from utils.colors import WHITE, SAND, RED, BLACK, GREEN
 from utils.data_types import GridPosition
 
 
@@ -45,6 +45,7 @@ class MiniMap:
         self.half_height = self.height // 2
 
         self.position = self.get_position()
+        self.minimap_bounds = self.update_bounds()
 
         self.tile_size = tile_size if self.loaded else (tile_size[0] * ratio,
                                                         tile_size[1] * ratio)
@@ -91,11 +92,11 @@ class MiniMap:
             self.update_drawn_units()
             self.update_revealed_areas()
             self.visible.clear()
-            self.texture = self.create_minimap_texture()
 
     def update_position(self, dx: float, dy: float):
         self.move_shapes_lists(dx, dy)
         self.position = self.get_position()
+        self.minimap_bounds = self.update_bounds()
         self.viewport = self.update_viewport()
 
     def get_position(self):
@@ -129,8 +130,7 @@ class MiniMap:
         ]
         # TODO: update building, draw terrain objects
 
-    @property
-    def minimap_bounds(self) -> Tuple[float, float, float, float]:
+    def update_bounds(self):
         return (self.position[0] - self.half_width,
                 self.position[1] - self.half_height,
                 self.position[0] + self.half_width,
@@ -149,18 +149,14 @@ class MiniMap:
              for (grid_x, grid_y) in [grid for grid in revealed_this_time if grid[1] is row]]
 
     def draw(self):
-        if self.texture:
-            x, y = self.get_position()
-            draw_texture_rectangle(x, y, self.width, self.height, self.texture)
-        else:
-            # draw revealed map areas:
-            for shapes_list in self.shapes_lists.values():
-                shapes_list.draw()
-            for entity in self.drawn_entities:
-                draw_point(*entity)
-            # draw current viewport position on the game map:
-            draw_rectangle_outline(*self.viewport, color=WHITE)
-            draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
+        # draw revealed map areas:
+        for shapes_list in self.shapes_lists.values():
+            shapes_list.draw()
+        for entity in self.drawn_entities:
+            draw_point(*entity)
+        # draw current viewport position on the game map:
+        draw_rectangle_outline(*self.viewport, color=WHITE)
+        draw_rectangle_outline(*self.position, self.width, self.height, RED, 1)
 
     def cursor_over_minimap(self, x: float, y: float) -> Optional[Tuple[float, float]]:
         """
@@ -173,29 +169,27 @@ class MiniMap:
 
     def create_minimap_texture(self):
         from PIL import Image, ImageDraw
-        image = Image.new(mode='RGBA', size=(int(self.width), int(self.height)), color=(75, 75, 75, 255))
-        draw = ImageDraw.Draw(image)
-
-        # create texture once for static objects
-
-        # redraw fog of war only when it changed
-        # if self.changed:
-        #     draw.point(
-        #         [(x, y) for x in range(int(image.width)) for y in range(int(image.height))], fill=BLACK
-        #     )
-
-        # redraw units only when they moved
+        image = Image.new(mode='RGBA', size=(int(self.width), int(self.height)), color=(75, 75, 75, 50))
+        draw = ImageDraw.Draw(image, 'RGBA')
+        # draw revealed map area
+        width, height = self.tile_size
+        [draw.regular_polygon((x * width, y * height, 2), 4, fill=(0, 255, 0, 50)) for (x, y) in self.drawn_area]
+        # draw viewport:
+        x, y, width, height = (int(x) for x in self.viewport)
+        lt = x - width / 2, y + height / 2
+        rt = x + width / 2, y + height / 2
+        rb = x + width / 2, y - height / 2
+        lb = x - width / 2, y - height / 2
+        draw.line([lt, rt, rt, rb, rb, lb, lb, lt], fill=WHITE)
+        # draw units
         left, bottom, *_ = self.minimap_bounds
-        for entity in self.drawn_entities:
-            xy = (int(entity[0] - left), int(entity[1] - bottom))
-            color = entity[2]
-            image.putpixel(xy, color)
-        image.resize((int(self.width), int(self.height * self.ratio)))
+        for color in (GREEN, RED):
+            draw.point(
+                [(int(entity[0] - left), int(entity[1] - bottom))
+                 for entity in self.drawn_entities if entity[2] == color], fill=color
+            )
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
-        return Texture('map_miniature.png', image)
-
-    def save_minimap_texture(self, path: str):
-        self.texture.image.save(path + '.png', bitmap_format='png')
+        return image
 
     def save(self):
         return [

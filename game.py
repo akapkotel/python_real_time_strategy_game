@@ -209,7 +209,7 @@ class GameWindow(Window, EventsCreator):
         self.settings = Settings()  # shared with Game
 
         self.campaigns: Dict[str, Campaign] = load_campaigns()
-        self.missions: List[MissionDescriptor] = []
+        self.scenarios: List[ScenarioDescriptor] = []
 
         self.sound_player = SoundPlayer(window=self)
 
@@ -456,7 +456,7 @@ class GameWindow(Window, EventsCreator):
             self.quit_current_game(self)
         files = scenarios or self.menu_view.selectable_groups[SAVED_GAMES]
         if (selected_save := files.currently_selected) is not None:
-            loader = self.save_manager.load_game(file_name=selected_save.name)
+            loader = self.save_manager.load_game(filename=selected_save.name)
             self.game_view = game = Game(loader=loader)
             self.show_view(game)
 
@@ -1144,7 +1144,7 @@ if __name__ == '__main__':
     from gameobjects.spawning import GameObjectsSpawner
     from map.fog_of_war import FogOfWar
     from buildings.buildings import Building, ConstructionSite
-    from campaigns.scenarios import Scenario, Campaign, load_campaigns, MissionDescriptor
+    from campaigns.scenarios import Scenario, Campaign, load_campaigns, ScenarioDescriptor
     from campaigns.events import Victory, Defeat
     from campaigns.triggers import NoUnitsLeftTrigger, TimePassedTrigger, MapRevealedTrigger
     from user_interface.menu import Menu

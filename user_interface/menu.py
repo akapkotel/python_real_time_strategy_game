@@ -11,12 +11,12 @@ from user_interface.constants import (
     GAME_TAB, SAVED_GAMES
 )
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Tab, Checkbox, TextInputField,
-    UiTextLabel, Slider, Background, Frame, SelectableGroup, GenericTextButton, ScrollableContainer, ScrollBar,
-    ImageSlot
+    UiElementsBundle, UiBundlesHandler, Button, Checkbox, TextInputField, UiTextLabel, Slider, SelectableGroup,
+    GenericTextButton, ScrollableContainer, ImageSlot
 )
 from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
+from players_and_factions.constants import PlayerColor
 
 
 class Menu(LoadableWindowView, UiBundlesHandler):
@@ -235,6 +235,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable')
+                # TODO: create and add ColorPicker using PlayerColor enum
             ],
             register_to=self,
             _on_load=partial(self.update_scenarios_or_saves_list, SKIRMISH_MENU, SCENARIOS)
@@ -285,20 +286,20 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         """
         Populate the list of scenarios or saved games to display in the screen.
         """
+        manager = self.window.save_manager
         bundle: UiElementsBundle = self.window.menu_view.get_bundle(ui_elements_bundle_name)
         self.window.menu_view.selectable_groups[files_type] = group = SelectableGroup()
         subgroup = 5 if files_type == SCENARIOS else 4
         bundle.remove_subgroup(subgroup)
         x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
-        files = self.window.save_manager.scenarios if files_type == SCENARIOS else self.window.save_manager.saved_games
+        files = manager.scenarios if files_type == SCENARIOS else self.window.save_manager.saved_games
+        # files = manager.sort_saves_by_date()
         labels = [GenericTextButton('generic_text_button.png', x, next(y), file,
-                                    functions=partial(self.set_scenario_miniature, bundle, file), subgroup=subgroup,
-                                    selectable_group=group) for file in files]
+                                    functions=(partial(self.set_scenario_miniature, bundle, file),),
+                                    subgroup=subgroup, selectable_group=group) for file in files]
         scrollable = bundle.find_by_name('scrollable')
         scrollable.clear_children()
         scrollable.extend_children(labels)
-        # for label in labels:
-        #     scrollable.add_child(label)
         bundle.extend(labels)
 
     def set_scenario_miniature(self, bundle: UiElementsBundle, save_file_name: str):

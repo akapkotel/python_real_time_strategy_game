@@ -45,8 +45,6 @@ class KeyboardHandler(ToggledElement):
             self.window.game.show_construction_options(UI_BUILDINGS_CONSTRUCTION_PANEL)
         elif symbol == D:
             x = 1
-        elif symbol == C and self.window.game.settings.developer_mode:
-            self.window.mouse.attach_placeable_gameobject('command_center')
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif symbol == LCTRL:

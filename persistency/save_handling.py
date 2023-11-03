@@ -35,10 +35,6 @@ def add_extension_to_file_name_if_required(path: str, save_name: str, extension:
     return os.path.join(path, save_name if extension in save_name else save_name + extension)
 
 
-def save_minimap_texture(game, path, save_name):
-    game.mini_map.save_minimap_texture(os.path.join(path, save_name))
-
-
 class SaveManager:
     """
     This manager works not only with player-created saved games, but also with
@@ -72,7 +68,7 @@ class SaveManager:
         for name, path in self.scenarios.items():
             full_scenario_path = os.path.join(scenarios_path, name)
             with shelve.open(full_scenario_path, 'r') as scenario_file:
-                self.window.missions.append(scenario_file['mission_descriptor'])
+                self.window.scenarios.append(scenario_file['scenario_descriptor'])
 
     def update_saves(self, extension: str, saves_path: str):
         self.saved_games = self.find_all_files(extension, saves_path)
@@ -92,9 +88,9 @@ class SaveManager:
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
         path, extension = self.set_correct_path_and_extension(scenario)
         full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
-        self.delete_file(save_name, scenario)  # to avoid 'adding data' to existing file
+        self.delete_file(full_save_path, scenario)  # to avoid 'adding data' to existing file
         with shelve.open(full_save_path) as file:
-            file['saved_date'] = time.localtime()
+            file['save_date'] = time.gmtime(game.timer.seconds)
             file['timer'] = game.save_timer()
             file['settings'] = game.settings
             file['viewports'] = game.viewport, game.window.menu_view.viewport
@@ -105,7 +101,7 @@ class SaveManager:
             file['units'] = [unit.save() for unit in game.units]
             file['buildings'] = [building.save() for building in game.buildings]
             file['scenario_descriptor'] = game.current_scenario.get_descriptor
-            file['scenario_miniature'] = game.mini_map.texture.image
+            file['scenario_miniature'] = game.mini_map.create_minimap_texture()
             file['scenario'] = game.current_scenario
             file['permanent_units_groups'] = game.units_manager.permanent_units_groups
             if game.editor_mode and finished:
@@ -115,27 +111,26 @@ class SaveManager:
             file['scheduled_events'] = self.game.events_scheduler.save()
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
-        save_minimap_texture(game, path, save_name)
         self.update_saves(extension, path)
         log(f'Game saved successfully as: {save_name + extension}', True)
 
-    def get_full_path_to_file_with_extension(self, save_name: str) -> str:
+    def get_full_path_to_file_with_extension(self, filename: str) -> str:
         """
         Since we do not know if player want's to load his own saved game or to
         start a new game from a predefined .scn file, we determine it checking
         the file name provided to us and adding proper path and extension.
         """
-        if SAVE_EXTENSION in save_name:
-            return os.path.join(self.saves_path, save_name)
-        elif SCENARIO_EXTENSION in save_name:
-            return os.path.join(self.scenarios_path, save_name)
-        elif (full_name := save_name + SCENARIO_EXTENSION) in self.scenarios:
+        if SAVE_EXTENSION in filename:
+            return os.path.join(self.saves_path, filename)
+        elif SCENARIO_EXTENSION in filename:
+            return os.path.join(self.scenarios_path, filename)
+        elif (full_name := filename + SCENARIO_EXTENSION) in self.scenarios:
             return os.path.join(self.scenarios_path, full_name)
         else:
-            return os.path.join(self.saves_path, save_name + SAVE_EXTENSION)
+            return os.path.join(self.saves_path, filename + SAVE_EXTENSION)
 
-    def extract_miniature_from_save(self, file_name: str) -> Image:
-        path = self.get_full_path_to_file_with_extension(file_name)
+    def extract_miniature_from_save(self, filename: str) -> Image:
+        path = self.get_full_path_to_file_with_extension(filename)
         with shelve.open(path) as file:
             try:
                 image = file['scenario_miniature']
@@ -143,8 +138,14 @@ class SaveManager:
                 return None
         return image
 
-    def load_game(self, file_name: str) -> Generator[float, Any, None]:
-        full_save_path = self.get_full_path_to_file_with_extension(file_name)
+    def read_save_date(self, filename: str, scenario: bool):
+        full_save_path = self.get_full_path_to_file_with_extension(filename)
+        with shelve.open(full_save_path) as file:
+            date = file['save_date']
+        return date
+
+    def load_game(self, filename: str) -> Generator[float, Any, None]:
+        full_save_path = self.get_full_path_to_file_with_extension(filename)
         with shelve.open(full_save_path) as file:
             loaded = ['timer', 'settings', 'viewports', 'map', 'factions',
                       'players', 'local_human_player', 'units', 'buildings',
@@ -157,16 +158,13 @@ class SaveManager:
                 log(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
         self.loaded = True
-        log(f'Saved game: {file_name} was loaded successfully!', console=True)
+        log(f'Saved game: {filename} was loaded successfully!', console=True)
 
     @staticmethod
     def loading_step(function: Callable, argument: Any):
         function(argument)
 
     def load_scenario_descriptor(self, descriptor):
-        pass
-
-    def load_saved_date(self, date):
         pass
 
     def load_timer(self, loaded_timer):
@@ -239,13 +237,17 @@ class SaveManager:
     def load_scheduled_events(self, scheduled_events: List[Dict]):
         self.game.events_scheduler.load(scheduled_events)
 
-    def delete_file(self, save_name: str, scenario: bool):
-        paths = self.scenarios if scenario else self.saved_games
+    def delete_file(self, file_path: str, scenario: bool):
+        # paths = self.scenarios if scenario else self.saved_games
         try:
-            os.remove(paths[save_name])
-            del paths[save_name]
+            os.remove(file_path)
         except Exception as e:
             log(f'{str(e)}', console=True)
+        finally:
+            if scenario:
+                self.update_scenarios(SCENARIO_EXTENSION, self.saves_path)
+            else:
+                self.update_saves(SAVE_EXTENSION, self.scenarios_path)
 
     def rename_saved_game(self, old_name: str, new_name: str):
         try:
