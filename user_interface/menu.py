@@ -58,8 +58,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        name=QUIT_GAME_BUTTON, active=False,
                        functions=window.quit_current_game),
                 Button('menu_button_savegame.png', x, next(y),
-                       name=SAVE_GAME_BUTTON,
-                       functions=partial(switch_menu, SAVING_MENU),
+                       name=SAVE_GAME_BUTTON, functions=window.open_saving_menu,
                        active=False),
                 # buttons in center:
                 Button('menu_button_skirmish.png', x * 4, SCREEN_HEIGHT * 0.75,
@@ -174,7 +173,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, LOADING_MENU, SAVED_GAMES)
+            _on_load=partial(self.refresh_files_list_in_bundle, LOADING_MENU, SAVED_GAMES)
         )
 
         y = (i for i in range(300, SCREEN_HEIGHT, 125))
@@ -191,7 +190,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 # TODO: add checkbox to set the 'finished' flag
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, SAVING_MENU, SAVED_GAMES)
+            _on_load=partial(self.refresh_files_list_in_bundle, SAVING_MENU, SAVED_GAMES)
         )
 
         x, y = SCREEN_WIDTH * 0.25, SCREEN_Y
@@ -243,7 +242,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 # TODO: create and add ColorPicker using PlayerColor enum
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, SKIRMISH_MENU, SCENARIOS)
+            _on_load=partial(self.refresh_files_list_in_bundle, SKIRMISH_MENU, SCENARIOS)
         )
 
         campaign_menu = UiElementsBundle(
@@ -254,7 +253,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable')
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, CAMPAIGN_MENU, SCENARIOS)
+            _on_load=partial(self.refresh_files_list_in_bundle, CAMPAIGN_MENU, SCENARIOS)
         )
 
         multiplayer_menu = UiElementsBundle(
@@ -269,17 +268,21 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
         y = (i for i in range(300, 675, 75))
 
+        text_input = TextInputField('text_input_field.png', SCREEN_X, 650, 'input_field')
         scenario_editor_menu = UiElementsBundle(
             name=SCENARIO_EDITOR_MENU,
             elements=[
                 self.create_back_to_menu_button(),
                 # UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
-                Button('menu_button_create.png', SCREEN_X, 300,
+                Button('menu_button_create.png', SCREEN_X * 0.4, 150,
                        functions=window.open_scenario_editor),
-                Button('menu_button_delete_project.png', SCREEN_X, 450,
+                Button('menu_button_delete_project.png', SCREEN_X, 300,
                        functions=window.delete_scenario),
-                Button('menu_button_load_project.png', SCREEN_X, 600,
+                Button('menu_button_load_project.png', SCREEN_X, 425,
                        functions=window.load_scenario),
+                Button('menu_button_save_project.png', SCREEN_X, 550,
+                       functions=partial(window.save_game, text_input)),
+                text_input,
                 Slider('slider.png', *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
@@ -290,22 +293,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 ImageSlot('image_slot.png', SCREEN_X, 850, 'miniature_slot', None),
             ],
             register_to=self,
-            _on_load=partial(self.update_scenarios_or_saves_list, SCENARIO_EDITOR_MENU, PROJECTS)
+            _on_load=partial(self.refresh_files_list_in_bundle, SCENARIO_EDITOR_MENU, PROJECTS)
         )
 
-    def update_scenarios_or_saves_list(self, bundle_name: str, files_type: str):
+    def refresh_files_list_in_bundle(self, bundle_name: str, files_type: str):
         """
         Populate the list of scenarios or saved games to display in the screen.
         """
         self.window.mouse.select_ui_element(None)
         bundle: UiElementsBundle = self.window.menu_view.get_bundle(bundle_name)
         bundle.remove_subgroup(1)
-
         file_selection_buttons = self.create_files_selection_buttons(bundle, files_type, bundle_name)
-
-        scrollable = bundle.find_by_name('scrollable')
-        scrollable.clear_children()
-        scrollable.extend_children(file_selection_buttons)
+        self.populate_scrollable_container_with_selection_buttons(bundle, file_selection_buttons)
 
     def create_files_selection_buttons(self, bundle, files_type, bundle_name):
         x, y = SCREEN_X // 2, (i for i in range(0, SCREEN_HEIGHT, 1))
@@ -335,6 +334,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         image_slot: ImageSlot
         if (image := self.window.save_manager.extract_miniature_from_save(save_file_name)) is not None:
             image_slot.image = image
+
+    def populate_scrollable_container_with_selection_buttons(self, bundle, file_selection_buttons):
+        scrollable = bundle.find_by_name('scrollable')
+        scrollable.clear_children()
+        scrollable.extend_children(file_selection_buttons)
 
     def on_show_view(self):
         super().on_show_view()

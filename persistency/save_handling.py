@@ -101,7 +101,7 @@ class SaveManager:
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
         path, extension = self.set_correct_path_and_extension(scenario, finished)
         full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
-        self.delete_file(full_save_path, scenario)  # to avoid 'adding data' to existing file
+        self.delete_file(full_save_path, scenario)
         with shelve.open(full_save_path) as file:
             file['save_date'] = time.gmtime()
             file['timer'] = game.save_timer()
@@ -125,7 +125,7 @@ class SaveManager:
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
         self.update_files(extension, path)
-        log(f'Game saved successfully as: {save_name + extension}', True)
+        log(f'Game saved successfully as: {save_name}', True)
 
     def update_files(self, extension, path):
         if extension is SAVE_EXTENSION:
@@ -262,11 +262,17 @@ class SaveManager:
     def load_scheduled_events(self, scheduled_events: List[Dict]):
         self.game.events_scheduler.load(scheduled_events)
 
-    def delete_file(self, save_name: str, scenario: bool):
-        paths = self.scenarios if scenario else self.saved_games
+    def check_if_file_exists(self, file_name: str) -> bool:
+        for files in (self.saved_games, self.scenarios, self.projects):
+            if files.get(file_name) is not None:
+                return True
+        return False
+
+    def delete_file(self, file_name: str, scenario: bool):
+        paths = self.saved_games if SAVE_EXTENSION in file_name else (self.scenarios if SCENARIO_EXTENSION in file_name else self.projects)
         try:
-            os.remove(paths[save_name])
-            del paths[save_name]
+            os.remove(paths[file_name])
+            del paths[file_name]
         except Exception as e:
             log(f'{str(e)}', console=True)
 
