@@ -177,7 +177,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         )
 
         y = (i for i in range(300, SCREEN_HEIGHT, 125))
-        text_input = TextInputField('text_input_field.png', x, next(y), 'input_field')
+        text_input = TextInputField('text_input_field.png', x, next(y), 'input_field', forbidden_symbols='.,/\\')
         saving_menu = UiElementsBundle(
             name=SAVING_MENU,
             elements=[
@@ -268,7 +268,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
         y = (i for i in range(300, 675, 75))
 
-        text_input = TextInputField('text_input_field.png', SCREEN_X, 650, 'input_field')
+        text_input = TextInputField('text_input_field.png', SCREEN_X, 650, 'input_field', forbidden_symbols='.,/\\')
         scenario_editor_menu = UiElementsBundle(
             name=SCENARIO_EDITOR_MENU,
             elements=[

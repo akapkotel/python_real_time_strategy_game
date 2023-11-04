@@ -818,9 +818,10 @@ class TextInputField(UiElement):
     """
 
     def __init__(self, texture_name: str, x: int, y: int, name: str,
-                 keyboard_handler: KeyboardHandler = None):
+                 keyboard_handler: KeyboardHandler = None, forbidden_symbols: str = None):
         super().__init__(texture_name, x, y)
         self.name = name
+        self.forbidden_symbols = '' if forbidden_symbols is None else forbidden_symbols
         self.input_characters = []
         self.keyboard_handler = keyboard_handler
 
@@ -842,8 +843,15 @@ class TextInputField(UiElement):
             self.erase_last_character()
         elif symbol == ENTER:
             self.on_enter_pressed()
-        elif self.not_too_long and (key := chr(symbol)).isascii():
+        elif self.not_too_long and (key := self.validate(symbol)) is not None:
             self.input_characters.append(key.upper() if shift_pressed else key)
+
+    def validate(self, symbol: int):
+        key = chr(symbol)
+        if key.isascii() and key not in self.forbidden_symbols:
+            return key
+        else:
+            return None
 
     @property
     def not_too_long(self) -> bool:
@@ -1052,13 +1060,14 @@ class _SliderHandle(UiElement):
 
     def __init__(self, texture_name: str, x: int, y: int, axis, parent: Slider):
         super().__init__(texture_name, x, y, parent=parent, can_be_dragged=True)
-        self.min_x = self.parent.left if axis == HORIZONTAL else self.parent.center_x
-        self.max_x = self.parent.right if axis == HORIZONTAL else self.parent.center_x
-        self.min_y = self.parent.bottom if axis == VERTICAL else self.parent.center_y
-        self.max_y = self.parent.top if axis == VERTICAL else self.parent.center_y
+        self.slider = parent
+        self.min_x = self.slider.left if axis == HORIZONTAL else self.slider.center_x
+        self.max_x = self.slider.right if axis == HORIZONTAL else self.slider.center_x
+        self.min_y = self.slider.bottom if axis == VERTICAL else self.slider.center_y
+        self.max_y = self.slider.top if axis == VERTICAL else self.slider.center_y
         self.range_x = self.max_x - self.min_x
         self.range_y = self.max_y - self.min_y
-        self.value_to_position(self.parent.value)
+        self.value_to_position(self.slider.value)
 
     def on_mouse_drag(self, dx: float, dy: float):
         self.center_x = clamp(self.center_x + dx, self.max_x, self.min_x)
@@ -1067,11 +1076,14 @@ class _SliderHandle(UiElement):
 
     def update_value(self):
         if self.range_x:
-            self.parent.value = (self.center_x - self.min_x) / self.range_x
+            self.slider.value = (self.center_x - self.min_x) / self.range_x
         else:
-            self.parent.value = (self.center_y - self.min_y) / self.range_y
-        if self.parent.step:
-            self.value_to_position(self.parent.value)
+            self.slider.value = (self.center_y - self.min_y) / self.range_y
+
+    def on_mouse_exit(self):
+        super().on_mouse_exit()
+        if self.slider.step:
+            self.value_to_position(self.slider.value)
 
     @singledispatchmethod
     def value_to_position(self, value):
@@ -1086,13 +1098,13 @@ class _SliderHandle(UiElement):
 
     @value_to_position.register
     def _(self, value: int):
-        value_range = (self.parent.max_value - self.parent.min_value)
+        value_range = (self.slider.max_value - self.slider.min_value)
         if self.range_x:
             unit = self.range_x / value_range
-            self.center_x = clamp(self.min_x + unit * (value - self.parent.min_value), self.max_x, self.min_x)
+            self.center_x = clamp(self.min_x + unit * (value - self.slider.min_value), self.max_x, self.min_x)
         else:
             unit = self.range_y / value_range
-            self.center_y = clamp(self.min_y + unit * (value - self.parent.min_value), self.max_y, self.min_y)
+            self.center_y = clamp(self.min_y + unit * (value - self.slider.min_value), self.max_y, self.min_y)
 
 
 class Hint(Sprite, ToggledElement):

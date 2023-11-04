@@ -454,12 +454,12 @@ class GameWindow(Window, EventsCreator):
     @ask_player_for_confirmation(SCREEN_CENTER, LOADING_MENU)
     def delete_saved_game(self):
         if (selected := self.is_valid_file_selected()) is not None:
-            self.save_manager.delete_file(selected.name, False)
+            self.save_manager.delete_file(selected.name)
 
     @ask_player_for_confirmation(SCREEN_CENTER, SCENARIO_EDITOR_MENU)
     def delete_scenario(self):
         if (selected := self.is_valid_file_selected()) is not None:
-            self.save_manager.delete_file(selected.name, False)
+            self.save_manager.delete_file(selected.name)
 
     def is_valid_file_selected(self):
         if (selected := self.mouse.selected_ui_element) is not None:

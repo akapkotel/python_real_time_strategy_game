@@ -38,6 +38,12 @@ def add_extension_to_file_name_if_required(path: str, save_name: str, extension:
     return os.path.join(path, save_name if extension in save_name else save_name + extension)
 
 
+class UnidentifiedFileError(Exception):
+    """
+    This Exception is raised when SaveManager can not parse the provided filename using all it's extensions and paths.
+    """
+
+
 class SaveManager:
     """
     This manager works not only with player-created saved games, but also with
@@ -57,18 +63,12 @@ class SaveManager:
         self.saved_games: SavedGames = {}
         self.projects: SavedGames = {}
 
-        self.update_scenarios(SCENARIO_EXTENSION, self.scenarios_path)
         self.update_saves(SAVE_EXTENSION, self.saves_path)
-        self.update_projects(PROJECT_EXTENSION, self.projects_path)
-
-        log_here(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
-        log_here(f'Found {len(self.projects)} scenarios in {self.projects_path}.', True)
         log_here(f'Found {len(self.saved_games)} saved games in {self.saves_path}.', True)
-
-        self.loaded = False
-
-    def __bool__(self):
-        return not self.loaded
+        self.update_scenarios(SCENARIO_EXTENSION, self.scenarios_path)
+        log_here(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
+        self.update_projects(PROJECT_EXTENSION, self.projects_path)
+        log_here(f'Found {len(self.projects)} projects in {self.projects_path}.', True)
 
     def update_scenarios(self, extension: str, scenarios_path: str):
         self.scenarios = self.find_all_files(extension, scenarios_path)
@@ -101,7 +101,7 @@ class SaveManager:
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
         path, extension = self.set_correct_path_and_extension(scenario, finished)
         full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
-        self.delete_file(full_save_path, scenario)
+        self.delete_file(full_save_path)
         with shelve.open(full_save_path) as file:
             file['save_date'] = time.gmtime()
             file['timer'] = game.save_timer()
@@ -151,8 +151,10 @@ class SaveManager:
             return os.path.join(self.scenarios_path, full_name)
         elif (full_name := filename + PROJECT_EXTENSION) in self.projects:
             return os.path.join(self.projects_path, full_name)
+        elif (full_name := filename + SAVE_EXTENSION) in self.saved_games:
+            return os.path.join(self.saves_path, full_name)
         else:
-            return os.path.join(self.saves_path, filename + SAVE_EXTENSION)
+            raise UnidentifiedFileError(f"Could not find {filename}")
 
     def extract_miniature_from_save(self, filename: str) -> Image:
         path = self.get_full_path_to_file_with_extension(filename)
@@ -182,7 +184,6 @@ class SaveManager:
                 log_here(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
             self.game.settings.editor_mode = editor_mode
-        self.loaded = True
         log_here(f'Saved game: {filename} was loaded successfully!', console=True)
 
     @staticmethod
@@ -268,13 +269,14 @@ class SaveManager:
                 return True
         return False
 
-    def delete_file(self, file_name: str, scenario: bool):
+    def delete_file(self, file_name: str):
         paths = self.saved_games if SAVE_EXTENSION in file_name else (self.scenarios if SCENARIO_EXTENSION in file_name else self.projects)
-        try:
-            os.remove(paths[file_name])
-            del paths[file_name]
-        except Exception as e:
-            log_here(f'{str(e)}', console=True)
+        if paths.get(file_name) is not None:
+            try:
+                os.remove(paths[file_name])
+                del paths[file_name]
+            except Exception as e:
+                log_here(f'{str(e)}', console=True)
 
     def rename_saved_game(self, old_name: str, new_name: str):
         try:

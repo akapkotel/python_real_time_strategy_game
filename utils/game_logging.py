@@ -30,7 +30,9 @@ for logger in (console_logger, file_logger):
 
 
 def log_here(logged_message: str, console: Union[int, bool] = False):
-    message = f'{logger.findCaller()[:2]} | ' + logged_message
+    full_file_path, line_number, function, stack = logger.findCaller()
+    filename = full_file_path.split('\\')[-1]
+    message = f' | {filename, line_number, function, stack} | {logged_message}'
     file_logger.info(message, exc_info=True)
     if console:
         console_logger.info(message, exc_info=True)
