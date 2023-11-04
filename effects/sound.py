@@ -6,7 +6,7 @@ from math import dist
 from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 
-from utils.game_logging import log
+from utils.game_logging import log_here
 
 from arcade import load_sound, play_sound, stop_sound, Sound
 from pyglet.media import Player
@@ -58,8 +58,8 @@ class SoundPlayer:
 
         SoundPlayer.instance = self
 
-        log(f'Loaded {len(self.sounds)} sounds.', console=True)
-        log(f'Found {len(self.playlists)} playlists', console=True)
+        log_here(f'Loaded {len(self.sounds)} sounds.', console=True)
+        log_here(f'Found {len(self.playlists)} playlists', console=True)
 
     def _preload_sounds(self) -> Dict[str, Sound]:
         names_to_paths = self.window.resources_manager.get(SOUNDS_EXTENSION)
@@ -173,7 +173,7 @@ class SoundPlayer:
     def play_sound(self, name: str, volume: Optional[float]=None, sound_position: Optional[Tuple[float, float]]=None):
         """Play a single sound. Use this for sound effects."""
         if name not in self.sounds:
-            log(f'Sound: {name} not found!', console=True)
+            log_here(f'Sound: {name} not found!', console=True)
             return
         elif self.is_music(name) and not self.music_on:
             return

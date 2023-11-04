@@ -5,7 +5,7 @@ import csv
 from typing import Dict, Union, Tuple, List, Any
 
 from utils.functions import get_path_to_file
-from utils.game_logging import log
+from utils.game_logging import log_here
 
 
 def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
@@ -20,7 +20,7 @@ def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
         try:
             configs.update(read_single_file(file))
         except Exception as e:
-            log(f'{str(e)}')
+            log_here(f'{str(e)}')
     return configs
 
 def read_single_file(filename: str) -> Dict[str, Dict[str, Any]]:

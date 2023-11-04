@@ -9,7 +9,7 @@ from buildings.buildings import Building
 from players_and_factions.player import Player
 from units.units import *
 
-from utils.game_logging import log
+from utils.game_logging import log_here
 from gameobjects.constants import (
     CLASS,
     CORPSE,
@@ -32,7 +32,7 @@ class GameObjectsSpawner:
     def __init__(self):
         self.pathfinder = self.game.pathfinder
         self.configs: Dict[str, Dict[str, Any]] = self.game.configs
-        log(f'GameObjectsSpawner was initialized successfully. Found {len(self.configs)} entities in config file.', console=True)
+        log_here(f'GameObjectsSpawner was initialized successfully. Found {len(self.configs)} entities in config file.', console=True)
 
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
         if player is None:

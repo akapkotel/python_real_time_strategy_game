@@ -33,7 +33,7 @@ from map.constants import TILE_WIDTH, TILE_HEIGHT
 from user_interface.constants import UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
-from utils.game_logging import logger
+from utils.game_logging import log_this_call
 
 
 class UnitsProducer:
@@ -71,7 +71,7 @@ class UnitsProducer:
             for unit in produced_units
         }
 
-    @logger()
+    @log_this_call()
     def start_production(self, unit_name: str):
         costs = self.produced_units[unit_name]
         if self.player.enough_resources_for(expense=unit_name, costs=costs):
@@ -155,7 +155,7 @@ class UnitsProducer:
         else:
             button.progress = 0
 
-    @logger()
+    @log_this_call()
     def finish_production(self, finished_unit_name: str):
         self.production_progress = 0
         self._set_currently_produced_to(None)
@@ -223,8 +223,7 @@ class ResourceProducer:
         return {}
 
     def after_respawn(self, state):
-        print('resource extractor __setstate__')
-        # TODO
+        ...
 
 
 class ResearchFacility:
@@ -282,7 +281,6 @@ class ResearchFacility:
         }
 
     def after_respawn(self, state: Dict):
-        print('research facility __setstate__')
         self.__dict__.update(state)
         if (tech_name := state['researched_technology']) is not None:
             self.researched_technology = self.owner.game.window.configs[tech_name]

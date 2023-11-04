@@ -40,7 +40,7 @@ from user_interface.user_interface import (
 )
 
 from utils.functions import ignore_in_menu
-from utils.game_logging import logger
+from utils.game_logging import log_this_call
 
 MOUSE_CURSOR_SIZE = 60
 
@@ -163,14 +163,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def select_ui_element(self, element: Optional[UiElement] = None):
         self.selected_ui_element = element
 
-    @logger()
+    @log_this_call()
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_press(x, y)
         elif button is MOUSE_BUTTON_RIGHT:
             self.on_right_button_press()
 
-    @logger()
+    @log_this_call()
     def on_left_button_press(self, x: float, y: float):
         if (ui_element := self.pointed_ui_element) is not None:
             ui_element.on_mouse_press(MOUSE_BUTTON_LEFT)
@@ -189,7 +189,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             else:
                 self.window.move_viewport_to_the_position(*self.cursor_over_minimap_position)
 
-    @logger()
+    @log_this_call()
     def on_right_button_press(self):
         if self.pointed_ui_element is not None:
             self.pointed_ui_element.on_mouse_press(MOUSE_BUTTON_RIGHT)

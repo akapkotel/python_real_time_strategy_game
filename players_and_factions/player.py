@@ -20,7 +20,7 @@ from user_interface.constants import UI_RESOURCES_SECTION
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid, TILE_WIDTH
 from campaigns.research import Technology
-from utils.game_logging import log
+from utils.game_logging import log_here
 from utils.observer import Observed, Observer
 from utils.priority_queue import PriorityQueue
 from utils.colors import GREEN, RED
@@ -399,7 +399,7 @@ class CpuPlayer(Player):
         """
         if self.game.settings.ai_sleep:
             return
-        log(f'Updating CPU logic of player: {self}')
+        log_here(f'Updating CPU logic of player: {self}')
         if self.construction_priorities:
             self.build_unit_or_building()
         else:

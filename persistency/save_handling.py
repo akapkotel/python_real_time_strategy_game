@@ -8,7 +8,7 @@ from typing import List, Dict, Callable, Any, Generator, Tuple
 from PIL import Image
 
 from utils.functions import find_paths_to_all_files_of_type
-from utils.game_logging import log, logger
+from utils.game_logging import log_here, log_this_call
 from utils.data_types import SavedGames
 from players_and_factions.player import Faction
 from map.map import Map, Pathfinder
@@ -61,9 +61,9 @@ class SaveManager:
         self.update_saves(SAVE_EXTENSION, self.saves_path)
         self.update_projects(PROJECT_EXTENSION, self.projects_path)
 
-        log(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
-        log(f'Found {len(self.projects)} scenarios in {self.projects_path}.', True)
-        log(f'Found {len(self.saved_games)} saved games in {self.saves_path}.', True)
+        log_here(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
+        log_here(f'Found {len(self.projects)} scenarios in {self.projects_path}.', True)
+        log_here(f'Found {len(self.saved_games)} saved games in {self.saves_path}.', True)
 
         self.loaded = False
 
@@ -125,7 +125,7 @@ class SaveManager:
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
         self.update_files(extension, path)
-        log(f'Game saved successfully as: {save_name}', True)
+        log_here(f'Game saved successfully as: {save_name}', True)
 
     def update_files(self, extension, path):
         if extension is SAVE_EXTENSION:
@@ -177,13 +177,13 @@ class SaveManager:
         with shelve.open(full_save_path) as file:
             progress = 1 / len(loaded)
             for name in loaded:
-                log(f'Loading: {name}...', console=True)
+                log_here(f'Loading: {name}...', console=True)
                 self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
-                log(f'Saved data: {name} was successfully loaded!', console=True)
+                log_here(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
             self.game.settings.editor_mode = editor_mode
         self.loaded = True
-        log(f'Saved game: {filename} was loaded successfully!', console=True)
+        log_here(f'Saved game: {filename} was loaded successfully!', console=True)
 
     @staticmethod
     def loading_step(function: Callable, argument: Any):
@@ -274,7 +274,7 @@ class SaveManager:
             os.remove(paths[file_name])
             del paths[file_name]
         except Exception as e:
-            log(f'{str(e)}', console=True)
+            log_here(f'{str(e)}', console=True)
 
     def rename_saved_game(self, old_name: str, new_name: str):
         try:
@@ -283,7 +283,7 @@ class SaveManager:
             self.saved_games[new_name] = new
             del self.saved_games[old_name]
         except Exception as e:
-            log(f'{str(e)}', console=True)
+            log_here(f'{str(e)}', console=True)
 
 
 # these imports are placed here to avoid circular-imports issue:

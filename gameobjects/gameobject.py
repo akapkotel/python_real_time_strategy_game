@@ -14,7 +14,7 @@ from utils.colors import GREEN, RED, add_transparency
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
 from utils.functions import get_path_to_file, add_extension
-from utils.game_logging import log
+from utils.game_logging import log_here
 from utils.improved_spritelists import LayeredSpriteList
 from utils.scheduling import EventsCreator, ScheduledEvent
 
@@ -126,7 +126,7 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         pass
 
     def kill(self):
-        log(f'Destroying GameObject: {self}', True)
+        log_here(f'Destroying GameObject: {self}', True)
         try:
             self.layered_spritelist.remove(self)
         except (AttributeError, ValueError):

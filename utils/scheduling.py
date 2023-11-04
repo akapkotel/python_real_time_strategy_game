@@ -4,7 +4,7 @@ from __future__ import annotations
 from math import inf
 from typing import List, Tuple, Dict, Any, Optional, Callable, Union, Iterator
 
-from utils.game_logging import log, logger
+from utils.game_logging import log_here, log_this_call
 
 
 class ScheduledEvent:
@@ -35,19 +35,19 @@ class ScheduledEvent:
         self.kwargs = kwargs or {}
         self.repeat = inf if repeat == -1 else repeat
         self.delay_left = delay_left
-        print(f'{self}')
+        log_here(f'{self}')
 
     def __repr__(self):
         return (f'ScheduledEvent(creator: {self.creator.__class__.__name__}, '
                 f'function: {self.function.__name__}, args: {self.args}, '
-                f'kwargs: {self.kwargs}, time left: {self.delay_left}')
+                f'kwargs: {self.kwargs}, time left: {self.delay_left})')
 
-    @logger()
+    @log_this_call()
     def execute(self):
         try:
             self.function(*self.args, **self.kwargs)
         except Exception as e:
-            log(f'{self} failed to execute with exception: {str(e)}')
+            log_here(f'{self} failed to execute with exception: {str(e)}')
 
     def shelve(self):
         return {
@@ -92,13 +92,13 @@ class EventsScheduler:
     def __iter__(self) -> Iterator[ScheduledEvent]:
         return self.scheduled_events.__iter__()
 
-    @logger()
+    @log_this_call()
     def schedule(self, event: ScheduledEvent):
         delay = (event.delay_left or event.delay) + self.game.timer.total_game_time
         self.scheduled_events.append(event)
         self.execution_times.append(delay)
 
-    @logger()
+    @log_this_call()
     def unschedule(self, event: ScheduledEvent):
         self._unschedule(self.scheduled_events.index(event))
 
@@ -107,7 +107,7 @@ class EventsScheduler:
             self.scheduled_events.pop(event_index)
             self.execution_times.pop(event_index)
         except IndexError as e:
-            log(f'Failed to unschedule ScheduledEvent due to: {e}', True)
+            log_here(f'Failed to unschedule ScheduledEvent due to: {e}', True)
 
     def update(self):
         time = self.game.timer.total_game_time

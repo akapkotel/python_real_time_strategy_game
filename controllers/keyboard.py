@@ -10,7 +10,7 @@ from user_interface.user_interface import (
     ToggledElement, TextInputField, UiBundlesHandler
 )
 from utils.functions import ignore_in_menu, ignore_in_game
-from utils.game_logging import log
+from utils.game_logging import log_here
 
 KEYBOARD_SCROLL_SPEED = 50
 
@@ -25,7 +25,7 @@ class KeyboardHandler(ToggledElement):
         text_input_consumer.set_keyboard_handler(handler=self)
 
     def on_key_press(self, symbol: int):
-        log(f'Pressed key: {symbol}, other pressed keys: {self.keys_pressed}')
+        log_here(f'Pressed key: {symbol}, other pressed keys: {self.keys_pressed}')
         self.keys_pressed.add(symbol)
         self.evaluate_pressed_key(symbol)
         if self.keyboard_input_consumer is not None:

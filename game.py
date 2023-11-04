@@ -65,7 +65,7 @@ from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba, YELLOW
 from utils.data_types import Viewport
 from utils.functions import ignore_in_editor_mode, find_paths_to_all_files_of_type
-from utils.game_logging import log, logger
+from utils.game_logging import log_here, log_this_call
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
 from utils.improved_spritelists import (
@@ -467,8 +467,7 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
-        print(f'Average FPS: {round(1 / (self.total_delta_time / self.frames), 2)}')
-        log('Terminating application...', console=True)
+        log_here(f'Terminating application... Average FPS: {round(1 / (self.total_delta_time / self.frames), 2)}', console=True)
         super().close()
 
 
@@ -571,7 +570,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.random_scenario = self.loader is None
 
-        log('Game initialized successfully', console=True)
+        log_here('Game initialized successfully', console=self.settings.developer_mode)
 
     @property
     def resources_manager(self) -> ResourcesManager:
@@ -648,7 +647,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ui_options_section = UiElementsBundle(
             name=UI_OPTIONS_PANEL,
             elements=[
-                # right_panel,
                 Frame('ui_right_panel.png', ui_x, ui_y, *ui_size, name='right_panel'),
                 Checkbox('menu_checkbox.png', ui_x - 170, ui_y + 370, '', 10,
                          ticked=self.settings.show_minimap, variable=(self.settings, 'show_minimap')),
@@ -658,14 +656,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                        functions=partial(self.show_construction_options, UI_UNITS_CONSTRUCTION_PANEL)),
                 Button('game_button_menu.png', ui_x + 100, 120,
                         functions=partial(self.window.show_view,
-                                          self.window.menu_view),
-                        parent='right_panel'),
+                                          self.window.menu_view)),
                 Button('game_button_save.png', ui_x, 120,
-                        functions=self.window.open_saving_menu,
-                        parent='right_panel'),
+                        functions=self.window.open_saving_menu),
                 Button('game_button_pause.png', ui_x - 100, 120,
-                        functions=partial(self.toggle_pause),
-                        parent='right_panel'),
+                        functions=partial(self.toggle_pause)),
             ],
             register_to=self
         )
@@ -773,7 +768,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
         # TODO: 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
 
-    def create_selected_units_panel_labels(self, selected_units_bundle, x, y):
+    @staticmethod
+    def create_selected_units_panel_labels(selected_units_bundle, x, y):
         selected_units_bundle.extend(
             [UiTextLabel(x, y + 60, 'Selected units:', 13, WHITE, active=False),
              UiTextLabel(x, y - 130, 'Available actions:', 13, WHITE, active=False)]
@@ -829,7 +825,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def populate_construction_options_with_available_buildings(self, construction_bundle, positions):
         for i, building_name in enumerate(set(self.local_human_player.buildings_possible_to_build)):
-            log(building_name, True)  # TODO: real logic instead of test log
+            log_here(building_name, True)  # TODO: real logic instead of test log
             column, row = positions[i]
             button = Button(f'{building_name}_icon.png', column, row, building_name,
                             active=self.local_human_player.enough_resources_for(building_name),
@@ -955,7 +951,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         elif isinstance(attached, (UiElementsBundle, UiElement)):
             super().on_being_attached(attached)
         else:
-            log(f'Tried to attach {attached} which Game is unable to attach.')
+            log_here(f'Tried to attach {attached} which Game is unable to attach.')
 
     def notify(self, attribute: str, value: Any):
         pass
@@ -968,7 +964,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         elif isinstance(detached, (UiElementsBundle, UiElement)):
             self.remove(detached)
         else:
-            log(f'Tried to detach {detached} which Game is unable to detach.')
+            log_here(f'Tried to detach {detached} which Game is unable to detach.')
 
     def attach_gameobject(self, gameobject: GameObject):
         if isinstance(gameobject, PlayerEntity):
@@ -1040,7 +1036,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.timer.total_game_time = time.time() - self.timer.game_start_time
         return self.timer
 
-    @logger()
+    @log_this_call()
     def load_timer(self, loaded_timer: Timer):
         """
         Subtract total time played from loading time to correctly reset timer

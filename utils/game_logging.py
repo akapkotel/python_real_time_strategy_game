@@ -4,25 +4,43 @@ import logging
 from typing import Union
 
 
-logging.basicConfig(
-    filename='resources/logging/logfile.txt',
-    filemode='w',
-    level=logging.INFO,
-    format='%(levelname)s: %(asctime)s %(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p'
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler(
+    'resources/logging/logfile.txt',
+    'w'
 )
 
 
-def log(logged_message: str, console: Union[int, bool] = False):
-    logging.info(logged_message)
+file_logger = logging.getLogger('file_handler')
+file_logger.addHandler(file_handler)
+file_logger.setLevel(logging.INFO)
+
+console_logger = logging.getLogger('console_handler')
+console_logger.addHandler(console_handler)
+console_logger.setLevel(logging.INFO)
+
+
+log_formatter = logging.Formatter(
+    '%(levelname)s: %(asctime)s %(message)s',
+    '%m/%d/%Y %I:%M:%S %p'
+)
+for logger in (console_logger, file_logger):
+    for handler in logger.handlers:
+        handler.setFormatter(log_formatter)
+
+
+def log_here(logged_message: str, console: Union[int, bool] = False):
+    message = f'{logger.findCaller()[:2]} | ' + logged_message
+    file_logger.info(message, exc_info=True)
     if console:
-        print(logged_message)
+        console_logger.info(message, exc_info=True)
 
 
-def logger(console=False):
+def log_this_call(console=False):
+    """Decorator for logging function calls."""
     def decorator(func):
         def wrapper(*args, **kwargs):
-            log(f'Called function: {func.__name__}, args: {args}, kwargs: {kwargs}', console)
+            log_here(f'func: {func.__name__} args: {args}, kwargs: {kwargs}', console)
             return func(*args, **kwargs)
         return wrapper
     return decorator

@@ -7,7 +7,7 @@ from arcade import (
 
 
 # from utils.functions import get_objects_with_attribute
-from utils.game_logging import log, logger
+from utils.game_logging import log_here, log_this_call
 from utils.improved_spritelists import LayeredSpriteList
 from utils.colors import WHITE, GREEN, BLACK
 from utils.data_types import Viewport
@@ -88,18 +88,17 @@ class LoadableWindowView(View):
         self.updated = [u for u in updated if u not in ignore_update]
 
     def on_show_view(self):
-        log(f'Switched to View: {self.__class__.__name__}')
+        log_here(f'Switched to View: {self.__class__.__name__}')
         self.window.updated = self.updated
         self.window.set_viewport(*self.viewport)
 
     def on_update(self, delta_time: float):
         if self.loading_progress < 1.0:
-            print(f'loading progress... {self.loading_progress}')
             return self.update_loading()
         if not self.paused:
             self.update_view(delta_time)
 
-    @logger(console=False)
+    @log_this_call(console=False)
     def update_loading(self):
         if self.things_to_load:
             self.load(*self.things_to_load[0])
@@ -113,17 +112,16 @@ class LoadableWindowView(View):
         for obj in self.updated:
             obj.on_update(delta_time)
 
-    @logger(console=True)
+    @log_this_call(console=True)
     def load(self, loaded: str, value: Any, progress: float, *args, **kwargs):
         args = [a() if callable(a) else a for a in args]
         setattr(self, loaded, value(*args, **kwargs) if callable(value) else value)
         self.loading_progress += progress
 
-    @logger()
+    @log_this_call(console=True)
     def load_from_loader(self):
         try:
-            progress = next(self.loader)
-            self.loading_progress += progress
+            self.loading_progress += next(self.loader)
         except StopIteration:
             self.loader = None
             self.after_loading()

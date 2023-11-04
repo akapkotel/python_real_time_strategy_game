@@ -26,7 +26,7 @@ from utils.functions import (
     get_path_to_file, all_files_of_type_named
 )
 from map.quadtree import QuadTree
-from utils.game_logging import log, logger
+from utils.game_logging import log_here, log_this_call
 from utils.timing import timer
 from utils.geometry import calculate_circular_area
 
@@ -95,13 +95,14 @@ def set_terrain_texture(terrain_type: str,
 
 
 @timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
-def a_star(map: Map,
+def a_star(current_map: Map,
            start: GridPosition,
            end: GridPosition,
            pathable: bool = False) -> Union[MapPath, bool]:
     """
     Find the shortest path from <start> to <end> position using A* algorithm.
 
+    :param current_map: Map
     :param start: GridPosition -- (int, int) path-start point.
     :param end: GridPosition -- (int, int) path-destination point.
     :param pathable: bool -- should pathfinder check only walkable tiles
@@ -110,7 +111,7 @@ def a_star(map: Map,
     :return: Union[MapPath, bool] -- list of points or False if no path
     found
     """
-    map_nodes = map.nodes
+    map_nodes = current_map.nodes
     unexplored = PriorityQueue(start, heuristic(start, end))
     explored = set()
     previous: Dict[GridPosition, GridPosition] = {}
@@ -138,7 +139,7 @@ def a_star(map: Map,
     # if path was not found searching by walkable tiles, we call second
     # pass and search for pathable nodes this time
     if not pathable:
-        return a_star(map, start, end, pathable=True)
+        return a_star(current_map, start, end, pathable=True)
     return False  # no third pass, if there is no possible path!
 
 
@@ -183,19 +184,31 @@ class Map:
         self.distances = {}
 
         self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
-        log(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
+        log_here(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
 
         self.generate_map_nodes_and_tiles()
         #  TODO: find efficient way to use these costs in pathfinding
         # self.calculate_distances_between_nodes()
 
-        try:
-            trees = map_settings['trees']
-            self.game.after_load_functions.append(partial(self.plant_trees, trees))
-        except KeyError:
-            self.game.after_load_functions.append(self.plant_trees)
+        self.prepare_planting_trees(map_settings)
 
-        log('Map was initialized successfully...', console=True)
+        log_here('Map was initialized successfully...', console=True)
+
+    def prepare_planting_trees(self, map_settings):
+        """"""
+        trees = map_settings.get('trees') or self.generate_random_trees()
+        self.game.after_load_functions.append(partial(self.plant_trees, trees))
+
+    @log_this_call()
+    def plant_trees(self, trees):
+        for node in self.nodes.values():
+            if (tree_type := trees.get(node.grid)) is not None:
+                self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
+
+    def generate_random_trees(self) -> Dict[GridPosition, int]:
+        trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
+        return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
+                if random.random() < self.game.settings.percent_chance_for_spawning_tree}
 
     def save(self) -> Dict:
         return {
@@ -257,14 +270,14 @@ class Map:
         return (node for node in self.nodes.values() if node.is_walkable)
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
-    @logger(console=True)
+    @log_this_call(console=True)
     def generate_map_nodes_and_tiles(self):
         for x in range(self.columns):
             for y in range(self.rows):
                 terrain = TerrainType.VOID if x in(0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
                 self.nodes[(x, y)] = node = MapNode(x, y, terrain)
                 self.create_map_sprite(*node.position, node.terrain_type)
-        log(f'Generated {len(self.nodes)} map nodes.', console=True)
+        log_here(f'Generated {len(self.nodes)} map nodes.', console=True)
 
     def create_map_sprite(self, x: int, y: int, terrain_type: TerrainType):
         sprite = Sprite(center_x=x, center_y=y, hit_box_algorithm='None')
@@ -300,18 +313,6 @@ class Map:
                 # terrain_cost = node.terrain_cost + adjacent_node.terrain_cost
                 node.costs[grid] = distance #  * terrain_cost
             self.distances[node.grid] = costs_dict
-
-    @logger()
-    def plant_trees(self, trees: Optional[Dict[GridPosition, int]] = None):
-        trees = trees or self.generate_random_trees()
-        for node in self.nodes.values():
-            if (tree_type := trees.get(node.grid)) is not None:
-                self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
-
-    def generate_random_trees(self) -> Dict[GridPosition, int]:
-        trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
-        return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
-                if random.random() < self.game.settings.percent_chance_for_spawning_tree}
 
     def get_nodes_by_row(self, row: int) -> List[MapNode]:
         return [n for n in self.nodes.values() if n.grid[1] == row]
@@ -557,7 +558,7 @@ class NavigatingUnitsGroup:
         try:
             del self.units_paths[unit]
         except KeyError:
-            log(f'Failed to discard {unit} from {self}', True)
+            log_here(f'Failed to discard {unit} from {self}', True)
 
     def reset_units_navigating_groups(self, units: List[Unit]):
         for unit in units:

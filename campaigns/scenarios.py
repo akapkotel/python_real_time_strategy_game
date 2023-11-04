@@ -147,11 +147,9 @@ class Scenario:
         self.game.window.quit_current_game(ignore_confirmation=True)
 
     def __setstate__(self, state):
-        print('State recovering...')
         self.__dict__.update(state)
         for event_trigger in self.events_triggers:
             event_trigger.bind_game_and_scenario(self)
-        print('Scenario state recovered from saved state')
 
     def __getstate__(self):
         state = self.__dict__.copy()

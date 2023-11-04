@@ -25,7 +25,7 @@ from user_interface.constants import UI_UNITS_PANEL
 from user_interface.user_interface import UiElement, UiTextLabel
 from utils.colors import GREEN, value_to_color
 from utils.functions import (get_path_to_file, get_texture_size)
-from utils.game_logging import log
+from utils.game_logging import log_here
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
     vector_2d, ROTATION_STEP, ROTATIONS
@@ -359,7 +359,7 @@ class Unit(PlayerEntity, ABC):
             try:
                 self.game.units_manager.permanent_units_groups[cur_index].discard(self)
             except KeyError:
-                log(f'Unable to remove Unit from permanent groups due to KeyError: {cur_index}.')
+                log_here(f'Unable to remove Unit from permanent groups due to KeyError: {cur_index}.')
         self.permanent_units_group = index
 
     def update_battle_behaviour(self):

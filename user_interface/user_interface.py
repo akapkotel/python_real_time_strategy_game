@@ -28,7 +28,7 @@ from utils.geometry import clamp
 from utils.colors import rgb_to_rgba
 from utils.improved_spritelists import UiSpriteList
 from utils.functions import get_path_to_file, get_texture_size
-from utils.game_logging import log
+from utils.game_logging import log_here
 from utils.colors import GREEN, RED, WHITE, BLACK, FOG
 
 
@@ -66,10 +66,12 @@ class Hierarchical:
         self._parent = parent
         self._children: Optional[Set] = None
 
-        try:
-            parent.add_child(self)
-        except AttributeError:
-            log(f'UiElement {id(self)} was unable to register its parent of type {type(parent)}')
+        if self._parent is not None:
+            if self._parent is not None:
+                try:
+                    parent.add_child(self)
+                except Exception as e:
+                    log_here(str(e))
 
     @property
     def parent(self):
@@ -169,7 +171,7 @@ class CursorInteractive(Hierarchical):
             self.parent.on_mouse_scroll(scroll_x, scroll_y)
 
     def on_mouse_press(self, button: int):
-        log(f'Mouse button {button} clicked on {self}')
+        log_here(f'Mouse button {button} clicked on {self}')
         if self.functions[button]:
             self._call_bound_functions(button)
         self.dragged = self.can_be_dragged
@@ -348,8 +350,8 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
 
     def add_child(self, child: Hierarchical):
         super().add_child(child)
-        if child not in self._bundle.elements:
-            self._bundle.append(child)
+        if (bundle := self._bundle) is not None and child not in bundle.elements:
+            bundle.append(child)
 
     def this_or_child(self, cursor) -> UiElement:
         """
@@ -659,7 +661,7 @@ class Checkbox(UiElement):
             self.toggle_variable()
 
     def toggle_variable(self):
-        log(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
+        log_here(f'Changing {self.variable[0]}{self.variable[1]} to {self.ticked}')
         setattr(*self.variable, self.ticked)
 
     def draw(self):
@@ -1405,7 +1407,7 @@ class UiBundlesHandler(Observer):
                 raise KeyError(bundle)
 
     def _switch_to_bundle(self, bundle: UiElementsBundle, exceptions: Optional[Tuple[str, ...]] = None):
-        log(f'Switched to submenu {bundle.name}')
+        log_here(f'Switched to submenu {bundle.name}')
         self._unload_all(exceptions)
         self._load_bundle(bundle)
 
@@ -1454,7 +1456,7 @@ class UiBundlesHandler(Observer):
             return
 
     def _load_bundle(self, bundle: UiElementsBundle, clear: bool = False):
-        log(f'Loading Ui_Elemnts_Bundle: {bundle.name}')
+        log_here(f'Loading Ui_Elemnts_Bundle: {bundle.name}')
         if clear:
             bundle.elements.clear()
         bundle.on_load()

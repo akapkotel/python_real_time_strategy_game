@@ -3,7 +3,7 @@ import pathlib
 from typing import Optional, Union
 
 from utils.functions import find_paths_to_all_files_of_type
-from utils.game_logging import log
+from utils.game_logging import log_here
 
 
 class ResourcesManager:
@@ -20,7 +20,7 @@ class ResourcesManager:
         for extension in self.extensions:
             names_to_paths = find_paths_to_all_files_of_type(extension, self.resources_path)
             self.resources[extension] = {name: pathlib.Path(path, name) for name, path in names_to_paths.items()}
-        log(f'ResourceManager found {sum(len(paths) for paths in self.resources.values())} files.', console=True)
+        log_here(f'ResourceManager found {sum(len(paths) for paths in self.resources.values())} files.', console=True)
 
     def get(self, file_name_or_extension: str) -> Union[str, dict[str, str]]:
         """

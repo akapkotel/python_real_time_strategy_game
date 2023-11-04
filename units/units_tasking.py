@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from utils.game_logging import log
+from utils.game_logging import log_here
 from utils.scheduling import ScheduledEvent
 
 
@@ -35,7 +35,7 @@ class UnitTask:
         return f'{self.__class__.__name__} id: {id(self)}'
 
     def update(self):
-        log(f'Updating task: {self}, units: {self.units}', True)
+        log_here(f'Updating task: {self}, units: {self.units}', True)
         if self.condition():
             self.schedule_next_update()
         else:

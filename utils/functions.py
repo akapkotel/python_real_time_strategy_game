@@ -9,7 +9,7 @@ from PIL import Image
 from arcade.arcade_types import Color
 
 from utils.colors import colors_names
-from utils.game_logging import log
+from utils.game_logging import log_here
 
 
 @lru_cache
@@ -21,7 +21,7 @@ def get_path_to_file(filename: str, extension: str = 'png') -> Path:
     for dirpath, dirnames, filenames in os.walk(os.getcwd()):
         if correct_filename in filenames:
             return Path(dirpath, correct_filename)
-    log(f'File {filename} does not exist!', console=True)
+    log_here(f'File {filename} does not exist!', console=True)
 
 
 @lru_cache
