@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from typing import Optional, Tuple, List, Set, Union, Dict, Iterable
+from typing import Optional, Tuple, List, Set, Union, Dict
 
 from arcade import (ShapeElementList, draw_rectangle_outline, draw_point,
-                    create_rectangle_filled, TShape, draw_texture_rectangle, Texture)
+                    create_rectangle_filled)
 from arcade.arcade_types import Color
 
 from game import Game
@@ -11,8 +11,8 @@ from utils.colors import WHITE, SAND, RED, BLACK, GREEN
 from utils.data_types import GridPosition
 
 
-MARGIN_TOP = 5  # since our mini-map area is distanced little from screen edges
-MARGIN_RIGHT = 5
+MARGIN_TOP = 7  # since our mini-map area is distanced little from screen edges
+MARGIN_RIGHT = 7
 
 
 class MiniMap:
@@ -25,8 +25,10 @@ class MiniMap:
         units etc. Assign it to the mini_map attribute of the Game class.
 
         :param data: List -- accepts a list of values, if Game is loaded from
-        file, eg. when player loads saved game, list contains 6 elements, or 4
+        file, e.g. when player loads saved game, list contains 6 elements, or 4
         otherwise.
+        :param loaded: bool -- whether minimap is loaded from file. Defaults to
+        False.
         """
         self.loaded = loaded
         screen_size, minimap_size, tile_size, rows = data[:4]
@@ -34,7 +36,9 @@ class MiniMap:
         self.screen_width: int = screen_size[0]
         self.screen_height: int = screen_size[1]
         self.max_width: int = minimap_size[0]
+        self.half_max_width: int = self.max_width // 2
         self.max_height: int = minimap_size[1]
+        self.half_max_height: int = self.max_height // 2
         self.rows: int = rows
 
         self.ratio = ratio = self.set_map_to_mini_map_ratio()
@@ -78,12 +82,12 @@ class MiniMap:
         self.shapes_lists = {
             row: ShapeElementList() for row in range(self.rows)
         }
-        if self.loaded:
-            r, t = self.screen_width - MARGIN_RIGHT, self.screen_height - MARGIN_TOP
-            dx, dy = r - (self.max_width // 2) - self.half_width, t - self.max_height
-        else:
-            dx, dy, *_ = self.minimap_bounds
-        self.move_shapes_lists(dx + 9, dy + 60)
+        # if self.loaded:
+        r, t = self.screen_width, self.screen_height
+        dx, dy = r - self.half_max_width - self.half_width, t - self.half_max_height - self.half_height
+        # else:
+        #     dx, dy, *_ = self.minimap_bounds
+        self.move_shapes_lists(dx + 2, dy + 53)
         return self.shapes_lists
 
     def update(self):
@@ -100,8 +104,7 @@ class MiniMap:
 
     def get_position(self):
         _, right, _, top = self.game.viewport
-        right, top = right - MARGIN_RIGHT, top - MARGIN_TOP
-        return right - self.max_width // 2, top - self.max_height // 2
+        return right - (self.half_max_width + MARGIN_RIGHT), top - (self.half_max_height + MARGIN_TOP)
 
     def move_shapes_lists(self, dx: float, dy: float):
         shapes_list: ShapeElementList
