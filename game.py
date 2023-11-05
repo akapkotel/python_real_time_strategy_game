@@ -1102,11 +1102,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
 
 def run_profiled_game(settings: Settings):
-    from pyprofiler import start_profile, end_profile
-    with start_profile() as profiler:
+    import pyprofiler
+    with pyprofiler.start_profile() as profiler:
         GameWindow(settings)
         run()
-    end_profile(profiler, 35, True)
+    pyprofiler.end_profile(profiler, 35, True)
 
 
 def run_game(settings: Settings):
