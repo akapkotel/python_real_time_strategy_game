@@ -423,6 +423,7 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def quit_current_game(self):
+        self.sound_player.pause()  # to fix bug #6
         self.game_view.unload()
         self.show_view(self.menu_view)
         self.settings.editor_mode = False
@@ -445,6 +446,7 @@ class GameWindow(Window, EventsCreator):
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
         log_here(f'Terminating application... Average FPS: {round(1 / (self.total_delta_time / self.frames), 2)}', console=True)
+        self.sound_player.pause()  # to fix bug #6
         super().close()
 
 
