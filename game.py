@@ -28,33 +28,16 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from effects.sound import SoundPlayer
-from map.constants import TILE_WIDTH, TILE_HEIGHT
+from utils.constants import TILE_WIDTH, TILE_HEIGHT, EDITOR, SAVED_GAMES, SCENARIO_EDITOR_MENU, LOADING_MENU, \
+    SAVING_MENU, MAIN_MENU, MINIMAP_WIDTH, MINIMAP_HEIGHT, UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, UI_BUILDINGS_PANEL, \
+    UI_UNITS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_TERRAIN_EDITING_PANEL
 from persistency.configs_handling import read_csv_files
 from persistency.resources_manager import ResourcesManager
-from user_interface.constants import (
-    EDITOR,
-    MAIN_MENU,
-    SAVING_MENU,
-    LOADING_MENU,
-    UI_RESOURCES_SECTION,
-    UI_UNITS_PANEL,
-    UI_BUILDINGS_PANEL,
-    UI_UNITS_CONSTRUCTION_PANEL,
-    UI_BUILDINGS_CONSTRUCTION_PANEL,
-    UI_TERRAIN_EDITING_PANEL,
-    UI_OPTIONS_PANEL,
-    MINIMAP_WIDTH,
-    MINIMAP_HEIGHT,
-    SCENARIOS,
-    SAVED_GAMES, SCENARIO_EDITOR_MENU, PROJECTS,
-)
 from user_interface.user_interface import (
     Frame,
     Button,
     UiBundlesHandler,
     UiElementsBundle,
-    GenericTextButton,
-    SelectableGroup,
     TextInputField,
     UiTextLabel,
     UiElement,
@@ -64,7 +47,7 @@ from user_interface.user_interface import (
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba, YELLOW
 from utils.data_types import Viewport
-from utils.functions import ignore_in_editor_mode, find_paths_to_all_files_of_type
+from utils.functions import ignore_in_editor_mode
 from utils.game_logging import log_here, log_this_call
 from utils.timing import timer
 from utils.geometry import clamp, average_position_of_points_group, generate_2d_grid
@@ -206,7 +189,8 @@ class GameWindow(Window, EventsCreator):
         self.current_fps = 0
 
         self.resources_manager = ResourcesManager()
-        self.settings = Settings()  # shared with Game
+        self.settings = settings  # shared with Game
+        self.configs = read_csv_files('resources/configs')  # shared with Game
 
         self.campaigns: Dict[str, Campaign] = load_campaigns()
         self.scenarios: List[ScenarioDescriptor] = []
@@ -216,9 +200,6 @@ class GameWindow(Window, EventsCreator):
         self.save_manager = SaveManager('saved_games', 'scenarios', self)
 
         self._updated: List[Updateable] = []
-
-        # Settings, gameobjects configs, game-progress data, etc.
-        self.configs = read_csv_files('resources/configs')
 
         # views:
         self._current_view: Optional[LoadableWindowView] = None
@@ -277,15 +258,11 @@ class GameWindow(Window, EventsCreator):
         self.frames += 1
         self.total_delta_time += delta_time
         self.current_fps = round(pyglet.clock.get_fps(), 2)  # round(1 / delta_time, 2)
-
         self.current_view.on_update(delta_time)
-
         for controller in (self.mouse, self.keyboard):
             if controller.active:
                 controller.update()
-
         self.sound_player.on_update()
-
         super().on_update(delta_time)
 
     def on_draw(self):
@@ -397,15 +374,15 @@ class GameWindow(Window, EventsCreator):
         self.show_view(self.menu_view)
         self.menu_view.switch_to_bundle(SCENARIO_EDITOR_MENU if self.settings.editor_mode else SAVING_MENU)
 
-    def create_new_game(self, editor_mode: bool):
-        self.settings.editor_mode = editor_mode
+    def create_new_game(self):
         self.game_view = Game(loader=None)
 
     def start_new_game(self, editor_mode: bool = False):
+        self.settings.editor_mode = editor_mode
         if (selected := self.mouse.selected_ui_element) is not None:
             self.load_saved_game_or_scenario(selected, editor_mode)
         else:
-            self.create_new_game(editor_mode)
+            self.create_new_game()
             self.show_view(self.game_view)
 
     def load_game(self):
@@ -424,7 +401,7 @@ class GameWindow(Window, EventsCreator):
 
     def save_game(self, text_input_field: Optional[TextInputField] = None):
         """
-        Save current game-state into the shelve file with .sav extension.
+        Save current game-state into the shelf file with .sav extension.
 
         :param text_input_field: TextInputField -- field from which name for a
         new saved-game file should be read. If field is empty, automatic save
@@ -501,6 +478,14 @@ class Timer:
         self.game_start_time = time.time() - self.total_game_time
 
 
+class ScenarioEditor:
+    _selected_player: Optional[Player] = None
+
+    @property
+    def selected_player(self) -> Player:
+        return self._selected_player or Game.instance.local_human_player
+
+
 class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     """This is an actual Game-instance, created when player starts the game."""
     instance: Optional[Game] = None
@@ -555,6 +540,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.current_campaign: Optional[Campaign] = None
         self.current_scenario: Optional[Scenario] = None
 
+        self.scenario_editor: Optional[ScenarioEditor] = ScenarioEditor() if self.editor_mode else None
+
         # list used only when Game is randomly-generated:
         rows, columns = self.settings.map_height, self.settings.map_width
         self.things_to_load = [
@@ -599,6 +586,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @property
     def configs(self):
         return self.window.configs
+
+    @property
+    def current_active_player(self) -> Player:
+        return self.scenario_editor.selected_player if self.editor_mode else self.local_human_player
 
     def assign_reference_to_self_for_all_classes(self):
         game = self.__class__.__name__.lower()
@@ -725,7 +716,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         Change elements displayed in interface to proper for currently selected
         gameobjects giving player access to context-options.
         """
-        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
+        self._unload_all(exceptions=(UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR))
         if context_gameobjects is not None:
             if isinstance(context_gameobjects, Building):
                 self.configure_building_interface(context_gameobjects)
@@ -806,7 +797,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         ])
 
     def show_construction_options(self, construction_bundle_name: str):
-        self._unload_all(exceptions=[UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR])
+        self._unload_all(exceptions=(UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR))
 
         construction_bundle = self.get_bundle(construction_bundle_name)
         construction_bundle.clear()
@@ -825,7 +816,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def populate_construction_options_with_available_buildings(self, construction_bundle, positions):
         for i, building_name in enumerate(set(self.local_human_player.buildings_possible_to_build)):
-            log_here(building_name, True)  # TODO: real logic instead of test log
             column, row = positions[i]
             button = Button(f'{building_name}_icon.png', column, row, building_name,
                             active=self.local_human_player.enough_resources_for(building_name),
@@ -834,13 +824,19 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def populate_construction_options_with_available_units(self, units_construction_bundle, positions):
         delay = self.settings.hints_delay_seconds
-        for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
-            producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-            hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
-            button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
-                                    functions=partial(producer.start_production, unit_name), hint=hint)
-            button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
-            units_construction_bundle.append(button)
+        if self.editor_mode:
+            for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
+                button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
+                                        functions=partial(self.mouse.attach_placeable_gameobject, unit_name))
+                units_construction_bundle.append(button)
+        else:
+            for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
+                producer = self.local_human_player.get_default_producer_of_unit(unit_name)
+                hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
+                button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
+                                        functions=partial(producer.start_production, unit_name), hint=hint)
+                button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
+                units_construction_bundle.append(button)
 
     def populate_construction_options_with_terrain_features(self, terrain_features_bundle, positions):
         # TODO: implement terrain tiles as PlaceAble objects to place on the map in editor mode
@@ -852,9 +848,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         explosions.
         """
         if effect_type is Explosion:
-            if self.explosions_pool is None:
-                self.explosions_pool = ExplosionsPool(self)
-            self.explosions_pool.create_explosion('explosion.png', x, y)
+            self.create_explosion(x, y, name)
+
+    def create_explosion(self, x, y, name: str):
+        if self.explosions_pool is None:
+            self.explosions_pool = ExplosionsPool(self)
+        self.explosions_pool.create_explosion('explosion.png', x, y)
 
     def on_show_view(self):
         super().on_show_view()
@@ -1094,6 +1093,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def unload(self):
         self.updated.clear()
         self.local_human_player = None
+        self.scenario_editor = None
         self.units_manager.unselect_all_selected()
         self.local_drawn_units_and_buildings.clear()
         self.factions.clear()
@@ -1139,9 +1139,9 @@ if __name__ == '__main__':
     from user_interface.minimap import MiniMap
     from persistency.save_handling import SaveManager
 
-    settings = Settings()
+    game_settings = Settings()
 
-    if __status__ == 'development' and settings.pyprofiler:
-        run_profiled_game(settings)
+    if __status__ == 'development' and game_settings.pyprofiler:
+        run_profiled_game(game_settings)
     else:
-        run_game(settings)
+        run_game(game_settings)

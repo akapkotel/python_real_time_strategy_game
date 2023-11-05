@@ -15,8 +15,8 @@ from typing import (
 from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
 
 from game import PROFILING_LEVEL
-from map.constants import TILE_WIDTH, TILE_HEIGHT, NormalizedPoint, ADJACENT_OFFSETS, DIAGONAL_DIST, VERTICAL_DIST, \
-    MapPath, TreeID, OPTIMAL_PATH_LENGTH, PathRequest
+from utils.constants import TILE_WIDTH, TILE_HEIGHT, VERTICAL_DIST, DIAGONAL_DIST, ADJACENT_OFFSETS, \
+    OPTIMAL_PATH_LENGTH, NormalizedPoint, MapPath, PathRequest, TreeID
 from gameobjects.gameobject import GameObject
 from utils.colors import SAND, WATER_SHALLOW, BLACK
 from utils.data_types import GridPosition, Number
@@ -442,8 +442,14 @@ class MapNode:
         self._pathable = value
 
     @property
-    def available_for_construction(self)  -> bool:
-        return self.is_walkable and self.grid in self.map.game.fog_of_war.explored and not any(n.building for n in self.adjacent_nodes)
+    def available_for_construction(self) -> bool:
+        return self.is_walkable and not self.are_buildings_nearby() and self.is_explored()
+
+    def is_explored(self):
+        return self.map.game.editor_mode or self.grid in self.map.game.fog_of_war.explored
+
+    def are_buildings_nearby(self):
+        return any(n.building for n in self.adjacent_nodes)
 
     @property
     def walkable_adjacent(self) -> Set[MapNode]:

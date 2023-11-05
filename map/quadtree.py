@@ -70,7 +70,7 @@ class QuadTree(Rect):
         try:
             self.entities[faction_id].add(entity)
         except KeyError:
-            self.entities[faction_id] = {entity,}
+            self.entities[faction_id] = {entity, }
         finally:
             self.entities_count += 1
 
@@ -121,7 +121,7 @@ class QuadTree(Rect):
     def collapse(self) -> bool:
         if all(child.collapse() for child in self.children):
             self.children.clear()
-        return not (self.children or self.entities_count)
+        return not self.children and not self.entities_count
 
     def clear(self):
         for quadtree in self.children:
@@ -138,7 +138,6 @@ class QuadTree(Rect):
 
     def get_entities(self):
         return [e.id for entities_list in self.entities.values() for e in entities_list]
-
 
     def draw(self):
         draw_rectangle_outline(*self.position, self.width, self.height, RED)

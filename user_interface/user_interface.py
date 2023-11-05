@@ -21,8 +21,7 @@ from arcade import (
 from arcade.arcade_types import Color
 from arcade.key import BACKSPACE, ENTER
 
-from controllers.constants import HORIZONTAL, VERTICAL
-from user_interface.constants import CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
+from utils.constants import HORIZONTAL, VERTICAL, CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.observer import Observed, Observer
 from utils.geometry import clamp
 from utils.colors import rgb_to_rgba
@@ -1511,7 +1510,7 @@ class UiBundlesHandler(Observer):
         self._unload_bundle(element)
         del self.ui_elements_bundles[element.name]
 
-    def _unload_all(self, exceptions: Optional[Tuple[str]] = None):
+    def _unload_all(self, exceptions: Optional[Tuple[str, ...]] = None):
         for bundle in self.ui_elements_bundles.values():
             bundle.on_unload()
         self.active_bundles.clear()

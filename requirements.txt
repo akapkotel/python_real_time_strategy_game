@@ -4,10 +4,11 @@ cffi==1.14.3
 llvmlite>=0.34.0
 numba>=0.51.2
 numpy>=1.19.2
-Pillow>=8.0.1
+Pillow==8.0.1
 pycparser==2.20
-pyglet==1.5.8
+pyglet>=1.5.8
 pymunk==5.7.0
+pyprofiler==69
 pytiled-parser==0.9.4a3
 PyYAML==5.3.1
 Shapely>=1.7.1

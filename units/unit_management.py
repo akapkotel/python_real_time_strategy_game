@@ -152,8 +152,9 @@ class SelectedUnitMarker(SelectedEntityMarker):
         self.borders.texture = selection_textures[group_index]
 
 
-class SelectedSoldierMarker(SelectedEntityMarker):
+class SelectedSoldierMarker(SelectedUnitMarker):
     health_bar_height = SOLDIER_HEALTH_BARS_HEIGHT
+    health_bar_length = SOLDIER_SELECTION_MARKER_SIZE
     single_bar_width = SOLDIER_SINGLE_BAR_WIDTH
     bars_distance = SOLDIER_BARS_DISTANCE
     bars_count = UNIT_BARS_COUNT
@@ -294,6 +295,13 @@ class UnitsManager(EventsCreator):
     @property
     def units_or_building_selected(self) -> bool:
         return self.selected_units or self.selected_building is not None
+
+    def kill_selected(self):
+        """Remove Units and Buildings in scenario editor."""
+        for unit in self.selected_units[::]:
+            unit.kill()
+        if self.selected_building is not None:
+            self.selected_building.kill()
 
     def toggle_waypoint_mode(self, forced_mode: Optional[bool] = None):
         if self.waypoints_mode and self.game.pathfinder.created_waypoints_queue is not None:
@@ -441,7 +449,7 @@ class UnitsManager(EventsCreator):
             self.selected_building = None
         else:
             self.selected_units.remove(entity)
-            self.selected_units_types[entity.object_name] -= 1
+            self.selected_units_types[entity.object_name] -= 1  # TODO: #1 fix KeyError when Unit is killed during selection
         self.remove_from_selection_markers(entity.selection_marker)
         self.update_interface_on_selection_change()
 

@@ -14,17 +14,16 @@ from typing import Deque, List, Dict, Optional, Union
 from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line
 from arcade.arcade_types import Point
 
-from effects.constants import EXPLOSION
+from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL
 from effects.explosions import Explosion
 from map.map import (
-    GridPosition, MapNode, MapPath, Pathfinder, normalize_position,
+    GridPosition, MapNode, Pathfinder, normalize_position,
     position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
-from user_interface.constants import UI_UNITS_PANEL
 from user_interface.user_interface import UiElement, UiTextLabel
 from utils.colors import GREEN, value_to_color
-from utils.functions import (get_path_to_file, get_texture_size)
+from utils.functions import (get_path_to_file, get_texture_size, ignore_in_editor_mode)
 from utils.game_logging import log_here
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
@@ -401,11 +400,15 @@ class Unit(PlayerEntity, ABC):
         self.stop_completely()
         self.set_permanent_units_group()
         self.clear_all_blocked_nodes()
+        self.animate_and_communicate_unit_death()
+        super().kill()
+
+    @ignore_in_editor_mode
+    def animate_and_communicate_unit_death(self):
         if self.outside and self.is_rendered:
             self.create_death_animation()
         if self.player.is_local_human_player:
             self.game.sound_player.play_sound('unit_lost.vaw')
-        super().kill()
 
     def cancel_tasks(self):
         for task in self.tasks:
@@ -516,9 +519,10 @@ class Vehicle(Unit):
             self.threads_time = t
             self.game.vehicles_threads.append(VehicleThreads(self.threads_texture, self.facing_direction, *self.position))
 
-    def kill(self):
+    @ignore_in_editor_mode
+    def animate_and_communicate_unit_death(self):
+        super().animate_and_communicate_unit_death()
         self.spawn_wreck()
-        super().kill()
 
     def spawn_wreck(self):
         self.game.spawn(f'{self.object_name}_wreck.png', None, self.position, self.facing_direction)

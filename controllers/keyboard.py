@@ -5,7 +5,7 @@ from typing import Set, Optional
 from arcade import Window
 from arcade.key import *
 
-from user_interface.constants import UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL
+from utils.constants import UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL
 from user_interface.user_interface import (
     ToggledElement, TextInputField, UiBundlesHandler
 )
@@ -44,11 +44,14 @@ class KeyboardHandler(ToggledElement):
         elif symbol == B and self.window.is_game_running:
             self.window.game.show_construction_options(UI_BUILDINGS_CONSTRUCTION_PANEL)
         elif symbol == D:
-            x = 1
+            ...
         elif symbol == ESCAPE:
             self.on_escape_pressed()
         elif symbol == LCTRL:
             self.window.game.units_manager.toggle_waypoint_mode()
+        elif symbol == DELETE:
+            if self.window.settings.editor_mode and self.window.game.units_manager.units_or_building_selected:
+                self.window.game.units_manager.kill_selected()
         elif (digit := chr(symbol)).isdigit():
             self.on_numeric_key_press(int(digit))
 

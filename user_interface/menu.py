@@ -3,20 +3,15 @@ from __future__ import annotations
 
 from functools import partial
 
-from controllers.constants import MULTIPLAYER_MENU
-from user_interface.constants import (
-    LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, CREDITS_SUBMENU,
-    CAMPAIGN_MENU, SKIRMISH_MENU, NEW_GAME_MENU, SCENARIO_EDITOR_MENU,
-    QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON, NOT_AVAILABLE_NOTIFICATION, SCENARIOS, GRAPHICS_TAB, SOUND_TAB,
-    GAME_TAB, SAVED_GAMES, PROJECTS
-)
+from utils.constants import MULTIPLAYER_MENU, SCENARIOS, PROJECTS, SAVED_GAMES, SCENARIO_EDITOR_MENU, NEW_GAME_MENU, \
+    SKIRMISH_MENU, CAMPAIGN_MENU, LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, GRAPHICS_TAB, SOUND_TAB, \
+    GAME_TAB, CREDITS_SUBMENU, NOT_AVAILABLE_NOTIFICATION, QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON
 from user_interface.user_interface import (
     UiElementsBundle, UiBundlesHandler, Button, Checkbox, TextInputField, UiTextLabel, Slider, SelectableGroup,
     GenericTextButton, ScrollableContainer, ImageSlot
 )
 from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
-from players_and_factions.constants import PlayerColor
 
 LOADER = 'loader'
 

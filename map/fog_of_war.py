@@ -8,7 +8,7 @@ from arcade import Sprite, SpriteList, make_soft_circle_texture
 from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
 from game import Game
-from map.constants import TILE_WIDTH, TILE_HEIGHT
+from utils.constants import TILE_WIDTH, TILE_HEIGHT
 from map.quadtree import Rect
 
 OFFSET_X = TILE_WIDTH // 2

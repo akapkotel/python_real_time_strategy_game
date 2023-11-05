@@ -19,12 +19,13 @@ from arcade import (
     draw_lines
 )
 
-from controllers.constants import *
 from buildings.buildings import Building
 from map.map import position_to_map_grid
 from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED, MAP_GREEN
 from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameObject
+from utils.constants import CURSOR_NORMAL_TEXTURE, CURSOR_FORBIDDEN_TEXTURE, CURSOR_ATTACK_TEXTURE, \
+    CURSOR_SELECTION_TEXTURE, CURSOR_MOVE_TEXTURE
 from utils.data_types import Number
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
@@ -158,7 +159,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
 
     def attach_placeable_gameobject(self, gameobject_name: str):
-        self.placeable_gameobject = PlaceableGameObject(gameobject_name, self.game.local_human_player, *self.position)
+        player = self.game.current_active_player
+        self.placeable_gameobject = PlaceableGameObject(gameobject_name, player, *self.position)
 
     def select_ui_element(self, element: Optional[UiElement] = None):
         self.selected_ui_element = element

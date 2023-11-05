@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 from PIL import Image
 
 from arcade import AnimatedTimeBasedSprite, load_texture, draw_rectangle_filled
 from arcade.arcade_types import Point
 
-from map.constants import TILE_WIDTH, TILE_HEIGHT
+from utils.constants import TILE_WIDTH, TILE_HEIGHT
 from utils.colors import GREEN, RED, add_transparency
 from utils.geometry import ROTATIONS
 from utils.observer import Observed, Observer
@@ -194,14 +194,11 @@ class Wreck(TerrainObject):
         width, height = Image.open(texture_name).size
         try:  # for tanks with turrets
             i, j = texture_index  # Tuple
-            self.texture = load_texture(texture_name,
-                                   j * (width // ROTATIONS),
-                                   i * (height // ROTATIONS), width // ROTATIONS,
-                                   height // ROTATIONS)
+            self.texture = load_texture(
+                texture_name, j * (width // ROTATIONS), i * (height // ROTATIONS), width // ROTATIONS, height // ROTATIONS)
         except TypeError:
-            self.texture = load_texture(texture_name,
-                                   texture_index * (width // ROTATIONS),
-                                   0, width // ROTATIONS, height)
+            self.texture = load_texture(
+                texture_name, texture_index * (width // ROTATIONS), 0, width // ROTATIONS, height)
 
 
 class Corpse(Wreck):
@@ -270,6 +267,7 @@ class PlaceableGameObject:
     def build(self):
         if self.game.editor_mode:
             self.game.spawn(self.gameobject_name, self.player, self.position)
+            self.game.units_manager.unselect_all_selected()
         else:
             from buildings.buildings import ConstructionSite
             ConstructionSite(self.gameobject_name, self.player, self.position)

@@ -20,7 +20,6 @@ from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity
 )
-from players_and_factions.constants import FUEL, AMMUNITION, STEEL, ELECTRONICS, CONSCRIPTS, ENERGY
 from utils.views import ProgressBar
 from utils.colors import GREEN, RED, BLACK, CONSTRUCTION_BAR_COLOR
 from utils.functions import (
@@ -28,9 +27,8 @@ from utils.functions import (
     get_path_to_file, ignore_in_editor_mode, add_extension
 )
 from utils.geometry import find_area, generate_2d_grid
-from controllers.constants import CURSOR_ENTER_TEXTURE
-from map.constants import TILE_WIDTH, TILE_HEIGHT
-from user_interface.constants import UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
+from utils.constants import CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
+    CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 from utils.game_logging import log_this_call
@@ -130,8 +128,7 @@ class UnitsProducer:
 
     def update_units_production(self, delta_time: float):
         if self.currently_produced is not None and self.is_powered:
-            health_factor = self.health_percentage * 0.01
-            self.production_progress += (health_factor * self.power_ratio * delta_time)
+            self.production_progress += (self.health_ratio * self.power_ratio * delta_time)
             if self.player.is_local_human_player:
                 self.update_ui_units_construction_section()
             if self.production_progress >= self.production_time:
@@ -236,6 +233,7 @@ class ResearchFacility:
         self.funding = 0
         self.required_funding = 0
         self.researched_technologies: Dict[Technology, float] = {}
+        self.researched_technology = None
 
     def start_research(self, technology: Technology):
         if self.player.knows_all_required(technology.required):
@@ -314,7 +312,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if produced_resource is not None:
             ResourceProducer.__init__(self, produced_resource)
         if research_facility:
-            ResearchFacility.__init__(self)
+            ResearchFacility(building=self)
 
         if object_id is None:
             self.place_building_properly_on_the_grid()

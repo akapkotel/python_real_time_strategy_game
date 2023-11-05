@@ -70,6 +70,7 @@ class SaveManager:
         self.update_projects(PROJECT_EXTENSION, self.projects_path)
         log_here(f'Found {len(self.projects)} projects in {self.projects_path}.', True)
 
+
     def update_scenarios(self, extension: str, scenarios_path: str):
         self.scenarios = self.find_all_files(extension, scenarios_path)
         for name, path in self.scenarios.items():
@@ -183,7 +184,7 @@ class SaveManager:
                 self.loading_step(function=eval(f'self.load_{name}'), argument=file[name])
                 log_here(f'Saved data: {name} was successfully loaded!', console=True)
                 yield progress
-            self.game.settings.editor_mode = editor_mode
+            # self.game.settings.editor_mode = editor_mode
         log_here(f'Saved game: {filename} was loaded successfully!', console=True)
 
     @staticmethod

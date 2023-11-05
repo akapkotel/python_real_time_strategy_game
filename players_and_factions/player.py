@@ -11,14 +11,12 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade.arcade_types import Color, Point
 
-from gameobjects.constants import CONSTRUCTION_SITE
-from players_and_factions.constants import (
-    FactionName, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS, RESOURCES, YIELD_PER_SECOND,
-    CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY
-)
-from user_interface.constants import UI_RESOURCES_SECTION
+from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
+    CONSCRIPTS, YIELD_PER_SECOND, CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY, RESOURCES, FactionName, \
+    UI_RESOURCES_SECTION
+
 from gameobjects.gameobject import GameObject
-from map.map import MapNode, position_to_map_grid, TILE_WIDTH
+from map.map import MapNode, position_to_map_grid
 from campaigns.research import Technology
 from utils.game_logging import log_here
 from utils.observer import Observed, Observer
@@ -152,8 +150,9 @@ class Player(EventsCreator, Observer, Observed):
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color
 
-        self.units_possible_to_build: List[str] = []
-        self.buildings_possible_to_build: List[str] = []
+        units, buildings = ([], []) if not self.game.editor_mode else self.populate_units_and_buildings_options()
+        self.units_possible_to_build: List[str] = units
+        self.buildings_possible_to_build: List[str] = buildings
 
         self.units: Set[Unit] = set()
         self.buildings: Set[Building] = set()
@@ -170,8 +169,19 @@ class Player(EventsCreator, Observer, Observed):
             setattr(self, f"{resource_name}{PRODUCTION_EFFICIENCY}", 1.0)
             if resource_name != ENERGY:
                 setattr(self, f"{resource_name}{CONSUMPTION_PER_SECOND}", 0)
+
         self.attach_observers(observers=[self.game, self.faction])
         self.schedule_event(ScheduledEvent(self, 1, self._update_resources_stock, repeat=-1))
+
+    def populate_units_and_buildings_options(self) -> Tuple[List[str], List[str]]:
+        configs = self.game.configs.values()
+        units_possible_to_build = [
+            unit.get('object_name') for unit in configs if unit['game_id'].startswith('U')
+        ]
+        buildings_possible_to_build = [
+            building.get('object_name') for building in configs if building['class'] == 'Building'
+        ]
+        return units_possible_to_build, buildings_possible_to_build
 
     def __repr__(self) -> str:
         return self.name
@@ -273,9 +283,11 @@ class Player(EventsCreator, Observer, Observed):
 
     @property
     def unlimited_resources(self) -> bool:
-        if self.is_local_human_player:
-            return self.game.settings.unlimited_player_resources
-        return self.game.settings.unlimited_cpu_resources
+        return any((
+            self.game.editor_mode,
+            self.is_local_human_player and self.game.settings.unlimited_player_resources,
+            not self.is_local_human_player and self.game.settings.unlimited_cpu_resources
+        ))
 
     def _identify_expense_category(self, expense: str) -> str:
         try:
