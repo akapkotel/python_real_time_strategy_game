@@ -7,9 +7,9 @@ from enum import IntEnum
 
 from math import dist
 from collections import deque, defaultdict
-from functools import partial, cached_property, lru_cache
+from functools import partial, cached_property, lru_cache, singledispatch
 from typing import (
-    Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection,
+    Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any,
 )
 
 from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
@@ -55,11 +55,25 @@ def normalize_position(x: Number, y: Number) -> NormalizedPoint:
 
 
 @lru_cache(maxsize=62500)
-def map_grid_to_position(grid: GridPosition) -> NormalizedPoint:
+@singledispatch
+def map_grid_to_position(grid: Any, *args) -> tuple[int, int]:
     """Return (x, y) position of the map-grid-normalised Node."""
+    raise NotImplementedError
+
+
+@map_grid_to_position.register
+def _(grid: tuple) -> tuple[int, int]:
     return (
         int(grid[0] * TILE_WIDTH + (TILE_WIDTH // 2)),
         int(grid[1] * TILE_HEIGHT + (TILE_HEIGHT // 2))
+    )
+
+
+@map_grid_to_position.register
+def _(grid_x: int, grid_y: int) -> tuple[int, int]:
+    return (
+        int(grid_x * TILE_WIDTH + (TILE_WIDTH // 2)),
+        int(grid_y * TILE_HEIGHT + (TILE_HEIGHT // 2))
     )
 
 
@@ -443,7 +457,7 @@ class MapNode:
 
     @property
     def available_for_construction(self) -> bool:
-        return self.is_walkable and not self.are_buildings_nearby() and self.is_explored()
+        return self.is_walkable and self.is_explored()  # and not self.are_buildings_nearby()
 
     def is_explored(self):
         return self.map.game.editor_mode or self.grid in self.map.game.fog_of_war.explored

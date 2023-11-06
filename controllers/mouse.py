@@ -67,6 +67,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         # textures-related:
         self.animations_keyframes: List[List[AnimationKeyframe]] = []
         self.load_textures()
+        self.frame_time = 0
 
         # cache currently updated and drawn spritelists of the active View:
         self._updated_spritelists: List[DrawnAndUpdated] = []
@@ -126,7 +127,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             frames_count = texture.width // MOUSE_CURSOR_SIZE
             locations_list = [(MOUSE_CURSOR_SIZE * j, 0, MOUSE_CURSOR_SIZE, MOUSE_CURSOR_SIZE) for j in range(frames_count)]
             frames = load_textures(self.window.resources_manager.get(names[i]), locations_list)
-            duration = 1 // frames_count
+            duration = 1 / frames_count
             self.animations_keyframes.append(
                 self.new_frames_list(frames, duration)
             )
@@ -160,7 +161,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def attach_placeable_gameobject(self, gameobject_name: str):
         player = self.game.current_active_player
-        self.placeable_gameobject = PlaceableGameObject(gameobject_name, player, *self.position)
+        self.placeable_gameobject = PlaceableGameObject(gameobject_name, player)
 
     def select_ui_element(self, element: Optional[UiElement] = None):
         self.selected_ui_element = element
@@ -234,7 +235,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.placeable_gameobject = None
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
-                      buttons: int, modifiers: int):
+                      buttons: int):
         if buttons == MOUSE_BUTTON_LEFT:
             self.on_left_button_drag(dx, dy, x, y)
         elif buttons == MOUSE_BUTTON_RIGHT:
@@ -265,7 +266,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             new, lost = self.mouse_drag_selection.update(x, y)
             self.units_manager.update_selection_markers_set(new, lost)
 
-    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+    def on_mouse_scroll(self, scroll_x: int, scroll_y: int):
         if self.pointed_scrollable is not None:
             self.pointed_scrollable.on_mouse_scroll(scroll_x, scroll_y)
 
@@ -279,9 +280,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.placeable_gameobject.update()
         self.update_cursor_pointed()
         self.update_cursor_texture()
-        self.update_animation(self.window.settings.update_rate)
+        self.update_animation()
 
-    def update_animation(self, delta_time: float = .1):
+    def update_animation(self, delta_time: float = 1/60):
         """
         Logic for selecting the proper texture to use.
         """
@@ -446,8 +447,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
-        if self.placeable_gameobject is None:
-            self.draw_cross_cursor()
+        # if self.placeable_gameobject is None:
+        self.draw_cross_cursor()
 
         if self.show_hint and self.text_hint_delay <= self.game.timer.total_game_time:
             self.draw_text_hint(self.pointed_gameobject.text_hint)

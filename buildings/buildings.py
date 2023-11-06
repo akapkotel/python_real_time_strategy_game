@@ -7,16 +7,16 @@ from functools import partial
 from pathlib import Path
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union, Iterable
 
-from arcade import load_texture, MOUSE_BUTTON_RIGHT, draw_point
+from arcade import load_texture, MOUSE_BUTTON_RIGHT
 from arcade.arcade_types import Point
 
 from units.units import Soldier, Unit
 from effects.sound import UNIT_PRODUCTION_FINISHED
 from user_interface.user_interface import (
-    ProgressButton, UiElementsBundle, UiElement, Hint, Button, UiTextLabel, UnitProductionCostsHint
+    ProgressButton, UiElementsBundle, UiElement, Button, UiTextLabel, UnitProductionCostsHint
 )
 from campaigns.research import Technology
-from map.map import MapNode, normalize_position, position_to_map_grid
+from map.map import MapNode, normalize_position, position_to_map_grid, map_grid_to_position
 from players_and_factions.player import (
     Player, PlayerEntity
 )
@@ -26,9 +26,9 @@ from utils.functions import (
     add_player_color_to_name, get_texture_size,
     get_path_to_file, ignore_in_editor_mode, add_extension
 )
-from utils.geometry import find_area, generate_2d_grid
+from utils.geometry import generate_2d_grid, find_grid_center
 from utils.constants import CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
-    CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL
+    CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, CONSTRUCTION_SITE
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 from utils.game_logging import log_this_call
@@ -316,6 +316,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
         if object_id is None:
             self.place_building_properly_on_the_grid()
+
         self.occupied_nodes: Set[MapNode] = self.find_occupied_nodes()
         self.block_map_nodes(self.occupied_nodes)
 
@@ -356,16 +357,15 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         Buildings positions must be adjusted accordingly to their texture
         width and height, so they occupy minimum MapNodes.
         """
-        self.position = normalize_position(*self.position)
-        left = self.position[0] - (TILE_WIDTH // 2) + 1
-        bottom = self.position[1] - (TILE_HEIGHT // 2) + 1
-        return left + self.width // 2, bottom + self.height // 2
+        self.position = normalized = normalize_position(*self.position)
+        return normalized
 
     def find_occupied_nodes(self) -> Set[MapNode]:
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
-        max_x_grid = int(self.right // TILE_WIDTH)
-        max_y_grid = int(self.top // TILE_HEIGHT)
+        width, height = self.configs.get('size')
+        max_x_grid = min_x_grid + width
+        max_y_grid = min_y_grid + height
         return {
             self.game.map.grid_to_node((x, y))
             for x in range(min_x_grid, max_x_grid)
@@ -616,7 +616,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def save(self) -> Dict:
         saved_building = super().save()
-
         if self.produced_units is not None:
             saved_building.update(UnitsProducer.save(self))
         elif self.produced_resource is not None:
@@ -656,23 +655,23 @@ class ConstructionSite(Building):
     """
 
     def __init__(self, building_name: str, player: Player, position):
-        super().__init__(f'construction_site', player, position)
-
-        constructed_building_configs = self.game.configs[building_name]
-
+        self.size = self.game.configs[building_name]['size']
+        super().__init__(f'{CONSTRUCTION_SITE}_{self.size[0]}x{self.size[1]}', player, position)
+        print(666, self.__dict__.get('saved_constructed_building'))
         self.constructed_building_position = position
         self.constructed_building_name = building_name
 
-        # TODO: find a way to resize placeholder texture to the size of constructed building in game
         # TODO: create construction textures for each Building with stages of construction
+        #  https://github.com/akapkotel/python_real_time_strategy_game/issues/8
 
-        self.maximum_construction_progress = constructed_building_configs['max_health']
+        self.maximum_construction_progress = self.game.configs[building_name]['max_health']
         self.construction_progress = 0
 
         self.construction_progress_bar = ProgressBar(
             self.center_x, self.top, self.width, 20, 0, self.maximum_construction_progress, 1, BLACK,
             CONSTRUCTION_BAR_COLOR
         )
+        self.object_name = CONSTRUCTION_SITE
 
     def on_update(self, delta_time: float = 1 / 60):
         super().on_update(delta_time)
@@ -691,7 +690,19 @@ class ConstructionSite(Building):
         self.construction_progress_bar = None
         self.kill()
         self.game.spawn(self.constructed_building_name, self.player, self.constructed_building_position)
-        self.game.sound_player.play_sound('construction_complete.wav')
+        if self.player.is_local_human_player:
+            self.game.sound_player.play_sound('construction_complete.wav')
+
+    def save(self):
+        saved_construction_site = super().save()
+        saved_construction_site['constructed_building_name'] = self.constructed_building_name
+        saved_construction_site['construction_progress'] = self.construction_progress
+        saved_construction_site['maximum_construction_progress'] = self.maximum_construction_progress
+        return saved_construction_site
+
+    def after_respawn(self, loaded_data: Dict):
+        super().after_respawn(loaded_data)
+        self.construction_progress_bar.total_progress = self.construction_progress
 
 
 if __name__:

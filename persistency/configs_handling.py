@@ -23,12 +23,14 @@ def read_csv_files(configs_path: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
             log_here(f'{str(e)}')
     return configs
 
+
 def read_single_file(filename: str) -> Dict[str, Dict[str, Any]]:
     category_dict = {}
     with open(get_path_to_file(filename, 'csv'), newline='') as file:
         for row in csv.DictReader(file):
             category_dict[row['object_name']] = convert_csv_data(row)
     return category_dict
+
 
 def convert_csv_data(row) -> Dict[str, Any]:
     """
@@ -43,10 +45,12 @@ def convert_csv_data(row) -> Dict[str, Any]:
             converted[key] = convert_value(value)
     return converted
 
+
 def unpack_value(value: str, bracket: str) -> Union[Tuple, List]:
     """Convert str representation of tuple or list to python tuple or list."""
     values = [convert_value(v) for v in value.strip('([)]').split(';')]
     return tuple(values) if bracket == '(' else values
+
 
 def convert_value(value: str) -> Union[str, float, int, bool, None]:
     if value[0].isnumeric():
@@ -55,9 +59,11 @@ def convert_value(value: str) -> Union[str, float, int, bool, None]:
         return eval(value)
     return value
 
+
 def convert_to_numeric(value: str) -> Union[float, int]:
     """Identify numeric values and convert them to int or float."""
     return float(value) if '.' in value else int(value)
+
 
 def load_player_configs() -> Dict[str, Any]:
     pass

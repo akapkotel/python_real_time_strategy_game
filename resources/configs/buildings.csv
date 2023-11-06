@@ -8,7 +8,7 @@ fuel_plant,B006,Building,None,None,fuel,False,1800,0.75,4,300,450,180,8,0,None,(
 hydroponic_farm,B007,Building,None,(garrison),food,False,600,0.50,2,200,200,80,6,0,None,(2;2),10
 research_laboratory,B008,Building,None,None,None,True,600,0.75,4,250,200,800,5,0,None,(2;2),15
 light_vehicles_factory,B009,Building,(truck;cistern;scout_car;apc),(medium_vehicles_factory),None,False,800,0.75,2,120,250,200,8,0,None,(2;2),15
-medium_vehicles_factory,B010,Building,(tank_medium),(heavy_vehicles_factory),None,False,1000,0.75,2,180,300,300,8,0,None,(2;3),15
+medium_vehicles_factory,B010,Building,(tank_medium),(heavy_vehicles_factory),None,False,1000,0.75,2,180,300,300,8,0,None,(3;3),15
 storage_facility,B011,Building,None,None,None,False,400,0.25,1,80,100,25,4,0,None,(2;2),5
 helipads,B012,Building,None,None,None,False,600,0.50,2,100,150,100,8,0,None,(2;2),10
 construction_site,B014,Building,None,None,None,False,500,0,0,0.01,0,0,4,0,None,(3;3),0

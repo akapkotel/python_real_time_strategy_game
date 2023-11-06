@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, dist
-from typing import Optional, Sequence, Tuple, List, Set, Literal
+from typing import Optional, Sequence, Tuple, List, Set
 
 from numba import njit
 
@@ -202,3 +202,16 @@ def generate_2d_grid(start_x: float, start_y: float, rows: int, columns: int, it
             shift_y = (row % rows) * (item_height + padding)
             grid.append((shifted_x, start_y - shift_y))
     return grid
+
+
+def find_grid_center(grid: Tuple[int, int], size: Tuple[int, int]) -> Tuple[int, int]:
+    return tuple(center_coordinate(c, size) for (c, size) in zip(grid, size))
+
+
+def center_coordinate(coordinate: int, size: int) -> int:
+    if size == 1:
+        return coordinate
+    elif size % 2 == 0:
+        return coordinate + (size // 2)
+    else:
+        return coordinate + (size // 2)

@@ -339,6 +339,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         super().on_show_view()
         if (game := self.window.game_view) is not None:
             game.save_timer()
+            game.mouse.placeable_gameobject = None
         self.window.toggle_mouse_and_keyboard(True)
         self.switch_to_bundle(MAIN_MENU)
         self.toggle_game_related_buttons()

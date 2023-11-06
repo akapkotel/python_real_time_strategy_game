@@ -5,13 +5,13 @@ from typing import Any, Dict
 
 from arcade.arcade_types import Point
 
-from buildings.buildings import Building
+from buildings.buildings import Building, ConstructionSite
 from players_and_factions.player import Player
 from units.units import *
 
 from utils.game_logging import log_here
 from utils.constants import CLASS, TREE, CORPSE, WRECK, VEHICLE_WITH_TURRET, VEHICLE, SOLDIER, BUILDING, \
-    RESEARCH_FACILITY, PRODUCED_RESOURCE, PRODUCED_UNITS
+    RESEARCH_FACILITY, PRODUCED_RESOURCE, PRODUCED_UNITS, CONSTRUCTION_SITE
 from gameobjects.gameobject import GameObject, Wreck, Tree, Corpse
 
 
@@ -26,7 +26,9 @@ class GameObjectsSpawner:
     def spawn(self, name: str, player: Player, position: Point, *args, **kwargs):
         if player is None:
             return self._spawn_terrain_object(name, position, *args, **kwargs)
-        elif self.configs[name][CLASS] == BUILDING:
+        if CONSTRUCTION_SITE in name:
+            return ConstructionSite(name, player, position)
+        if self.configs[name][CLASS] == BUILDING:
             return self._spawn_building(name, player, position, **kwargs)
         elif self.configs[name][CLASS] in (SOLDIER, VEHICLE, VEHICLE_WITH_TURRET):
             return self._spawn_unit(name, player, position, **kwargs)

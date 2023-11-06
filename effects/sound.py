@@ -100,7 +100,7 @@ class SoundPlayer:
     def pause_or_resume_playing_music(self):
         if self.music_on and self.paused_track_name is not None:
             self._resume_playing_paused_music_track()
-        else:
+        elif self.current_music is not None:
             self._pause_current_music_track()
 
     @property

@@ -337,6 +337,7 @@ class Player(EventsCreator, Observer, Observed):
         if (produced_units := building.produced_units) is not None:
             for unit_name in produced_units:
                 self.units_possible_to_build.remove(unit_name)
+        # object_name = building.object_name.rsplit('_', 1)[0] if CONSTRUCTION_SITE in building.object_name else building.object_name
         if (constructions := self.game.configs[building.object_name]['allows_construction']) is not None:
             for building_name in constructions:
                 self.buildings_possible_to_build.remove(building_name)
@@ -533,7 +534,8 @@ class PlayerEntity(GameObject):
 
         self.attach_observers(observers=[self.game, self.player])
 
-    def get_texture_name_with_player_color(self, player, texture_name) -> str:
+    @staticmethod
+    def get_texture_name_with_player_color(player, texture_name) -> str:
         if CONSTRUCTION_SITE in texture_name:
             return texture_name
         else:
@@ -548,6 +550,8 @@ class PlayerEntity(GameObject):
     @property
     def configs(self):
         # changed into property because the values could be modified during the game
+        if CONSTRUCTION_SITE in self.object_name:
+            return self.game.configs[self.object_name.rsplit('_', 1)[0]]
         return self.game.configs[self.object_name]
 
     @property

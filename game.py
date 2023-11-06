@@ -17,10 +17,12 @@ __credits__ = {'Coding': __author__,
 import random
 import time
 import pathlib
+from pprint import pprint
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
+import PIL.Image
 import pyglet
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
@@ -304,11 +306,11 @@ class GameWindow(Window, EventsCreator):
                 return
             left, _, bottom, _ = self.current_view.viewport
             self.mouse.on_mouse_motion(x, y, dx, dy)
-            self.mouse.on_mouse_drag(x + left, y + bottom, dx, dy, buttons, modifiers)
+            self.mouse.on_mouse_drag(x + left, y + bottom, dx, dy, buttons)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         if self.mouse.active:
-            self.mouse.on_mouse_scroll(x, y, scroll_x, scroll_y)
+            self.mouse.on_mouse_scroll(scroll_x, scroll_y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.keyboard.active:
@@ -423,7 +425,6 @@ class GameWindow(Window, EventsCreator):
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def quit_current_game(self):
-        self.sound_player.pause()  # to fix bug #6
         self.game_view.unload()
         self.show_view(self.menu_view)
         self.settings.editor_mode = False
@@ -446,7 +447,7 @@ class GameWindow(Window, EventsCreator):
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
         log_here(f'Terminating application... Average FPS: {round(1 / (self.total_delta_time / self.frames), 2)}', console=True)
-        self.sound_player.pause()  # to fix bug #6
+        self.sound_player.pause()
         super().close()
 
 
@@ -825,20 +826,26 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             construction_bundle.append(button)
 
     def populate_construction_options_with_available_units(self, units_construction_bundle, positions):
-        delay = self.settings.hints_delay_seconds
         if self.editor_mode:
-            for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
-                button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
-                                        functions=partial(self.mouse.attach_placeable_gameobject, unit_name))
-                units_construction_bundle.append(button)
+            self.populate_with_all_possible_units(positions, units_construction_bundle)
         else:
-            for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
-                producer = self.local_human_player.get_default_producer_of_unit(unit_name)
-                hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
-                button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
-                                        functions=partial(producer.start_production, unit_name), hint=hint)
-                button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
-                units_construction_bundle.append(button)
+            self.populate_with_units_available_in_game(positions, units_construction_bundle)
+
+    def populate_with_all_possible_units(self, positions, units_construction_bundle):
+        for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
+            button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
+                                    functions=partial(self.mouse.attach_placeable_gameobject, unit_name))
+            units_construction_bundle.append(button)
+
+    def populate_with_units_available_in_game(self, positions, units_construction_bundle):
+        delay = self.settings.hints_delay_seconds
+        for (col, row), unit_name in zip(positions, set(self.local_human_player.units_possible_to_build)):
+            producer = self.local_human_player.get_default_producer_of_unit(unit_name)
+            hint = UnitProductionCostsHint(self.local_human_player, producer.produced_units[unit_name], delay=delay)
+            button = ProgressButton(f'{unit_name}_icon.png', col, row, unit_name,
+                                    functions=partial(producer.start_production, unit_name), hint=hint)
+            button.bind_function(partial(producer.cancel_production, unit_name), MOUSE_BUTTON_RIGHT)
+            units_construction_bundle.append(button)
 
     def populate_construction_options_with_terrain_features(self, terrain_features_bundle, positions):
         # TODO: implement terrain tiles as PlaceAble objects to place on the map in editor mode

@@ -104,6 +104,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+venv
 env/
 venv/
 ENV/
@@ -135,6 +136,7 @@ dmypy.json
 .scn
 .dat
 .dir
+dev_utils.py
 
 # sound source info
 /resources/sounds/effects/źródła.txt

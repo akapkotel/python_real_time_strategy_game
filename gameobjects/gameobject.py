@@ -216,15 +216,16 @@ class PlaceableGameObject:
     much space is required to build the object.
     """
 
-    def __init__(self, gameobject_name: str, player, x, y):
+    def __init__(self, gameobject_name: str, player):
         self.game = player.game
         self.player = player
         self.gameobject_name = gameobject_name
-        self.position = x, y
+        self.position = 0, 0
         self.grid_width, self.grid_height = self.game.configs[gameobject_name]['size']
         self.last_grid = None
         self.grids = None
         self.drawn_gizmo_data = None
+        self.find_node = self.game.map.node
 
     def snap_to_the_map_grid(self, gx: int, gy: int, forced=False):
         """
@@ -234,9 +235,11 @@ class PlaceableGameObject:
         if not forced and self.last_grid == (gx, gy):
             return
         from map.map import map_grid_to_position
-        self.position = map_grid_to_position((gx + 1, gy + 1))  # TODO: find why and where this offset happens
+        from utils.geometry import find_grid_center
+        centered = find_grid_center((gx, gy), (self.grid_width, self.grid_height))
+        self.position = map_grid_to_position(centered)
         self.grids = {
-            map_grid_to_position((gx + x, gy + y)): self.game.map.node((gx + x, gy + y)).available_for_construction
+            map_grid_to_position((gx + x, gy + y)): self.find_node((gx + x, gy + y)).available_for_construction
             for y in range(self.grid_height) for x in range(self.grid_width)
         }
         self.last_grid = gx, gy
