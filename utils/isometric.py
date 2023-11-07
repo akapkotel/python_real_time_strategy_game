@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict, Optional, Collection, Set
 
 from arcade import (
     Window,
@@ -99,6 +99,12 @@ class IsometricMap:
         a, b, c, d = invert_matrix(width, -width, width * 0.5, width * 0.5)
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
         return grid if grid in self.tiles else None
+
+    def __contains__(self, item: Tuple[int, int]):
+        return item in self.tiles
+
+    def is_inside_map_grid(self, grid: Collection[Tuple[int, int]]) -> Set[Tuple[int, int]]:
+        return {g for g in grid if g in self.tiles}
 
     def draw(self, editor_mode: bool = False):
         if editor_mode:
