@@ -651,7 +651,7 @@ class PlayerEntity(GameObject):
     def calculate_observed_area(self) -> Set[GridPosition]:
         gx, gy = position_to_map_grid(*self.position)
         circular_map_grid_area = find_area(gx, gy, self.visibility_matrix)
-        return self.map.in_bounds(circular_map_grid_area)
+        return self.map.is_inside_map_grid(circular_map_grid_area)
 
     @ignore_in_editor_mode
     def update_known_enemies_set(self):

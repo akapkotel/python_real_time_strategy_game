@@ -245,7 +245,7 @@ class Map:
     def __contains__(self, item: GridPosition):
         return item in self.nodes
 
-    def in_bounds(self, grid: Collection[GridPosition]) -> Set[GridPosition]:
+    def is_inside_map_grid(self, grid: Collection[GridPosition]) -> Set[GridPosition]:
         return {g for g in grid if g in self.nodes}
 
     def on_map_area(self, x: Number, y: Number) -> bool:
@@ -265,7 +265,7 @@ class Map:
 
     def adjacent_nodes(self, x: Number, y: Number) -> Set[MapNode]:
         return {
-            self.nodes[adj] for adj in self.in_bounds(adjacent_map_grids(x, y))
+            self.nodes[adj] for adj in self.is_inside_map_grid(adjacent_map_grids(x, y))
         }
 
     def position_to_node(self, x: Number, y: Number) -> MapNode:
@@ -320,7 +320,7 @@ class Map:
     def calculate_distances_between_nodes(self):
         for node in self.nodes.values():
             node.costs = costs_dict = {}
-            for grid in self.in_bounds(adjacent_map_grids(*node.position)):
+            for grid in self.is_inside_map_grid(adjacent_map_grids(*node.position)):
                 adjacent_node = self.nodes[grid]
                 distance = adjacent_distance(grid, adjacent_node.grid)
                 # terrain_cost = node.terrain_cost + adjacent_node.terrain_cost
@@ -386,7 +386,7 @@ class MapNode:
         return f'MapNode(x={self.x}, y={self.y}, terrain_type={self.terrain_type})'
 
     def in_bounds(self, *args, **kwargs):
-        return self.map.in_bounds(*args, **kwargs)
+        return self.map.is_inside_map_grid(*args, **kwargs)
 
     def diagonal_to_other(self, other: GridPosition):
         return self.grid[0] != other[0] and self.grid[1] != other[1]

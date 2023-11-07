@@ -311,7 +311,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
             return found_entities
         for faction_id, entities in self.entities.items():
             if faction_id in hostile_factions_ids:
-                found_entities.extend(e for e in entities if bounds.in_bounds(e))
+                found_entities.extend(e for e in entities if bounds.is_inside_map_grid(e))
         for quadtree in self.children:
             found_entities = quadtree.query(hostile_factions_ids, bounds, found_entities)
         return found_entities
