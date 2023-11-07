@@ -16,7 +16,7 @@ from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement, Button, UiTextLabel, UnitProductionCostsHint
 )
 from campaigns.research import Technology
-from map.map import MapNode, normalize_position, position_to_map_grid, map_grid_to_position
+from map.map import MapNode, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity
 )
@@ -26,7 +26,7 @@ from utils.functions import (
     add_player_color_to_name, get_texture_size,
     get_path_to_file, ignore_in_editor_mode, add_extension
 )
-from utils.geometry import generate_2d_grid, find_grid_center
+from utils.geometry import generate_2d_grid
 from utils.constants import CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, CONSTRUCTION_SITE
 
@@ -657,7 +657,6 @@ class ConstructionSite(Building):
     def __init__(self, building_name: str, player: Player, position):
         self.size = self.game.configs[building_name]['size']
         super().__init__(f'{CONSTRUCTION_SITE}_{self.size[0]}x{self.size[1]}', player, position)
-        print(666, self.__dict__.get('saved_constructed_building'))
         self.constructed_building_position = position
         self.constructed_building_name = building_name
 

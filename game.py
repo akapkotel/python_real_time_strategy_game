@@ -120,7 +120,7 @@ class Settings:
         self.update_rate = 1 / (self.fps * self.game_speed)
         self.draw_fps_counter: bool = self.developer_mode and not self.editor_mode
 
-        self.sound_on: bool = True
+        self.sound_on: bool = False
         self.music_on: bool = True
         self.sound_effects_on: bool = True
 
@@ -302,7 +302,7 @@ class GameWindow(Window, EventsCreator):
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float,
                       buttons: int, modifiers: int):
         if self.mouse.active:
-            if self.current_view is self.game_view and self.mouse.pointed_ui_element:
+            if self.is_game_running and self.mouse.pointed_ui_element:
                 return
             left, _, bottom, _ = self.current_view.viewport
             self.mouse.on_mouse_motion(x, y, dx, dy)

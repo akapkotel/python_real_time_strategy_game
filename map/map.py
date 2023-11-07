@@ -12,7 +12,7 @@ from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any,
 )
 
-from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
+from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture, create_isometric_grid_lines
 
 from game import PROFILING_LEVEL
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, VERTICAL_DIST, DIAGONAL_DIST, ADJACENT_OFFSETS, \
@@ -25,7 +25,7 @@ from utils.scheduling import EventsCreator
 from utils.functions import (
     get_path_to_file, all_files_of_type_named
 )
-from map.quadtree import QuadTree
+from map.quadtree import CartesianQuadTree
 from utils.game_logging import log_here, log_this_call
 from utils.timing import timer
 from utils.geometry import calculate_circular_area
@@ -197,7 +197,7 @@ class Map:
         self.nodes: Dict[GridPosition, MapNode] = {}
         self.distances = {}
 
-        self.quadtree = QuadTree(self.width // 2, self.height // 2, self.width, self.height)
+        self.quadtree = CartesianQuadTree(self.width // 2, self.height // 2, self.width, self.height)
         log_here(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
 
         self.generate_map_nodes_and_tiles()
@@ -209,7 +209,6 @@ class Map:
         log_here('Map was initialized successfully...', console=True)
 
     def prepare_planting_trees(self, map_settings):
-        """"""
         trees = map_settings.get('trees') or self.generate_random_trees()
         self.game.after_load_functions.append(partial(self.plant_trees, trees))
 
