@@ -112,7 +112,7 @@ def set_terrain_texture(terrain_type: str,
 def a_star(current_map: Map,
            start: GridPosition,
            end: GridPosition,
-           pathable: bool = False) -> Union[MapPath, bool]:
+           pathable: bool = False) -> Union[MapPath, None]:
     """
     Find the shortest path from <start> to <end> position using A* algorithm.
 
@@ -154,7 +154,7 @@ def a_star(current_map: Map,
     # pass and search for pathable nodes this time
     if not pathable:
         return a_star(current_map, start, end, pathable=True)
-    return False  # no third pass, if there is no possible path!
+    return None  # no third pass, if there is no possible path!
 
 
 def heuristic(start: GridPosition, end: GridPosition) -> int:
@@ -258,10 +258,16 @@ class Map:
             return False
 
     def walkable_adjacent(self, x, y) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes(x, y) if n.is_walkable}
+        if (x, y) not in self.nodes:
+            x, y = position_to_map_grid(x, y)
+        pointed_tile = self.nodes[x, y]
+        return {tile for tile in pointed_tile.adjacent_nodes if tile.is_walkable}
 
     def pathable_adjacent(self, x, y) -> Set[MapNode]:
-        return {n for n in self.adjacent_nodes(x, y) if n.is_pathable}
+        if (x, y) not in self.nodes:
+            x, y = position_to_map_grid(x, y)
+        pointed_node = self.nodes[x, y]
+        return {node for node in pointed_node.adjacent_nodes if node.is_pathable}
 
     def adjacent_nodes(self, x: Number, y: Number) -> Set[MapNode]:
         return {
@@ -385,7 +391,7 @@ class MapNode:
     def __repr__(self) -> str:
         return f'MapNode(x={self.x}, y={self.y}, terrain_type={self.terrain_type})'
 
-    def in_bounds(self, *args, **kwargs):
+    def is_inside_map_grid(self, *args, **kwargs):
         return self.map.is_inside_map_grid(*args, **kwargs)
 
     def diagonal_to_other(self, other: GridPosition):
@@ -702,7 +708,7 @@ class Pathfinder(EventsCreator):
         # other Unit from the same navigating groups pathfinding to the
         # same place TODO: find a better way to not mutually-block nodes
         if self.map.grid_to_node(destination).is_walkable:
-            if path := a_star(self.map, start, destination):
+            if (path := a_star(self.map, start, destination)) is not None:
                 return unit.follow_new_path(path)
         self.request_path(unit, start, destination)
 

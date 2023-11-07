@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import math
 import random
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import Tuple, List, Dict, Optional, Collection, Set
+from enum import IntEnum
+from functools import lru_cache, singledispatch
+from typing import Tuple, List, Dict, Optional, Collection, Set, Union, Any
 
 from arcade import (
     Window,
@@ -12,12 +16,16 @@ from arcade import (
     run,
     load_texture,
     draw_polygon_filled,
-    create_line_strip, Texture
+    create_line_strip, Texture, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_LEFT
 )
 
+# from buildings.buildings import Building
+# from gameobjects.gameobject import GameObject
 from map.quadtree import IsometricQuadTree
+# from units.units import Unit
 from utils.colors import WHITE, GREEN
-
+from utils.constants import DIAGONAL_DIST, VERTICAL_DIST
+from utils.priority_queue import PriorityQueue
 
 ADJACENCY_MATRIX = ((-1, -1), (-1, 0), (0, -1), (0, 1), (1, 1), (1, 0), (1, -1), (-1, 1))
 
@@ -27,10 +35,49 @@ def invert_matrix(a, b, c, d):
     return det * d, det * -b, det * -c, det * a
 
 
+@lru_cache(maxsize=62500)
+@singledispatch
+def map_grid_to_position(grid: Any, *args) -> tuple[int, int]:
+    """Return (x, y) position of the map-grid-normalised Node."""
+    raise NotImplementedError
+
+
+@map_grid_to_position.register
+def _(grid: tuple) -> tuple[int, int]:
+    x, y = IsometricMap.instance.grids_to_positions[grid]
+    return pos_to_iso_grid(x, y)
+
+
+@map_grid_to_position.register
+def _(grid_x: int, grid_y: int) -> tuple[int, int]:
+    x, y = IsometricMap.instance.grids_to_positions[(grid_x, grid_y)]
+    return pos_to_iso_grid(x, y)
+
+
 def pos_to_iso_grid(pos_x: int, pos_y: int) -> Tuple[int, int] | None:
     """Use this, function from other scripts to convert positions to iso grid coordinates."""
     isometric_map = IsometricMap.instance
     return isometric_map.pos_to_iso_grid(isometric_map, pos_x, pos_y)
+
+
+def adjacent_distance(this: Tuple[int, int], adjacent: Tuple[int, int]) -> int:
+    return DIAGONAL_DIST if diagonal(this, adjacent) else VERTICAL_DIST
+
+
+def diagonal(first_grid: Tuple[int, int], second_grid: Tuple[int, int]) -> bool:
+    return first_grid[0] == second_grid[0] and first_grid[1] == second_grid[1]
+
+
+@dataclass
+class Coordinate:
+    __slots__ = ['position',]
+    position: Tuple[float, float]
+
+
+class TerrainType(IntEnum):
+    GROUND = 0
+    WATER = 1
+    VOID = 2
 
 
 class IsometricMap:
@@ -40,6 +87,7 @@ class IsometricMap:
     def __init__(self, window: Window, map_width: int, map_height: int, tile_width: int):
         self.window = window
         self.tiles: Dict[Tuple[int, int], IsometricTile] = {}
+        self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
         self.tile_width = tile_width
         self.tile_height = tile_width // 2
         self.map_width = map_width
@@ -75,12 +123,14 @@ class IsometricMap:
                 idx = row * self.columns + col + 1
                 tile_x, tile_y = self.iso_grid_to_position(col, row)
                 sprite = Sprite(center_x=tile_x, center_y=tile_y, hit_box_algorithm='None')
-                sprite.texture = random.choice(list(self.terrains.values()))
-                tile = IsometricTile(idx, col, row, tile_x, tile_y, 0, self.tile_width, sprite=sprite)
+                terrain, sprite.texture = random.choice(list(self.terrains.items()))
+                tile = IsometricTile(idx, col, row, tile_x, tile_y, 0, self.tile_width, terrain, sprite=sprite)
+                tile.texture = random.choice(list(self.terrains.values()))
                 gizmo = create_line_strip(tile.points, WHITE)
                 tiles[(col, row)] = tile
                 self.grid_gizmo.append(gizmo)
                 self.tiles_sprites.append(sprite)
+                self.grids_to_positions[(col, row)] = tile_x, tile_y
         return tiles
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
@@ -100,11 +150,36 @@ class IsometricMap:
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
         return grid if grid in self.tiles else None
 
+    def on_map_area(self, x: float, y: float) -> bool:
+        return self.quadtree.in_bounds(Coordinate((x, y)))
+
     def __contains__(self, item: Tuple[int, int]):
         return item in self.tiles
 
     def is_inside_map_grid(self, grid: Collection[Tuple[int, int]]) -> Set[Tuple[int, int]]:
         return {g for g in grid if g in self.tiles}
+
+    def walkable(self, grid: Tuple[int, int]) -> bool:
+        try:
+            return self.tiles[grid].is_walkable
+        except KeyError:
+            return False
+
+    def walkable_adjacent(self, x, y) -> Set[IsometricTile]:
+        if (x, y) not in self.tiles:
+            x, y = self.pos_to_iso_grid(x, y)
+        pointed_tile = self.tiles[self.pos_to_iso_grid(x, y)]
+        return {tile for tile in pointed_tile.adjacent_tiles if tile.is_walkable}
+
+    def pathable_adjacent(self, x, y) -> Set[IsometricTile]:
+        if (x, y) not in self.tiles:
+            x, y = self.pos_to_iso_grid(x, y)
+        pointed_tile = self.tiles[x, y]
+        return {tile for tile in pointed_tile.adjacent_tiles if tile.is_pathable}
+
+    def position_to_node(self, x: int, y: int) -> IsometricTile:
+        iso_grid = self.pos_to_iso_grid(x, y)
+        return self.tiles[iso_grid]
 
     def draw(self, editor_mode: bool = False):
         if editor_mode:
@@ -117,8 +192,9 @@ class IsometricMap:
 
 
 class IsometricTile:
+    map: Optional[IsometricMap] = None
 
-    def __init__(self, idx: int, gx: int, gy: int, x: int, y: int, z: int, width: int, sprite: Sprite = None):
+    def __init__(self, idx: int, gx: int, gy: int, x: int, y: int, z: int, width: int, terrain: str, sprite: Sprite = None):
         self.idx = idx
         self.gx = gx
         self.gy = gy
@@ -132,8 +208,26 @@ class IsometricTile:
         self.width = width
         self.pointed = False
         self._sprite = sprite
+
+        self.grid = gx, gy
+        self.terrain_type: TerrainType = TerrainType.GROUND if terrain in ('grass', 'sand') else TerrainType.WATER
+        self.map_region: Optional[int] = None
+        self.costs = None
+
+        self._walkable = self.terrain_type != TerrainType.WATER
+        self._pathable = self.terrain_type > -1
         self._adjacent_ids: Optional[List[Tuple[int, int]]] = None
         self._adjacent_tiles: Optional[List[IsometricTile]] = None
+
+        self._is_pathable = True  # terrain_type > -1
+
+        self._tree: Optional[int] = None
+        self._unit: Optional['Unit'] = None
+        self._building: Optional['Building'] = None
+        self._static_gameobject: Optional['GameObject', int] = None
+
+    def __repr__(self) -> str:
+        return f'MapTile({self.idx},{self.gx},{self.gy},{self.x},{self.y},{self.z},{self.width})'
 
     def __str__(self) -> str:
         return f'IsometricTile(idx:{self.idx}, grid:{self.gx},{self.gy}, position:{self.x},{self.y})'
@@ -149,14 +243,102 @@ class IsometricTile:
     @property
     def adjacent_ids(self) -> List[Tuple[int, int]]:
         if self._adjacent_ids is None:
-            self._adjacent_ids = IsometricMap.instance.adjacent_grids(self.gx, self.gy)
+            self._adjacent_ids = self.map.adjacent_grids(self.gx, self.gy)
         return self._adjacent_ids
 
     @property
     def adjacent_tiles(self) -> List[IsometricTile]:
         if self._adjacent_tiles is None:
-            self._adjacent_tiles = [IsometricMap.instance.tiles[gx, gy] for (gx, gy) in self.adjacent_ids]
+            self._adjacent_tiles = [self.map.tiles[gx, gy] for (gx, gy) in self.adjacent_ids]
         return self._adjacent_tiles
+
+    @property
+    def walkable_adjacent(self):
+        return {tile for tile in self.adjacent_tiles if tile.is_walkable}
+
+    @property
+    def pathable_adjacent(self):
+        return {tile for tile in self.adjacent_tiles if tile.is_pathable}
+
+    def diagonal_to_other(self, other: IsometricTile):
+        return self.gx == other.gx or self.gy == other.gy
+
+    @property
+    def tree(self) -> Optional[int]:
+        return self._tree
+
+    @tree.setter
+    def tree(self, value: Optional[int]):
+        self._static_gameobject = self._tree = value
+
+    def remove_tree(self):
+        if self._tree is not None:
+            for obj in self.map.game.static_objects:
+                if obj.map_node is self:
+                    obj.kill()
+
+    @property
+    def unit(self) -> Optional['Unit']:
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: Optional['Unit']):
+        self._unit = value
+
+    @property
+    def building(self) -> Optional['Building']:
+        return self._building
+
+    @building.setter
+    def building(self, value: Optional['Building']):
+        self._static_gameobject = self._building = value
+
+    @property
+    def unit_or_building(self) -> Optional[Union['Unit', 'Building']]:
+        return self._unit or self._building
+
+    @property
+    def static_gameobject(self) -> Optional['GameObject', int]:
+        return self._static_gameobject
+
+    @static_gameobject.setter
+    def static_gameobject(self, value: Optional['GameObject', int]):
+        self._static_gameobject = value
+
+    @property
+    def is_water(self) -> bool:
+        return self.terrain_type is TerrainType.WATER
+
+    @property
+    def is_navigable(self):
+        return self.is_water and self._unit is None
+
+    @property
+    def is_walkable(self) -> bool:
+        """
+        Use it to find if node is not blocked at the moment by units or
+        buildings.
+        """
+        return self.terrain_type is TerrainType.GROUND and self.is_pathable and self._unit is None
+
+    @property
+    def is_pathable(self) -> bool:
+        """Call it to find if this node is available for pathfinding at all."""
+        return self._pathable and self._static_gameobject is None
+
+    @is_pathable.setter
+    def is_pathable(self, value: bool):
+        self._pathable = value
+
+    @property
+    def available_for_construction(self) -> bool:
+        return self.is_walkable and self.is_explored()  # and not self.are_buildings_nearby()
+
+    def is_explored(self):
+        return self.map.game.editor_mode or self.grid in self.map.game.fog_of_war.explored
+
+    def are_buildings_nearby(self):
+        return any(n.building for n in self.adjacent_tiles)
 
     def draw(self):
         color = GREEN if self.pointed else WHITE
@@ -169,7 +351,12 @@ class IsometricWindow(Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         self.map = IsometricMap(self, width, height, 100)
+
+        # debugging stuff
         self.current_tile = None
+        self.start_point = None
+        self.end_point = None
+        self.path = None
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -177,19 +364,46 @@ class IsometricWindow(Window):
     def on_draw(self):
         self.clear()
         self.map.draw(editor_mode=True)
+        if self.path:
+            for (gx, gy) in self.path:
+                points = self.map.tiles[(gx, gy)].points
+                draw_polygon_filled(points, GREEN)
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        if self.current_tile is not None:
-            self.current_tile.pointed = False
-            self.current_tile = None
+        self.highlight_pointed_tile(x, y)
+
+    def highlight_pointed_tile(self, x, y):
         if (grid := self.map.pos_to_iso_grid(x, y)) is not None:
             tile = self.map.tiles.get(grid)
-            tile.pointed = True
+            if self.current_tile not in (tile, None):
+                self.current_tile.pointed = False
             self.current_tile = tile
+            tile.pointed = True
+        else:
+            self.current_tile = None
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        # debugging stuff
+        if button == MOUSE_BUTTON_RIGHT:
+            self.start_point = self.end_point = None
+            if self.path:
+                self.path.clear()
+            return
         if self.current_tile is not None:
-            print(self.current_tile)
+            self.highlight_adjacent_tiles()
+            if self.start_point is None:
+                self.start_point = self.current_tile.grid
+            elif self.end_point is None:
+                self.end_point = self.current_tile.grid
+                self.path = a_star(self.map, self.start_point, self.end_point)
+
+    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
+        if button == MOUSE_BUTTON_LEFT and self.current_tile is not None:
+            self.highlight_adjacent_tiles()
+
+    def highlight_adjacent_tiles(self):
+        for adjacent in self.current_tile.adjacent_tiles:
+            adjacent.pointed = not adjacent.pointed
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
         old_left, _, old_bottom, _ = self.get_viewport()
@@ -200,10 +414,69 @@ class IsometricWindow(Window):
         self.set_viewport(new_left, new_right, new_bottom, new_top)
 
 
-@dataclass
-class Coordinate:
-    __slots__ = ['position',]
-    position: Tuple[float, float]
+# @timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
+def a_star(current_map: IsometricMap,
+           start: Tuple[int, int],
+           end: Tuple[int, int],
+           pathable: bool = False) -> Union[Union[List[Tuple[int, int]], List[Tuple[int, int]]], None]:
+    """
+    Find the shortest path from <start> to <end> position using A* algorithm.
+
+    :param current_map: Map
+    :param start: GridPosition -- (int, int) path-start point.
+    :param end: GridPosition -- (int, int) path-destination point.
+    :param pathable: bool -- should pathfinder check only walkable tiles
+    (default) or all pathable map area? Use it to get into 'blocked'
+    areas, e.g. places enclosed by units.
+    :return: Union[MapPath, bool] -- list of points or False if no path
+    found
+    """
+    map_nodes = current_map.tiles
+    unexplored = PriorityQueue(start, heuristic(start, end))
+    explored = set()
+    previous: Dict[Tuple[int, int], Tuple[int, int]] = {}
+
+    get_best_unexplored = unexplored.get
+    put_to_unexplored = unexplored.put
+
+    cost_so_far = defaultdict(lambda: math.inf)
+    cost_so_far[start] = 0
+
+    while unexplored:
+        if (current := get_best_unexplored()[1]) == end:
+            return reconstruct_path(map_nodes, previous, current)
+        node = map_nodes[current]
+        walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
+        for adjacent in (a for a in walkable if a.grid not in explored):
+            adj_grid = adjacent.grid
+            total = cost_so_far[current] + adjacent_distance(current, adj_grid)
+            if total < cost_so_far[adj_grid]:
+                previous[adj_grid] = current
+                cost_so_far[adj_grid] = total
+                priority = total + heuristic(adj_grid, end)
+                put_to_unexplored(adj_grid, priority)
+            explored.add(current)
+    # if path was not found searching by walkable tiles, we call second
+    # pass and search for pathable nodes this time
+    if not pathable:
+        return a_star(current_map, start, end, pathable=True)
+    return None  # no third pass, if there is no possible path!
+
+
+def heuristic(start: Tuple[int, int], end: Tuple[int, int]) -> int:
+    dx = abs(start[0] - end[0])
+    dy = abs(start[1] - end[1])
+    return DIAGONAL_DIST * min(dx, dy) + VERTICAL_DIST * max(dx, dy)
+
+
+def reconstruct_path(map_nodes: Dict[Tuple[int, int], IsometricTile],
+                     previous_nodes: Dict[Tuple[int, int], Tuple[int, int]],
+                     current_node: Tuple[int, int]) -> Union[List[Tuple[int, int]], List[Tuple[int, int,]]]:
+    path = [map_nodes[current_node]]
+    while current_node in previous_nodes.keys():
+        current_node = previous_nodes[current_node]
+        path.append(map_nodes[current_node])
+    return [node.grid for node in path[::-1]]
 
 
 if __name__ == '__main__':

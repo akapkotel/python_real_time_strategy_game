@@ -728,7 +728,8 @@ class Soldier(Unit):
 
     def leave_building(self, building):
         x, y = building.position  # TODO: replace this with Building exit position
-        self.position = self.game.pathfinder.get_closest_walkable_position(x, y)
+        self.position = building.adjacent_nodes
+        #(self.game.pathfinder.get_closest_walkable_position(x, y))
         self.insert_to_map_quadtree()
         self.outside = True
         self.start_rendering()
