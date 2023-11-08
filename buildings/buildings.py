@@ -357,8 +357,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         Buildings positions must be adjusted accordingly to their texture
         width and height, so they occupy minimum MapNodes.
         """
-        self.position = normalized = normalize_position(*self.position)
-        return normalized
+        return self.position
 
     def find_occupied_nodes(self) -> Set[MapNode]:
         min_x_grid = int(self.left // TILE_WIDTH)

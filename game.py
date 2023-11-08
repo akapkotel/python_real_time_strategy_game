@@ -185,6 +185,7 @@ class GameWindow(Window, EventsCreator):
     def __init__(self, settings: Settings):
         Window.__init__(self, settings.screen_width, settings.screen_height, __title__, settings.full_screen, update_rate=settings.update_rate)
         EventsCreator.__init__(self)
+        self.cursor_xy = 0, 0
 
         self.total_delta_time = 0
         self.frames = 0
@@ -282,10 +283,14 @@ class GameWindow(Window, EventsCreator):
                   GREEN if self.current_fps > 24 else YELLOW if self.current_fps > 20 else RED)
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        self.cursor_xy = x, y
         if self.mouse.active:
-            if self.current_view is self.game_view:
+            if self.is_game_running:
                 left, _, bottom, _ = self.current_view.viewport
-                self.mouse.on_mouse_motion(x + left, y + bottom, dx, dy)
+                x += left
+                y += bottom
+                self.cursor_xy = x, y, self.game.map.pos_to_iso_grid(x, y)
+                self.mouse.on_mouse_motion(x, y, dx, dy)
             else:
                 self.mouse.on_mouse_motion(x, y, dx, dy)
 
@@ -343,8 +348,10 @@ class GameWindow(Window, EventsCreator):
         game_map = self.game_view.map
         left, right, bottom, top = self.get_viewport()
         offset = SCREEN_WIDTH - UI_WIDTH
-        new_left = clamp(left - dx, game_map.width - offset, 0)
-        new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
+        # new_left = clamp(left - dx, game_map.width - offset, 0)
+        # new_bottom = clamp(bottom - dy, game_map.height - SCREEN_HEIGHT, 0)
+        new_left = left - dx
+        new_bottom = bottom - dy
         self._update_viewport_coordinates(new_left, new_bottom)
 
     def _update_viewport_coordinates(self, new_left, new_bottom):
@@ -504,7 +511,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.dialog: Optional[Tuple[str, Color, Color]] = None
 
         # SpriteLists:
-        self.terrain_tiles = SpriteListWithSwitch(is_static=True, update_on=False)
+        self.terrain_tiles = SpriteListWithSwitch(use_spatial_hash=True, is_static=True, update_on=False)
         self.dead_bodies = SpriteListWithSwitch(is_static=True, update_on=False)
         self.vehicles_threads = SpriteList(is_static=True)
         self.units_ordered_destinations = UnitsOrderedDestinations()
@@ -518,7 +525,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
         self.events_scheduler = EventsScheduler(game=self)
 
-        self.map: Optional[Map] = None
+        self.map: Optional[IsometricMap] = None
         self.mini_map: Optional[MiniMap] = None
         self.fog_of_war: Optional[FogOfWar] = None
 
@@ -546,16 +553,15 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.scenario_editor: Optional[ScenarioEditor] = ScenarioEditor() if self.editor_mode else None
 
         # list used only when Game is randomly-generated:
-        rows, columns = self.settings.map_height, self.settings.map_width
         self.things_to_load = [
-            ['map', Map, 0.35, {'rows': rows, 'columns': columns,
-             'grid_width': TILE_WIDTH, 'grid_height': TILE_HEIGHT}],
+            ['map', IsometricMap, 0.35, {'rows': self.settings.map_height, 'columns': self.settings.map_width,
+             'tile_width': TILE_WIDTH, 'tile_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
-            ['fog_of_war', FogOfWar, 0.15],
+            # ['fog_of_war', FogOfWar, 0.15],
             ['spawner', GameObjectsSpawner, 0.05],
-            ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
-                                         (MINIMAP_WIDTH, MINIMAP_HEIGHT),
-                                         (TILE_WIDTH, TILE_HEIGHT), rows)],
+            # ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
+            #                              (MINIMAP_WIDTH, MINIMAP_HEIGHT),
+            #                              (TILE_WIDTH, TILE_HEIGHT), rows)],
         ] if self.loader is None else []
 
         self.random_scenario = self.loader is None
@@ -712,7 +718,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         diff_y = top - self.interface[0].top
         self.interface.move(diff_x, diff_y)
         self.update_not_displayed_bundles_positions(diff_x, diff_y)
-        self.mini_map.update_position(diff_x, diff_y)
+        if self.mini_map is not None:
+            self.mini_map.update_position(diff_x, diff_y)
 
     def change_interface_content(self, context_gameobjects=None):
         """
@@ -873,8 +880,8 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_random_scenario(self):
         self.test_factions_and_players_creation()
-        self.test_buildings_spawning()
-        self.test_units_spawning()
+        # self.test_buildings_spawning()
+        # self.test_units_spawning()
         self.test_scenarios()
 
     def place_viewport_at_players_base_or_starting_position(self):
@@ -882,10 +889,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.buildings]
             )
-        else:
+        elif self.local_human_player.units:
             position = average_position_of_points_group(
                 [u.position for u in self.local_human_player.units]
             )
+        else:
+            return
         self.window.move_viewport_to_the_position(*position)
 
     def test_factions_and_players_creation(self):
@@ -1032,7 +1041,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.show_view(self)
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
-        self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
+        # self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
         super().after_loading()
         if self.random_scenario:
             self.create_random_scenario()
@@ -1073,12 +1082,16 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
+        # if self.map is not None:
+        #     self.map.draw()
         super().on_draw()
         if self.mini_map is not None and self.settings.show_minimap:
             self.mini_map.draw()
         self.timer.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
+        left, *_, top = self.viewport
+        draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
@@ -1126,7 +1139,7 @@ def run_game(settings: Settings):
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
-    from map.map import Map, Pathfinder, map_grid_to_position
+    from map.map import Map, Pathfinder, map_grid_to_position, IsometricMap
     from units.unit_management import (
         UnitsManager, SelectedEntityMarker, PermanentUnitsGroup
     )

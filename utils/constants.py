@@ -41,7 +41,7 @@ PRODUCED_RESOURCE = 'produced_resource'
 PRODUCED_UNITS = 'produced_units'
 
 # map
-TILE_WIDTH = 60
+TILE_WIDTH = 100
 TILE_HEIGHT = 50
 PATH = 'PATH'
 VERTICAL_DIST = 10

@@ -332,7 +332,7 @@ class UnitsManager(EventsCreator):
     def teleport_units_to_location(self, x, y, units: List[Unit]):
         positions = self.game.pathfinder.get_group_of_waypoints(x, y, len(units))
         for position, unit in zip(positions, units):
-            new_map_node = self.game.map.node(position)
+            new_map_node = self.game.map.position_to_node(*position)
             unit.swap_blocked_nodes(unit.current_node, new_map_node)
             unit.position = new_map_node.position
 

@@ -67,7 +67,6 @@ class Unit(PlayerEntity, ABC):
         self.weight = weight
 
         # pathfinding and map-related:
-        self.position = normalize_position(*self.position)
         self.reserved_node = None
         self.current_node = self.map.position_to_node(*self.position)
         self.block_map_node(self.current_node)

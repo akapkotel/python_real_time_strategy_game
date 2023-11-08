@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 from PIL import Image
 
-from arcade import AnimatedTimeBasedSprite, load_texture, draw_rectangle_filled
+from arcade import AnimatedTimeBasedSprite, load_texture, draw_rectangle_filled, draw_polygon_filled
 from arcade.arcade_types import Point
 
 from utils.constants import TILE_WIDTH, TILE_HEIGHT
@@ -17,6 +17,10 @@ from utils.functions import get_path_to_file, add_extension
 from utils.game_logging import log_here
 from utils.improved_spritelists import LayeredSpriteList
 from utils.scheduling import EventsCreator, ScheduledEvent
+
+
+TRANSPARENT_GREEN = add_transparency(GREEN, 75)
+TRANSPARENT_RED = add_transparency(RED, 75)
 
 
 def name_without_color(name: str) -> str:
@@ -223,55 +227,64 @@ class PlaceableGameObject:
         self.position = 0, 0
         self.grid_width, self.grid_height = self.game.configs[gameobject_name]['size']
         self.last_grid = None
-        self.grids = None
+        self.tiles = None
         self.drawn_gizmo_data = None
-        self.find_node = self.game.map.node
+        self.find_node = self.game.map.grid_to_node
 
-    def snap_to_the_map_grid(self, gx: int, gy: int, forced=False):
+    def has_grid_changed(self, gx: int, gy: int) -> bool:
         """
-        Create dictionary of map positions and their boolean 'availabilities' for constructing Building. This dict would
-        be used to draw colored gizmo on the screen when player seek a proper position for placing the Building.
+        Check if the grid has changed.
         """
-        if not forced and self.last_grid == (gx, gy):
-            return
-        from map.map import map_grid_to_position
-        from utils.geometry import find_grid_center
-        centered = find_grid_center((gx, gy), (self.grid_width, self.grid_height))
-        self.position = map_grid_to_position(centered)
-        self.grids = {
-            map_grid_to_position((gx + x, gy + y)): self.find_node((gx + x, gy + y)).available_for_construction
-            for y in range(self.grid_height) for x in range(self.grid_width)
-        }
+        return self.last_grid != (gx, gy)
+
+    def update_tiles(self, gx: int, gy: int):
+        """
+        Update the tiles based on the grid position.
+        """
+        self.tiles = [self.find_node((gx + x, gy + y)) for y in range(self.grid_height) for x in range(self.grid_width)]
         self.last_grid = gx, gy
 
     def update(self):
-        if not self.grids:
-            return
-        self.drawn_gizmo_data = (
-            (gx, gy, TILE_WIDTH, TILE_HEIGHT, add_transparency(GREEN if is_available else RED, 64))
-            for (gx, gy), is_available in self.grids.items()
-        )
+        if self.tiles:
+            self.update_drawn_gizmo_data()
+
+    def update_drawn_gizmo_data(self):
+        self.drawn_gizmo_data = [
+            (tile.points, TRANSPARENT_GREEN if tile.available_for_construction else TRANSPARENT_RED)
+            for tile in self.tiles
+        ]
 
     def draw(self):
-        for grid_data in self.drawn_gizmo_data:
-            draw_rectangle_filled(*grid_data)
+        if self.drawn_gizmo_data:
+            for grid_data in self.drawn_gizmo_data:
+                draw_polygon_filled(*grid_data)
+
+    def is_location_available(self) -> bool:
+        """
+        Check if the location is available for construction.
+        """
+        if self.tiles:
+            return all(grid_data[1] == TRANSPARENT_GREEN for grid_data in self.drawn_gizmo_data)
+        return False
+
+    def has_enough_resources(self) -> bool:
+        """
+        Check if the player has enough resources for construction.
+        """
+        return self.game.settings.editor_mode or self.player.enough_resources_for(self.gameobject_name)
 
     def is_construction_possible(self) -> bool:
-        if self.is_location_available:
-            return self.game.settings.editor_mode or self.player.enough_resources_for(self.gameobject_name)
-        return False
-
-    @property
-    def is_location_available(self) -> bool:
-        if self.grids:
-            return all(bool(availability) for availability in self.grids.values())
-        return False
+        """
+        Check if construction is possible.
+        """
+        return self.is_location_available() and self.has_enough_resources()
 
     def build(self):
+        position = self.game.map.iso_grid_to_position(*self.last_grid)
         if self.game.editor_mode:
-            self.game.spawn(self.gameobject_name, self.player, self.position)
+            self.game.spawn(self.gameobject_name, self.player, position)
             self.game.units_manager.unselect_all_selected()
         else:
             from buildings.buildings import ConstructionSite
-            ConstructionSite(self.gameobject_name, self.player, self.position)
-        self.snap_to_the_map_grid(*self.last_grid, forced=True)
+            ConstructionSite(self.gameobject_name, self.player, position)
+        self.update_drawn_gizmo_data()

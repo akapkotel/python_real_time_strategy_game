@@ -116,11 +116,12 @@ class IsometricMap(metaclass=SingletonMeta):
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
         self.tile_width = settings['tile_width']
         self.tile_height = self.tile_width // 2
-        self.origin_tile = window.width // 2, window.height - self.tile_height // 2
+        # self.origin_tile = window.width // 2, window.height - self.tile_height // 2
         self.rows = settings['rows']
         self.columns = settings['columns']
         self.width = self.columns * self.tile_width
         self.height = self.rows * self.tile_height
+        self.origin_tile = self.width // 2, self.height - self.tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self.tiles_sprites = SpriteList(use_spatial_hash=True, is_static=True)
         self.terrains = self.find_terrains()
@@ -169,8 +170,8 @@ class IsometricMap(metaclass=SingletonMeta):
     def pos_to_iso_grid(self, pos_x: int, pos_y: int) -> Tuple[int, int] | None:
         """Convert (x, y) position (e.g. mouse cursor position) to isometric grid coordinates."""
         left, _, bottom, _ = self.window.get_viewport()
-        iso_x = pos_x - (self.window.width * 0.5 - left)
-        iso_y = -pos_y - bottom + self.window.height
+        iso_x = pos_x - (self.width * 0.5 - left)
+        iso_y = -pos_y - bottom + self.height
         width = self.tile_width * 0.5
         a, b, c, d = invert_matrix(width, -width, width * 0.5, width * 0.5)
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
@@ -381,8 +382,8 @@ class IsometricWindow(Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         map_settings = {
-            'rows': 20,
-            'columns': 20,
+            'rows': 120,
+            'columns': 120,
             'tile_width': 100,
         }
         self.map = IsometricMap(self, map_settings)

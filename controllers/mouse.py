@@ -155,9 +155,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
-        if self.placeable_gameobject is not None:
-            grid_x, grid_y = position_to_map_grid(x, y)
-            self.placeable_gameobject.snap_to_the_map_grid(grid_x, grid_y)
+        if (placeable := self.placeable_gameobject) is not None:
+            if (grid := self.game.map.pos_to_iso_grid(x, y)) is not None and placeable.has_grid_changed(*grid):
+                placeable.update_tiles(*grid)
 
     def attach_placeable_gameobject(self, gameobject_name: str):
         player = self.game.current_active_player
@@ -180,8 +180,6 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.evaluate_mini_map_click()
         if self.bound_text_input_field not in (ui_element, None):
             self.unbind_text_input_field()
-        if self.placeable_gameobject is not None and self.placeable_gameobject.is_construction_possible():
-            self.placeable_gameobject.build()
 
     @ignore_in_menu
     def evaluate_mini_map_click(self):
@@ -209,6 +207,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     @ignore_in_menu
     def on_left_button_release_in_game(self, x, y):
+        if self.placeable_gameobject is not None and self.placeable_gameobject.is_construction_possible():
+            return self.placeable_gameobject.build()
         if self.mouse_drag_selection is None:
             if self.pointed_ui_element is None:
                 self.units_manager.on_left_click_no_selection(x, y)
