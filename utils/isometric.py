@@ -16,14 +16,14 @@ from arcade import (
     run,
     load_texture,
     draw_polygon_filled,
-    create_line_strip, Texture, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_LEFT
+    create_line_strip, Texture, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_LEFT, draw_text
 )
 
 # from buildings.buildings import Building
 # from gameobjects.gameobject import GameObject
 from map.quadtree import IsometricQuadTree
 # from units.units import Unit
-from utils.colors import WHITE, GREEN
+from utils.colors import WHITE, GREEN, rgb_to_rgba
 from utils.constants import DIAGONAL_DIST, VERTICAL_DIST
 from utils.priority_queue import PriorityQueue
 
@@ -84,23 +84,23 @@ class IsometricMap:
     game = None
     instance = None
 
-    def __init__(self, window: Window, map_width: int, map_height: int, tile_width: int):
+    def __init__(self, window: Window, settings: Dict[str, Any]):
         self.window = window
         self.tiles: Dict[Tuple[int, int], IsometricTile] = {}
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
-        self.tile_width = tile_width
-        self.tile_height = tile_width // 2
-        self.map_width = map_width
-        self.map_height = map_height
-        self.first_tile = map_width // 2, map_height - self.tile_height // 2
-        self.rows = 60
-        self.columns = 60
+        self.tile_width = settings['tile_width']
+        self.tile_height = self.tile_width // 2
+        self.origin_tile = window.width // 2, window.height - self.tile_height // 2
+        self.rows = settings['rows']
+        self.columns = settings['columns']
+        self.width = self.columns * self.tile_width
+        self.height = self.rows * self.tile_height
         self.grid_gizmo = ShapeElementList()
         self.tiles_sprites = SpriteList(use_spatial_hash=True, is_static=True)
         self.terrains = self.find_terrains()
         self.tiles = self.generate_tiles()
         self.quadtree = self.generate_quadtree()
-        IsometricMap.instance = self
+        IsometricMap.instance = IsometricTile.map = self
 
     def find_terrains(self) -> Dict[str, Texture]:
         return {
@@ -135,7 +135,7 @@ class IsometricMap:
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
-        x, y = self.first_tile
+        x, y = self.origin_tile
         pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
         pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
         return pos_x, pos_y
@@ -179,7 +179,7 @@ class IsometricMap:
 
     def position_to_node(self, x: int, y: int) -> IsometricTile:
         iso_grid = self.pos_to_iso_grid(x, y)
-        return self.tiles[iso_grid]
+        return self.tiles.get(iso_grid)
 
     def draw(self, editor_mode: bool = False):
         if editor_mode:
@@ -341,18 +341,26 @@ class IsometricTile:
         return any(n.building for n in self.adjacent_tiles)
 
     def draw(self):
-        color = GREEN if self.pointed else WHITE
+        color = rgb_to_rgba(GREEN, 125) if self.pointed else WHITE
         if self.pointed:
             draw_polygon_filled(self.points, color)
+            draw_text(f'{self.gx},{self.gy}', self.x, self.y, WHITE, anchor_x='center', anchor_y='center')
 
 
 class IsometricWindow(Window):
 
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
-        self.map = IsometricMap(self, width, height, 100)
+        map_settings = {
+            'rows': 20,
+            'columns': 20,
+            'tile_width': 100,
+        }
+        self.map = IsometricMap(self, map_settings)
 
         # debugging stuff
+        self.cursor = 0, 0
+        self.world_cursor = 0, 0
         self.current_tile = None
         self.start_point = None
         self.end_point = None
@@ -364,17 +372,22 @@ class IsometricWindow(Window):
     def on_draw(self):
         self.clear()
         self.map.draw(editor_mode=True)
+        left, *_, top = self.get_viewport()
+        # debug cursor
+        draw_text(f'screen:{self.cursor}', left + 30, top - 30, WHITE)
+        draw_text(f'world: {self.world_cursor}', left + 30, top - 60, WHITE)
+        # debug pathfinding
         if self.path:
             for (gx, gy) in self.path:
                 points = self.map.tiles[(gx, gy)].points
-                draw_polygon_filled(points, GREEN)
+                draw_polygon_filled(points, rgb_to_rgba(GREEN, 125))
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        self.cursor = x, y
         self.highlight_pointed_tile(x, y)
 
     def highlight_pointed_tile(self, x, y):
-        if (grid := self.map.pos_to_iso_grid(x, y)) is not None:
-            tile = self.map.tiles.get(grid)
+        if (tile := self.map.position_to_node(x, y)) is not None:
             if self.current_tile not in (tile, None):
                 self.current_tile.pointed = False
             self.current_tile = tile
@@ -385,17 +398,27 @@ class IsometricWindow(Window):
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         # debugging stuff
         if button == MOUSE_BUTTON_RIGHT:
-            self.start_point = self.end_point = None
-            if self.path:
-                self.path.clear()
-            return
-        if self.current_tile is not None:
+            self.clear_pathfinding_debug()
+        elif self.current_tile is not None:
+            area = calculate_circular_area(*self.current_tile.grid, 7)
+            area = [self.map.tiles.get(g) for g in area]
+            for tile in area:
+                if tile is not None:
+                    tile.pointed = True
             self.highlight_adjacent_tiles()
-            if self.start_point is None:
-                self.start_point = self.current_tile.grid
-            elif self.end_point is None:
-                self.end_point = self.current_tile.grid
-                self.path = a_star(self.map, self.start_point, self.end_point)
+            self.debug_pathfinding()
+
+    def debug_pathfinding(self):
+        if self.start_point is None:
+            self.start_point = self.current_tile.grid
+        elif self.end_point is None and self.end_point != self.start_point:
+            self.end_point = self.current_tile.grid
+            self.path = a_star(self.map, self.start_point, self.end_point)
+
+    def clear_pathfinding_debug(self):
+        self.start_point = self.end_point = None
+        if self.path:
+            self.path.clear()
 
     def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
         if button == MOUSE_BUTTON_LEFT and self.current_tile is not None:
@@ -476,7 +499,22 @@ def reconstruct_path(map_nodes: Dict[Tuple[int, int], IsometricTile],
     while current_node in previous_nodes.keys():
         current_node = previous_nodes[current_node]
         path.append(map_nodes[current_node])
-    return [node.grid for node in path[::-1]]
+    return [node.grid for node in path[::-1]]  # TODO: change GridPosition used by Unit.path to IsometricTile
+
+
+@lru_cache(maxsize=None)
+def calculate_circular_area(grid_x, grid_y, max_distance):
+    radius = max_distance * 1.6
+    observable_area = []
+    for x in range(-max_distance, max_distance + 1):
+        dist_x = abs(x)
+        for y in range(-max_distance, max_distance + 1):
+            dist_y = abs(y)
+            total_distance = dist_x + dist_y
+            if total_distance < radius:
+                grid = (grid_x + x, grid_y + y)
+                observable_area.append(grid)
+    return observable_area
 
 
 if __name__ == '__main__':

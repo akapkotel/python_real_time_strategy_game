@@ -72,6 +72,21 @@ PRODUCTION_EFFICIENCY = "_production_efficiency"
 FactionName = Literal['Solarian Republic', 'Interplanetary Industrial Conglomerate', 'Colonists', None]
 RESOURCES = (FUEL, ENERGY, AMMUNITION, STEEL, ELECTRONICS, FOOD, CONSCRIPTS)
 
+OBJECT_NAME = 'object_name'
+GAME_ID = 'game_id'
+MAX_SPEED = 'max_speed'
+ROTATION_SPEED = 'rotation_speed'
+FUEL_CONSUMPTION = 'fuel_consumption'
+WEAPONS_NAMES = 'weapons_names'
+ARMOUR = 'armour'
+KILL_EXPERIENCE = 'kill_experience'
+PRODUCTION_TIME = 'production_time'
+MAX_HEALTH = 'max_health'
+ATTACK_RADIUS = 'attack_radius'
+VISIBILITY_RADIUS = 'visibility_radius'
+SIZE = 'size'
+ATTACK = 'attack'
+
 # user interface
 EDITOR = 'editor'
 SCENARIOS = 'scenarios'

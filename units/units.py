@@ -14,7 +14,7 @@ from typing import Deque, List, Dict, Optional, Union
 from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line
 from arcade.arcade_types import Point
 
-from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL
+from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION, FUEL, MAX_SPEED
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, MapNode, Pathfinder, normalize_position,
@@ -77,8 +77,8 @@ class Unit(PlayerEntity, ABC):
         self.path_wait_counter: int = 0
         self.awaited_path: Optional[MapPath] = None
 
-        self.max_speed = 0
-        self.current_speed = 0
+        self.max_speed = self.configs[MAX_SPEED]
+        self.current_speed = self.max_speed
         self.rotation_speed = 0
 
         self.permanent_units_group: int = 0
@@ -283,14 +283,14 @@ class Unit(PlayerEntity, ABC):
 
     def follow_path(self):
         destination = self.path[0]
-        if (distance_left := dist(self.position, destination)) < CLOSE_ENOUGH_DISTANCE * self.max_speed:
+        if (distance_left := dist(self.position, destination)) < CLOSE_ENOUGH_DISTANCE * self.current_speed:
             self.move_to_next_waypoint()
         else:
             angle_to_target = int(calculate_angle(*self.position, *destination))
             if self.virtual_angle != angle_to_target:
                 self.stop()
                 return self.rotate_towards_target(angle_to_target)
-            self.move_to_current_waypoint(destination, distance_left)
+            self.move_to_current_waypoint(destination)
 
     def rotate_towards_target(self, angle_to_target):
         """
@@ -317,9 +317,9 @@ class Unit(PlayerEntity, ABC):
     def move_to_next_waypoint(self):
         self.path.popleft()
 
-    def move_to_current_waypoint(self, destination, distance_left):
+    def move_to_current_waypoint(self, destination):
         angle = calculate_angle(*self.position, *destination)
-        self.change_x, self.change_y = vector_2d(angle, self.max_speed * self.health_ratio)
+        self.change_x, self.change_y = vector_2d(angle, self.current_speed)
 
     def move_to(self, destination: GridPosition, force_destination=True):
         self.cancel_path_requests()
@@ -488,8 +488,8 @@ class Vehicle(Unit):
         # when this Vehicle left its threads on the ground last time:
         self.threads_time = 0
 
-        self.max_fuel = self.fuel = self.configs['fuel']
-        self.fuel_consumption = self.configs['fuel_consumption']
+        self.max_fuel = self.fuel = self.configs[FUEL]
+        self.fuel_consumption = self.configs[FUEL_CONSUMPTION]
 
     @cached_property
     def threads_frequency(self):
@@ -518,6 +518,10 @@ class Vehicle(Unit):
         if (t := self.timer.frames) - self.threads_time >= self.threads_frequency:
             self.threads_time = t
             self.game.vehicles_threads.append(VehicleThreads(self.threads_texture, self.facing_direction, *self.position))
+
+    def _calculate_damage(self, damage: float, penetration: float):
+        super()._calculate_damage(damage, penetration)
+        self.current_speed = self.max_speed * self.health_ratio
 
     @ignore_in_editor_mode
     def animate_and_communicate_unit_death(self):

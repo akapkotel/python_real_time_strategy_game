@@ -204,7 +204,7 @@ def generate_2d_grid(start_x: float, start_y: float, rows: int, columns: int, it
     return grid
 
 
-def find_grid_center(grid: Tuple[int, int], size: Tuple[int, int]) -> Tuple[int, int]:
+def find_grid_center(grid: Tuple[int, int], size: Tuple[int, int]) -> Tuple[int, ...]:
     return tuple(center_coordinate(c, size) for (c, size) in zip(grid, size))
 
 

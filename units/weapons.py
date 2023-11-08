@@ -52,7 +52,7 @@ class Weapon:
         self.next_firing_time = self.owner.timer.total_game_time + self.rate_of_fire
         self.consume_ammunition()
         if self.check_if_target_was_hit(target):
-            target.on_being_damaged(self.damage, self.penetration)
+            target.on_being_hit(self.damage, self.penetration)
         self.create_shot_audio_visual_effects()
 
     def consume_ammunition(self, burst_size: int = 1):

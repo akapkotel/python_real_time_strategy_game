@@ -40,7 +40,7 @@ MAP_TEXTURES = {
 
 random_value = random.random
 
-MAP_TILE_TEXTURE_GROUND = make_soft_square_texture(TILE_WIDTH, SAND, 255, 255)
+MAP_TILE_TEXTURE_GROUND = make_soft_square_texture(TILE_WIDTH, SAND, 255, 225)
 MAP_TILE_TEXTURE_WATER = make_soft_square_texture(TILE_WIDTH, WATER_SHALLOW, 255, 255)
 MAP_TILE_TEXTURE_VOID = make_soft_square_texture(TILE_WIDTH, BLACK, 255, 0)
 
@@ -293,7 +293,7 @@ class Map:
     def generate_map_nodes_and_tiles(self):
         for x in range(self.columns):
             for y in range(self.rows):
-                terrain = TerrainType.VOID if x in(0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
+                terrain = TerrainType.VOID if x in (0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
                 self.nodes[(x, y)] = node = MapNode(x, y, terrain)
                 self.create_map_sprite(*node.position, node.terrain_type)
         log_here(f'Generated {len(self.nodes)} map nodes.', console=True)
@@ -741,7 +741,8 @@ class Pathfinder(EventsCreator):
         Find requested number of valid waypoints around requested position.
         """
         center = position_to_map_grid(x, y)
-        if required_waypoints == 1: return [center, ]
+        if required_waypoints == 1:
+            return [center, ]
         radius = 1
         waypoints = []
         nodes = self.map.nodes

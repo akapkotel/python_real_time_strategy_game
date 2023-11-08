@@ -595,9 +595,9 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         finally:
             self.update_garrison_button()
 
-    def on_being_damaged(self, damage: float, penetration: float = 0) -> bool:
+    def on_being_hit(self, damage: float, penetration: float = 0) -> bool:
         # TODO: killing personnel inside Building
-        return super().on_being_damaged(damage)
+        return super().on_being_hit(damage)
 
     def kill(self):
         if self.garrisoned_soldiers:

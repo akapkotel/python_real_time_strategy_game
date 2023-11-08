@@ -13,7 +13,7 @@ from arcade.arcade_types import Color, Point
 
 from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, YIELD_PER_SECOND, CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY, RESOURCES, FactionName, \
-    UI_RESOURCES_SECTION
+    UI_RESOURCES_SECTION, MAX_HEALTH, ATTACK_RADIUS, WEAPONS_NAMES, VISIBILITY_RADIUS
 
 from gameobjects.gameobject import GameObject
 from map.map import MapNode, position_to_map_grid
@@ -500,7 +500,7 @@ class PlayerEntity(GameObject):
         self.is_unit = not self.is_building
         self.is_infantry = self.is_unit and (isinstance(self, Soldier) or issubclass(self.__class__, Soldier))
 
-        self._max_health = self.configs['max_health']
+        self._max_health = self.configs[MAX_HEALTH]
         self._health = self._max_health
         self.armour = 0
         self.cover = 0
@@ -511,7 +511,7 @@ class PlayerEntity(GameObject):
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
         # matrix current position
-        self.visibility_radius = value = self.configs['visibility_radius'] * TILE_WIDTH
+        self.visibility_radius = value = self.configs[VISIBILITY_RADIUS] * TILE_WIDTH
         self.visibility_matrix = precalculate_circular_area_matrix(value // TILE_WIDTH)
 
         # area inside which all map-nodes are visible for this entity:
@@ -519,14 +519,14 @@ class PlayerEntity(GameObject):
         self.observed_nodes: Set[MapNode] = set()
 
         # like the visibility matrix, but range should be smaller:
-        self.attack_radius = self.configs['attack_radius'] * TILE_WIDTH
+        self.attack_radius = self.configs[ATTACK_RADIUS] * TILE_WIDTH
         # self.attack_range_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which every enemy unit could by attacked:
         self.fire_covered: Set[MapNode] = set()
 
         self._weapons: List[Weapon] = []
-        if (weapons := self.configs['weapons_names']) is not None:
+        if (weapons := self.configs[WEAPONS_NAMES]) is not None:
             self._weapons.extend(Weapon(name=name, owner=self) for name in weapons)
         self.max_ammunition = self.ammunition
 
@@ -717,7 +717,7 @@ class PlayerEntity(GameObject):
     def is_damaged(self) -> bool:
         return self._health < self._max_health
 
-    def on_being_damaged(self, damage: float, penetration: float = 0):
+    def on_being_hit(self, damage: float, penetration: float = 0):
         """
         :param damage: float -- damage dealt by the attacker
         :param penetration: float -- value of attacker's weapon penetration
@@ -726,10 +726,13 @@ class PlayerEntity(GameObject):
         """
         if self.game.settings.immortal_player_units and self.player.is_local_human_player:
             return
+        self._calculate_damage(damage, penetration)
+        self.check_id_should_entity_die()
+
+    def _calculate_damage(self, damage: float, penetration: float):
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
         self.health -= random.gauss(damage, deviation) * effectiveness
-        self.check_id_should_entity_die()
 
     def check_id_should_entity_die(self):
         if self._health <= 0:
