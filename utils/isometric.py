@@ -26,6 +26,7 @@ from map.quadtree import IsometricQuadTree
 from utils.colors import WHITE, GREEN, rgb_to_rgba
 from utils.constants import DIAGONAL_DIST, VERTICAL_DIST
 from utils.priority_queue import PriorityQueue
+from utils.singleton import SingletonMeta
 
 ADJACENCY_MATRIX = ((-1, -1), (-1, 0), (0, -1), (0, 1), (1, 1), (1, 0), (1, -1), (-1, 1))
 
@@ -44,20 +45,19 @@ def map_grid_to_position(grid: Any, *args) -> tuple[int, int]:
 
 @map_grid_to_position.register
 def _(grid: tuple) -> tuple[int, int]:
-    x, y = IsometricMap.instance.grids_to_positions[grid]
+    x, y = IsometricMap().grids_to_positions[grid]
     return pos_to_iso_grid(x, y)
 
 
 @map_grid_to_position.register
 def _(grid_x: int, grid_y: int) -> tuple[int, int]:
-    x, y = IsometricMap.instance.grids_to_positions[(grid_x, grid_y)]
+    x, y = IsometricMap().grids_to_positions[(grid_x, grid_y)]
     return pos_to_iso_grid(x, y)
 
 
 def pos_to_iso_grid(pos_x: int, pos_y: int) -> Tuple[int, int] | None:
     """Use this, function from other scripts to convert positions to iso grid coordinates."""
-    isometric_map = IsometricMap.instance
-    return isometric_map.pos_to_iso_grid(isometric_map, pos_x, pos_y)
+    return IsometricMap().pos_to_iso_grid(pos_x, pos_y)
 
 
 def adjacent_distance(this: Tuple[int, int], adjacent: Tuple[int, int]) -> int:
@@ -75,18 +75,44 @@ class Coordinate:
 
 
 class TerrainType(IntEnum):
+    """
+    Enum representing different types of terrain.
+    """
     GROUND = 0
     WATER = 1
     VOID = 2
 
+    def is_ground(self) -> bool:
+        return self == TerrainType.GROUND
 
-class IsometricMap:
+    def is_water(self) -> bool:
+        return self == TerrainType.WATER
+
+    def is_void(self) -> bool:
+        return self == TerrainType.VOID
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f'TerrainType.{self.name}'
+
+    @staticmethod
+    def is_valid_terrain(value: int) -> bool:
+        return value in TerrainType.__members__.values()
+
+
+class IsometricMap(metaclass=SingletonMeta):
+    """
+    The IsometricMap class represents a map in an isometric game. It generates and manages isometric tiles, handles
+    conversions between isometric grid coordinates and cartesian coordinates, and provides methods for querying and
+    manipulating the map.
+    """
     game = None
-    instance = None
 
-    def __init__(self, window: Window, settings: Dict[str, Any]):
+    def __init__(self, window: Window = None, settings: Dict[str, Any] = None):
         self.window = window
-        self.tiles: Dict[Tuple[int, int], IsometricTile] = {}
+        self.tiles = {}
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
         self.tile_width = settings['tile_width']
         self.tile_height = self.tile_width // 2
@@ -98,9 +124,9 @@ class IsometricMap:
         self.grid_gizmo = ShapeElementList()
         self.tiles_sprites = SpriteList(use_spatial_hash=True, is_static=True)
         self.terrains = self.find_terrains()
-        self.tiles = self.generate_tiles()
+        self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
         self.quadtree = self.generate_quadtree()
-        IsometricMap.instance = IsometricTile.map = self
+        IsometricTile.map = self
 
     def find_terrains(self) -> Dict[str, Texture]:
         return {
@@ -149,6 +175,9 @@ class IsometricMap:
         a, b, c, d = invert_matrix(width, -width, width * 0.5, width * 0.5)
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
         return grid if grid in self.tiles else None
+
+    def get_tile(self, row: int, column: int) -> IsometricTile:
+        return self.tiles[row][column]  # TODO: implement 2D array instead of Dictionary for self.tiles]
 
     def on_map_area(self, x: float, y: float) -> bool:
         return self.quadtree.in_bounds(Coordinate((x, y)))
@@ -230,7 +259,7 @@ class IsometricTile:
         return f'MapTile({self.idx},{self.gx},{self.gy},{self.x},{self.y},{self.z},{self.width})'
 
     def __str__(self) -> str:
-        return f'IsometricTile(idx:{self.idx}, grid:{self.gx},{self.gy}, position:{self.x},{self.y})'
+        return f'IsometricTile(idx:{self.idx}, grid:{self.gx},{self.gy}, position:{self.x},{self.y}, type:{self.terrain_type})'
 
     @property
     def position(self) -> Tuple[int, int]:
@@ -400,13 +429,15 @@ class IsometricWindow(Window):
         if button == MOUSE_BUTTON_RIGHT:
             self.clear_pathfinding_debug()
         elif self.current_tile is not None:
-            area = calculate_circular_area(*self.current_tile.grid, 7)
-            area = [self.map.tiles.get(g) for g in area]
-            for tile in area:
-                if tile is not None:
-                    tile.pointed = True
             self.highlight_adjacent_tiles()
             self.debug_pathfinding()
+            print(self.current_tile)
+
+    def circular_area(self):
+        area = calculate_circular_area(*self.current_tile.grid, 2)
+        area = [self.map.tiles.get(g) for g in area if g is not None]
+        for tile in area:
+            tile.pointed = True
 
     def debug_pathfinding(self):
         if self.start_point is None:
