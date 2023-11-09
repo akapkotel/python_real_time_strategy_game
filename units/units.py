@@ -17,7 +17,7 @@ from arcade.arcade_types import Point
 from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION, FUEL, MAX_SPEED
 from effects.explosions import Explosion
 from map.map import (
-    GridPosition, MapNode, Pathfinder, normalize_position,
+    GridPosition, IsometricTile, Pathfinder, normalize_position,
     position_to_map_grid, TerrainType
 )
 from players_and_factions.player import Player, PlayerEntity
@@ -113,20 +113,20 @@ class Unit(PlayerEntity, ABC):
         self.set_texture(index)
 
     @property
-    def adjacent_nodes(self) -> List[MapNode]:
+    def adjacent_nodes(self) -> List[IsometricTile]:
         return self.current_node.adjacent_nodes
 
     @property
     def is_moving(self) -> bool:
         return bool(self.change_x or self.change_y)
 
-    def reached_destination(self, destination: Union[MapNode, GridPosition]) -> bool:
+    def reached_destination(self, destination: Union[IsometricTile, GridPosition]) -> bool:
         try:
             return destination.grid == self.current_node.grid
         except AttributeError:
             return destination == self.current_node.grid
 
-    def heading_to(self, destination: Union[MapNode, GridPosition]):
+    def heading_to(self, destination: Union[IsometricTile, GridPosition]):
         return self.path and self.path[0] == self.map.map_grid_to_position(destination)
 
     def on_mouse_enter(self):
@@ -164,14 +164,14 @@ class Unit(PlayerEntity, ABC):
             self.layered_spritelist.swap_rendering_layers(self, old_y, new_y)
         return current_node
 
-    def update_observed_area(self, current_node: MapNode):
+    def update_observed_area(self, current_node: IsometricTile):
         if self.observed_nodes and current_node == self.current_node:
             pass
         else:
             self.observed_grids = grids = self.calculate_observed_area()
             self.observed_nodes = {self.map[grid] for grid in grids}
 
-    def update_blocked_map_nodes(self, new_current_node: MapNode):
+    def update_blocked_map_nodes(self, new_current_node: IsometricTile):
         """
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
@@ -182,7 +182,7 @@ class Unit(PlayerEntity, ABC):
         if len(self.path) > 1:
             self.update_reserved_node()
 
-    def update_current_blocked_node(self, new_current_node: MapNode):
+    def update_current_blocked_node(self, new_current_node: IsometricTile):
         self.swap_blocked_nodes(self.current_node, new_current_node)
         self.current_node = new_current_node
 
@@ -191,16 +191,16 @@ class Unit(PlayerEntity, ABC):
         self.swap_blocked_nodes(self.reserved_node, new_reserved_node)
         self.reserved_node = new_reserved_node
 
-    def swap_blocked_nodes(self, unblocked: MapNode, blocked: MapNode):
+    def swap_blocked_nodes(self, unblocked: IsometricTile, blocked: IsometricTile):
         if unblocked is not None:
             self.unblock_map_node(unblocked)
         self.block_map_node(blocked)
 
     @staticmethod
-    def unblock_map_node(node: MapNode):
+    def unblock_map_node(node: IsometricTile):
         node.unit = None
 
-    def block_map_node(self, node: MapNode):
+    def block_map_node(self, node: IsometricTile):
         node.unit = self
 
     def scan_next_nodes_for_collisions(self):

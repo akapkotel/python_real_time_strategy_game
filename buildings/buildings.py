@@ -16,7 +16,7 @@ from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement, Button, UiTextLabel, UnitProductionCostsHint
 )
 from campaigns.research import Technology
-from map.map import MapNode, normalize_position, position_to_map_grid
+from map.map import IsometricMap, normalize_position, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity
 )
@@ -317,7 +317,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if object_id is None:
             self.place_building_properly_on_the_grid()
 
-        self.occupied_nodes: Set[MapNode] = self.find_occupied_nodes()
+        self.occupied_nodes: Set[IsometricMap] = self.find_occupied_nodes()
         self.block_map_nodes(self.occupied_nodes)
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
@@ -359,7 +359,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         """
         return self.position
 
-    def find_occupied_nodes(self) -> Set[MapNode]:
+    def find_occupied_nodes(self) -> Set[IsometricMap]:
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         width, height = self.configs.get('size')
@@ -371,7 +371,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             for y in range(min_y_grid, max_y_grid)
         }
 
-    def block_map_nodes(self, occupied_nodes: Set[MapNode]):
+    def block_map_nodes(self, occupied_nodes: Set[IsometricMap]):
         for node in occupied_nodes:
             node.remove_tree()
             self.block_map_node(node)
@@ -379,7 +379,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
         for _ in range(min(number_of_soldiers, self.garrison_size)):
-            soldier: Soldier = self.game.spawn('soldier', self.player, self.map.random_walkable_node.position)
+            soldier: Soldier = self.game.spawn('soldier', self.player, self.map.random_walkable_tile.position)
             soldier.enter_building(self)
 
     @property
@@ -387,10 +387,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return False  # this is rather obvious, since this is a Building
 
     @staticmethod
-    def unblock_map_node(node: MapNode):
+    def unblock_map_node(node: IsometricMap):
         node.building = None
 
-    def block_map_node(self, node: MapNode):
+    def block_map_node(self, node: IsometricMap):
         node.building = self
 
     def update_observed_area(self, *args, **kwargs):

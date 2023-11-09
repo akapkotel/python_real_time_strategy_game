@@ -15,8 +15,8 @@ from pyglet.media import Player
 SOUNDS_DIRECTORY = 'resources/sounds'
 SOUNDS_EXTENSION = 'wav'
 MUSIC_TRACK_SUFFIX = 'theme'
-UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
-UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
+# UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
+# UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
 UNIT_PRODUCTION_FINISHED = [f'unit_{suffix}.wav' for suffix in ("ready", "complete")]
 
 

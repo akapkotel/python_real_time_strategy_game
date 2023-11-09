@@ -10,8 +10,10 @@ from players_and_factions.player import Player
 from units.units import *
 
 from utils.game_logging import log_here
-from utils.constants import CLASS, TREE, CORPSE, WRECK, VEHICLE_WITH_TURRET, VEHICLE, SOLDIER, BUILDING, \
-    RESEARCH_FACILITY, PRODUCED_RESOURCE, PRODUCED_UNITS, CONSTRUCTION_SITE
+from utils.constants import (
+    CLASS, TREE, CORPSE, WRECK, VEHICLE_WITH_TURRET, VEHICLE, SOLDIER, BUILDING, RESEARCH_FACILITY, PRODUCED_RESOURCE,
+    PRODUCED_UNITS, CONSTRUCTION_SITE
+)
 from gameobjects.gameobject import GameObject, Wreck, Tree, Corpse
 
 

@@ -16,7 +16,7 @@ from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITIO
     UI_RESOURCES_SECTION, MAX_HEALTH, ATTACK_RADIUS, WEAPONS_NAMES, VISIBILITY_RADIUS
 
 from gameobjects.gameobject import GameObject
-from map.map import MapNode, position_to_map_grid
+from map.map import IsometricTile, position_to_map_grid
 from campaigns.research import Technology
 from utils.game_logging import log_here
 from utils.observer import Observed, Observer
@@ -516,14 +516,14 @@ class PlayerEntity(GameObject):
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
-        self.observed_nodes: Set[MapNode] = set()
+        self.observed_nodes: Set[IsometricTile] = set()
 
         # like the visibility matrix, but range should be smaller:
         self.attack_radius = self.configs[ATTACK_RADIUS] * TILE_WIDTH
         # self.attack_range_matrix = precalculate_circular_area_matrix(value)
 
         # area inside which every enemy unit could by attacked:
-        self.fire_covered: Set[MapNode] = set()
+        self.fire_covered: Set[IsometricTile] = set()
 
         self._weapons: List[Weapon] = []
         if (weapons := self.configs[WEAPONS_NAMES]) is not None:
@@ -610,11 +610,11 @@ class PlayerEntity(GameObject):
 
     @staticmethod
     @abstractmethod
-    def unblock_map_node(node: MapNode):
+    def unblock_map_node(node: IsometricTile):
         raise NotImplementedError
 
     @abstractmethod
-    def block_map_node(self, node: MapNode):
+    def block_map_node(self, node: IsometricTile):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):

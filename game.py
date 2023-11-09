@@ -881,7 +881,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_random_scenario(self):
         self.test_factions_and_players_creation()
         # self.test_buildings_spawning()
-        # self.test_units_spawning()
+        self.test_units_spawning()
         self.test_scenarios()
 
     def place_viewport_at_players_base_or_starting_position(self):
@@ -936,7 +936,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_units_spawning(self):
         # TODO: remove it when game is completed
         units_names = ('tank_medium', 'apc', 'truck')
-        walkable = list(self.map.all_walkable_nodes)
+        walkable = list(self.map.all_walkable_tiles)
         for unit_name in units_names:
             for player in (self.players.values()):
                 node = random.choice(walkable)
@@ -1121,6 +1121,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.factions.clear()
         self.players.clear()
         self.window.game_view = None
+        self.map = None
 
 
 def run_profiled_game(settings: Settings):
@@ -1139,7 +1140,7 @@ def run_game(settings: Settings):
 if __name__ == '__main__':
     # these imports are placed here to avoid circular-imports issue:
     # imports-optimization can delete SelectedEntityMarker, PermanentUnitsGroup imports:
-    from map.map import Map, Pathfinder, map_grid_to_position, IsometricMap
+    from map.map import IsometricMap, Pathfinder, map_grid_to_position
     from units.unit_management import (
         UnitsManager, SelectedEntityMarker, PermanentUnitsGroup
     )

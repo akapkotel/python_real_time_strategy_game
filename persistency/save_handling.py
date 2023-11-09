@@ -12,7 +12,7 @@ from utils.functions import find_paths_to_all_files_of_type
 from utils.game_logging import log_here, log_this_call
 from utils.data_types import SavedGames
 from players_and_factions.player import Faction
-from map.map import Map, Pathfinder
+from map.map import IsometricMap, Pathfinder
 from user_interface.minimap import MiniMap
 from gameobjects.spawning import GameObjectsSpawner
 from effects.explosions import ExplosionsPool
@@ -214,7 +214,7 @@ class SaveManager:
         self.game.window.menu_view.viewport = viewports[1]
 
     def load_map(self, map_settings):
-        self.game.map = game_map = Map(map_settings=map_settings)
+        self.game.map = game_map = IsometricMap(map_settings=map_settings)
         self.game.pathfinder = Pathfinder(game_map)
 
     def load_factions(self, factions):

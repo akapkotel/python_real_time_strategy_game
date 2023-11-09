@@ -9,9 +9,6 @@ from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
 from arcade.arcade_types import Color, Point
 
 from buildings.buildings import Building
-from effects.sound import (
-    UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
-)
 from units.units_tasking import UnitTask, TaskEnterBuilding
 from utils.colors import GREEN, RED, YELLOW
 from game import Game, UI_WIDTH
@@ -21,6 +18,9 @@ from utils.functions import get_path_to_file, ignore_in_menu
 from utils.geometry import average_position_of_points_group
 from utils.scheduling import EventsCreator
 
+
+UNITS_SELECTION_CONFIRMATIONS = [f'on_unit_selected_{i}.wav' for i in range(6)]
+UNITS_MOVE_ORDERS_CONFIRMATIONS = [f'on_unit_get_order_{i}.wav' for i in range(6)]
 
 UNIT_HEALTH_BARS_HEIGHT = 5
 SOLDIER_HEALTH_BARS_HEIGHT = 3
