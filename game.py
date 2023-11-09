@@ -936,7 +936,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_units_spawning(self):
         # TODO: remove it when game is completed
         units_names = ('tank_medium', 'apc', 'truck')
-        walkable = list(self.map.all_walkable_tiles)
+        walkable = list(self.map.get_all_walkable_tiles())
         for unit_name in units_names:
             for player in (self.players.values()):
                 node = random.choice(walkable)

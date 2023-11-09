@@ -10,7 +10,7 @@ from math import dist
 from collections import deque, defaultdict
 from functools import partial, cached_property, lru_cache, singledispatch, singledispatchmethod
 from typing import (
-    Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any,
+    Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any, Callable,
 )
 
 from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture, create_isometric_grid_lines, Window, \
@@ -264,6 +264,7 @@ class IsometricMap:
     instance = None
 
     def __init__(self, map_settings: Dict[str, Any] = None):
+        self.initialised = False
         self.window = self.game.window
         self.tiles = {}
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
@@ -291,28 +292,31 @@ class IsometricMap:
         quad_width, quad_height = self.columns * self.tile_width, self.rows * self.tile_height
         return IsometricQuadTree(quad_iso_x, quad_iso_y + self.tile_height // 2, quad_width, quad_height)
 
-    def adjacent_grids(self, gx: int, gy: int) -> List[Tuple[int, int]]:
-        return [adj for adj in [(gx + x, gy + y) for (x, y) in ADJACENCY_MATRIX] if adj in self.tiles]
-
     def generate_tiles(self) -> Dict[Tuple[int, int], IsometricTile]:
         tiles = {}
-        for row in range(self.rows):
-            for col in range(self.columns):
+        columns, rows = self.columns, self.rows
+        terrains = self.terrains.items()
+        apend_to_terrain_tiles = self.game.terrain_tiles.append
+
+        for row in range(rows):
+            for col in range(columns):
                 idx = row * self.columns + col + 1
                 tile_x, tile_y = self.iso_grid_to_position(col, row)
                 sprite = Sprite(center_x=tile_x, center_y=tile_y, hit_box_algorithm='None')
-                terrain, sprite.texture = random.choice(list(self.terrains.items()))
+                terrain, sprite.texture = random.choice(list(terrains))
                 tile = IsometricTile(idx, col, row, tile_x, tile_y, 0, self.tile_width, terrain, sprite=sprite)
-                tile.texture = random.choice(list(self.terrains.values()))
                 gizmo = create_line_strip(tile.points, WHITE)
                 tiles[(col, row)] = tile
                 self.grid_gizmo.append(gizmo)
                 self.game.terrain_tiles.append(sprite)
                 self.grids_to_positions[(col, row)] = tile_x, tile_y
+        self.initialised = True
         return tiles
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
+        if self.initialised:
+            return self.grids_to_positions[(gx, gy)]
         x, y = self.origin_tile
         pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
         pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
@@ -320,7 +324,6 @@ class IsometricMap:
 
     def pos_to_iso_grid(self, pos_x: int, pos_y: int) -> Tuple[int, int] | None:
         """Convert (x, y) position (e.g. mouse cursor position) to isometric grid coordinates."""
-        left, _, bottom, _ = self.game.viewport
         iso_x = pos_x - (self.width * 0.5)
         iso_y = -pos_y + self.height
         width = self.tile_width * 0.5
@@ -328,19 +331,24 @@ class IsometricMap:
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
         return grid if grid in self.tiles else None
 
-    def position_to_node(self, x: Number, y: Number) -> IsometricTile:
+    def position_to_node(self, x: Number, y: Number) -> Optional[IsometricTile]:
         return self.grid_to_node(self.pos_to_iso_grid(x, y))
 
-    def grid_to_node(self, grid: Tuple[int, int]) -> IsometricTile:
+    def grid_to_node(self, grid: Tuple[int, int]) -> Optional[IsometricTile]:
         return self.tiles.get(grid, self.nonexistent_node)
 
-    @property
-    def random_walkable_tile(self) -> IsometricTile:
-        return random.choice(tuple(self.all_walkable_tiles))
+    def get_random_walkable_tile(self, predicate: Optional[Callable[[IsometricTile], bool]] = None) -> IsometricTile:
+        if predicate:
+            filtered_tiles = [tile for tile in self.tiles.values() if tile.is_walkable and predicate(tile)]
+        else:
+            filtered_tiles = [tile for tile in self.tiles.values() if tile.is_walkable]
+        return random.choice(filtered_tiles)
 
-    @property
-    def all_walkable_tiles(self) -> Generator[IsometricTile]:
-        return (tile for tile in self.tiles.values() if tile.is_walkable)
+    def get_all_walkable_tiles(self, predicate: Optional[Callable[[IsometricTile], bool]] = None) -> Generator[IsometricTile]:
+        if predicate:
+            return (tile for tile in self.tiles.values() if tile.is_walkable and predicate(tile))
+        else:
+            return (tile for tile in self.tiles.values() if tile.is_walkable)
 
     def get_tile(self, row: int, column: int) -> IsometricTile:
         return self.tiles[row][column]  # TODO: implement 2D array instead of Dictionary for self.tiles]
@@ -359,6 +367,9 @@ class IsometricMap:
             return self.tiles[grid].is_walkable
         except KeyError:
             return False
+
+    def adjacent_grids(self, gx: int, gy: int) -> List[Tuple[int, int]]:
+        return [adj for adj in [(gx + x, gy + y) for (x, y) in ADJACENCY_MATRIX] if adj in self.tiles]
 
     def walkable_adjacent(self, x, y) -> Set[IsometricTile]:
         if (x, y) not in self.tiles:
@@ -379,7 +390,7 @@ class IsometricMap:
         return tile
 
     def get_random_position(self) -> NormalizedPoint:
-        return random.choice([n.position for n in self.all_walkable_tiles])
+        return random.choice([n.position for n in self.get_all_walkable_tiles()])
 
     def get_valid_position(self, position: Optional[NormalizedPoint] = None) -> NormalizedPoint:
         """
@@ -398,6 +409,10 @@ class IsometricMap:
             # self.tiles_sprites.draw()
         for tile in list(self.tiles.values())[:]:
             tile.draw()
+            
+    def save(self):
+        # TODO: reimplement this method to allow saving Game!
+        raise NotImplementedError
 
 
 class IsometricTile:
@@ -1013,7 +1028,7 @@ class Pathfinder(EventsCreator):
     def get_group_of_waypoints(self,
                                x: int,
                                y: int,
-                               required_waypoints: int) -> List[GridPosition]:
+                               required_waypoints: int) -> List[Tuple[int, int]]:
         """
         Find requested number of valid waypoints around requested position.
         """
@@ -1022,10 +1037,10 @@ class Pathfinder(EventsCreator):
             return [center, ]
         radius = 1
         waypoints = []
-        nodes = self.map.tiles
+        tiles = self.map.tiles
         while len(waypoints) < required_waypoints:
             waypoints = [w for w in calculate_circular_area(*center, radius) if
-                         w in nodes and nodes[w].is_walkable]
+                         w in tiles and tiles[w].is_walkable]
             radius += 1
         waypoints.sort(key=lambda w: dist(w, center))
         return [d[0] for d in zip(waypoints, range(required_waypoints))]

@@ -1,777 +1,412 @@
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 194, '__init__', None) | ResourceManager found 192 files.
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 194, '__init__', None) | ResourceManager found 192 files.
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 201, '__init__', None) | Loaded 29 sounds.
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 201, '__init__', None) | Loaded 29 sounds.
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 201, '__init__', None) | Found 2 playlists
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 201, '__init__', None) | Found 2 playlists
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 203, '__init__', None) | Found 2 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 203, '__init__', None) | Found 2 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 203, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 203, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('game.py', 203, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
+INFO: 11/09/2023 02:55:45 AM  | ('game.py', 203, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
 NoneType: None
-INFO: 11/09/2023 01:16:03 AM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
+INFO: 11/09/2023 02:55:45 AM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
+INFO: 11/09/2023 02:55:46 AM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 11/09/2023 02:55:46 AM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001B35D511DC0>,), kwargs: {}
+INFO: 11/09/2023 02:55:46 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000002AD333FFD60>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000001B35D3243A0>,), kwargs: {}
+INFO: 11/09/2023 02:55:46 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000002AD3122F2E0>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('menu.py', 339, 'on_show_view', None) | Switched to View: Menu
+INFO: 11/09/2023 02:55:46 AM  | ('menu.py', 339, 'on_show_view', None) | Switched to View: Menu
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 11/09/2023 02:55:46 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 11/09/2023 01:16:04 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 11/09/2023 02:55:46 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None
-INFO: 11/09/2023 01:16:05 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1451, 243, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:55:47 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1557, 178, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:05 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1451, 243), kwargs: {}
+INFO: 11/09/2023 02:55:47 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1557, 178), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:05 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874380160
+INFO: 11/09/2023 02:55:47 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942910454080
 NoneType: None
-INFO: 11/09/2023 01:16:05 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu scenario editor menu
+INFO: 11/09/2023 02:55:47 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu scenario editor menu
 NoneType: None
-INFO: 11/09/2023 01:16:05 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: scenario editor menu
+INFO: 11/09/2023 02:55:47 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: scenario editor menu
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 337, 814, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:55:48 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 334, 815, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 337, 814), kwargs: {}
+INFO: 11/09/2023 02:55:48 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 334, 815), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1869876372864
+INFO: 11/09/2023 02:55:48 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 2942912433408
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 320, 858, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:55:49 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 335, 857, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 320, 858), kwargs: {}
+INFO: 11/09/2023 02:55:49 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 335, 857), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:07 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1869874569088
+INFO: 11/09/2023 02:55:49 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 2942910622016
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 447, 142, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 310, 197, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 447, 142), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 310, 197), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869876333888
+INFO: 11/09/2023 02:55:50 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942912399424
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('game.py', 387, 'create_new_game', None) | Game initialized successfully
+INFO: 11/09/2023 02:55:50 AM  | ('game.py', 387, 'create_new_game', None) | Game initialized successfully
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001B3574733A0>,), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000002AD2D343A00>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B35745B6D0>,), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000002AD2D320D60>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:08 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B35745B6D0>, 'map', <class 'map.map.IsometricMap'>, 0.35, {'rows': 60, 'columns': 60, 'tile_width': 100, 'tile_height': 50}), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000002AD2D320D60>, 'map', <class 'map.map.IsometricMap'>, 0.35, {'rows': 60, 'columns': 60, 'tile_width': 100, 'tile_height': 50}), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B35745B6D0>,), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000002AD2D320D60>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B35745B6D0>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x000001B355A080D0>), kwargs: {}
+INFO: 11/09/2023 02:55:50 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000002AD2D320D60>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x000002AD2B954430>), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B35745B6D0>,), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000002AD2D320D60>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B35745B6D0>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000002AD2D320D60>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 118, 'load', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
+INFO: 11/09/2023 02:55:51 AM  | ('views.py', 118, 'load', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B35745B6D0>,), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000002AD2D320D60>,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('game.py', 875, 'on_show_view', None) | Switched to View: Game
+INFO: 11/09/2023 02:55:51 AM  | ('game.py', 875, 'on_show_view', None) | Switched to View: Game
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('game.py', 876, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x000001B35745B6D0>, <__main__.Timer object at 0x000001B35745B6A0>), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('game.py', 876, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x000002AD2D320D60>, <__main__.Timer object at 0x000002AD2D320D30>), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:55:51 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:55:51 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
+INFO: 11/09/2023 02:55:51 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B3574732B0>, ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000002AD2D343910>, ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
+INFO: 11/09/2023 02:55:51 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B3574732B0>, ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000002AD2D343910>, ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('player.py', 402, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)
+INFO: 11/09/2023 02:55:51 AM  | ('player.py', 402, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B3574732B0>, ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000002AD2D343910>, ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('scenarios.py', 52, '__init__', None) | ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)
+INFO: 11/09/2023 02:55:51 AM  | ('scenarios.py', 52, '__init__', None) | ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)
 NoneType: None
-INFO: 11/09/2023 01:16:09 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B3574732B0>, ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)), kwargs: {}
+INFO: 11/09/2023 02:55:51 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000002AD2D343910>, ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:10 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 507, 443, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 795, 664, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:10 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:10 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 410, 643, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 928, 577, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:10 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:11 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 608, 656, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 806, 554, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:11 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:52 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:11 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 816, 561, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:53 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1129, 202, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:11 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:53 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:12 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 685, 872, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:55 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 865, 907, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:12 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:55 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:12 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 554, 825, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:56 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1019, 656, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:12 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:56 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:13 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 623, 1064, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:57 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 704, 190, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:13 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:57 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:13 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1005, 938, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:57 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1244, 542, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:13 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:57 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 900, 748, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:58 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1051, 374, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:58 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 951, 594, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:58 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 781, 465, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:58 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1050, 598, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:59 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 615, 582, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:14 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:59 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:15 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 962, 474, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:55:59 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 618, 325, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:15 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:55:59 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:15 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 783, 661, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:00 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 804, 746, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:15 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:00 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 825, 542, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:00 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 720, 757, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:00 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 998, 283, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:01 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 733, 768, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:01 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1041, 287, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:01 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 780, 824, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:16 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:01 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:17 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 763, 418, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:02 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1053, 774, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:17 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:02 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:17 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 935, 590, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1790, 636, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:17 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1790, 636), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 480, 447, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810951232
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 519, 666, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_terrain_editing_panel
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 501, 666, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1699, 631, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:19 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1699, 631), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:20 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 514, 738, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810958592
 NoneType: None
-INFO: 11/09/2023 01:16:20 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:20 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 431, 765, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:20 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 471, '__init__', None) | File tank_light_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 524, 727, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 471, '__init__', None) | File apc_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 471, '__init__', None) | File heavy_tank_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 683, 821, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 471, '__init__', None) | File at_specialist_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:04 AM  | ('user_interface.py', 471, '__init__', None) | File crewman_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 702, 719, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File machinegunner_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:21 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File saboteur_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:22 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 959, 508, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File scout_car_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:22 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File engineer_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:22 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 409, 626, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File light_sp_artillery_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:22 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File sniper_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 485, 703, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 471, '__init__', None) | File truck_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:05 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 462, 620, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1586, 637, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1586, 637), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 969, 725, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810955968
 NoneType: None
-INFO: 11/09/2023 01:16:23 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:24 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 942, 752, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:24 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File helipads_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:24 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1020, 626, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File construction_site_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:24 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File hydroponic_farm_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:25 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1346, 446, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File storage_facility_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:25 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File electronics_plant_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:39 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1153, 380, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File small_power_generator_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:39 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File fuel_plant_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:40 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 882, 603, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File garrison_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:40 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:06 AM  | ('user_interface.py', 471, '__init__', None) | File light_vehicles_factory_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:41 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 758, 577, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File steel_foundry_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:41 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File barracks_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:41 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 957, 403, 4, 0), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File medium_vehicles_factory_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:41 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File heavy_vehicles_factory_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1679, 621, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File research_laboratory_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1679, 621), kwargs: {}
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 471, '__init__', None) | File small_bunker_icon.png does not exist!
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869775029952
+INFO: 11/09/2023 02:56:07 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_buildings_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:08 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1742, 631, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:08 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1742, 631), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 471, '__init__', None) | File engineer_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810958592
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 471, '__init__', None) | File sniper_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 471, '__init__', None) | File at_specialist_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:45 AM  | ('user_interface.py', 471, '__init__', None) | File tank_light_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File truck_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1622, 635, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File apc_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1622, 635), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File scout_car_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810955968
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File heavy_tank_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File crewman_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File saboteur_icon.png does not exist!
+INFO: 11/09/2023 02:56:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_buildings_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File light_sp_artillery_icon.png does not exist!
+INFO: 11/09/2023 02:56:09 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1728, 636, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 471, '__init__', None) | File machinegunner_icon.png does not exist!
+INFO: 11/09/2023 02:56:09 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1728, 636), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:46 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810958592
 NoneType: None
-INFO: 11/09/2023 01:16:47 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1585, 557, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:16:47 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1585, 557), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:16:47 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on ProgressButton id: 1870198059904
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:16:57 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 927, 582, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1623, 634, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:57 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 927, 582), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1623, 634), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:16:57 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810955968
 NoneType: None
-INFO: 11/09/2023 01:16:57 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:01 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 866, 613, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:01 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 866, 613), kwargs: {}
+INFO: 11/09/2023 02:56:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_buildings_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:17:01 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:10 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1749, 637, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:01 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:10 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1749, 637), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 888, 559, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:10 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810958592
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 888, 559), kwargs: {}
+INFO: 11/09/2023 02:56:10 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:10 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:10 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 994, 551, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:11 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1601, 639, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 994, 551), kwargs: {}
+INFO: 11/09/2023 02:56:11 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1601, 639), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:11 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810955968
 NoneType: None
-INFO: 11/09/2023 01:17:03 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:11 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 888, 676, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:11 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 888, 676), kwargs: {}
+INFO: 11/09/2023 02:56:11 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_buildings_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:16 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1656, 335, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:16 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1656, 335), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 920, 694, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:16 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2943182771712
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 920, 694), kwargs: {}
+INFO: 11/09/2023 02:56:18 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1044, 578, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:18 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:05 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:19 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1252, 342, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 984, 708, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:19 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 984, 708), kwargs: {}
+INFO: 11/09/2023 02:56:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1708, 627, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:21 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1708, 627), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:21 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810958592
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1033, 735, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:06 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1033, 735), kwargs: {}
+INFO: 11/09/2023 02:56:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:07 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:17:07 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:22 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1611, 629, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1126, 742, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:22 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1611, 629), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1126, 742), kwargs: {}
+INFO: 11/09/2023 02:56:22 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2942810955968
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:22 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:22 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1093, 671, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:22 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_buildings_construction_panel
 NoneType: None
-INFO: 11/09/2023 01:17:08 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1093, 671), kwargs: {}
+INFO: 11/09/2023 02:56:23 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1599, 554, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:23 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1599, 554), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:23 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2943263275456
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1163, 665, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:25 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 697, 652, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1163, 665), kwargs: {}
+INFO: 11/09/2023 02:56:25 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 697, 652), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:25 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:09 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:25 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:10 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1229, 626, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:26 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 939, 581, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:10 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1229, 626), kwargs: {}
+INFO: 11/09/2023 02:56:26 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:10 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:27 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1062, 386, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:10 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:27 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:11 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1146, 588, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:29 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1106, 311, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:11 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1146, 588), kwargs: {}
+INFO: 11/09/2023 02:56:29 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:11 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:41 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 673, 263, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:11 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:41 AM  | ('mouse.py', 181, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1185, 562, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:43 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 964, 615, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1185, 562), kwargs: {}
+INFO: 11/09/2023 02:56:43 AM  | ('mouse.py', 179, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 964, 615), kwargs: {}
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 11/09/2023 02:56:44 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 11/09/2023 02:56:44 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1220, 539, 1, 0), kwargs: {}
+INFO: 11/09/2023 02:56:44 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1220, 539), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:12 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:13 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1271, 512, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:13 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1271, 512), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:13 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:13 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1182, 509, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1182, 509), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1110, 511, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1110, 511), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:14 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:15 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1005, 515, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:15 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1005, 515), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:15 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:15 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:16 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 976, 602, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:16 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 976, 602), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:16 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:16 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 851, 545, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 851, 545), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 758, 533, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 758, 533), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:18 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:19 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 772, 611, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:19 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 772, 611), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:19 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:19 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 926, 776, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 926, 776), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 832, 781, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 832, 781), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:21 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:22 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 786, 711, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:22 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 786, 711), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:22 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:22 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:23 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1013, 411, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:23 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:24 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 994, 420, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:24 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:25 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1168, 406, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:25 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:28 AM  | ('game.py', 322, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
-NoneType: None
-INFO: 11/09/2023 01:17:28 AM  | ('menu.py', 339, 'on_show_view', None) | Switched to View: Menu
-NoneType: None
-INFO: 11/09/2023 01:17:28 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:28 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 11/09/2023 01:17:30 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 240, 357, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:30 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 240, 357), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:30 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874343872
-NoneType: None
-INFO: 11/09/2023 01:17:30 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu options
-NoneType: None
-INFO: 11/09/2023 01:17:30 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: options
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1022, 218, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1022, 218), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1007, 171, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1007, 171), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874431296
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:31 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 124, 743, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 124, 743), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874370560
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('game.py', 875, 'on_show_view', None) | Switched to View: Game
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('game.py', 876, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x000001B35745B6D0>, <__main__.Timer object at 0x000001B35745B6A0>), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None),), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None),), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None),), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None),), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:32 AM  | ('game_logging.py', 46, 'wrapper', None) | ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None) failed to execute with exception: 'NoneType' object has no attribute 'unexplored'
-Traceback (most recent call last):
-  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\scheduling.py", line 48, in execute
-    self.function(*self.args, **self.kwargs)
-  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\campaigns\scenarios.py", line 122, in evaluate_events_triggers
-    event_trigger.evaluate_condition()
-  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\campaigns\triggers.py", line 43, in evaluate_condition
-    if self.condition_fulfilled():
-  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\campaigns\triggers.py", line 105, in condition_fulfilled
-    return len(self.game.fog_of_war.unexplored) == 0
-AttributeError: 'NoneType' object has no attribute 'unexplored'
-INFO: 11/09/2023 01:17:33 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 878, 727, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:33 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:38 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 541, 287, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:38 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:40 AM  | ('game.py', 322, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
-NoneType: None
-INFO: 11/09/2023 01:17:40 AM  | ('menu.py', 339, 'on_show_view', None) | Switched to View: Menu
-NoneType: None
-INFO: 11/09/2023 01:17:40 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:40 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 11/09/2023 01:17:41 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 274, 875, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:41 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 274, 875), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:41 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874371264
-NoneType: None
-INFO: 11/09/2023 01:17:41 AM  | ('user_interface.py', 1413, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
-NoneType: None
-INFO: 11/09/2023 01:17:41 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
-NoneType: None
-INFO: 11/09/2023 01:17:42 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 485, 550, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:42 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 485, 550), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:42 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869877311680
-NoneType: None
-INFO: 11/09/2023 01:17:42 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:42 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 11/09/2023 01:17:43 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1429, 246, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:43 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1429, 246), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:43 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874380160
-NoneType: None
-INFO: 11/09/2023 01:17:43 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu scenario editor menu
-NoneType: None
-INFO: 11/09/2023 01:17:43 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: scenario editor menu
-NoneType: None
-INFO: 11/09/2023 01:17:44 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 288, 824, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:44 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 288, 824), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:44 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1869876372864
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 387, 192, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 387, 192), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869876333888
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('game.py', 387, 'create_new_game', None) | Game initialized successfully
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001B361513DC0>,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B36154EDC0>,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:45 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B36154EDC0>, 'map', <class 'map.map.IsometricMap'>, 0.35, {'rows': 60, 'columns': 60, 'tile_width': 100, 'tile_height': 50}), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B36154EDC0>,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B36154EDC0>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x000001B359204670>), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B36154EDC0>,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001B36154EDC0>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 118, 'load', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001B36154EDC0>,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('game.py', 875, 'on_show_view', None) | Switched to View: Game
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('game.py', 876, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x000001B36154EDC0>, <__main__.Timer object at 0x000001B36154E4F0>), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B361513250>, ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('player.py', 174, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B361513250>, ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: None)), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('player.py', 402, '__init__', None) | ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B361513250>, ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: None)), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('scenarios.py', 52, '__init__', None) | ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('scheduling.py', 157, 'schedule_event', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x000001B361513250>, ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: None)), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 535, 547, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:46 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:48 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1230, 187, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:48 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:49 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1234, 318, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:49 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:49 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 684, 590, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:49 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:50 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 516, 367, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:50 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:51 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 181, 609, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:51 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:52 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 142, 816, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:52 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:52 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 233, 534, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:52 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:53 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 230, 568, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:53 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:53 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 319, 689, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:53 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:54 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 308, 744, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:54 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:55 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 857, 637, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:55 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:55 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 934, 508, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:55 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:56 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 550, 548, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:56 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:56 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 464, 615, 4, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:56 AM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('game.py', 322, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('menu.py', 339, 'on_show_view', None) | Switched to View: Menu
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 193, 89, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 193, 89), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869874341696
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('user_interface.py', 1413, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
-NoneType: None
-INFO: 11/09/2023 01:17:58 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 449, 520, 1, 0), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 449, 520), kwargs: {}
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1869926606080
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 46.8
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 11/09/2023 01:17:59 AM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 11/09/2023 02:56:44 AM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None

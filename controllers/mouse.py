@@ -20,7 +20,7 @@ from arcade import (
 )
 
 from buildings.buildings import Building
-from map.map import position_to_map_grid
+from map.map import position_to_map_grid, IsometricTile
 from utils.colors import CLEAR_GREEN, GREEN, BLACK, WHITE, RED, MAP_GREEN
 from game import Game
 from gameobjects.gameobject import GameObject, PlaceableGameObject
@@ -73,6 +73,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self._updated_spritelists: List[DrawnAndUpdated] = []
 
         self.mouse_dragging = False
+
+        self.pointed_map_tile: Optional[IsometricTile] = None
 
         self.placeable_gameobject: Optional[PlaceableGameObject] = None
 
@@ -155,8 +157,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
+        if self.is_game_loaded_and_running:
+            self.pointed_map_tile = tile = self.game.map.position_to_node(x, y)
+            self.on_mouse_motion_with_placeable(tile.grid)
+
+    def on_mouse_motion_with_placeable(self, grid: Tuple[int, int]):
         if (placeable := self.placeable_gameobject) is not None:
-            if (grid := self.game.map.pos_to_iso_grid(x, y)) is not None and placeable.has_grid_changed(*grid):
+            if grid is not None and placeable.has_grid_changed(*grid):
                 placeable.update_tiles(*grid)
 
     def attach_placeable_gameobject(self, gameobject_name: str):

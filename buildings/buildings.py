@@ -379,7 +379,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
         for _ in range(min(number_of_soldiers, self.garrison_size)):
-            soldier: Soldier = self.game.spawn('soldier', self.player, self.map.random_walkable_tile.position)
+            soldier: Soldier = self.game.spawn('soldier', self.player, self.map.get_random_walkable_tile().position)
             soldier.enter_building(self)
 
     @property
