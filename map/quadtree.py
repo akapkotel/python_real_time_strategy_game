@@ -13,7 +13,7 @@ from utils.colors import RED
 
 
 class Rect:
-    __slots__ = ('cx', 'cy', 'position', 'width', 'height', 'smaller_dimension', 'left', 'right', 'bottom', 'top')
+    __slots__ = ('cx', 'cy', 'position', 'width', 'height', 'smaller_dimension', 'left', 'right', 'bottom', 'top', 'points')
 
     def __init__(self, cx, cy, width, height):
         self.cx, self.cy = cx, cy
@@ -24,6 +24,7 @@ class Rect:
         self.right = self.left + self.width
         self.bottom = self.cy - self.height // 2
         self.top = self.bottom + self.height
+        self.points = [(self.left, self.top), (self.right, self.top), (self.left, self.bottom), (self.right, self.bottom)]
 
     def in_bounds(self, item) -> bool:
         return (

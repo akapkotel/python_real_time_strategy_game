@@ -557,7 +557,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['map', IsometricMap, 0.35, {'rows': self.settings.map_height, 'columns': self.settings.map_width,
              'tile_width': TILE_WIDTH, 'tile_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
-            # ['fog_of_war', FogOfWar, 0.15],
+            ['fog_of_war', FogOfWar, 0.15],
             ['spawner', GameObjectsSpawner, 0.05],
             # ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
             #                              (MINIMAP_WIDTH, MINIMAP_HEIGHT),
@@ -906,14 +906,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def test_buildings_spawning(self):
         # TODO: remove it when game is completed
         random_pos = self.map.get_random_position
-        building = self.spawn('medium_vehicles_factory', self.players[2], random_pos(), garrison=1)
-        pos = random_pos(building.position, 3, 10)
-        building = self.spawn('garrison', self.players[2], pos, garrison=1)
-        pos = random_pos(building.position, 3, 10)
-        self.spawn('command_center', self.players[2], pos, garrison=1)
-        pos = random_pos(building.position, 3, 10)
-        ConstructionSite('command_center', self.players[2], pos)
-
+        building = self.spawn('medium_vehicles_factory', self.local_human_player, random_pos(), garrison=1)
+        pos = random_pos(building.position, 4, 10)
+        building = self.spawn('garrison', self.local_human_player, pos, garrison=1)
+        pos = random_pos(building.position, 4, 10)
+        self.spawn('command_center', self.local_human_player, pos, garrison=1)
+        pos = random_pos(building.position, 4, 10)
+        ConstructionSite('command_center', self.local_human_player, pos)
         self.spawn('medium_vehicles_factory', self.players[4], random_pos(), garrison=1)
 
     def spawn(self,
@@ -1046,7 +1045,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.window.show_view(self)
         # we put FoW before the interface to list of rendered layers to
         # assure that FoW will not cover player interface:
-        # self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
+        self.drawn.insert(BEFORE_INTERFACE_LAYER, self.fog_of_war)
         super().after_loading()
         if self.random_scenario:
             self.create_random_scenario()
@@ -1087,8 +1086,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     @timer(level=1, global_profiling_level=PROFILING_LEVEL)
     def on_draw(self):
-        # if self.map is not None:
-        #     self.map.draw()
         super().on_draw()
         if self.mini_map is not None and self.settings.show_minimap:
             self.mini_map.draw()

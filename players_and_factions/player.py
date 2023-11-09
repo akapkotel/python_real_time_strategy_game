@@ -160,7 +160,7 @@ class Player(EventsCreator, Observer, Observed):
         self.known_technologies: Set[int] = set()
         self.current_research: Dict[int, float] = defaultdict()
 
-        self.known_enemies: Set[PlayerEntity] = set()
+        self.known_enemy_units_and_buildings: Set[PlayerEntity] = set()
 
         for resource_name, start_value in self.resources.items():
             amount = self.game.settings.starting_resources * start_value
@@ -240,10 +240,11 @@ class Player(EventsCreator, Observer, Observed):
             self.faction.start_war_with(other.faction)
 
     def update(self):
-        self.known_enemies.clear()
+        self.known_enemy_units_and_buildings.clear()
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
-        self.known_enemies.update(enemies)
+        if new_enemies := enemies.difference(self.known_enemy_units_and_buildings):
+            self.known_enemy_units_and_buildings.update(new_enemies)
         self.faction.known_enemies.update(enemies)
 
     def notify_player_of_new_enemies_detected(self):
@@ -485,7 +486,7 @@ class PlayerEntity(GameObject):
 
         # Each Unit or Building keeps a set containing enemies it actually
         # sees and updates this set each frame:
-        self.known_enemies: Set[PlayerEntity] = set()
+        self.known_enemy_units_and_buildings: Set[PlayerEntity] = set()
 
         # this enemy must be assigned by the Player (e.g. by mouse-click)
         self._enemy_assigned_by_player: Optional[PlayerEntity] = None
@@ -610,18 +611,18 @@ class PlayerEntity(GameObject):
 
     @staticmethod
     @abstractmethod
-    def unblock_map_node(node: IsometricTile):
+    def unblock_map_tile(node: IsometricTile):
         raise NotImplementedError
 
     @abstractmethod
-    def block_map_node(self, node: IsometricTile):
+    def block_map_tile(self, node: IsometricTile):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
-        if self.known_enemies or self._enemy_assigned_by_player:
+        if self.known_enemy_units_and_buildings or self._enemy_assigned_by_player:
             self.update_battle_behaviour()
         super().on_update(delta_time)
 
@@ -657,7 +658,7 @@ class PlayerEntity(GameObject):
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
-        self.known_enemies = enemies
+        self.known_enemy_units_and_buildings = enemies
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(
@@ -672,11 +673,11 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
-        if not self.known_enemies:
+        if not self.known_enemy_units_and_buildings:
             return None
         # if there are many enemies, prioritize armed enemies
-        if not (sorted_enemies := [e for e in self.known_enemies if e.weapons]):
-            sorted_enemies = self.known_enemies
+        if not (sorted_enemies := [e for e in self.known_enemy_units_and_buildings if e.weapons]):
+            sorted_enemies = self.known_enemy_units_and_buildings
         # then filter the weakest enemy to destroy it fast
         if sorted_by_health := sorted(sorted_enemies, key=lambda e: e.health):
             return sorted_by_health[0]
@@ -698,7 +699,7 @@ class PlayerEntity(GameObject):
         if not enemy.is_alive:
             if self._enemy_assigned_by_player is enemy:
                 self._enemy_assigned_by_player = None
-            self.known_enemies.discard(enemy)
+            self.known_enemy_units_and_buildings.discard(enemy)
             self._targeted_enemy = None
 
     def is_enemy(self, other: PlayerEntity) -> bool:
@@ -741,7 +742,7 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(self)
-        self.known_enemies.clear()
+        self.known_enemy_units_and_buildings.clear()
         if self.quadtree is not None:
             self.remove_from_map_quadtree()
         super().kill()

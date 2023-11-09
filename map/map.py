@@ -8,44 +8,28 @@ from enum import IntEnum
 
 from math import dist
 from collections import deque, defaultdict
-from functools import partial, cached_property, lru_cache, singledispatch, singledispatchmethod
+from functools import cached_property, lru_cache, singledispatch
 from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any, Callable,
 )
 
-from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture, create_isometric_grid_lines, Window, \
-    ShapeElementList, SpriteList, load_texture, create_line_strip, draw_polygon_filled, draw_text
+from arcade import Sprite, Texture, ShapeElementList, load_texture, create_line_strip, draw_polygon_filled, draw_text
 
-from game import PROFILING_LEVEL
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, VERTICAL_DIST, DIAGONAL_DIST, ADJACENT_OFFSETS, \
-    OPTIMAL_PATH_LENGTH, NormalizedPoint, MapPath, PathRequest, TreeID
+    OPTIMAL_PATH_LENGTH, NormalizedPoint, PathRequest
 from gameobjects.gameobject import GameObject
-from utils.colors import SAND, WATER_SHALLOW, BLACK, WHITE, rgb_to_rgba, GREEN
+from utils.colors import WHITE, rgb_to_rgba, GREEN
 from utils.data_types import GridPosition, Number
 from utils.priority_queue import PriorityQueue
 from utils.scheduling import EventsCreator
-from utils.functions import (
-    get_path_to_file, all_files_of_type_named
-)
-from map.quadtree import CartesianQuadTree, IsometricQuadTree
-from utils.game_logging import log_here, log_this_call
-from utils.singleton import SingletonMeta
-from utils.timing import timer
+
+from map.quadtree import IsometricQuadTree
+from utils.game_logging import log_here
+
 from utils.geometry import calculate_circular_area
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
-
-MAP_TEXTURES = {
-    'mud': load_spritesheet(
-        get_path_to_file('mud_tileset_6x6.png'), 60, 50, 4, 16, 0)
-}
-
-random_value = random.random
-
-MAP_TILE_TEXTURE_GROUND = make_soft_square_texture(TILE_WIDTH, SAND, 255, 225)
-MAP_TILE_TEXTURE_WATER = make_soft_square_texture(TILE_WIDTH, WATER_SHALLOW, 255, 255)
-MAP_TILE_TEXTURE_VOID = make_soft_square_texture(TILE_WIDTH, BLACK, 255, 0)
 
 ADJACENCY_MATRIX = ((-1, -1), (-1, 0), (0, -1), (0, 1), (1, 1), (1, 0), (1, -1), (-1, 1))
 
@@ -88,89 +72,6 @@ def adjacent_distance(this: GridPosition, adjacent: GridPosition) -> int:
 
 def diagonal(first_grid: GridPosition, second_grid: GridPosition) -> bool:
     return first_grid[0] != second_grid[0] and first_grid[1] != second_grid[1]
-
-
-def random_terrain_texture() -> Texture:
-    texture = random.choice(MAP_TEXTURES['mud'])
-    texture.image.transpose(random.randint(0, 5))
-    return texture
-
-
-def set_terrain_texture(terrain_type: str,
-                        index: int = None,
-                        rotation: int = None) -> Tuple[Texture, int, int]:
-    index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
-    texture: Texture = MAP_TEXTURES[terrain_type][index]
-
-    rotation = rotation or random.randint(0, 5)
-    texture.image.transpose(rotation)
-    return texture, index, rotation
-
-#
-# @timer(level=2, global_profiling_level=PROFILING_LEVEL, forced=False)
-# def a_star(current_map: Map,
-#            start: GridPosition,
-#            end: GridPosition,
-#            pathable: bool = False) -> Union[MapPath, None]:
-#     """
-#     Find the shortest path from <start> to <end> position using A* algorithm.
-#
-#     :param current_map: Map
-#     :param start: GridPosition -- (int, int) path-start point.
-#     :param end: GridPosition -- (int, int) path-destination point.
-#     :param pathable: bool -- should pathfinder check only walkable tiles
-#     (default) or all pathable map area? Use it to get into 'blocked'
-#     areas, e.g. places enclosed by units.
-#     :return: Union[MapPath, bool] -- list of points or False if no path
-#     found
-#     """
-#     map_nodes = current_map.nodes
-#     unexplored = PriorityQueue(start, heuristic(start, end))
-#     explored = set()
-#     previous: Dict[GridPosition, GridPosition] = {}
-#
-#     get_best_unexplored = unexplored.get
-#     put_to_unexplored = unexplored.put
-#
-#     cost_so_far = defaultdict(lambda: math.inf)
-#     cost_so_far[start] = 0
-#
-#     while unexplored:
-#         if (current := get_best_unexplored()[1]) == end:
-#             return reconstruct_path(map_nodes, previous, current)
-#         node = map_nodes[current]
-#         walkable = node.pathable_adjacent if pathable else node.walkable_adjacent
-#         for adjacent in (a for a in walkable if a.grid not in explored):
-#             adj_grid = adjacent.grid
-#             total = cost_so_far[current] + adjacent_distance(current, adj_grid)
-#             if total < cost_so_far[adj_grid]:
-#                 previous[adj_grid] = current
-#                 cost_so_far[adj_grid] = total
-#                 priority = total + heuristic(adj_grid, end)
-#                 put_to_unexplored(adj_grid, priority)
-#             explored.add(current)
-#     # if path was not found searching by walkable tiles, we call second
-#     # pass and search for pathable nodes this time
-#     if not pathable:
-#         return a_star(current_map, start, end, pathable=True)
-#     return None  # no third pass, if there is no possible path!
-#
-#
-# def heuristic(start: GridPosition, end: GridPosition) -> int:
-#     dx = abs(start[0] - end[0])
-#     dy = abs(start[1] - end[1])
-#     return DIAGONAL_DIST * min(dx, dy) + VERTICAL_DIST * max(dx, dy)
-#
-#
-# def reconstruct_path(map_nodes: Dict[GridPosition, MapNode],
-#                      previous_nodes: Dict[GridPosition, GridPosition],
-#                      current_node: GridPosition) -> MapPath:
-#     path = [map_nodes[current_node]]
-#     while current_node in previous_nodes.keys():
-#         current_node = previous_nodes[current_node]
-#         path.append(map_nodes[current_node])
-#     return [node.position for node in path[::-1]]
-#
 
 
 def invert_matrix(a, b, c, d):
@@ -245,7 +146,13 @@ def reconstruct_path(map_nodes: Dict[Tuple[int, int], IsometricTile],
     while current_node in previous_nodes.keys():
         current_node = previous_nodes[current_node]
         path.append(map_nodes[current_node])
-    return [node.grid for node in path[::-1]]  # TODO: change GridPosition used by Unit.path to IsometricTile
+    return [node.position for node in path[::-1]]  # TODO: change GridPosition used by Unit.path to IsometricTile
+
+
+def max_distance_between_tiles(tile: IsometricTile, min_distance: int, max_distance: int) -> Callable[[IsometricTile], bool]:
+    def internal(other_tile: IsometricTile):
+        return min_distance <= dist(tile.grid, other_tile.grid) <= max_distance
+    return internal
 
 
 @dataclass
@@ -254,10 +161,32 @@ class Coordinate:
     position: Tuple[float, float]
 
 
-def max_distance_between_tiles(tile: IsometricTile, min_distance: int, max_distance: int) -> Callable[[IsometricTile], bool]:
-    def internal(other_tile: IsometricTile):
-        return min_distance <= dist(tile.grid, other_tile.grid) <= max_distance
-    return internal
+class TerrainType(IntEnum):
+    """
+    Enum representing different types of terrain.
+    """
+    GROUND = 0
+    WATER = 1
+    VOID = 2
+
+    def is_ground(self) -> bool:
+        return self == TerrainType.GROUND
+
+    def is_water(self) -> bool:
+        return self == TerrainType.WATER
+
+    def is_void(self) -> bool:
+        return self == TerrainType.VOID
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f'TerrainType.{self.name}'
+
+    @staticmethod
+    def is_valid_terrain(value: int) -> bool:
+        return value in TerrainType.__members__.values()
 
 
 class IsometricMap:
@@ -280,7 +209,7 @@ class IsometricMap:
         self.height = self.rows * self.tile_height
         self.origin_tile = self.width // 2, self.height - self.tile_height // 2
         self.grid_gizmo = ShapeElementList()
-        self.grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
+        self._grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
             [None for _ in range(self.columns + 1)] for _ in range(self.rows + 1)
         ]
         self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
@@ -305,7 +234,7 @@ class IsometricMap:
         find_iso_grid = self.iso_grid_to_position
         append_to_grid_gizmo = self.grid_gizmo.append
         append_to_terrain_tiles = self.game.terrain_tiles.append
-        grids_to_positions_2d_array = self.grids_to_positions
+        grids_to_positions_2d_array = self._grids_to_positions
         for row in range(rows):
             for col in range(columns):
                 idx = row * columns + col + 1
@@ -320,10 +249,13 @@ class IsometricMap:
                 grids_to_positions_2d_array[row][col] = tile_x, tile_y
         return tiles
 
+    def grids_to_positions(self, grid: Tuple[int, int]) -> Tuple[int, int]:
+        return self._grids_to_positions[grid[1]][grid[0]]
+
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
         if self.instance is not None:
-            return self.grids_to_positions[gy][gx]
+            return self._grids_to_positions[gy][gx]
         x, y = self.origin_tile
         pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
         pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
@@ -598,218 +530,6 @@ class IsometricTile:
         IsometricTile.instance = None
 
 
-class TerrainType(IntEnum):
-    """
-    Enum representing different types of terrain.
-    """
-    GROUND = 0
-    WATER = 1
-    VOID = 2
-
-    def is_ground(self) -> bool:
-        return self == TerrainType.GROUND
-
-    def is_water(self) -> bool:
-        return self == TerrainType.WATER
-
-    def is_void(self) -> bool:
-        return self == TerrainType.VOID
-
-    def __str__(self) -> str:
-        return self.name
-
-    def __repr__(self) -> str:
-        return f'TerrainType.{self.name}'
-
-    @staticmethod
-    def is_valid_terrain(value: int) -> bool:
-        return value in TerrainType.__members__.values()
-
-#
-# class Map:
-#     game = None
-#     instance = None
-#
-#     def __init__(self, map_settings: Dict):
-#         MapNode.map = Map.instance = self
-#         self.rows = map_settings['rows']
-#         self.columns = map_settings['columns']
-#         self.grid_width = map_settings['tile_width']
-#         self.grid_height = map_settings['tile_height']
-#         self.width = self.columns * self.grid_width
-#         self.height = self.rows * self.grid_height
-#
-#         self.nodes_data = map_settings.get('nodes', {})
-#
-#         self.nodes: Dict[GridPosition, MapNode] = {}
-#         self.distances = {}
-#
-#         self.quadtree = CartesianQuadTree(self.width // 2, self.height // 2, self.width, self.height)
-#         log_here(f'Generated QuadTree of depth: {self.quadtree.total_depth()}', console=True)
-#
-#         self.generate_map_nodes_and_tiles()
-#         #  TODO: find efficient way to use these costs in pathfinding
-#         # self.calculate_distances_between_nodes()
-#
-#         self.prepare_planting_trees(map_settings)
-#
-#         log_here('Map was initialized successfully...', console=True)
-#
-#     def prepare_planting_trees(self, map_settings):
-#         trees = map_settings.get('trees') or self.generate_random_trees()
-#         self.game.after_load_functions.append(partial(self.plant_trees, trees))
-#
-#     @log_this_call()
-#     def plant_trees(self, trees):
-#         for node in self.nodes.values():
-#             if (tree_type := trees.get(node.grid)) is not None:
-#                 self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
-#
-#     def generate_random_trees(self) -> Dict[GridPosition, int]:
-#         trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
-#         return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
-#                 if random.random() < self.game.settings.percent_chance_for_spawning_tree}
-#
-#     def save(self) -> Dict:
-#         return {
-#             'rows': self.rows,
-#             'columns': self.columns,
-#             'grid_width': self.grid_width,
-#             'grid_height': self.grid_height,
-#             'nodes_data': self.nodes_data,
-#             'trees': {g: n.tree.save() for (g, n) in self.nodes.items() if n.tree is not None}
-#         }
-#
-#     def __str__(self) -> str:
-#         return f'Map(height: {self.height}, width: {self.width}, nodes: {len(self.nodes)})'
-#
-#     def __len__(self) -> int:
-#         return len(self.nodes)
-#
-#     def __getitem__(self, item):
-#         return self.nodes.get(item, self.nonexistent_node)
-#
-#     def __contains__(self, item: GridPosition):
-#         return item in self.nodes
-#
-#     def is_inside_map_grid(self, grid: Collection[GridPosition]) -> Set[GridPosition]:
-#         return {g for g in grid if g in self.nodes}
-#
-#     def on_map_area(self, x: Number, y: Number) -> bool:
-#         return 0 <= x < self.width and 0 <= y < self.height
-#
-#     def walkable(self, grid) -> bool:
-#         try:
-#             return self.nodes[grid].is_walkable
-#         except KeyError:
-#             return False
-#
-#     def walkable_adjacent(self, x, y) -> Set[MapNode]:
-#         if (x, y) not in self.nodes:
-#             x, y = position_to_map_grid(x, y)
-#         pointed_tile = self.nodes[x, y]
-#         return {tile for tile in pointed_tile.adjacent_nodes if tile.is_walkable}
-#
-#     def pathable_adjacent(self, x, y) -> Set[MapNode]:
-#         if (x, y) not in self.nodes:
-#             x, y = position_to_map_grid(x, y)
-#         pointed_node = self.nodes[x, y]
-#         return {node for node in pointed_node.adjacent_nodes if node.is_pathable}
-#
-#     def adjacent_nodes(self, x: Number, y: Number) -> Set[MapNode]:
-#         return {
-#             self.nodes[adj] for adj in self.is_inside_map_grid(adjacent_map_grids(x, y))
-#         }
-#
-#     def position_to_node(self, x: Number, y: Number) -> MapNode:
-#         return self.grid_to_node(position_to_map_grid(x, y))
-#
-#     def grid_to_node(self, grid: GridPosition) -> MapNode:
-#         return self.nodes.get(grid)
-#
-#     @property
-#     def random_walkable_node(self) -> MapNode:
-#         return random.choice(tuple(self.all_walkable_nodes))
-#
-#     @property
-#     def all_walkable_nodes(self) -> Generator[MapNode]:
-#         return (node for node in self.nodes.values() if node.is_walkable)
-#
-#     @timer(1, global_profiling_level=PROFILING_LEVEL)
-#     @log_this_call(console=True)
-#     def generate_map_nodes_and_tiles(self):
-#         for x in range(self.columns):
-#             for y in range(self.rows):
-#                 terrain = TerrainType.VOID if x in (0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
-#                 self.nodes[(x, y)] = node = MapNode(x, y, terrain)
-#                 self.create_map_sprite(*node.position, node.terrain_type)
-#         log_here(f'Generated {len(self.nodes)} map nodes.', console=True)
-#
-#     def create_map_sprite(self, x: int, y: int, terrain_type: TerrainType):
-#         sprite = Sprite(center_x=x, center_y=y, hit_box_algorithm='None')
-#         sprite.texture = {
-#             terrain_type.GROUND: MAP_TILE_TEXTURE_GROUND,
-#             terrain_type.VOID: MAP_TILE_TEXTURE_VOID,
-#             terrain_type.WATER: MAP_TILE_TEXTURE_WATER
-#         }[terrain_type]
-#         # try:
-#         #     terrain_type, index, rotation = self.nodes_data[(x, y)]
-#         #     t, i, r = set_terrain_texture(terrain_type, index, rotation)
-#         # except KeyError:
-#         #     terrain_type = 'mud'
-#         #     t, i, r = set_terrain_texture(terrain_type)
-#         #     self.nodes_data[(x, y)] = terrain_type, i, r
-#         # sprite.texture = t
-#         self.game.terrain_tiles.append(sprite)
-#
-#     def find_map_regions(self):
-#         """
-#         All MapNodes which are intermediary connected or there is possible path connecting them, belong to the same map
-#         region, which allows for fast excluding impossible pathfinding calls - if start and destination belong to the
-#         different regions, we do not need call A-star algorithm.
-#         """
-#         ...
-#
-#     def calculate_distances_between_nodes(self):
-#         for node in self.nodes.values():
-#             node.costs = costs_dict = {}
-#             for grid in self.is_inside_map_grid(adjacent_map_grids(*node.position)):
-#                 adjacent_node = self.nodes[grid]
-#                 distance = adjacent_distance(grid, adjacent_node.grid)
-#                 # terrain_cost = node.terrain_cost + adjacent_node.terrain_cost
-#                 node.costs[grid] = distance #  * terrain_cost
-#             self.distances[node.grid] = costs_dict
-#
-#     def get_nodes_by_row(self, row: int) -> List[MapNode]:
-#         return [n for n in self.nodes.values() if n.grid[1] == row]
-#
-#     def get_nodes_by_column(self, column: int) -> List[MapNode]:
-#         return [n for n in self.nodes.values() if n.grid[0] == column]
-#
-#     def get_all_nodes(self) -> Generator[MapNode]:
-#         return (n for n in self.nodes.values())
-#
-#     def get_random_position(self) -> NormalizedPoint:
-#         return random.choice([n.position for n in self.all_walkable_nodes])
-#
-#     def get_valid_position(self, position: Optional[NormalizedPoint] = None) -> NormalizedPoint:
-#         """
-#
-#         :param position: Optional[NormalizedPoint] -- if left to default None, returns random, valid position
-#         :return: NormalizedPoint
-#         """
-#         return position or self.get_random_position()
-#
-#     def node(self, grid: GridPosition) -> MapNode:
-#         return self.nodes.get(grid, self.nonexistent_node)
-#
-#     @cached_property
-#     def nonexistent_node(self) -> MapNode:
-#         node = MapNode(-1, -1, TerrainType.VOID)
-#         node.is_pathable = node._walkable = False
-#         return node
-#
-
 class WaypointsQueue:
     """
     When human player gives his Units movement orders with left CTRL key
@@ -878,7 +598,7 @@ class NavigatingUnitsGroup:
     """
 
     def __init__(self, units: List[Unit], x: Number, y: Number):
-        self.map = IsometricMap.instance
+        self.map: IsometricMap = IsometricMap.instance
         self.leader = units[0]
         self.destination = position_to_map_grid(x, y)
         self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
@@ -909,7 +629,7 @@ class NavigatingUnitsGroup:
             unit.set_navigating_group(navigating_group=self)
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
-        start = self.leader.current_node.grid
+        start = self.leader.current_tile.grid
         path = a_star(self.map, start, self.destination, True)
         destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
         if len(path) > OPTIMAL_PATH_LENGTH:
@@ -938,7 +658,7 @@ class NavigatingUnitsGroup:
                 steps.pop()
 
     def add_visible_indicators_of_destinations(self, destinations, units):
-        positions = [map_grid_to_position(g) for g in destinations]
+        positions = [self.map.iso_grid_to_position(*g) for g in destinations]
         self.map.game.units_ordered_destinations.new_destinations(positions, units)
 
     def update(self):
@@ -1076,7 +796,7 @@ class Pathfinder(EventsCreator):
             return node.position
         nearest_walkable = None
         while nearest_walkable is None:
-            adjacent = node.adjacent_nodes
+            adjacent = node.adjacent_tiles
             for adjacent_node in (n for n in adjacent if n.is_walkable):
                 return adjacent_node.position
             node = random.choice([n for n in adjacent])

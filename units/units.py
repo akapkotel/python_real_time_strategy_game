@@ -68,8 +68,8 @@ class Unit(PlayerEntity, ABC):
 
         # pathfinding and map-related:
         self.reserved_node = None
-        self.current_node = self.map.position_to_node(*self.position)
-        self.block_map_node(self.current_node)
+        self.current_tile = self.map.position_to_node(*self.position)
+        self.block_map_tile(self.current_tile)
 
         self.forced_destination = False
         self.path: Deque[GridPosition] = deque()
@@ -90,7 +90,7 @@ class Unit(PlayerEntity, ABC):
 
         self.explosion_name = EXPLOSION
 
-        self.layered_spritelist.swap_rendering_layers(self, 0, self.current_node.grid[1])
+        self.layered_spritelist.swap_rendering_layers(self, 0, self.current_tile.grid[1])
 
     @abstractmethod
     def _load_textures(self):
@@ -113,8 +113,8 @@ class Unit(PlayerEntity, ABC):
         self.set_texture(index)
 
     @property
-    def adjacent_nodes(self) -> List[IsometricTile]:
-        return self.current_node.adjacent_nodes
+    def adjacent_tiles(self) -> List[IsometricTile]:
+        return self.current_tile.adjacent_tiles
 
     @property
     def is_moving(self) -> bool:
@@ -122,9 +122,9 @@ class Unit(PlayerEntity, ABC):
 
     def reached_destination(self, destination: Union[IsometricTile, GridPosition]) -> bool:
         try:
-            return destination.grid == self.current_node.grid
+            return destination.grid == self.current_tile.grid
         except AttributeError:
-            return destination == self.current_node.grid
+            return destination == self.current_tile.grid
 
     def heading_to(self, destination: Union[IsometricTile, GridPosition]):
         return self.path and self.path[0] == self.map.map_grid_to_position(destination)
@@ -146,64 +146,64 @@ class Unit(PlayerEntity, ABC):
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
-        new_current_node = self.update_current_node()
-        self.update_observed_area(new_current_node)
-        self.update_blocked_map_nodes(new_current_node)
+        new_current_tile = self.update_current_tile()
+        self.update_observed_area(new_current_tile)
+        self.update_blocked_map_tiles(new_current_tile)
         self.update_pathfinding()
 
-    def update_current_node(self):
-        current_node = self.get_current_node()
-        if current_node is not self.current_node:
+    def update_current_tile(self):
+        current_tile = self.get_current_tile()
+        if current_tile is not self.current_tile:
             if self.quadtree is not None and not self.quadtree.in_bounds(self):
                 self.update_in_map_quadtree()
-        return current_node
+        return current_tile
 
-    def get_current_node(self):
+    def get_current_tile(self):
         current_node = self.map.position_to_node(*self.position)
-        if (old_y := self.current_node.grid[1]) != (new_y := current_node.grid[1]):
+        if (old_y := self.current_tile.grid[1]) != (new_y := current_node.grid[1]):
             self.layered_spritelist.swap_rendering_layers(self, old_y, new_y)
         return current_node
 
-    def update_observed_area(self, current_node: IsometricTile):
-        if self.observed_nodes and current_node == self.current_node:
+    def update_observed_area(self, current_tile: IsometricTile):
+        if self.observed_nodes and current_tile == self.current_tile:
             pass
         else:
             self.observed_grids = grids = self.calculate_observed_area()
-            self.observed_nodes = {self.map[grid] for grid in grids}
+            self.observed_nodes = {self.map.tiles[grid] for grid in grids}
 
-    def update_blocked_map_nodes(self, new_current_node: IsometricTile):
+    def update_blocked_map_tiles(self, new_current_tile: IsometricTile):
         """
         Units are blocking MapNodes they are occupying to enable other units
         avoid collisions by navigating around blocked nodes.
         """
         if self.path:
-            self.scan_next_nodes_for_collisions()
-        self.update_current_blocked_node(new_current_node)
+            self.scan_next_tiles_for_collisions()
+        self.update_current_blocked_tile(new_current_tile)
         if len(self.path) > 1:
-            self.update_reserved_node()
+            self.update_reserved_tile()
 
-    def update_current_blocked_node(self, new_current_node: IsometricTile):
-        self.swap_blocked_nodes(self.current_node, new_current_node)
-        self.current_node = new_current_node
+    def update_current_blocked_tile(self, new_current_node: IsometricTile):
+        self.swap_blocked_tiles(self.current_tile, new_current_node)
+        self.current_tile = new_current_node
 
-    def update_reserved_node(self):
+    def update_reserved_tile(self):
         new_reserved_node = self.map.position_to_node(*self.path[0])
-        self.swap_blocked_nodes(self.reserved_node, new_reserved_node)
+        self.swap_blocked_tiles(self.reserved_node, new_reserved_node)
         self.reserved_node = new_reserved_node
 
-    def swap_blocked_nodes(self, unblocked: IsometricTile, blocked: IsometricTile):
+    def swap_blocked_tiles(self, unblocked: IsometricTile, blocked: IsometricTile):
         if unblocked is not None:
-            self.unblock_map_node(unblocked)
-        self.block_map_node(blocked)
+            self.unblock_map_tile(unblocked)
+        self.block_map_tile(blocked)
 
     @staticmethod
-    def unblock_map_node(node: IsometricTile):
+    def unblock_map_tile(node: IsometricTile):
         node.unit = None
 
-    def block_map_node(self, node: IsometricTile):
+    def block_map_tile(self, node: IsometricTile):
         node.unit = self
 
-    def scan_next_nodes_for_collisions(self):
+    def scan_next_tiles_for_collisions(self):
         next_node = self.map.position_to_node(*self.path[0])
         if next_node.unit not in (self, None):
             self.find_best_way_to_avoid_collision(next_node.unit)
@@ -237,7 +237,7 @@ class Unit(PlayerEntity, ABC):
     def find_alternative_path(self) -> Optional[Deque]:
         if len(path := self.path) > 1:
             destination = self.map.position_to_node(*path[1])
-            adjacent = self.current_node.walkable_adjacent
+            adjacent = self.current_tile.walkable_adjacent
             for node in (n for n in adjacent if n in destination.walkable_adjacent):
                 self.path[0] = node.position
                 return self.path
@@ -250,7 +250,7 @@ class Unit(PlayerEntity, ABC):
             self.move_to(destination)
 
     def find_free_tile_to_unblock_way(self, path) -> bool:
-        if adjacent := self.current_node.walkable_adjacent:
+        if adjacent := self.current_tile.walkable_adjacent:
             free_tile = random.choice([node for node in adjacent])
             self.move_to(free_tile.grid)
             return True
@@ -266,8 +266,8 @@ class Unit(PlayerEntity, ABC):
 
     def countdown_waiting(self, path):
         if time.time() >= self.path_wait_counter:
-            node = self.map.position_to_node(*path[0])
-            if node.is_walkable or len(path) < 20:
+            tile = self.map.position_to_node(*path[0])
+            if tile.is_walkable or len(path) < 20:
                 self.restart_path(path)
             else:
                 self.path_wait_counter += 1
@@ -282,7 +282,7 @@ class Unit(PlayerEntity, ABC):
 
     def follow_path(self):
         destination = self.path[0]
-        if (distance_left := dist(self.position, destination)) < CLOSE_ENOUGH_DISTANCE * self.current_speed:
+        if dist(self.position, destination) < CLOSE_ENOUGH_DISTANCE * self.current_speed:
             self.move_to_next_waypoint()
         else:
             angle_to_target = int(calculate_angle(*self.position, *destination))
@@ -370,14 +370,6 @@ class Unit(PlayerEntity, ABC):
                 self.stop_completely()
         else:
             self.move_toward_enemy(enemy)
-        # enemies = (e for e in [self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()] if e is not None)
-        # for enemy in enemies:
-        #     if self.in_attack_range(enemy):
-        #         self.fight_enemy(enemy)
-        #         if enemy is self._enemy_assigned_by_player:
-        #             self.stop_completely()
-        #     else:
-        #         self.move_toward_enemy(enemy)
 
     def move_toward_enemy(self, enemy: PlayerEntity):
         if not (enemy is self._enemy_assigned_by_player or self.has_destination):
@@ -420,8 +412,8 @@ class Unit(PlayerEntity, ABC):
         self.navigating_group = navigating_group
 
     def clear_all_blocked_nodes(self):
-        for node in (self.current_node, self.reserved_node):
-            self.unblock_map_node(node) if node is not None else ...
+        for node in (self.current_tile, self.reserved_node):
+            self.unblock_map_tile(node) if node is not None else ...
 
     def create_death_animation(self):
         if not self.is_infantry:  # particular Soldiers dying instead
@@ -731,7 +723,7 @@ class Soldier(Unit):
 
     def leave_building(self, building):
         x, y = building.position  # TODO: replace this with Building exit position
-        self.position = building.adjacent_nodes
+        self.position = building.adjacent_tiles
         #(self.game.pathfinder.get_closest_walkable_position(x, y))
         self.insert_to_map_quadtree()
         self.outside = True

@@ -16,7 +16,7 @@ from user_interface.user_interface import (
     ProgressButton, UiElementsBundle, UiElement, Button, UiTextLabel, UnitProductionCostsHint
 )
 from campaigns.research import Technology
-from map.map import IsometricMap, normalize_position, position_to_map_grid
+from map.map import IsometricMap, IsometricTile, position_to_map_grid
 from players_and_factions.player import (
     Player, PlayerEntity
 )
@@ -27,8 +27,10 @@ from utils.functions import (
     get_path_to_file, ignore_in_editor_mode, add_extension
 )
 from utils.geometry import generate_2d_grid
-from utils.constants import CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
-    CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, CONSTRUCTION_SITE
+from utils.constants import (
+    CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, CONSCRIPTS,
+    UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, CONSTRUCTION_SITE
+)
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 from utils.game_logging import log_this_call
@@ -317,8 +319,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if object_id is None:
             self.place_building_properly_on_the_grid()
 
-        self.occupied_nodes: Set[IsometricMap] = self.find_occupied_nodes()
-        self.block_map_nodes(self.occupied_nodes)
+        self.occupied_nodes: Set[IsometricTile] = self.find_occupied_nodes()
+        self.block_map_tiles(self.occupied_nodes)
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
@@ -359,7 +361,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         """
         return self.position
 
-    def find_occupied_nodes(self) -> Set[IsometricMap]:
+    def find_occupied_nodes(self) -> Set[IsometricTile]:
         min_x_grid = int(self.left // TILE_WIDTH)
         min_y_grid = int(self.bottom // TILE_HEIGHT)
         width, height = self.configs.get('size')
@@ -371,10 +373,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             for y in range(min_y_grid, max_y_grid)
         }
 
-    def block_map_nodes(self, occupied_nodes: Set[IsometricMap]):
-        for node in occupied_nodes:
-            node.remove_tree()
-            self.block_map_node(node)
+    def block_map_tiles(self, occupied_tiles: Set[IsometricTile]):
+        for tile in occupied_tiles:
+            tile.remove_tree()
+            self.block_map_tile(tile)
 
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
@@ -387,16 +389,16 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return False  # this is rather obvious, since this is a Building
 
     @staticmethod
-    def unblock_map_node(node: IsometricMap):
-        node.building = None
+    def unblock_map_tile(tile: IsometricTile):
+        tile.building = None
 
-    def block_map_node(self, node: IsometricMap):
-        node.building = self
+    def block_map_tile(self, tile: IsometricTile):
+        tile.building = self
 
     def update_observed_area(self, *args, **kwargs):
         if not self.observed_nodes:  # Building need calculate it only once
             self.observed_grids = grids = self.calculate_observed_area()
-            self.observed_nodes = {self.map[grid] for grid in grids}
+            self.observed_nodes = {self.map.tiles[grid] for grid in grids}
 
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
@@ -572,7 +574,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return path_and_texture, size
 
     def clear_known_enemies(self):
-        self.known_enemies.clear()
+        self.known_enemy_units_and_buildings.clear()
 
     def change_player(self, new_player: Player):
         self.detach(self.player)
@@ -606,7 +608,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def unblock_occupied_nodes(self):
         for node in self.occupied_nodes:
-            self.unblock_map_node(node)
+            self.unblock_map_tile(node)
 
     def kill_garrisoned_soldiers(self):
         for soldier in self.garrisoned_soldiers:

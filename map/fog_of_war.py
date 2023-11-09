@@ -8,15 +8,12 @@ from arcade import Sprite, SpriteList, make_soft_circle_texture
 from utils.colors import BLACK, FOG
 from utils.data_types import GridPosition
 from game import Game
-from utils.constants import TILE_WIDTH, TILE_HEIGHT
+from utils.constants import TILE_WIDTH
 from map.quadtree import Rect
 
-OFFSET_X = TILE_WIDTH // 2
-OFFSET_Y = TILE_HEIGHT // 2
 
-
-DARK_TEXTURE = make_soft_circle_texture(3 * TILE_WIDTH, BLACK)
-FOG_TEXTURE = make_soft_circle_texture(3 * TILE_WIDTH, FOG, 128)
+DARK_TEXTURE = make_soft_circle_texture(2 * TILE_WIDTH, BLACK)
+FOG_TEXTURE = make_soft_circle_texture(2 * TILE_WIDTH, FOG, 128)
 FOG_SPRITELIST_SIZE = 60
 
 
@@ -34,14 +31,15 @@ class FogOfWar(Rect):
     game: Optional[Game] = None
 
     def __init__(self, cx=0, cy=0, width=0, height=0):
-        width = self.game.map.width // self.game.map.grid_width
-        height = self.game.map.height  // self.game.map.grid_height
+        width = self.game.map.width
+        height = self.game.map.height
         x = width // 2
         y = height // 2
+        self.fog_tile_size = self.game.map.tile_width
         super().__init__(x, y, width, height)
 
         # grid-data of the game-map:
-        self.map_grids: KeysView[GridPosition] = self.game.map.nodes.keys()
+        self.map_grids: KeysView[GridPosition] = self.game.map.tiles.keys()
         # Tiles which have not been revealed yet:
         self.unexplored: Set[GridPosition] = set([k for k in self.map_grids])
 
@@ -73,7 +71,7 @@ class FogOfWar(Rect):
             get_tile_position = self.get_tile_position
             for x, y in self.unexplored:
                 sprite_list = sprite_lists[(x // FOG_SPRITELIST_SIZE, y // FOG_SPRITELIST_SIZE)]
-                sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
+                sprite = FogSprite(get_tile_position((x, y)), DARK_TEXTURE)
                 self.grids_to_sprites[(x, y)] = sprite
                 sprite_list.append(sprite)
         return sprite_lists
@@ -91,7 +89,9 @@ class FogOfWar(Rect):
         grids_to_sprites = self.grids_to_sprites
         # since MiniMap also draws FoW, but the miniaturized version of, send
         # set of GridPositions revealed this frame to the MiniMap instance:
-        self.game.mini_map.visible = revealed = visible.intersection(grids_to_sprites)
+
+        # self.game.mini_map.visible = revealed = visible.intersection(grids_to_sprites)
+        revealed = visible.intersection(grids_to_sprites)
         for grid in revealed:
             sprite_list = self.fog_sprite_lists[(grid[0] // FOG_SPRITELIST_SIZE, grid[1] // FOG_SPRITELIST_SIZE)]
             sprite_list.remove(grids_to_sprites[grid])
@@ -99,19 +99,18 @@ class FogOfWar(Rect):
         # add grey-semi-transparent fog to the tiles which are no longer seen:
         fog = self.explored - visible
         get_tile_position = self.get_tile_position
-        for grid_x, grid_y in fog.difference(grids_to_sprites):
-            x, y = get_tile_position(grid_x, grid_y)
-            grids_to_sprites[(grid_x, grid_y)] = sprite = FogSprite((x, y), FOG_TEXTURE)
-            sprite_list = self.fog_sprite_lists[(grid_x // FOG_SPRITELIST_SIZE, grid_y // FOG_SPRITELIST_SIZE)]
+        for grid in fog.difference(grids_to_sprites):
+            x, y = get_tile_position(grid)
+            grids_to_sprites[grid] = sprite = FogSprite((x, y), FOG_TEXTURE)
+            sprite_list = self.fog_sprite_lists[(grid[0] // FOG_SPRITELIST_SIZE, grid[1] // FOG_SPRITELIST_SIZE)]
             sprite_list.append(sprite)
         self.explored.update(visible)
         self.unexplored.difference_update(visible)
         self.visible.clear()
 
-    @staticmethod
     @lru_cache()
-    def get_tile_position(x, y):
-        return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
+    def get_tile_position(self, grid: Tuple[int, int]):
+        return self.game.map.grids_to_positions(grid)
 
     def draw(self):
         if self.game.editor_mode:
@@ -134,6 +133,6 @@ class FogOfWar(Rect):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.map_grids = self.game.map.nodes.keys()
+        self.map_grids = self.game.map.tiles.keys()
         self.grids_to_sprites = {}
         self.fog_sprite_lists = self.create_dark_sprites()
