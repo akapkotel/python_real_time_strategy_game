@@ -89,9 +89,7 @@ class FogOfWar(Rect):
         grids_to_sprites = self.grids_to_sprites
         # since MiniMap also draws FoW, but the miniaturized version of, send
         # set of GridPositions revealed this frame to the MiniMap instance:
-
-        # self.game.mini_map.visible = revealed = visible.intersection(grids_to_sprites)
-        revealed = visible.intersection(grids_to_sprites)
+        self.game.mini_map.visible = revealed = visible.intersection(grids_to_sprites)
         for grid in revealed:
             sprite_list = self.fog_sprite_lists[(grid[0] // FOG_SPRITELIST_SIZE, grid[1] // FOG_SPRITELIST_SIZE)]
             sprite_list.remove(grids_to_sprites[grid])

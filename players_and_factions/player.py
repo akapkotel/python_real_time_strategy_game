@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade.arcade_types import Color, Point
 
+from map.quadtree import Rect
 from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, YIELD_PER_SECOND, CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY, RESOURCES, FactionName, \
     UI_RESOURCES_SECTION, MAX_HEALTH, ATTACK_RADIUS, WEAPONS_NAMES, VISIBILITY_RADIUS
@@ -620,6 +621,7 @@ class PlayerEntity(GameObject):
 
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
+            self.rect = Rect(*self.position, self.visibility_radius, self.visibility_radius * 0.5)
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         if self.known_enemy_units_and_buildings or self._enemy_assigned_by_player:

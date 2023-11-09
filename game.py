@@ -74,7 +74,7 @@ SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 UI_WIDTH = SCREEN_WIDTH // 5
 
 PLAYER_UNITS = 5
-CPU_UNITS = 5
+CPU_UNITS = 0
 
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 
@@ -130,6 +130,7 @@ class Settings:
 
         self.full_screen: bool = False
         self.pyprofiler: bool = False
+        self.debug_quadtree: bool = False
 
         self.difficulty: int = 3
 
@@ -559,9 +560,9 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
             ['fog_of_war', FogOfWar, 0.15],
             ['spawner', GameObjectsSpawner, 0.05],
-            # ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
-            #                              (MINIMAP_WIDTH, MINIMAP_HEIGHT),
-            #                              (TILE_WIDTH, TILE_HEIGHT), rows)],
+            ['mini_map', MiniMap, 0.15, ((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                         (MINIMAP_WIDTH, MINIMAP_HEIGHT),
+                                         (TILE_WIDTH, TILE_HEIGHT), self.settings.map_height)],
         ] if self.loader is None else []
 
         self.random_scenario = self.loader is None
@@ -1094,6 +1095,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             self.draw_dialog(*self.dialog)
         left, *_, top = self.viewport
         draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
+        if self.map is not None and self.settings.debug_quadtree:
+            self.map.quadtree.draw()
+            for unit in self.local_human_player.units:
+                draw_text(f'{unit.quadtree.id}', unit.center_x, unit.center_y - 40, WHITE)
+                # draw_rectangle_filled(*unit.position, unit.visibility_radius, unit.visibility_radius * 0.5, color=(255, 0, 0, 25))
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center

@@ -382,8 +382,8 @@ class IsometricWindow(Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         map_settings = {
-            'rows': 120,
-            'columns': 120,
+            'rows': 20,
+            'columns': 20,
             'tile_width': 100,
         }
         self.map = IsometricMap(self, map_settings)
@@ -413,7 +413,9 @@ class IsometricWindow(Window):
                 draw_polygon_filled(points, rgb_to_rgba(GREEN, 125))
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        self.cursor = x, y
+        left, _, bottom, _ = self.get_viewport()
+        in_quad = self.map.quadtree.in_bounds(Coordinate((x + left, y + bottom)))
+        self.cursor = x, y, in_quad
         self.highlight_pointed_tile(x, y)
 
     def highlight_pointed_tile(self, x, y):

@@ -59,8 +59,11 @@ class IsometricRect(Rect):
 
 
 class QuadTree(ABC):
+    count = 0
 
     def __init__(self, max_entities=5, depth=0):
+        self.id = QuadTree.count
+        QuadTree.count += 1
         self.max_entities = max_entities
         self.entities_count = 0
         self.depth = depth
@@ -73,7 +76,7 @@ class QuadTree(ABC):
         raise NotImplementedError
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        diameter = radius + radius
+        diameter = radius * 2
         rect = Rect(circle_x, circle_y, diameter, diameter)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
@@ -105,7 +108,7 @@ class QuadTree(ABC):
                 quadtree.remove(entity)
         else:
             self.entities_count -= 1
-            self.collapse()
+            # self.collapse()
 
     @abstractmethod
     def divide(self):
@@ -300,26 +303,27 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         quart_width, quart_height = half_width / 2, half_height / 2
         new_depth = self.depth + 1
         self.children = [
-            CartesianQuadTree(cx - quart_width, cy, half_width, half_height, self.max_entities, new_depth),
-            CartesianQuadTree(cx, cy + quart_height, half_width, half_height, self.max_entities, new_depth),
-            CartesianQuadTree(cx + quart_width, cy, half_width, half_height, self.max_entities, new_depth),
-            CartesianQuadTree(cx, cy - quart_height, half_width, half_height, self.max_entities, new_depth)
+            IsometricQuadTree(cx - quart_width, cy, half_width, half_height, self.max_entities, new_depth),
+            IsometricQuadTree(cx, cy + quart_height, half_width, half_height, self.max_entities, new_depth),
+            IsometricQuadTree(cx + quart_width, cy, half_width, half_height, self.max_entities, new_depth),
+            IsometricQuadTree(cx, cy - quart_height, half_width, half_height, self.max_entities, new_depth)
         ]
 
     def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
         if not self.intersects(bounds):
             return found_entities
+        in_bounds = bounds.in_bounds
         for faction_id, entities in self.entities.items():
             if faction_id in hostile_factions_ids:
-                found_entities.extend(e for e in entities if bounds.in_bounds(e))
+                found_entities.extend(e for e in entities if in_bounds(e))
         for quadtree in self.children:
             found_entities = quadtree.query(hostile_factions_ids, bounds, found_entities)
         return found_entities
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        diameter = radius + radius
-        rect = Rect(circle_x, circle_y, diameter, diameter)
+        diameter = radius * 2
+        rect = Rect(circle_x, circle_y, diameter, radius)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
         return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}
@@ -351,7 +355,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
 
     def draw(self):
         super().draw()
-        if self.entities_count:
-            draw_text(str(self.get_entities()), *self.position, RED, 20)
+        # if self.entities_count:
+        draw_text(f'{self.id}: {self.get_entities()}', *self.position, RED, 20)
         for child in self.children:
             child.draw()
