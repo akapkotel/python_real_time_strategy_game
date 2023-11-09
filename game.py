@@ -880,7 +880,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_random_scenario(self):
         self.test_factions_and_players_creation()
-        # self.test_buildings_spawning()
+        self.test_buildings_spawning()
         self.test_units_spawning()
         self.test_scenarios()
 
@@ -905,11 +905,16 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def test_buildings_spawning(self):
         # TODO: remove it when game is completed
-        self.spawn('medium_vehicles_factory', self.players[2], (400, 600), garrison=1)
-        self.spawn('garrison', self.players[2], (600, 800), garrison=1)
-        self.spawn('command_center', self.players[2], (400, 900), garrison=1)
-        self.spawn('medium_vehicles_factory', self.players[4], (1400, 1000), garrison=1)
-        ConstructionSite('command_center', self.players[2], (850, 800))
+        random_pos = self.map.get_random_position
+        building = self.spawn('medium_vehicles_factory', self.players[2], random_pos(), garrison=1)
+        pos = random_pos(building.position, 3, 10)
+        building = self.spawn('garrison', self.players[2], pos, garrison=1)
+        pos = random_pos(building.position, 3, 10)
+        self.spawn('command_center', self.players[2], pos, garrison=1)
+        pos = random_pos(building.position, 3, 10)
+        ConstructionSite('command_center', self.players[2], pos)
+
+        self.spawn('medium_vehicles_factory', self.players[4], random_pos(), garrison=1)
 
     def spawn(self,
               object_name: str,
