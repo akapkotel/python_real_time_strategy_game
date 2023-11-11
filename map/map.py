@@ -207,7 +207,7 @@ class IsometricMap:
         self.columns = map_settings['columns']
         self.width = self.columns * self.tile_width
         self.height = self.rows * self.tile_height
-        self.origin_tile = self.width // 2, self.height - self.tile_height // 2
+        self.origin_tile_xy = self.width // 2, self.height - self.tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self._grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
             [None for _ in range(self.columns + 1)] for _ in range(self.rows + 1)
@@ -223,9 +223,16 @@ class IsometricMap:
         }
 
     def generate_quadtree(self) -> IsometricQuadTree:
-        quad_iso_x, quad_iso_y = self.iso_grid_to_position(self.rows // 2, self.columns // 2)
-        quad_width, quad_height = self.columns * self.tile_width, self.rows * self.tile_height
-        return IsometricQuadTree(quad_iso_x, quad_iso_y + self.tile_height // 2, quad_width, quad_height)
+        w_ratio = self.columns / (self.columns + self.rows)
+        h_ratio = self.rows / (self.rows + self.columns)
+
+        quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
+        quad_y = y + self.tile_height // 2
+
+        quad_width = (self.columns + self.rows) * self.tile_height
+        quad_height = (self.columns + self.rows) * self.tile_height
+
+        return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
 
     def generate_tiles(self) -> Dict[Tuple[int, int], IsometricTile]:
         tiles = {}
@@ -256,7 +263,7 @@ class IsometricMap:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
         if self.instance is not None:
             return self._grids_to_positions[gy][gx]
-        x, y = self.origin_tile
+        x, y = self.origin_tile_xy
         pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
         pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
         return pos_x, pos_y
@@ -419,6 +426,22 @@ class IsometricTile:
     @position.setter
     def position(self, new_position: Tuple[int, int]):
         self.x, self.y = new_position
+
+    @property
+    def left(self) -> Tuple[int, int]:
+        return self.points[0]
+
+    @property
+    def top(self) -> Tuple[int, int]:
+        return self.points[1]
+
+    @property
+    def right(self) -> Tuple[int, int]:
+        return self.points[2]
+
+    @property
+    def bottom(self) -> Tuple[int, int]:
+        return self.points[3]
 
     @property
     def adjacent_ids(self) -> List[Tuple[int, int]]:

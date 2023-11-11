@@ -3,13 +3,15 @@ from __future__ import annotations
 
 from abc import abstractmethod, ABC
 from math import dist
-from typing import Optional
+from typing import Optional, Set
+
+import shapely.geometry
 from matplotlib import path as mpltPath
 from numpy import array
 
 from arcade import draw_rectangle_outline, draw_text, draw_polygon_outline
 
-from utils.colors import RED
+from utils.colors import RED, WHITE
 
 
 class Rect:
@@ -36,16 +38,30 @@ class Rect:
                     (other.top < self.bottom or self.top < other.bottom))
 
     def draw(self):
-        draw_rectangle_outline(*self.position, self.width, self.height, RED)
+        draw_rectangle_outline(self.cx // 55, self.cy // 55, self.width // 10, self.height // 10, RED)
 
 
 class IsometricRect(Rect):
 
-    def __init__(self, cx, cy, width, height):
+    def __init__(self, cx, cy, width, height, w_ratio: float, h_ratio: float):
+        # params: x, y, width, height, w_ratio, h_ratio
         super().__init__(cx, cy, width, height)
-        x, y = self.cx, self.cy
-        hh, hw = self.width // 4, self.width // 2
+        self.w_ratio = w_ratio
+        self.h_ratio = h_ratio
+
+        x, y = cx, cy
+        hh, hw = height / 4, width / 2
+
         self.points = [(x - hw, y), (x, y + hh), (x + hw, y), (x, y - hh), (x - hw, y)]
+        self.polygon = shapely.geometry.Polygon(self.points)
+        l, b, r, t = self.polygon.bounds
+        self.bbox_height = height = t - b
+        self.bbox_width = width = r - l
+
+        self.points = [
+            (l, b + (height * w_ratio)), (r - (width * w_ratio), y + hh), (r, t - (height * w_ratio)),
+            (l + (width * w_ratio), b), (l, b + (height * w_ratio))
+        ]
         self.polygon = mpltPath.Path(array(self.points))
 
     def in_bounds(self, item) -> bool:
@@ -253,15 +269,16 @@ class CartesianQuadTree(QuadTree, Rect):
 
 class IsometricQuadTree(QuadTree, IsometricRect):
 
-    def __init__(self, cx, cy, width, height, max_entities=5, depth=0):
+    def __init__(self, cx, cy, width, height, w_ratio, h_ratio, max_entities=5, depth=0):
         super().__init__(max_entities, depth)
-        IsometricRect.__init__(self, cx, cy, width, height)
+        IsometricRect.__init__(self, cx, cy, width, height, w_ratio, h_ratio)
+        self.tiles: Set[int] = set()  # TODO: find efficient way to register Tiles to Quads for faster spatial checks
 
     def __repr__(self) -> str:
         return f'QuadTree(depth: {self.depth}, l:{self.left}, r:{self.right}, b:{self.bottom}, t:{self.top})'
 
     def insert(self, entity) -> Optional[IsometricQuadTree]:
-        if not Rect.in_bounds(self, entity):
+        if not self.in_bounds(entity):
             return None
 
         if self.entities_count < self.max_entities:
@@ -300,14 +317,25 @@ class IsometricQuadTree(QuadTree, IsometricRect):
     def divide(self):
         cx, cy = self.cx, self.cy
         half_width, half_height = self.width / 2, self.height / 2
-        quart_width, quart_height = half_width / 2, half_height / 2
+        quart_width, quart_height = half_width / 2, half_height / 4
         new_depth = self.depth + 1
-        self.children = [
-            IsometricQuadTree(cx - quart_width, cy, half_width, half_height, self.max_entities, new_depth),
-            IsometricQuadTree(cx, cy + quart_height, half_width, half_height, self.max_entities, new_depth),
-            IsometricQuadTree(cx + quart_width, cy, half_width, half_height, self.max_entities, new_depth),
-            IsometricQuadTree(cx, cy - quart_height, half_width, half_height, self.max_entities, new_depth)
-        ]
+        max_entities = self.max_entities
+        w_ratio, h_ratio = self.w_ratio, self.h_ratio
+
+        if h_ratio != w_ratio:
+            self.children = [
+                IsometricQuadTree(cx - quart_width, cy + self.bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx - self.bbox_width // 2 * h_ratio, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + quart_width, cy - self.bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + self.bbox_width // 2 * h_ratio, cy - quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth)
+            ]
+        else:
+            self.children = [
+                IsometricQuadTree(cx - quart_width, cy, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + quart_width, cy, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx, cy - quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth)
+            ]
 
     def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
@@ -351,11 +379,13 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
     def get_entities(self):
-        return [e.id for entities_list in self.entities.values() for e in entities_list]
+        return [e for entities_list in self.entities.values() for e in entities_list]
 
     def draw(self):
         super().draw()
-        # if self.entities_count:
-        draw_text(f'{self.id}: {self.get_entities()}', *self.position, RED, 20)
+        if entities := self.get_entities():
+            for unit in (u for u in entities if u.quadtree is not None):
+                draw_text(f'{unit.quadtree.id}', unit.center_x, unit.center_y - 40, WHITE)
+        draw_text(f'{self.id}: {[e.id for e in entities]}', *self.position, RED, 20)
         for child in self.children:
             child.draw()

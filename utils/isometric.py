@@ -70,8 +70,18 @@ def diagonal(first_grid: Tuple[int, int], second_grid: Tuple[int, int]) -> bool:
 
 @dataclass
 class Coordinate:
-    __slots__ = ['position',]
+    __slots__ = ['position', 'faction']
+    id = 1
     position: Tuple[float, float]
+    faction: Faction
+
+    def __hash__(self):
+        return hash(id(self))
+
+
+
+class Faction:
+    id = 1
 
 
 class TerrainType(IntEnum):
@@ -116,12 +126,11 @@ class IsometricMap(metaclass=SingletonMeta):
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
         self.tile_width = settings['tile_width']
         self.tile_height = self.tile_width // 2
-        # self.origin_tile = window.width // 2, window.height - self.tile_height // 2
         self.rows = settings['rows']
         self.columns = settings['columns']
         self.width = self.columns * self.tile_width
         self.height = self.rows * self.tile_height
-        self.origin_tile = self.width // 2, self.height - self.tile_height // 2
+        self.origin_tile_xy = self.width // 2, self.height - self.tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self.tiles_sprites = SpriteList(use_spatial_hash=True, is_static=True)
         self.terrains = self.find_terrains()
@@ -135,10 +144,23 @@ class IsometricMap(metaclass=SingletonMeta):
             for name in ('grass', 'sand', 'water')
         }
 
+    # rows 10 * 50
+    # columns 20 * 100
+    # width 100
+
     def generate_quadtree(self) -> IsometricQuadTree:
-        quad_iso_x, quad_iso_y = self.iso_grid_to_position(self.rows // 2, self.columns // 2)
-        quad_width, quad_height = self.columns * self.tile_width, self.rows * self.tile_height
-        return IsometricQuadTree(quad_iso_x, quad_iso_y + self.tile_height // 2, quad_width, quad_height)
+        # bounding box
+        w_ratio = self.columns / (self.columns + self.rows)
+        h_ratio = self.rows / (self.rows + self.columns)
+        print(w_ratio, h_ratio)
+
+        quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
+        quad_y = y + self.tile_height // 2
+
+        quad_width = (self.columns + self.rows) * self.tile_height
+        quad_height = (self.columns + self.rows) * self.tile_height
+
+        return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
 
     def adjacent_grids(self, gx: int, gy: int) -> List[Tuple[int, int]]:
         return [adj for adj in [(gx + x, gy + y) for (x, y) in ADJACENCY_MATRIX] if adj in self.tiles]
@@ -162,7 +184,7 @@ class IsometricMap(metaclass=SingletonMeta):
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
-        x, y = self.origin_tile
+        x, y = self.origin_tile_xy
         pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
         pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
         return pos_x, pos_y
@@ -269,6 +291,22 @@ class IsometricTile:
     @position.setter
     def position(self, new_position: Tuple[int, int]):
         self.x, self.y = new_position
+
+    @property
+    def left(self) -> Tuple[int, int]:
+        return self.points[0]
+
+    @property
+    def top(self) -> Tuple[int, int]:
+        return self.points[1]
+
+    @property
+    def right(self) -> Tuple[int, int]:
+        return self.points[2]
+
+    @property
+    def bottom(self) -> Tuple[int, int]:
+        return self.points[3]
 
     @property
     def adjacent_ids(self) -> List[Tuple[int, int]]:
@@ -378,12 +416,12 @@ class IsometricTile:
 
 
 class IsometricWindow(Window):
-
+    # 20 : 60, 30 : 90, 10 : 30, (1:1, 1:3)
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         map_settings = {
-            'rows': 20,
-            'columns': 20,
+            'rows': 30,
+            'columns': 30,
             'tile_width': 100,
         }
         self.map = IsometricMap(self, map_settings)
@@ -395,6 +433,8 @@ class IsometricWindow(Window):
         self.start_point = None
         self.end_point = None
         self.path = None
+        self.quadtree = None
+        self.faction = Faction()
 
     def on_update(self, delta_time: float = 1/60):
         super().on_update(delta_time)
@@ -413,9 +453,7 @@ class IsometricWindow(Window):
                 draw_polygon_filled(points, rgb_to_rgba(GREEN, 125))
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        left, _, bottom, _ = self.get_viewport()
-        in_quad = self.map.quadtree.in_bounds(Coordinate((x + left, y + bottom)))
-        self.cursor = x, y, in_quad
+        self.cursor = x, y, self.quadtree.id if self.quadtree is not None else '...'
         self.highlight_pointed_tile(x, y)
 
     def highlight_pointed_tile(self, x, y):
@@ -428,6 +466,12 @@ class IsometricWindow(Window):
             self.current_tile = None
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        left, _, bottom, _ = self.get_viewport()
+        try:
+            ix, iy = self.map.position_to_node(x, y).position
+        except AttributeError:
+            raise AttributeError(f'Position {x, y} yielded no Tile!')
+        self.quadtree = self.map.quadtree.insert(entity=Coordinate((ix, iy), self.faction),)
         # debugging stuff
         if button == MOUSE_BUTTON_RIGHT:
             self.clear_pathfinding_debug()

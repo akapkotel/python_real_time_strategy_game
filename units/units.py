@@ -18,7 +18,7 @@ from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, IsometricTile, Pathfinder, normalize_position,
-    position_to_map_grid, TerrainType
+    position_to_map_grid, TerrainType, Coordinate
 )
 from players_and_factions.player import Player, PlayerEntity
 from user_interface.user_interface import UiElement, UiTextLabel
@@ -154,9 +154,13 @@ class Unit(PlayerEntity, ABC):
     def update_current_tile(self):
         current_tile = self.get_current_tile()
         if current_tile is not self.current_tile:
-            if self.quadtree is not None and not self.quadtree.in_bounds(self):
+            if self.quadtree is not None and self.should_update_quadtree():
                 self.update_in_map_quadtree()
         return current_tile
+
+    def should_update_quadtree(self) -> bool:
+        cx, cy = self.center_x // 55, self.center_y // 55
+        return not self.quadtree.in_bounds(Coordinate((cx, cy)))
 
     def get_current_tile(self):
         current_node = self.map.position_to_node(*self.position)

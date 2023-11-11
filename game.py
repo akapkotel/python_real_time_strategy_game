@@ -1097,9 +1097,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
         if self.map is not None and self.settings.debug_quadtree:
             self.map.quadtree.draw()
-            for unit in self.local_human_player.units:
-                draw_text(f'{unit.quadtree.id}', unit.center_x, unit.center_y - 40, WHITE)
-                # draw_rectangle_filled(*unit.position, unit.visibility_radius, unit.visibility_radius * 0.5, color=(255, 0, 0, 25))
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center
