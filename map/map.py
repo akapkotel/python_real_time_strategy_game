@@ -201,19 +201,19 @@ class IsometricMap:
     def __init__(self, map_settings: Dict[str, Any] = None):
         IsometricMap.instance = None
         self.window = self.game.window
-        self.tile_width = map_settings['tile_width']
-        self.tile_height = self.tile_width // 2
-        self.rows = map_settings['rows']
-        self.columns = map_settings['columns']
-        self.width = self.columns * self.tile_width
-        self.height = self.rows * self.tile_height
-        self.origin_tile_xy = self.width // 2, self.height - self.tile_height // 2
+        self.tile_width = tile_width = map_settings['tile_width']
+        self.tile_height = tile_height = self.tile_width // 2
+        self.rows = rows = map_settings['rows']
+        self.columns = columns = map_settings['columns']
+        self.width = width = columns * tile_width
+        self.height = height = rows * tile_height
+        self.origin_tile_xy = width // 2, height - tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self._grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
             [None for _ in range(self.columns + 1)] for _ in range(self.rows + 1)
         ]
         self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
-        self.quadtree = self.generate_quadtree()
+        self.quadtree = self.generate_quadtree(columns, rows, tile_height)
         IsometricMap.instance = IsometricTile.map = self
 
     def find_terrains(self) -> Dict[str, Texture]:
@@ -222,15 +222,37 @@ class IsometricMap:
             for name in ('grass', 'sand', 'water')
         }
 
-    def generate_quadtree(self) -> IsometricQuadTree:
-        w_ratio = self.columns / (self.columns + self.rows)
-        h_ratio = self.rows / (self.rows + self.columns)
+    # def generate_quadtree(self) -> IsometricQuadTree:
+    #     w_ratio = self.columns / (self.columns + self.rows)
+    #     h_ratio = self.rows / (self.rows + self.columns)
+    #
+    #     quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
+    #     quad_y = y + self.tile_height // 2
+    #
+    #     quad_width = (self.columns + self.rows) * self.tile_height
+    #     quad_height = (self.columns + self.rows) * self.tile_height
+    #
+    #     return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
 
-        quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
-        quad_y = y + self.tile_height // 2
+    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
+        w_ratio = columns / (columns + rows)
+        h_ratio = rows / (rows + columns)
 
-        quad_width = (self.columns + self.rows) * self.tile_height
-        quad_height = (self.columns + self.rows) * self.tile_height
+        print(columns // rows, rows // columns)
+        print(w_ratio, h_ratio, w_ratio > h_ratio)
+
+        if rows == columns:
+            ...
+        elif columns > rows and columns // rows != 3:
+            ...
+        elif rows > columns and rows // columns != 3:
+            ...
+
+        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
+        quad_y = y + tile_height // 2
+
+        quad_width = (columns + rows) * tile_height
+        quad_height = (columns + rows) * tile_height
 
         return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
 

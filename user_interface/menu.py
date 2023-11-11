@@ -7,13 +7,11 @@ from utils.constants import MULTIPLAYER_MENU, SCENARIOS, PROJECTS, SAVED_GAMES, 
     SKIRMISH_MENU, CAMPAIGN_MENU, LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, GRAPHICS_TAB, SOUND_TAB, \
     GAME_TAB, CREDITS_SUBMENU, NOT_AVAILABLE_NOTIFICATION, QUIT_GAME_BUTTON, CONTINUE_BUTTON, SAVE_GAME_BUTTON
 from user_interface.user_interface import (
-    UiElementsBundle, UiBundlesHandler, Button, Checkbox, TextInputField, UiTextLabel, Slider, SelectableGroup,
+    UiElementsBundle, UiBundlesHandler, Button, Checkbox, TextInputField, UiTextLabel, Slider,
     GenericTextButton, ScrollableContainer, ImageSlot
 )
 from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
-
-LOADER = 'loader'
 
 
 class Menu(LoadableWindowView, UiBundlesHandler):
@@ -133,7 +131,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[],
             register_to=self
         )
-        if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
+        if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # for testing (and cheating)
             game_tab.extend(
                 [
                     UiTextLabel(*next(positions), text='Cheats:', font_size=20, align_x='right'),
@@ -152,6 +150,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                     Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
                               20, ticked=window.settings.instant_production_time,
                               variable=(window.settings, 'instant_production_time')),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Debug map quadtree',
+                             20, ticked=window.settings.debug_quadtree,
+                             variable=(window.settings, 'debug_quadtree')),
                 ]
             )
 
@@ -228,10 +229,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                        min_value=0.25, max_value=1.0),
                 Slider('slider.png',  *next(positions), 'Map width:', 200,
                        variable=(window.settings, 'map_width'),
-                       min_value=60, max_value=260, step=20),
+                       min_value=60, max_value=240, step=20),
                 Slider('slider.png',  *next(positions), 'Map height:', 200,
                        variable=(window.settings, 'map_height'),
-                       min_value=60, max_value=260, step=20),
+                       min_value=60, max_value=240, step=20),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable'),
                 ImageSlot('image_slot.png', SCREEN_X, 650, 'miniature_slot', None),
                 # TODO: create and add ColorPicker using PlayerColor enum

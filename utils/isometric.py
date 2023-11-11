@@ -70,10 +70,10 @@ def diagonal(first_grid: Tuple[int, int], second_grid: Tuple[int, int]) -> bool:
 
 @dataclass
 class Coordinate:
-    __slots__ = ['position', 'faction']
     id = 1
     position: Tuple[float, float]
     faction: Faction
+    quadtree: IsometricQuadTree = None
 
     def __hash__(self):
         return hash(id(self))
@@ -124,18 +124,18 @@ class IsometricMap(metaclass=SingletonMeta):
         self.window = window
         self.tiles = {}
         self.grids_to_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
-        self.tile_width = settings['tile_width']
-        self.tile_height = self.tile_width // 2
-        self.rows = settings['rows']
-        self.columns = settings['columns']
-        self.width = self.columns * self.tile_width
-        self.height = self.rows * self.tile_height
-        self.origin_tile_xy = self.width // 2, self.height - self.tile_height // 2
+        self.tile_width = tile_width = settings['tile_width']
+        self.tile_height = tile_height = self.tile_width // 2
+        self.rows = rows = settings['rows']
+        self.columns = columns = settings['columns']
+        self.width = columns * tile_width
+        self.height = rows * tile_height
+        self.origin_tile_xy = self.width // 2, self.height - tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self.tiles_sprites = SpriteList(use_spatial_hash=True, is_static=True)
         self.terrains = self.find_terrains()
         self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
-        self.quadtree = self.generate_quadtree()
+        self.quadtree = self.generate_quadtree(columns, rows, tile_height)
         IsometricTile.map = self
 
     def find_terrains(self) -> Dict[str, Texture]:
@@ -148,17 +148,25 @@ class IsometricMap(metaclass=SingletonMeta):
     # columns 20 * 100
     # width 100
 
-    def generate_quadtree(self) -> IsometricQuadTree:
-        # bounding box
-        w_ratio = self.columns / (self.columns + self.rows)
-        h_ratio = self.rows / (self.rows + self.columns)
-        print(w_ratio, h_ratio)
+    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
+        w_ratio = columns / (columns + rows)
+        h_ratio = rows / (rows + columns)
 
-        quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
-        quad_y = y + self.tile_height // 2
+        print(columns // rows, rows // columns)
+        print(w_ratio, h_ratio, w_ratio > h_ratio)
 
-        quad_width = (self.columns + self.rows) * self.tile_height
-        quad_height = (self.columns + self.rows) * self.tile_height
+        if rows == columns:
+            ...
+        elif columns > rows and columns // rows != 3:
+            ...
+        elif rows > columns and rows // columns != 3:
+            ...
+
+        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
+        quad_y = y + tile_height // 2
+
+        quad_width = (columns + rows) * tile_height
+        quad_height = (columns + rows) * tile_height
 
         return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
 
@@ -421,7 +429,7 @@ class IsometricWindow(Window):
         super().__init__(width, height, title)
         map_settings = {
             'rows': 30,
-            'columns': 30,
+            'columns': 20,
             'tile_width': 100,
         }
         self.map = IsometricMap(self, map_settings)
@@ -467,10 +475,10 @@ class IsometricWindow(Window):
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         left, _, bottom, _ = self.get_viewport()
-        try:
-            ix, iy = self.map.position_to_node(x, y).position
-        except AttributeError:
-            raise AttributeError(f'Position {x, y} yielded no Tile!')
+        # try:
+        ix, iy = x + left, y + bottom
+        # except AttributeError:
+        #     raise AttributeError(f'Position {x, y} yielded no Tile!')
         self.quadtree = self.map.quadtree.insert(entity=Coordinate((ix, iy), self.faction),)
         # debugging stuff
         if button == MOUSE_BUTTON_RIGHT:

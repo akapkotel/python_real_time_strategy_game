@@ -33,7 +33,7 @@ class Rect:
                 self.left <= item.position[0] <= self.right and self.bottom <= item.position[1] <= self.top
         )
 
-    def intersects(self, other):
+    def intersects_with(self, other):
         return not ((other.right < self.left or self.right < other.left) and
                     (other.top < self.bottom or self.top < other.bottom))
 
@@ -49,17 +49,15 @@ class IsometricRect(Rect):
         self.w_ratio = w_ratio
         self.h_ratio = h_ratio
 
-        x, y = cx, cy
         hh, hw = height / 4, width / 2
-
-        self.points = [(x - hw, y), (x, y + hh), (x + hw, y), (x, y - hh), (x - hw, y)]
+        self.points = [(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh), (cx - hw, cy)]
         self.polygon = shapely.geometry.Polygon(self.points)
         l, b, r, t = self.polygon.bounds
         self.bbox_height = height = t - b
         self.bbox_width = width = r - l
 
         self.points = [
-            (l, b + (height * w_ratio)), (r - (width * w_ratio), y + hh), (r, t - (height * w_ratio)),
+            (l, b + (height * w_ratio)), (r - (width * w_ratio), cy + hh), (r, t - (height * w_ratio)),
             (l + (width * w_ratio), b), (l, b + (height * w_ratio))
         ]
         self.polygon = mpltPath.Path(array(self.points))
@@ -67,7 +65,7 @@ class IsometricRect(Rect):
     def in_bounds(self, item) -> bool:
         return self.polygon.contains_point(item.position)
 
-    def intersects(self, other) -> bool:
+    def intersects_with(self, other) -> bool:
         return any(self.polygon.contains_point(point) for point in other.points)
 
     def draw(self):
@@ -218,7 +216,7 @@ class CartesianQuadTree(QuadTree, Rect):
 
     def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
-        if not self.intersects(bounds):
+        if not self.intersects_with(bounds):
             return found_entities
         for faction_id, entities in self.entities.items():
             if faction_id in hostile_factions_ids:
@@ -320,16 +318,23 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         quart_width, quart_height = half_width / 2, half_height / 4
         new_depth = self.depth + 1
         max_entities = self.max_entities
-        w_ratio, h_ratio = self.w_ratio, self.h_ratio
+        w_ratio, h_ratio, bbox_height, bbox_width = self.w_ratio, self.h_ratio, self.bbox_height, self.bbox_width
 
-        if h_ratio != w_ratio:
+        if w_ratio > h_ratio:  # left-tilted quad (map has more columns than rows)
             self.children = [
-                IsometricQuadTree(cx - quart_width, cy + self.bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
-                IsometricQuadTree(cx - self.bbox_width // 2 * h_ratio, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
-                IsometricQuadTree(cx + quart_width, cy - self.bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
-                IsometricQuadTree(cx + self.bbox_width // 2 * h_ratio, cy - quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth)
+                IsometricQuadTree(cx - quart_width, cy + bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx - bbox_width // 2 * h_ratio, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + quart_width, cy - bbox_height // 2 * h_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + bbox_width // 2 * h_ratio, cy - quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth)
             ]
-        else:
+        elif h_ratio > w_ratio:  # right-tilted quad (more rows)
+            self.children = [
+                IsometricQuadTree(cx - quart_width, cy - bbox_height // 2 * w_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + bbox_width // 2 * w_ratio, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx + quart_width, cy + bbox_height // 2 * w_ratio, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
+                IsometricQuadTree(cx - bbox_width // 2 * w_ratio, cy - quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth)
+            ]
+        else:  # square quad (rows == cols)
             self.children = [
                 IsometricQuadTree(cx - quart_width, cy, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
                 IsometricQuadTree(cx, cy + quart_height, half_width, half_height, w_ratio, h_ratio, max_entities, new_depth),
@@ -339,7 +344,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
 
     def query(self, hostile_factions_ids, bounds, found_entities):
         """Find the points in the quadtree that lie within boundary."""
-        if not self.intersects(bounds):
+        if not self.intersects_with(bounds):
             return found_entities
         in_bounds = bounds.in_bounds
         for faction_id, entities in self.entities.items():

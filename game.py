@@ -17,13 +17,10 @@ __credits__ = {'Coding': __author__,
 import random
 import time
 import pathlib
-from pprint import pprint
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
-import PIL.Image
-import pyglet
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
 )
@@ -261,7 +258,7 @@ class GameWindow(Window, EventsCreator):
     def on_update(self, delta_time: float):
         self.frames += 1
         self.total_delta_time += delta_time
-        self.current_fps = round(pyglet.clock.get_fps(), 2)  # round(1 / delta_time, 2)
+        self.current_fps = round(1 / delta_time, 2)
         self.current_view.on_update(delta_time)
         for controller in (self.mouse, self.keyboard):
             if controller.active:

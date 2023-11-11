@@ -128,7 +128,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/testing_things.py
 
 # real_time_strategy_game
 
@@ -138,6 +137,8 @@ dmypy.json
 .dir
 .bak
 dev_utils.py
+/testing_things.py
+
 
 # sound source info
 /resources/sounds/effects/źródła.txt
@@ -146,3 +147,4 @@ dev_utils.py
 .log
 
 /testing_solutions.py
+/Issues/

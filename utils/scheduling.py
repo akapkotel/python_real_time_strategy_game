@@ -4,7 +4,7 @@ from __future__ import annotations
 from math import inf
 from typing import List, Tuple, Dict, Any, Optional, Callable, Union, Iterator
 
-from utils.game_logging import log_here, log_this_call
+from utils.game_logging import log_here
 
 
 class ScheduledEvent:
@@ -35,14 +35,12 @@ class ScheduledEvent:
         self.kwargs = kwargs or {}
         self.repeat = inf if repeat == -1 else repeat
         self.delay_left = delay_left
-        log_here(f'{self}')
 
     def __repr__(self):
         return (f'ScheduledEvent(creator: {self.creator.__class__.__name__}, '
                 f'function: {self.function.__name__}, args: {self.args}, '
                 f'kwargs: {self.kwargs}, time left: {self.delay_left})')
 
-    @log_this_call()
     def execute(self):
         try:
             self.function(*self.args, **self.kwargs)
@@ -92,13 +90,11 @@ class EventsScheduler:
     def __iter__(self) -> Iterator[ScheduledEvent]:
         return self.scheduled_events.__iter__()
 
-    @log_this_call()
     def schedule(self, event: ScheduledEvent):
         delay = (event.delay_left or event.delay) + self.game.timer.total_game_time
         self.scheduled_events.append(event)
         self.execution_times.append(delay)
 
-    @log_this_call()
     def unschedule(self, event: ScheduledEvent):
         self._unschedule(self.scheduled_events.index(event))
 
