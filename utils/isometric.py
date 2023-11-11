@@ -28,6 +28,10 @@ from utils.constants import DIAGONAL_DIST, VERTICAL_DIST
 from utils.priority_queue import PriorityQueue
 from utils.singleton import SingletonMeta
 
+MAXIMUM_MAP_SIZE = 240
+
+MAX_COLS_TO_ROWS_RATIO = 3
+
 ADJACENCY_MATRIX = ((-1, -1), (-1, 0), (0, -1), (0, 1), (1, 1), (1, 0), (1, -1), (-1, 1))
 
 
@@ -112,6 +116,28 @@ class TerrainType(IntEnum):
         return value in TerrainType.__members__.values()
 
 
+def resizer(bigger, smaller):
+    smaller_at_start = smaller
+    while not bigger // smaller == MAX_COLS_TO_ROWS_RATIO:
+        if smaller_at_start * MAX_COLS_TO_ROWS_RATIO <= MAXIMUM_MAP_SIZE:
+            bigger += 1
+        else:
+            smaller = bigger
+            break
+    return bigger, smaller
+
+
+def resize_quadtree_outside_map(columns: int, rows: int, tile_height: int) -> Tuple[int, int, int]:
+    if columns == rows:
+        raise ValueError('columns and rows must not be equal!')
+    if columns > rows:
+        columns, rows = resizer(columns, rows)
+    else:
+        rows, columns = resizer(rows, columns)
+    print(columns, rows)
+    return (columns + rows) * tile_height, columns, rows
+
+
 class IsometricMap(metaclass=SingletonMeta):
     """
     The IsometricMap class represents a map in an isometric game. It generates and manages isometric tiles, handles
@@ -144,32 +170,6 @@ class IsometricMap(metaclass=SingletonMeta):
             for name in ('grass', 'sand', 'water')
         }
 
-    # rows 10 * 50
-    # columns 20 * 100
-    # width 100
-
-    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
-        w_ratio = columns / (columns + rows)
-        h_ratio = rows / (rows + columns)
-
-        print(columns // rows, rows // columns)
-        print(w_ratio, h_ratio, w_ratio > h_ratio)
-
-        if rows == columns:
-            ...
-        elif columns > rows and columns // rows != 3:
-            ...
-        elif rows > columns and rows // columns != 3:
-            ...
-
-        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
-        quad_y = y + tile_height // 2
-
-        quad_width = (columns + rows) * tile_height
-        quad_height = (columns + rows) * tile_height
-
-        return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
-
     def adjacent_grids(self, gx: int, gy: int) -> List[Tuple[int, int]]:
         return [adj for adj in [(gx + x, gy + y) for (x, y) in ADJACENCY_MATRIX] if adj in self.tiles]
 
@@ -189,6 +189,22 @@ class IsometricMap(metaclass=SingletonMeta):
                 self.tiles_sprites.append(sprite)
                 self.grids_to_positions[(col, row)] = tile_x, tile_y
         return tiles
+
+    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
+        if rows == columns or MAX_COLS_TO_ROWS_RATIO in (rows // columns, columns // rows):
+            quad_size = (columns + rows) * tile_height
+        else:
+            quad_size, columns, rows = resize_quadtree_outside_map(columns, rows, tile_height)
+
+        w_ratio = columns / (columns + rows)
+        h_ratio = rows / (rows + columns)
+        print(columns // rows, rows // columns)
+        print(w_ratio, h_ratio, w_ratio > h_ratio)
+
+        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
+        quad_y = y + tile_height // 2
+
+        return IsometricQuadTree(quad_x, quad_y, quad_size, quad_size, w_ratio, h_ratio)
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
@@ -428,7 +444,7 @@ class IsometricWindow(Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         map_settings = {
-            'rows': 30,
+            'rows': 20,
             'columns': 20,
             'tile_width': 100,
         }

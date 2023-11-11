@@ -16,7 +16,7 @@ from typing import (
 from arcade import Sprite, Texture, ShapeElementList, load_texture, create_line_strip, draw_polygon_filled, draw_text
 
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, VERTICAL_DIST, DIAGONAL_DIST, ADJACENT_OFFSETS, \
-    OPTIMAL_PATH_LENGTH, NormalizedPoint, PathRequest
+    OPTIMAL_PATH_LENGTH, NormalizedPoint, PathRequest, MAX_COLS_TO_ROWS_RATIO, MAXIMUM_MAP_SIZE
 from gameobjects.gameobject import GameObject
 from utils.colors import WHITE, rgb_to_rgba, GREEN
 from utils.data_types import GridPosition, Number
@@ -155,6 +155,28 @@ def max_distance_between_tiles(tile: IsometricTile, min_distance: int, max_dista
     return internal
 
 
+def resizer(bigger, smaller):
+    smaller_at_start = smaller
+    while not bigger // smaller == MAX_COLS_TO_ROWS_RATIO:
+        if smaller_at_start * MAX_COLS_TO_ROWS_RATIO <= MAXIMUM_MAP_SIZE:
+            bigger += 1
+        else:
+            smaller = bigger
+            break
+    return bigger, smaller
+
+
+def resize_quadtree_outside_map(columns: int, rows: int, tile_height: int) -> Tuple[int, int, int]:
+    if columns == rows:
+        raise ValueError('columns and rows must not be equal!')
+    if columns > rows:
+        columns, rows = resizer(columns, rows)
+    else:
+        rows, columns = resizer(rows, columns)
+    print(columns, rows)
+    return (columns + rows) * tile_height, columns, rows
+
+
 @dataclass
 class Coordinate:
     __slots__ = ['position', ]
@@ -222,40 +244,6 @@ class IsometricMap:
             for name in ('grass', 'sand', 'water')
         }
 
-    # def generate_quadtree(self) -> IsometricQuadTree:
-    #     w_ratio = self.columns / (self.columns + self.rows)
-    #     h_ratio = self.rows / (self.rows + self.columns)
-    #
-    #     quad_x, y = self.iso_grid_to_position(self.columns // 2, self.rows // 2)
-    #     quad_y = y + self.tile_height // 2
-    #
-    #     quad_width = (self.columns + self.rows) * self.tile_height
-    #     quad_height = (self.columns + self.rows) * self.tile_height
-    #
-    #     return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
-
-    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
-        w_ratio = columns / (columns + rows)
-        h_ratio = rows / (rows + columns)
-
-        print(columns // rows, rows // columns)
-        print(w_ratio, h_ratio, w_ratio > h_ratio)
-
-        if rows == columns:
-            ...
-        elif columns > rows and columns // rows != 3:
-            ...
-        elif rows > columns and rows // columns != 3:
-            ...
-
-        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
-        quad_y = y + tile_height // 2
-
-        quad_width = (columns + rows) * tile_height
-        quad_height = (columns + rows) * tile_height
-
-        return IsometricQuadTree(quad_x, quad_y, quad_width, quad_height, w_ratio, h_ratio)
-
     def generate_tiles(self) -> Dict[Tuple[int, int], IsometricTile]:
         tiles = {}
         columns, rows, tile_width = self.columns, self.rows, self.tile_width
@@ -277,6 +265,22 @@ class IsometricMap:
                 append_to_terrain_tiles(sprite)
                 grids_to_positions_2d_array[row][col] = tile_x, tile_y
         return tiles
+
+    def generate_quadtree(self, columns, rows, tile_height) -> IsometricQuadTree:
+        if rows == columns or MAX_COLS_TO_ROWS_RATIO in (rows // columns, columns // rows):
+            quad_size = (columns + rows) * tile_height
+        else:
+            quad_size, columns, rows = resize_quadtree_outside_map(columns, rows, tile_height)
+
+        w_ratio = columns / (columns + rows)
+        h_ratio = rows / (rows + columns)
+        print(columns // rows, rows // columns)
+        print(w_ratio, h_ratio, w_ratio > h_ratio)
+
+        quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
+        quad_y = y + tile_height // 2
+
+        return IsometricQuadTree(quad_x, quad_y, quad_size, quad_size, w_ratio, h_ratio)
 
     def grids_to_positions(self, grid: Tuple[int, int]) -> Tuple[int, int]:
         return self._grids_to_positions[grid[1]][grid[0]]
