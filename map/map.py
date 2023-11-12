@@ -257,7 +257,7 @@ class IsometricMap:
                 idx = row * columns + col + 1
                 tile_x, tile_y = find_iso_grid(col, row)
                 sprite = Sprite(center_x=tile_x, center_y=tile_y, hit_box_algorithm='None')
-                terrain, sprite.texture = random.choice(terrains)
+                terrain, sprite.texture = random.choice(terrains)   # terrains[idx % len(terrains)] - makes checked area
                 tile = IsometricTile(idx, col, row, tile_x, tile_y, 0, tile_width, terrain, sprite=sprite)
                 gizmo = create_line_strip(tile.points, WHITE)
                 tiles[(col, row)] = tile
@@ -274,12 +274,9 @@ class IsometricMap:
 
         w_ratio = columns / (columns + rows)
         h_ratio = rows / (rows + columns)
-        print(columns // rows, rows // columns)
-        print(w_ratio, h_ratio, w_ratio > h_ratio)
 
         quad_x, y = self.iso_grid_to_position(columns // 2, rows // 2)
         quad_y = y + tile_height // 2
-
         return IsometricQuadTree(quad_x, quad_y, quad_size, quad_size, w_ratio, h_ratio)
 
     def grids_to_positions(self, grid: Tuple[int, int]) -> Tuple[int, int]:
@@ -439,6 +436,8 @@ class IsometricTile:
         self._building: Optional['Building'] = None
         self._static_gameobject: Optional['GameObject', int] = None
 
+        self.quad_id = None
+
     def __repr__(self) -> str:
         return f'MapTile({self.idx},{self.gx},{self.gy},{self.x},{self.y},{self.z},{self.width})'
 
@@ -591,7 +590,7 @@ class WaypointsQueue:
     def __init__(self, units: List[Unit]):
         self.map = IsometricMap.instance
         self.units = [u for u in units]
-        self.waypoints = []
+        self.leader_waypoints = []
         self.units_waypoints = {unit: [] for unit in units}
         self.active = False
         self.loop = False
@@ -604,11 +603,11 @@ class WaypointsQueue:
 
     def add_waypoint(self, x: int, y: int):
         x, y = normalize_position(x, y)
-        if len(self.waypoints) > 1 and (x, y) == self.waypoints[0]:
+        if len(self.leader_waypoints) > 1 and (x, y) == self.leader_waypoints[0]:
             self.loop = True
             Pathfinder.instance.finish_waypoints_queue()
         else:
-            self.waypoints.append((x, y))
+            self.leader_waypoints.append((x, y))
             self.add_waypoints_for_each_unit(len(self.units), x, y)
 
     def add_waypoints_for_each_unit(self, amount: int, x: int, y: int):

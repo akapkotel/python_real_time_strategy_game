@@ -44,7 +44,6 @@ class Rect:
 class IsometricRect(Rect):
 
     def __init__(self, cx, cy, width, height, w_ratio: float, h_ratio: float):
-        # params: x, y, width, height, w_ratio, h_ratio
         super().__init__(cx, cy, width, height)
         self.w_ratio = w_ratio
         self.h_ratio = h_ratio
@@ -66,6 +65,15 @@ class IsometricRect(Rect):
         return self.polygon.contains_point(item.position)
 
     def intersects_with(self, other) -> bool:
+        """
+        Check if the polygon intersects with another polygon.
+
+        Args:
+            other: The other polygon to check for intersection.
+
+        Returns:
+            True if the polygons intersect, False otherwise.
+        """
         return any(self.polygon.contains_point(point) for point in other.points)
 
     def draw(self):
@@ -122,7 +130,7 @@ class QuadTree(ABC):
                 quadtree.remove(entity)
         else:
             self.entities_count -= 1
-            # self.collapse()
+            self.collapse()
 
     @abstractmethod
     def divide(self):
@@ -355,7 +363,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         return found_entities
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        diameter = radius * 2
+        diameter = radius << 1
         rect = Rect(circle_x, circle_y, diameter, radius)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)

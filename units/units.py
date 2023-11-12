@@ -154,13 +154,12 @@ class Unit(PlayerEntity, ABC):
     def update_current_tile(self):
         current_tile = self.get_current_tile()
         if current_tile is not self.current_tile:
-            if self.quadtree is not None and self.should_update_quadtree():
+            if self.quadtree is not None and not self.in_the_same_quad():
                 self.update_in_map_quadtree()
         return current_tile
 
-    def should_update_quadtree(self) -> bool:
-        cx, cy = self.center_x // 55, self.center_y // 55
-        return not self.quadtree.in_bounds(Coordinate((cx, cy)))
+    def in_the_same_quad(self) -> bool:
+        return self.quadtree.in_bounds(Coordinate(self.current_tile.position))
 
     def get_current_tile(self):
         current_node = self.map.position_to_node(*self.position)
@@ -726,9 +725,7 @@ class Soldier(Unit):
         building.on_soldier_enter(soldier=self)
 
     def leave_building(self, building):
-        x, y = building.position  # TODO: replace this with Building exit position
         self.position = building.adjacent_tiles
-        #(self.game.pathfinder.get_closest_walkable_position(x, y))
         self.insert_to_map_quadtree()
         self.outside = True
         self.start_rendering()

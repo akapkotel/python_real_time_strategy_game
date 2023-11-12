@@ -437,9 +437,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             self.kill()
         # TODO: gradually remove garrisoned Soldiers from Building
 
-    def draw(self):
-        ...
-
     def update_production(self, delta_time):
         if self.produced_units is not None:
             self.update_units_production(delta_time)
