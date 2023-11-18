@@ -53,8 +53,8 @@ def precalculate_possible_sprites_angles(rotations=ROTATIONS,
                                          circle_slice=CIRCLE_SLICE,
                                          rotation_step=ROTATION_STEP):
     """
-    Build dict of int angles. We chop 360 degrees circle by 8 slices
-    each of 45 degrees. First slice has its center at 0/360 degrees,
+    Build dict of int angles. We chop 360 degrees circle by 16 slices
+    each of 22.5 degrees. First slice has its center at 0/360 degrees,
     second slice has its center at 22.5 degrees etc. This dict allows
     for fast replacing angle of range 0-359 to one of 16 pre-calculated
     angles.
@@ -138,7 +138,7 @@ def move_along_vector(start: Point,
 
 
 @lru_cache(maxsize=None)
-def calculate_circular_area(grid_x, grid_y, max_distance):
+def calculate_circular_area(grid_x: int = 0, grid_y: int = 0, max_distance: int = 1) -> Tuple[Tuple[int, int], ...]:
     radius = max_distance * 1.6
     observable_area = []
     for x in range(-max_distance, max_distance + 1):
@@ -149,20 +149,6 @@ def calculate_circular_area(grid_x, grid_y, max_distance):
             if total_distance < radius:
                 grid = (grid_x + x, grid_y + y)
                 observable_area.append(grid)
-    return observable_area
-
-
-@lru_cache
-def precalculate_circular_area_matrix(max_distance: int) -> Tuple[Tuple[int, int], ...]:
-    radius = max_distance * 1.6
-    observable_area = []
-    for x in range(-max_distance, max_distance + 1):
-        dist_x = abs(x)
-        for y in range(-max_distance, max_distance + 1):
-            dist_y = abs(y)
-            total_distance = dist_x + dist_y
-            if total_distance < radius:
-                observable_area.append((x, y))
     return tuple(observable_area)
 
 

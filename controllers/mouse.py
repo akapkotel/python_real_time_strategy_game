@@ -104,6 +104,8 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.cursor_default_color = MAP_GREEN
         self.cross_color = self.cursor_default_color
 
+        self.debug_info = None
+
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
 
@@ -455,8 +457,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
+        left, bottom, right, top = self.window.get_viewport()
+
         # if self.placeable_gameobject is None:
-        self.draw_cross_cursor()
+        self.draw_cross_cursor(left, bottom, right, top)
 
         if self.show_hint and self.text_hint_delay <= self.game.timer.total_game_time:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
@@ -467,13 +471,14 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.placeable_gameobject is not None and self.is_game_loaded_and_running and self.pointed_ui_element is None:
             self.placeable_gameobject.draw()
 
+        self.draw_debug(left, top)
+
         super().draw()
 
-    def draw_cross_cursor(self):
+    def draw_cross_cursor(self, x, width, y, height):
         color = self.cross_color
         cx, cy = self.position
-        if self.game is not None and self.game.is_running:
-            x, width, y, height = self.game.viewport
+        if self.is_game_loaded_and_running:
             draw_lines([(x, cy), (x + width, cy), (cx, y + height), (cx, y)], color=color, line_width=2)
         else:
             draw_lines([(0, cy), (self.window.width, cy), (cx, self.window.height), (cx, 0)], color=color, line_width=2)
@@ -484,6 +489,9 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         draw_lrtb_rectangle_filled(x, right, top, bottom, BLACK)
         draw_lrtb_rectangle_outline(x, right, top, bottom, WHITE)
         draw_text(text_hint, x + 5, y, WHITE, 11, anchor_y='center')
+
+    def draw_debug(self, left, top):
+        draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
 
 
 class MouseDragSelection:

@@ -22,7 +22,8 @@ from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
 from arcade import (
-    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
+    SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT,
+    draw_polygon_outline
 )
 from arcade.arcade_types import Color, Point
 
@@ -71,7 +72,7 @@ SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 UI_WIDTH = SCREEN_WIDTH // 5
 
 PLAYER_UNITS = 5
-CPU_UNITS = 0
+CPU_UNITS = 5
 
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 
@@ -128,6 +129,8 @@ class Settings:
         self.full_screen: bool = False
         self.pyprofiler: bool = False
         self.debug_quadtree: bool = False
+        self.debug_units: bool = False
+        self.debug_mouse: bool = False
 
         self.difficulty: int = 3
 
@@ -878,7 +881,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
 
     def create_random_scenario(self):
         self.test_factions_and_players_creation()
-        self.test_buildings_spawning()
+        # self.test_buildings_spawning()
         self.test_units_spawning()
         self.test_scenarios()
 
@@ -953,7 +956,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         events = (
             NoUnitsLeftTrigger(human).triggers(Defeat(human)),
             NoUnitsLeftTrigger(cpu_player).triggers(Victory(human)),
-            TimePassedTrigger(human, 3).triggers(Victory(human)),
+            # TimePassedTrigger(human, 3).triggers(Victory(human)),
             MapRevealedTrigger(human).triggers(Victory(human)),
         )
         self.current_scenario = Scenario('Test Mission', 'Map 1')\
@@ -1037,6 +1040,13 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         super().update_view(delta_time)
         self.update_local_drawn_units_and_buildings()
         self.update_factions_and_players(delta_time)
+        self.update_debugging()
+
+    def update_debugging(self):
+        if self.settings.debug_mouse:
+            self.mouse.update_debug()
+        if self.map is not None and self.settings.debug_quadtree:
+            self.map.quadtree.update_debug()
 
     def after_loading(self):
         self.window.menu_view.update_ui_elements_from_variables()
@@ -1090,8 +1100,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.timer.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
-        left, *_, top = self.viewport
-        draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
+        self.draw_debugging()
+
+    def draw_debugging(self):
+        if self.settings.debug_units:
+            for unit in self.local_human_player.units:
+                unit.debug_info.draw()
         if self.map is not None and self.settings.debug_quadtree:
             self.map.quadtree.draw()
 

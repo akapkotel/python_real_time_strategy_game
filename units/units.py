@@ -5,7 +5,7 @@ import random
 import time
 from enum import IntEnum
 
-from math import dist
+from math import dist, fabs
 from abc import abstractmethod, ABC
 from collections import deque
 from functools import cached_property
@@ -17,8 +17,7 @@ from arcade.arcade_types import Point
 from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION, FUEL, MAX_SPEED
 from effects.explosions import Explosion
 from map.map import (
-    GridPosition, IsometricTile, Pathfinder, normalize_position,
-    position_to_map_grid, TerrainType, Coordinate
+    GridPosition, IsometricTile, Pathfinder, position_to_map_grid, TerrainType, Coordinate
 )
 from players_and_factions.player import Player, PlayerEntity
 from user_interface.user_interface import UiElement, UiTextLabel
@@ -41,7 +40,8 @@ class UnitActivity(IntEnum):
     IDLE = 0
     MOVE = 1
     ATTACK = 2
-    DIE = 3
+    HOLD = 3
+    DIE = 4
 
 
 class Unit(PlayerEntity, ABC):
@@ -305,13 +305,14 @@ class Unit(PlayerEntity, ABC):
         self.set_rotated_texture()
 
     def calculate_virtual_angle(self, angle_to_target) -> int:
-        angular_difference = abs(self.virtual_angle - angle_to_target)
+        virtual_angle = self.virtual_angle
+        angular_difference = fabs(virtual_angle - angle_to_target)
         rotation = min(angular_difference, self.rotation_speed)
         if angular_difference < 180:
-            direction = 1 if self.virtual_angle < angle_to_target else -1
+            direction = 1 if virtual_angle < angle_to_target else -1
         else:
-            direction = -1 if self.virtual_angle < angle_to_target else 1
-        return int((self.virtual_angle + (rotation * direction)) % 360)
+            direction = -1 if virtual_angle < angle_to_target else 1
+        return int((virtual_angle + (rotation * direction)) % 360)
 
     def set_rotated_texture(self):
         self.angle_to_texture(self.virtual_angle)
@@ -540,7 +541,7 @@ class VehicleThreads(Sprite):
 
     def on_update(self, delta_time: float = 1 / 60):
         # threads slowly disappearing through time
-        if self.alpha:
+        if self.alpha > 0:
             self.alpha -= 1
         else:
             self.kill()

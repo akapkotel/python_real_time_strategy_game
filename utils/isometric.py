@@ -224,7 +224,8 @@ class IsometricMap(metaclass=SingletonMeta):
         return grid if grid in self.tiles else None
 
     def get_tile(self, row: int, column: int) -> IsometricTile:
-        return self.tiles[row][column]  # TODO: implement 2D array instead of Dictionary for self.tiles]
+        raise NotImplementedError
+        # TODO: implement 2D array instead of Dictionary for self.tiles (to allow: return self.tiles[row][column])
 
     def on_map_area(self, x: float, y: float) -> bool:
         return self.quadtree.in_bounds(Coordinate((x, y)))

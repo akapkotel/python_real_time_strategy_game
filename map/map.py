@@ -837,7 +837,7 @@ class Pathfinder(EventsCreator):
                          w in tiles and tiles[w].is_walkable]
             radius += 1
         waypoints.sort(key=lambda w: dist(w, center))
-        return [d[0] for d in zip(waypoints, range(required_waypoints))]
+        return [w[0] for w in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self, x, y) -> NormalizedPoint:
         if (node := self.map.position_to_node(x, y)).is_walkable:

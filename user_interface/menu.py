@@ -144,15 +144,27 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                     Checkbox('menu_checkbox.png', *next(positions), 'Unlimited player resources:',
                               20, ticked=window.settings.unlimited_player_resources,
                               variable=(window.settings, 'unlimited_player_resources')),
-                    Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources',
+                    Checkbox('menu_checkbox.png', *next(positions), 'Unlimited AI resources:',
                               20, ticked=window.settings.unlimited_cpu_resources,
                               variable=(window.settings, 'unlimited_cpu_resources')),
-                    Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
+                    Checkbox('menu_checkbox.png', *next(positions), 'Instant production time:',
                               20, ticked=window.settings.instant_production_time,
                               variable=(window.settings, 'instant_production_time')),
-                    Checkbox('menu_checkbox.png', *next(positions), 'Debug map quadtree',
+                ]
+            )
+        if self.window.settings.developer_mode:
+            game_tab.extend(
+                [
+                    UiTextLabel(*next(positions), text='Debugging:', font_size=20, align_x='right'),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Debug map quadtree:',
                              20, ticked=window.settings.debug_quadtree,
                              variable=(window.settings, 'debug_quadtree')),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Debug units:',
+                             20, ticked=window.settings.debug_units,
+                             variable=(window.settings, 'debug_units')),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Debug mouse:',
+                             20, ticked=window.settings.debug_mouse,
+                             variable=(window.settings, 'debug_mouse')),
                 ]
             )
 

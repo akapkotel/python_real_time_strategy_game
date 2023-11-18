@@ -12,6 +12,7 @@ from numpy import array
 from arcade import draw_rectangle_outline, draw_text, draw_polygon_outline
 
 from utils.colors import RED, WHITE
+from utils.debugging import DebugInfo
 
 
 class Rect:
@@ -158,6 +159,7 @@ class QuadTree(ABC):
     def total_entities(self):
         return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
+    @property
     def get_entities(self):
         return [e.id for entities_list in self.entities.values() for e in entities_list]
 
@@ -262,6 +264,7 @@ class CartesianQuadTree(QuadTree, Rect):
     def total_entities(self):
         return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
+    @property
     def get_entities(self):
         return [e.id for entities_list in self.entities.values() for e in entities_list]
 
@@ -279,6 +282,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         super().__init__(max_entities, depth)
         IsometricRect.__init__(self, cx, cy, width, height, w_ratio, h_ratio)
         self.tiles: Set[int] = set()  # TODO: find efficient way to register Tiles to Quads for faster spatial checks
+        self.debug_info = DebugInfo(f'{self.id}: {[e.id for e in self.get_entities]}', *self.position, RED, 20)
 
     def __repr__(self) -> str:
         return f'QuadTree(depth: {self.depth}, l:{self.left}, r:{self.right}, b:{self.bottom}, t:{self.top})'
@@ -363,8 +367,8 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         return found_entities
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        diameter = radius << 1
-        rect = Rect(circle_x, circle_y, diameter, radius)
+        diameter = radius * 2
+        rect = Rect(circle_x, circle_y, diameter, diameter)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
         return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}
@@ -391,14 +395,17 @@ class IsometricQuadTree(QuadTree, IsometricRect):
     def total_entities(self):
         return self.entities_count + sum(quadtree.total_entities() for quadtree in self.children)
 
+    @property
     def get_entities(self):
         return [e for entities_list in self.entities.values() for e in entities_list]
 
+    def update_debug(self):
+        self.debug_info.update(f'{self.id}: {[e.id for e in self.get_entities]}', self.cx, self.cy)
+        for child in self.children:
+            child.update_debug()
+
     def draw(self):
         super().draw()
-        if entities := self.get_entities():
-            for unit in (u for u in entities if u.quadtree is not None):
-                draw_text(f'{unit.quadtree.id}', unit.center_x, unit.center_y - 40, WHITE)
-        draw_text(f'{self.id}: {[e.id for e in entities]}', *self.position, RED, 20)
+        self.debug_info.draw()
         for child in self.children:
             child.draw()

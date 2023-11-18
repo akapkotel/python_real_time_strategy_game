@@ -11,7 +11,6 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade.arcade_types import Color, Point
 
-from map.quadtree import Rect
 from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, YIELD_PER_SECOND, CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY, RESOURCES, FactionName, \
     UI_RESOURCES_SECTION, MAX_HEALTH, ATTACK_RADIUS, WEAPONS_NAMES, VISIBILITY_RADIUS
@@ -19,6 +18,7 @@ from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITIO
 from gameobjects.gameobject import GameObject
 from map.map import IsometricTile, position_to_map_grid
 from campaigns.research import Technology
+from utils.debugging import DebugInfo
 from utils.game_logging import log_here
 from utils.observer import Observed, Observer
 from utils.priority_queue import PriorityQueue
@@ -28,7 +28,7 @@ from utils.functions import (
     ignore_in_editor_mode, add_player_color_to_name
 )
 from utils.geometry import (
-    clamp, find_area, precalculate_circular_area_matrix
+    clamp, find_area, calculate_circular_area
 )
 from utils.scheduling import EventsCreator, ScheduledEvent
 
@@ -244,8 +244,8 @@ class Player(EventsCreator, Observer, Observed):
         self.known_enemy_units_and_buildings.clear()
 
     def update_known_enemies(self, enemies: Set[PlayerEntity]):
-        if new_enemies := enemies.difference(self.known_enemy_units_and_buildings):
-            self.known_enemy_units_and_buildings.update(new_enemies)
+        # if new_enemies := enemies.difference(self.known_enemy_units_and_buildings):
+        self.known_enemy_units_and_buildings.update(enemies)
         self.faction.known_enemies.update(enemies)
 
     def notify_player_of_new_enemies_detected(self):
@@ -514,7 +514,7 @@ class PlayerEntity(GameObject):
         # later used in updating current visibility area by adding to the
         # matrix current position
         self.visibility_radius = value = self.configs[VISIBILITY_RADIUS] * TILE_WIDTH
-        self.visibility_matrix = precalculate_circular_area_matrix(value // TILE_WIDTH)
+        self.visibility_matrix = calculate_circular_area(max_distance=value // TILE_WIDTH)
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
@@ -533,6 +533,8 @@ class PlayerEntity(GameObject):
         self.max_ammunition = self.ammunition
 
         self.experience = 0
+
+        self.debug_info = DebugInfo(*self.get_debug_info)
 
         self.attach_observers(observers=[self.game, self.player])
 
@@ -621,12 +623,24 @@ class PlayerEntity(GameObject):
 
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
-            self.rect = Rect(*self.position, self.visibility_radius, self.visibility_radius * 0.5)
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         if self.known_enemy_units_and_buildings or self._enemy_assigned_by_player:
             self.update_battle_behaviour()
         super().on_update(delta_time)
+
+    def update_debug_info(self):
+        self.debug_info.update(*self.get_debug_info)
+
+    @property
+    def get_debug_info(self) -> Tuple[str, float, float, Tuple[int, int, int, int], int]:
+        return (
+            f'id: {self.id}, quad: {self.quadtree.id}, enemies:{[e.id for e in self.known_enemy_units_and_buildings]}',
+            self.center_x,
+            self.bottom,
+            self.player.color,
+            12
+        )
 
     @property
     def should_be_rendered(self) -> bool:
