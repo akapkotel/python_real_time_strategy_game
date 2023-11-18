@@ -380,15 +380,22 @@ class Unit(PlayerEntity, ABC):
             self.game.pathfinder.navigate_units_to_destination([self], *enemy.position)
 
     def run_away(self):
-        pass
+        # TODO: running away behaviour
+        ...
 
-    def fight_enemy(self, enemy):
-        if enemy.is_alive and enemy.is_enemy(self):
+    def fight_enemy(self, enemy: PlayerEntity):
+        if enemy.is_alive and self.is_enemy(enemy):
             self.attack(enemy)
-        elif self._enemy_assigned_by_player is enemy:
-            self._enemy_assigned_by_player = self.targeted_enemy = None
         else:
-            self.targeted_enemy = None
+            self.reset_enemy(enemy)
+
+    def reset_enemy(self, enemy: PlayerEntity):
+        """
+        Resets the enemy assigned by the player and the targeted enemy.
+        """
+        if enemy is self._enemy_assigned_by_player:
+            self._enemy_assigned_by_player = None
+        self.targeted_enemy = None
 
     def kill(self):
         self.assign_enemy(None)
@@ -402,7 +409,7 @@ class Unit(PlayerEntity, ABC):
     def animate_and_communicate_unit_death(self):
         if self.outside and self.is_rendered:
             self.create_death_animation()
-        if self.player.is_local_human_player:
+        if self.is_controlled_by_local_human_player:
             self.game.sound_player.play_sound('unit_lost.vaw')
 
     def cancel_tasks(self):

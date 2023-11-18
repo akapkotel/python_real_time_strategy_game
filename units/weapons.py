@@ -9,16 +9,10 @@ from arcade.texture import Texture
 
 from effects.sound import SOUNDS_EXTENSION
 from players_and_factions.player import PlayerEntity
-
-EXPERIENCE_HIT_CHANCE_BONUS = 0.05
-
-INFANTRY_HIT_CHANCE_PENALTY = -25
-
-TARGET_MOVEMENT_HIT_PENALTY = -15
-
-MOVEMENT_HIT_PENALTY = -25
-
-BUILDING_HIT_CHANCE_BONUS = 25
+from utils.constants import (
+    MAGAZINE_RELOAD_MULTIPLIER, EXPERIENCE_HIT_CHANCE_BONUS, INFANTRY_HIT_CHANCE_PENALTY, TARGET_MOVEMENT_HIT_PENALTY,
+    MOVEMENT_HIT_PENALTY, BUILDING_HIT_CHANCE_BONUS
+)
 
 
 class Weapon:
@@ -45,6 +39,7 @@ class Weapon:
         self.ammunition: int = self.max_ammunition
         self.ammo_left_in_magazine = self.magazine_size
 
+    @property
     def reloaded(self) -> bool:
         return self.owner.timer.total_game_time >= self.next_firing_time and self.ammunition
 
@@ -60,8 +55,8 @@ class Weapon:
             self.ammo_left_in_magazine -= burst_size
             if not self.ammo_left_in_magazine:
                 self.ammo_left_in_magazine = self.magazine_size
-                self.next_firing_time += (self.rate_of_fire * 4)
-        self.ammunition = max(0, self.ammunition - 1)
+                self.next_firing_time += (self.rate_of_fire * MAGAZINE_RELOAD_MULTIPLIER)
+        self.ammunition = max(0, self.ammunition - burst_size)
 
     def check_if_target_was_hit(self, target: PlayerEntity) -> bool:
         # we use that booleans are integers we can multiply by other values to avoid if statements
@@ -74,7 +69,7 @@ class Weapon:
                 BUILDING_HIT_CHANCE_BONUS * target.is_building,
                 MOVEMENT_HIT_PENALTY * self.owner.is_moving,
                 TARGET_MOVEMENT_HIT_PENALTY * target.is_moving,
-                INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry -self.owner.is_infantry)
+                INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry - self.owner.is_infantry)
             )
         )
         return uniform(0, 100) < hit_chance

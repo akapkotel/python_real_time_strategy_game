@@ -487,7 +487,7 @@ class PlayerEntity(GameObject):
 
         # Each Unit or Building keeps a set containing enemies it actually
         # sees and updates this set each frame:
-        self.known_enemy_units_and_buildings: Set[PlayerEntity] = set()
+        self.known_enemies: Set[PlayerEntity] = set()
 
         # this enemy must be assigned by the Player (e.g. by mouse-click)
         self._enemy_assigned_by_player: Optional[PlayerEntity] = None
@@ -625,7 +625,7 @@ class PlayerEntity(GameObject):
         if self.should_reveal_map:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
-        if self.known_enemy_units_and_buildings or self._enemy_assigned_by_player:
+        if self.known_enemies or self._enemy_assigned_by_player:
             self.update_battle_behaviour()
         super().on_update(delta_time)
 
@@ -635,7 +635,7 @@ class PlayerEntity(GameObject):
     @property
     def get_debug_info(self) -> Tuple[str, float, float, Tuple[int, int, int, int], int]:
         return (
-            f'id: {self.id}, quad: {self.quadtree.id}, enemies:{[e.id for e in self.known_enemy_units_and_buildings]}',
+            f'id: {self.id}, quad: {self.quadtree.id}, enemies:{[e.id for e in self.known_enemies]}',
             self.center_x,
             self.bottom,
             self.player.color,
@@ -674,7 +674,7 @@ class PlayerEntity(GameObject):
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
-        self.known_enemy_units_and_buildings = enemies
+        self.known_enemies = enemies
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(
@@ -688,15 +688,13 @@ class PlayerEntity(GameObject):
     def update_battle_behaviour(self):
         raise NotImplementedError
 
+    def find_armed_enemies(self) -> List[PlayerEntity]:
+        return [e for e in self.known_enemies if e.weapons]
+
     def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
-        if not self.known_enemy_units_and_buildings:
-            return None
-        # if there are many enemies, prioritize armed enemies
-        if not (sorted_enemies := [e for e in self.known_enemy_units_and_buildings if e.weapons]):
-            sorted_enemies = self.known_enemy_units_and_buildings
-        # then filter the weakest enemy to destroy it fast
-        if sorted_by_health := sorted(sorted_enemies, key=lambda e: e.health):
-            return sorted_by_health[0]
+        if self.known_enemies:
+            prioritized_enemies = self.find_armed_enemies() or self.known_enemies
+            return min(prioritized_enemies, key=lambda e: e.health)
 
     def in_attack_range(self, other: PlayerEntity) -> bool:
         if other.is_unit:
@@ -707,7 +705,7 @@ class PlayerEntity(GameObject):
 
     def attack(self, enemy):
         if self.ammunition:
-            for weapon in (w for w in self._weapons if w.reloaded()):
+            for weapon in (w for w in self._weapons if w.reloaded):
                 weapon.shoot(enemy)
             self.check_if_enemy_destroyed(enemy)
 
@@ -715,7 +713,7 @@ class PlayerEntity(GameObject):
         if not enemy.is_alive:
             if self._enemy_assigned_by_player is enemy:
                 self._enemy_assigned_by_player = None
-            self.known_enemy_units_and_buildings.discard(enemy)
+            self.known_enemies.discard(enemy)
             self._targeted_enemy = None
 
     def is_enemy(self, other: PlayerEntity) -> bool:
@@ -758,7 +756,7 @@ class PlayerEntity(GameObject):
     def kill(self):
         if self.is_selected and self.player is self.game.local_human_player:
             self.game.units_manager.unselect(self)
-        self.known_enemy_units_and_buildings.clear()
+        self.known_enemies.clear()
         if self.quadtree is not None:
             self.remove_from_map_quadtree()
         super().kill()

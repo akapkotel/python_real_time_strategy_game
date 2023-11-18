@@ -367,8 +367,7 @@ class IsometricQuadTree(QuadTree, IsometricRect):
         return found_entities
 
     def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        diameter = radius * 2
-        rect = Rect(circle_x, circle_y, diameter, diameter)
+        rect = Rect(circle_x, circle_y, radius * 2, radius * 2)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
         return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}

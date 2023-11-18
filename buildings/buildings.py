@@ -571,7 +571,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         return path_and_texture, size
 
     def clear_known_enemies(self):
-        self.known_enemy_units_and_buildings.clear()
+        self.known_enemies.clear()
 
     def change_player(self, new_player: Player):
         self.detach(self.player)
