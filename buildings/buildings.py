@@ -368,7 +368,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         max_x_grid = min_x_grid + width
         max_y_grid = min_y_grid + height
         return {
-            self.game.map.grid_to_node((x, y))
+            self.game.map.grid_to_tile((x, y))
             for x in range(min_x_grid, max_x_grid)
             for y in range(min_y_grid, max_y_grid)
         }

@@ -27,6 +27,7 @@ from gameobjects.gameobject import GameObject, PlaceableGameObject
 from utils.constants import CURSOR_NORMAL_TEXTURE, CURSOR_FORBIDDEN_TEXTURE, CURSOR_ATTACK_TEXTURE, \
     CURSOR_SELECTION_TEXTURE, CURSOR_MOVE_TEXTURE
 from utils.data_types import Number
+from utils.debugging import DebugInfo
 from utils.improved_spritelists import LayeredSpriteList, UiSpriteList
 from players_and_factions.player import PlayerEntity
 from utils.scheduling import EventsCreator
@@ -104,7 +105,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.cursor_default_color = MAP_GREEN
         self.cross_color = self.cursor_default_color
 
-        self.debug_info = None
+        self.debug_info = DebugInfo(f'{self.window.cursor_xy}', 0, 0, GREEN, 12)
 
         # hide system mouse cursor, since we render our own Sprite as cursor:
         self.window.set_mouse_visible(False)
@@ -457,10 +458,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.bound_text_input_field = None
 
     def draw(self):
-        left, bottom, right, top = self.window.get_viewport()
-
-        # if self.placeable_gameobject is None:
-        self.draw_cross_cursor(left, bottom, right, top)
+        self.draw_cross_cursor()
 
         if self.show_hint and self.text_hint_delay <= self.game.timer.total_game_time:
             self.draw_text_hint(self.pointed_gameobject.text_hint)
@@ -471,11 +469,10 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         if self.placeable_gameobject is not None and self.is_game_loaded_and_running and self.pointed_ui_element is None:
             self.placeable_gameobject.draw()
 
-        self.draw_debug(left, top)
-
         super().draw()
 
-    def draw_cross_cursor(self, x, width, y, height):
+    def draw_cross_cursor(self):
+        x, width, y, height = self.window.get_viewport()
         color = self.cross_color
         cx, cy = self.position
         if self.is_game_loaded_and_running:
@@ -490,8 +487,11 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         draw_lrtb_rectangle_outline(x, right, top, bottom, WHITE)
         draw_text(text_hint, x + 5, y, WHITE, 11, anchor_y='center')
 
-    def draw_debug(self, left, top):
-        draw_text(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
+    def draw_debug(self):
+        self.debug_info.draw()
+
+    def update_debug(self, left, top):
+        self.debug_info.update(f'{self.window.cursor_xy}', left + 50, top - 50, GREEN)
 
 
 class MouseDragSelection:
@@ -542,13 +542,13 @@ class MouseDragSelection:
         the selection rectangle: units inside the shape are considered as
         'selected' and units outside the shape are not selected.
         """
-        new = {u for u in self.all_selectable_units if self._inside_selection_rect(*u.position)}
-        added = new.difference(self.units)
-        old = self.units.difference(new)
-        self.units = new
-        return added, old
+        selected_units: Set[Unit] = set(u for u in self.all_selectable_units if self.is_inside_selection_rect(*u.position))
+        added: Set[Unit] = selected_units.difference(self.units)
+        removed: Set[Unit] = self.units.difference(selected_units)
+        self.units = selected_units
+        return added, removed
 
-    def _inside_selection_rect(self, x: float, y: float) -> bool:
+    def is_inside_selection_rect(self, x: float, y: float) -> bool:
         return self.left < x < self.right and self.bottom < y < self.top
 
     def draw(self):

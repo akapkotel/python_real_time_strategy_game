@@ -11,10 +11,10 @@ from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line
+from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line, draw_polygon_outline
 from arcade.arcade_types import Point
 
-from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION, FUEL, MAX_SPEED
+from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL, FUEL_CONSUMPTION, FUEL, MAX_SPEED, TILE_WIDTH
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, IsometricTile, Pathfinder, position_to_map_grid, TerrainType, Coordinate
@@ -26,7 +26,7 @@ from utils.functions import (get_path_to_file, get_texture_size, ignore_in_edito
 from utils.game_logging import log_here
 from utils.geometry import (
     precalculate_possible_sprites_angles, calculate_angle,
-    vector_2d, ROTATION_STEP, ROTATIONS
+    vector_2d, ROTATION_STEP, ROTATIONS, VisibilityRect
 )
 
 
@@ -68,7 +68,8 @@ class Unit(PlayerEntity, ABC):
 
         # pathfinding and map-related:
         self.reserved_node = None
-        self.current_tile = self.map.position_to_node(*self.position)
+        self.current_tile = current_tile = self.map.position_to_node(*self.position)
+        self.update_visibility_rect(current_tile.gx, current_tile.gy)
         self.block_map_tile(self.current_tile)
 
         self.forced_destination = False
@@ -154,6 +155,7 @@ class Unit(PlayerEntity, ABC):
     def update_current_tile(self):
         current_tile = self.get_current_tile()
         if current_tile is not self.current_tile:
+            self.update_visibility_rect(current_tile.gx, current_tile.gy)
             if self.quadtree is not None and not self.in_the_same_quad():
                 self.update_in_map_quadtree()
         return current_tile
@@ -220,6 +222,17 @@ class Unit(PlayerEntity, ABC):
             pass
         else:
             self.ask_for_pass(blocker)
+
+    def update_visibility_rect(self, gx: int, gy: int):
+        shift_x, shift_y = gx - self.current_tile.gx, gy - self.current_tile.gy
+        radius = self.visibility_radius
+        grids = ((x - shift_x, y - shift_y) for (x, y) in ((gx - radius, gy - radius), (gx - radius, gy + radius),
+                                                           (gx + radius, gy + radius), (gx + radius, gy - radius)))
+        grid_to_point = self.map.iso_grid_to_position
+        if self.visibility_rect is None:
+            self.visibility_rect = VisibilityRect([grid_to_point(x, y) for (x, y) in grids])
+        else:
+            self.visibility_rect.update_points([grid_to_point(x, y) for (x, y) in grids])
 
     @property
     def has_destination(self) -> bool:
@@ -767,26 +780,32 @@ class UnitsOrderedDestinations:
     ordered destinations on the screen for the Player convenience.
     """
     size = 1
+    scaling_matrix = ((+0.3, 0), (0, -0.15), (-0.3, 0), (0, +0.15))
 
     def __init__(self):
         self.destinations = []
         self.seconds_left = 0
 
-    def new_destinations(self, destinations: List[Point], units: List[Unit]):
+    def new_destinations(self, destinations: List[Point], tiles: List[IsometricTile], units: List[Unit]):
         self.seconds_left = 3
-        self.destinations = [[x, y, self.size, GREEN, 4, unit] for ((x, y), unit) in zip(destinations, units)]
+        self.destinations = [
+            [x, y, self.size, GREEN, unit, tile.points]
+            for ((x, y), unit, tile) in zip(destinations, units, tiles)
+        ]
 
     def on_update(self, delta_time):
         if self.seconds_left > 0:
             self.seconds_left -= delta_time
             for destination in self.destinations:
                 destination[2] = self.size * self.seconds_left
+                pts = destination[-1]
+                destination[-1] = [(p[0][0] + p[1][0], p[0][1] + p[1][1]) for p in zip(pts, self.scaling_matrix)]
         else:
             self.destinations.clear()
 
     def draw(self):
-        for destination in self.destinations:
-            draw_circle_filled(*destination[:-1])
-            x1, y1 = destination[:2]
-            x2, y2 = destination[-1].position
-            draw_line(x1, y1, x2, y2, GREEN)
+        for (x1, y1, size, color, unit, points) in self.destinations:
+            draw_polygon_outline(points, color)
+            draw_circle_filled(x1, y1, size, color)
+            x2, y2 = unit.position
+            draw_line(x1, y1, x2, y2, color)

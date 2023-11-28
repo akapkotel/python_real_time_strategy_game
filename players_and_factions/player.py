@@ -28,7 +28,7 @@ from utils.functions import (
     ignore_in_editor_mode, add_player_color_to_name
 )
 from utils.geometry import (
-    clamp, find_area, calculate_circular_area
+    clamp, find_area, calculate_circular_area, VisibilityRect
 )
 from utils.scheduling import EventsCreator, ScheduledEvent
 
@@ -513,8 +513,9 @@ class PlayerEntity(GameObject):
         # visibility matrix is a list of tuples containing (x, y) indices to be
         # later used in updating current visibility area by adding to the
         # matrix current position
-        self.visibility_radius = value = self.configs[VISIBILITY_RADIUS] * TILE_WIDTH
-        self.visibility_matrix = calculate_circular_area(max_distance=value // TILE_WIDTH)
+        self.visibility_radius = value = self.configs[VISIBILITY_RADIUS]
+        self.visibility_matrix = calculate_circular_area(max_distance=value)
+        self.visibility_rect: Optional[VisibilityRect] = None
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
@@ -624,7 +625,8 @@ class PlayerEntity(GameObject):
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
-        self.update_known_enemies_set()
+        if self.visibility_rect is not None:
+            self.update_known_enemies_set()
         if self.known_enemies or self._enemy_assigned_by_player:
             self.update_battle_behaviour()
         super().on_update(delta_time)
@@ -673,15 +675,21 @@ class PlayerEntity(GameObject):
     @ignore_in_editor_mode
     def update_known_enemies_set(self):
         if enemies := self.scan_for_visible_enemies():
+            # enemies_in_range = {e for e in enemies if dist(e.position, self.position) < self.visibility_radius}
             self.player.update_known_enemies(enemies)
         self.known_enemies = enemies
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(
-            *self.position,
+            *self.map.pos_to_iso_grid(*self.position),
             self.visibility_radius,
-            self.faction.enemy_factions
+            self.faction.enemy_factions,
+            self.visibility_rect
         )
+
+    @abstractmethod
+    def update_visibility_rect(self, *args, **kwargs):
+        raise NotImplementedError
 
     @abstractmethod
     @ignore_in_editor_mode

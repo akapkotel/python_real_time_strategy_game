@@ -28,6 +28,7 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from effects.sound import SoundPlayer
+from map.quadtree import IsometricRect, Rect
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, EDITOR, SAVED_GAMES, SCENARIO_EDITOR_MENU, LOADING_MENU, \
     SAVING_MENU, MAIN_MENU, MINIMAP_WIDTH, MINIMAP_HEIGHT, UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, UI_BUILDINGS_PANEL, \
     UI_UNITS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_TERRAIN_EDITING_PANEL
@@ -1043,8 +1044,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.update_debugging()
 
     def update_debugging(self):
+        if self.settings.debug_units:
+            for unit in self.local_human_player.units:
+                unit.update_debug_info()
         if self.settings.debug_mouse:
-            self.mouse.update_debug()
+            left, *_, top = self.viewport
+            self.mouse.update_debug(left, top)
         if self.map is not None and self.settings.debug_quadtree:
             self.map.quadtree.update_debug()
 
@@ -1103,9 +1108,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.draw_debugging()
 
     def draw_debugging(self):
+        if self.settings.debug_mouse:
+            self.mouse.draw_debug()
         if self.settings.debug_units:
-            for unit in self.local_human_player.units:
+            for unit in self.units:
                 unit.debug_info.draw()
+                draw_polygon_outline(unit.visibility_rect.points, WHITE)
         if self.map is not None and self.settings.debug_quadtree:
             self.map.quadtree.draw()
 

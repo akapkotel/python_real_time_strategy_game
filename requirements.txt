@@ -12,3 +12,4 @@ pyprofiler==69
 pytiled-parser==0.9.4a3
 PyYAML==5.3.1
 Shapely>=1.7.1
+matplotlib~=3.8.1

@@ -229,7 +229,7 @@ class PlaceableGameObject:
         self.last_grid = None
         self.tiles = None
         self.drawn_gizmo_data = None
-        self.find_node = self.game.map.grid_to_node
+        self.find_node = self.game.map.grid_to_tile
 
     def has_grid_changed(self, gx: int, gy: int) -> bool:
         """

@@ -11,7 +11,7 @@ from numpy import array
 
 from arcade import draw_rectangle_outline, draw_text, draw_polygon_outline
 
-from utils.colors import RED, WHITE
+from utils.colors import RED
 from utils.debugging import DebugInfo
 
 
@@ -27,7 +27,7 @@ class Rect:
         self.right = self.left + self.width
         self.bottom = self.cy - self.height // 2
         self.top = self.bottom + self.height
-        self.points = [(self.left, self.top), (self.right, self.top), (self.left, self.bottom), (self.right, self.bottom)]
+        self.points = [(self.left, self.top), (self.right, self.top), (self.right, self.bottom), (self.left, self.bottom)]
 
     def in_bounds(self, item) -> bool:
         return (
@@ -50,8 +50,9 @@ class IsometricRect(Rect):
         self.h_ratio = h_ratio
 
         hh, hw = height / 4, width / 2
-        self.points = [(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh), (cx - hw, cy)]
-        self.polygon = shapely.geometry.Polygon(self.points)
+        self.polygon = shapely.geometry.Polygon(
+            [(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh), (cx - hw, cy)]
+        )
         l, b, r, t = self.polygon.bounds
         self.bbox_height = height = t - b
         self.bbox_width = width = r - l
@@ -98,7 +99,7 @@ class QuadTree(ABC):
         """Find the points in the quadtree that lie within boundary."""
         raise NotImplementedError
 
-    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
+    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids, rect):
         diameter = radius * 2
         rect = Rect(circle_x, circle_y, diameter, diameter)
         possible_enemies = []
@@ -366,11 +367,11 @@ class IsometricQuadTree(QuadTree, IsometricRect):
             found_entities = quadtree.query(hostile_factions_ids, bounds, found_entities)
         return found_entities
 
-    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids):
-        rect = Rect(circle_x, circle_y, radius * 2, radius * 2)
+    def find_visible_entities_in_circle(self, circle_x, circle_y, radius, hostile_factions_ids, rect):
+        # rect = IsometricRect(circle_x, circle_y, radius * 2, radius * 2, 0.5, 0.5)
         possible_enemies = []
         possible_enemies = self.query(hostile_factions_ids, rect, possible_enemies)
-        return {e for e in possible_enemies if dist(e.position, (circle_x, circle_y)) < radius}
+        return {e for e in possible_enemies if dist(e.current_tile.grid, (circle_x, circle_y)) <= radius}
 
     @property
     def empty(self):

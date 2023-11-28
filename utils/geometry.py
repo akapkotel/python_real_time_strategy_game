@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, dist
 from typing import Optional, Sequence, Tuple, List, Set
@@ -157,6 +159,7 @@ def find_area(x: int, y: int, matrix_: Tuple[Tuple[int, int]] = None) -> Set[Tup
     return {(pos[0] + x, pos[1] + y) for pos in matrix_}
 
 
+@lru_cache(maxsize=240)
 def clamp(value: Number, maximum: Number, minimum: Number = 0) -> Number:
     """Guarantee that number will be larger than min and less than max."""
     if value < minimum:
@@ -201,3 +204,31 @@ def center_coordinate(coordinate: int, size: int) -> int:
         return coordinate + (size // 2)
     else:
         return coordinate + (size // 2)
+
+
+@dataclass
+class VisibilityRect:
+    """
+    This class represents a rectangle that contains visible area of Unit on the Map. It is used to fast lookup in the
+    Map quadtree for quads which contain the Unit on the Map. Each Unit updates it's VisibilityRect each time it's
+    current Tile changes and uses the VisibilityRect to query the Quadtree for valid Quads in which it should search for
+    enemy Units that could be visible from its current position.
+    """
+    __slots__ = ('points', 'left', 'right', 'top', 'bottom')
+    points: List
+
+    def __post_init__(self):
+        self._update_bounds()
+
+    def _update_bounds(self):
+        self.left = min(p[1] for p in self.points)
+        self.right = max(p[1] for p in self.points)
+        self.bottom = min(p[0] for p in self.points)
+        self.top = max(p[0] for p in self.points)
+
+    def update_points(self, points):
+        self.points = points
+        self._update_bounds()
+
+    def in_bounds(self, item) -> bool:
+        return self.left <= item.position[1] <= self.right and self.bottom <= item.position[0] <= self.top

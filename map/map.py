@@ -26,7 +26,7 @@ from utils.scheduling import EventsCreator
 from map.quadtree import IsometricQuadTree
 from utils.game_logging import log_here
 
-from utils.geometry import calculate_circular_area
+from utils.geometry import calculate_circular_area, clamp
 
 # CIRCULAR IMPORTS MOVED TO THE BOTTOM OF FILE!
 
@@ -191,12 +191,15 @@ class TerrainType(IntEnum):
     WATER = 1
     VOID = 2
 
+    @property
     def is_ground(self) -> bool:
         return self == TerrainType.GROUND
 
+    @property
     def is_water(self) -> bool:
         return self == TerrainType.WATER
 
+    @property
     def is_void(self) -> bool:
         return self == TerrainType.VOID
 
@@ -232,8 +235,9 @@ class IsometricMap:
         self.origin_tile_xy = width // 2, height - tile_height // 2
         self.grid_gizmo = ShapeElementList()
         self._grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
-            [None for _ in range(self.columns + 1)] for _ in range(self.rows + 1)
+            [None for _ in range(self.columns)] for _ in range(self.rows)
         ]
+        print(len(self._grids_to_positions))
         self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
         self.quadtree = self.generate_quadtree(columns, rows, tile_height)
         IsometricMap.instance = IsometricTile.map = self
@@ -284,11 +288,12 @@ class IsometricMap:
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
-        if self.instance is not None:
-            return self._grids_to_positions[gy][gx]
+        if IsometricMap.instance is not None:
+            return self._grids_to_positions[clamp(gy, self.rows - 1)][clamp(gx, self.columns - 1)]
+            # return self._grids_to_positions[gy][gx]
         x, y = self.origin_tile_xy
-        pos_x = int(x + (gx - gy) * (self.tile_width * 0.5))
-        pos_y = int(y - (gx + gy) * (self.tile_height * 0.5) + gz)
+        pos_x = (x + (gx - gy) * (self.tile_width * 0.5)) // 1
+        pos_y = (y - (gx + gy) * (self.tile_height * 0.5) + gz) // 1
         return pos_x, pos_y
 
     def pos_to_iso_grid(self, pos_x: int, pos_y: int) -> Tuple[int, int] | None:
@@ -301,9 +306,9 @@ class IsometricMap:
         return grid if grid in self.tiles else None
 
     def position_to_node(self, x: Number, y: Number) -> Optional[IsometricTile]:
-        return self.grid_to_node(self.pos_to_iso_grid(x, y))
+        return self.grid_to_tile(self.pos_to_iso_grid(x, y))
 
-    def grid_to_node(self, grid: Tuple[int, int]) -> Optional[IsometricTile]:
+    def grid_to_tile(self, grid: Tuple[int, int]) -> Optional[IsometricTile]:
         return self.tiles.get(grid, self.nonexistent_node)
 
     def get_tile(self, row: int, column: int) -> IsometricTile:
@@ -535,7 +540,7 @@ class IsometricTile:
 
     @property
     def is_water(self) -> bool:
-        return self.terrain_type is TerrainType.WATER
+        return self.terrain_type.is_water
 
     @property
     def is_navigable(self):
@@ -547,7 +552,7 @@ class IsometricTile:
         Use it to find if node is not blocked at the moment by units or
         buildings.
         """
-        return self.terrain_type is TerrainType.GROUND and self.is_pathable and self._unit is None
+        return self.terrain_type.is_ground and self.is_pathable and self._unit is None
 
     @property
     def is_pathable(self) -> bool:
@@ -651,10 +656,9 @@ class NavigatingUnitsGroup:
         self.destination = position_to_map_grid(x, y)
         self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
-        destinations = self.create_units_group_paths(units)
         self.reverse_units_paths()
         if self.leader.is_controlled_by_local_human_player:
-            self.add_visible_indicators_of_destinations(destinations, units)
+            self.add_visible_indicators_of_destinations(units)
 
     def __str__(self) -> str:
         return f'NavigatingUnitsGroup(units:{len(self.units_paths)})'
@@ -705,9 +709,13 @@ class NavigatingUnitsGroup:
             if len(steps) > 1:
                 steps.pop()
 
-    def add_visible_indicators_of_destinations(self, destinations, units):
-        positions = [self.map.iso_grid_to_position(*g) for g in destinations]
-        self.map.game.units_ordered_destinations.new_destinations(positions, units)
+    def add_visible_indicators_of_destinations(self, units: List[Unit]):
+        if not units:
+            return
+        destinations = self.create_units_group_paths(units)
+        tiles = [self.map.grid_to_tile(g) for g in destinations]
+        positions = [tile.position for tile in tiles]
+        self.map.game.units_ordered_destinations.new_destinations(positions, tiles, units)
 
     def update(self):
         to_remove = []
@@ -793,7 +801,7 @@ class Pathfinder(EventsCreator):
         # to avoid infinite attempts to find path to the Node blocked by
         # other Unit from the same navigating groups pathfinding to the
         # same place TODO: find a better way to not mutually-block nodes
-        if self.map.grid_to_node(destination).is_walkable:
+        if self.map.grid_to_tile(destination).is_walkable:
             if (path := a_star(self.map, start, destination)) is not None:
                 return unit.follow_new_path(path)
         self.request_path(unit, start, destination)
