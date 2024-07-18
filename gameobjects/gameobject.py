@@ -152,7 +152,7 @@ class TerrainObject(GameObject):
 
     def __init__(self, filename: str, durability: int, position: Point):
         GameObject.__init__(self, filename, position)
-        self.map_node = self.game.map.position_to_node(*self.position)
+        self.map_node = self.game.map.position_to_tile(*self.position)
         if durability:
             self.map_node.static_gameobject = self
         self.attach(observer=self.game)

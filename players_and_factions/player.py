@@ -519,7 +519,7 @@ class PlayerEntity(GameObject):
 
         # area inside which all map-nodes are visible for this entity:
         self.observed_grids: Set[GridPosition] = set()
-        self.observed_nodes: Set[IsometricTile] = set()
+        self.observed_tiles: Set[IsometricTile] = set()
 
         # like the visibility matrix, but range should be smaller:
         self.attack_radius = self.configs[ATTACK_RADIUS] * TILE_WIDTH
@@ -613,18 +613,9 @@ class PlayerEntity(GameObject):
     def targeted_enemy(self, enemy: Optional[PlayerEntity]):
         self._targeted_enemy = enemy
 
-    @staticmethod
-    @abstractmethod
-    def unblock_map_tile(node: IsometricTile):
-        raise NotImplementedError
-
-    @abstractmethod
-    def block_map_tile(self, node: IsometricTile):
-        raise NotImplementedError
-
     def on_update(self, delta_time: float = 1/60):
         if self.should_reveal_map:
-            self.game.fog_of_war.reveal_nodes(self.observed_grids)
+            self.game.fog_of_war.reveal_visible_nodes(self.observed_grids)
         if self.visibility_rect is not None:
             self.update_known_enemies_set()
         if self.known_enemies or self._enemy_assigned_by_player:
@@ -709,7 +700,7 @@ class PlayerEntity(GameObject):
             return dist(other.position, self.position) < self.attack_radius
         else:
             other: Building
-            return any(dist(n.position, self.position) < self.attack_radius for n in other.occupied_nodes)
+            return any(dist(n.position, self.position) < self.attack_radius for n in other.occupied_tiles)
 
     def attack(self, enemy):
         if self.ammunition:

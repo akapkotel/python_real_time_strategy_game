@@ -237,7 +237,6 @@ class IsometricMap:
         self._grids_to_positions: List[List[Optional[Tuple[int, int]]]] = [
             [None for _ in range(self.columns)] for _ in range(self.rows)
         ]
-        print(len(self._grids_to_positions))
         self.tiles: Dict[Tuple[int, int], IsometricTile] = self.generate_tiles()
         self.quadtree = self.generate_quadtree(columns, rows, tile_height)
         IsometricMap.instance = IsometricTile.map = self
@@ -261,7 +260,7 @@ class IsometricMap:
                 idx = row * columns + col + 1
                 tile_x, tile_y = find_iso_grid(col, row)
                 sprite = Sprite(center_x=tile_x, center_y=tile_y, hit_box_algorithm='None')
-                terrain, sprite.texture = random.choice(terrains)   # terrains[idx % len(terrains)] - makes checked area
+                terrain, sprite.texture = random.choice(terrains)
                 tile = IsometricTile(idx, col, row, tile_x, tile_y, 0, tile_width, terrain, sprite=sprite)
                 gizmo = create_line_strip(tile.points, WHITE)
                 tiles[(col, row)] = tile
@@ -283,14 +282,13 @@ class IsometricMap:
         quad_y = y + tile_height // 2
         return IsometricQuadTree(quad_x, quad_y, quad_size, quad_size, w_ratio, h_ratio)
 
-    def grids_to_positions(self, grid: Tuple[int, int]) -> Tuple[int, int]:
+    def grid_to_positions(self, grid: Tuple[int, int]) -> Tuple[int, int]:
         return self._grids_to_positions[grid[1]][grid[0]]
 
     def iso_grid_to_position(self, gx: int, gy: int, gz: int = 0) -> Tuple[int, int]:
         """Convert isometric grid coordinates (gx, gy) to cartesian coordinates (e.g. mouse cursor position)."""
         if IsometricMap.instance is not None:
             return self._grids_to_positions[clamp(gy, self.rows - 1)][clamp(gx, self.columns - 1)]
-            # return self._grids_to_positions[gy][gx]
         x, y = self.origin_tile_xy
         pos_x = (x + (gx - gy) * (self.tile_width * 0.5)) // 1
         pos_y = (y - (gx + gy) * (self.tile_height * 0.5) + gz) // 1
@@ -305,7 +303,7 @@ class IsometricMap:
         grid = int(iso_x * a + iso_y * b), int(iso_x * c + iso_y * d)
         return grid if grid in self.tiles else None
 
-    def position_to_node(self, x: Number, y: Number) -> Optional[IsometricTile]:
+    def position_to_tile(self, x: Number, y: Number) -> Optional[IsometricTile]:
         return self.grid_to_tile(self.pos_to_iso_grid(x, y))
 
     def grid_to_tile(self, grid: Tuple[int, int]) -> Optional[IsometricTile]:
@@ -313,6 +311,9 @@ class IsometricMap:
 
     def get_tile(self, row: int, column: int) -> IsometricTile:
         return self.tiles[row][column]  # TODO: implement 2D array instead of Dictionary for self.tiles]
+
+    def get_tiles(self, grids: Set[Tuple[int, int]]) -> Set[IsometricTile]:
+        return {self.tiles[grid] for grid in grids}
 
     def on_map_area(self, x: float, y: float) -> bool:
         return self.quadtree.in_bounds(Coordinate((x, y)))
@@ -366,7 +367,7 @@ class IsometricMap:
         near a specified tile, within a specified minimum and maximum distance.
         """
         if near is not None:
-            near = self.position_to_node(*near)
+            near = self.position_to_tile(*near)
             if near is None:
                 raise ValueError("Position is invalid.")
         return self.get_random_tile(near, min_distance, max_distance).position
@@ -579,6 +580,12 @@ class IsometricTile:
             draw_polygon_filled(self.points, color)
             draw_text(f'{self.gx},{self.gy}', self.x, self.y, WHITE, anchor_x='center', anchor_y='center')
 
+    def block(self, unit: Union[Unit, Building]):
+        self.unit = unit
+
+    def unblock(self):
+        self.unit = None
+
     def __del__(self):
         IsometricTile.instance = None
 
@@ -656,9 +663,9 @@ class NavigatingUnitsGroup:
         self.destination = position_to_map_grid(x, y)
         self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
-        self.reverse_units_paths()
-        if self.leader.is_controlled_by_local_human_player:
-            self.add_visible_indicators_of_destinations(units)
+        destinations = self.create_units_group_paths(units)
+        if units and self.leader.is_controlled_by_local_human_player:
+            self.add_visible_indicators_of_destinations(units, destinations)
 
     def __str__(self) -> str:
         return f'NavigatingUnitsGroup(units:{len(self.units_paths)})'
@@ -709,10 +716,7 @@ class NavigatingUnitsGroup:
             if len(steps) > 1:
                 steps.pop()
 
-    def add_visible_indicators_of_destinations(self, units: List[Unit]):
-        if not units:
-            return
-        destinations = self.create_units_group_paths(units)
+    def add_visible_indicators_of_destinations(self, units: List[Unit], destinations: List[GridPosition]):
         tiles = [self.map.grid_to_tile(g) for g in destinations]
         positions = [tile.position for tile in tiles]
         self.map.game.units_ordered_destinations.new_destinations(positions, tiles, units)
@@ -782,7 +786,7 @@ class Pathfinder(EventsCreator):
         self.created_waypoints_queue = None
 
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
-        if not self.map.position_to_node(x, y).is_walkable:
+        if not self.map.position_to_tile(x, y).is_walkable:
             x, y = self.get_closest_walkable_position(x, y)
         self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
 
@@ -848,7 +852,7 @@ class Pathfinder(EventsCreator):
         return [w[0] for w in zip(waypoints, range(required_waypoints))]
 
     def get_closest_walkable_position(self, x, y) -> NormalizedPoint:
-        if (node := self.map.position_to_node(x, y)).is_walkable:
+        if (node := self.map.position_to_tile(x, y)).is_walkable:
             return node.position
         nearest_walkable = None
         while nearest_walkable is None:
@@ -860,7 +864,7 @@ class Pathfinder(EventsCreator):
 
     def get_closest_walkable_node(self, x, y) -> IsometricTile:
         nx, ny = self.get_closest_walkable_position(x, y)
-        return self.map.position_to_node(nx, ny)
+        return self.map.position_to_tile(nx, ny)
 
 
 if __name__:

@@ -78,7 +78,7 @@ class TaskEnterBuilding(UnitTask):
         return self.units and self.target and self.target.count_empty_garrison_slots
 
     def check_if_soldier_can_enter(self, soldier):
-        if self.target.occupied_nodes.intersection(soldier.adjacent_tiles):
+        if self.target.occupied_tiles.intersection(soldier.adjacent_tiles):
             if self.target.is_enemy(soldier) or self.target.count_empty_garrison_slots:
                 soldier.enter_building(self.target)
             self.remove(soldier)

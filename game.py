@@ -28,7 +28,6 @@ from arcade import (
 from arcade.arcade_types import Color, Point
 
 from effects.sound import SoundPlayer
-from map.quadtree import IsometricRect, Rect
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, EDITOR, SAVED_GAMES, SCENARIO_EDITOR_MENU, LOADING_MENU, \
     SAVING_MENU, MAIN_MENU, MINIMAP_WIDTH, MINIMAP_HEIGHT, UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, UI_BUILDINGS_PANEL, \
     UI_UNITS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_TERRAIN_EDITING_PANEL
@@ -264,11 +263,13 @@ class GameWindow(Window, EventsCreator):
         self.total_delta_time += delta_time
         self.current_fps = round(1 / delta_time, 2)
         self.current_view.on_update(delta_time)
-        for controller in (self.mouse, self.keyboard):
-            if controller.active:
-                controller.update()
+        self.update_controllers()
         self.sound_player.on_update()
         super().on_update(delta_time)
+
+    def update_controllers(self):
+        for controller in (c for c in (self.mouse, self.keyboard) if c.active):
+            controller.update()
 
     def on_draw(self):
         self.clear()
@@ -555,7 +556,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.scenario_editor: Optional[ScenarioEditor] = ScenarioEditor() if self.editor_mode else None
 
         # list used only when Game is randomly-generated:
-        self.things_to_load = [
+        self.things_to_load = self.prepare_loader()
+
+        self.random_scenario = self.loader is None
+
+        log_here('Game initialized successfully', console=self.settings.developer_mode)
+
+    def prepare_loader(self):
+        return [
             ['map', IsometricMap, 0.35, {'rows': self.settings.map_height, 'columns': self.settings.map_width,
              'tile_width': TILE_WIDTH, 'tile_height': TILE_HEIGHT}],
             ['pathfinder', Pathfinder, 0.05, lambda: self.map],
@@ -565,10 +573,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
                                          (MINIMAP_WIDTH, MINIMAP_HEIGHT),
                                          (TILE_WIDTH, TILE_HEIGHT), self.settings.map_height)],
         ] if self.loader is None else []
-
-        self.random_scenario = self.loader is None
-
-        log_here('Game initialized successfully', console=self.settings.developer_mode)
 
     @property
     def resources_manager(self) -> ResourcesManager:

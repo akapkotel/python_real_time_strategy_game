@@ -161,7 +161,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.position = x, y
         if self.is_game_loaded_and_running:
-            self.pointed_map_tile = tile = self.game.map.position_to_node(x, y)
+            self.pointed_map_tile = tile = self.game.map.position_to_tile(x, y)
             self.update_placeable_gameobject(tile)
 
     def update_placeable_gameobject(self, tile: IsometricTile):
@@ -414,7 +414,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
 
     def cursor_on_terrain_with_selected_units(self):
-        tile = self.game.map.position_to_node(*self.position)
+        tile = self.game.map.position_to_tile(*self.position)
         if tile.is_walkable or tile.grid in self.game.fog_of_war.unexplored:
             self.set_texture(CURSOR_MOVE_TEXTURE)
         else:

@@ -1,930 +1,1038 @@
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 196, '__init__', None) | ResourceManager found 192 files.
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 195, '__init__', None) | ResourceManager found 192 files.
 NoneType: None
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 203, '__init__', None) | Loaded 29 sounds.
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 202, '__init__', None) | Loaded 29 sounds.
 NoneType: None
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 203, '__init__', None) | Found 2 playlists
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 202, '__init__', None) | Found 2 playlists
 NoneType: None
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 205, '__init__', None) | Found 0 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 204, '__init__', None) | Found 0 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
 NoneType: None
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 205, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 204, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
 NoneType: None
-INFO: 11/28/2023 04:36:08 PM  | ('game.py', 205, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
+INFO: 04/25/2024 08:36:28 PM  | ('game.py', 204, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
+INFO: 04/25/2024 08:36:29 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
+INFO: 04/25/2024 08:36:29 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 04/25/2024 08:36:30 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x00000127A4489670>,), kwargs: {}
+INFO: 04/25/2024 08:36:30 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001ACA2761670>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x00000127A3464520>,), kwargs: {}
+INFO: 04/25/2024 08:36:30 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000001ACA270D520>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('menu.py', 352, 'on_show_view', None) | Switched to View: Menu
+INFO: 04/25/2024 08:36:30 PM  | ('menu.py', 352, 'on_show_view', None) | Switched to View: Menu
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 04/25/2024 08:36:30 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 11/28/2023 04:36:09 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 04/25/2024 08:36:30 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 880, 825, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:31 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 927, 728, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 880, 825), kwargs: {}
+INFO: 04/25/2024 08:36:31 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 927, 728), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1269754705920
+INFO: 04/25/2024 08:36:31 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1840971336448
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu skirmish menu
+INFO: 04/25/2024 08:36:31 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu skirmish menu
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: skirmish menu
+INFO: 04/25/2024 08:36:31 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: skirmish menu
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 918, 303, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:31 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 926, 317, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 918, 303), kwargs: {}
+INFO: 04/25/2024 08:36:31 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 926, 317), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:10 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1269771498496
+INFO: 04/25/2024 08:36:31 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1840971541312
 NoneType: None
-INFO: 11/28/2023 04:36:11 PM  | ('game.py', 389, 'create_new_game', None) | Game initialized successfully
+INFO: 04/25/2024 08:36:32 PM  | ('game.py', 390, 'create_new_game', None) | Game initialized successfully
 NoneType: None
-INFO: 11/28/2023 04:36:11 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 04/25/2024 08:36:32 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 11/28/2023 04:36:11 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x00000127A5587A90>,), kwargs: {}
+INFO: 04/25/2024 08:36:32 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001AC9B765EB0>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:11 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:32 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:11 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x00000127A4753B20>, 'map', <class 'map.map.IsometricMap'>, 0.35, {'rows': 100, 'columns': 100, 'tile_width': 100, 'tile_height': 50}), kwargs: {}
+INFO: 04/25/2024 08:36:32 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001AC9B756460>, 'map', <class 'map.map.IsometricMap'>, 0.35, {'rows': 100, 'columns': 100, 'tile_width': 100, 'tile_height': 50}), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x00000127A4753B20>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.__init__.<locals>.<lambda> at 0x000001279A0DB700>), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001AC9B756460>, 'pathfinder', <class 'map.map.Pathfinder'>, 0.05, <function Game.prepare_loader.<locals>.<lambda> at 0x000001AC9ADED820>), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x00000127A4753B20>, 'fog_of_war', <class 'map.fog_of_war.FogOfWar'>, 0.15), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001AC9B756460>, 'fog_of_war', <class 'map.fog_of_war.FogOfWar'>, 0.15), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x00000127A4753B20>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001AC9B756460>, 'spawner', <class 'gameobjects.spawning.GameObjectsSpawner'>, 0.05), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 118, 'load', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 118, 'load', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x00000127A4753B20>, 'mini_map', <class 'user_interface.minimap.MiniMap'>, 0.15, ((1920, 1080), (388, 197), (100, 50), 100)), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 104, 'update_loading', None) | func: load args: (<__main__.Game object at 0x000001AC9B756460>, 'mini_map', <class 'user_interface.minimap.MiniMap'>, 0.15, ((1920, 1080), (388, 197), (100, 50), 100)), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x00000127A4753B20>,), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x000001AC9B756460>,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('game.py', 877, 'on_show_view', None) | Switched to View: Game
+INFO: 04/25/2024 08:36:33 PM  | ('game.py', 881, 'on_show_view', None) | Switched to View: Game
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('game.py', 878, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x00000127A4753B20>, <__main__.Timer object at 0x00000127A5576070>), kwargs: {}
+INFO: 04/25/2024 08:36:33 PM  | ('game.py', 882, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x000001AC9B756460>, <__main__.Timer object at 0x000001AC9B756280>), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:12 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1580, 959, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:35 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 757, 687, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1580, 959), kwargs: {}
+INFO: 04/25/2024 08:36:35 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Frame id: 1269789336000
+INFO: 04/25/2024 08:36:36 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1118, 727, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:36 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1118, 727), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1644, 1022, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:36 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1644, 1022), kwargs: {}
+INFO: 04/25/2024 08:36:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:15 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Frame id: 1269789336000
+INFO: 04/25/2024 08:36:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1188, 554, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1188, 554), kwargs: {}
+INFO: 04/25/2024 08:36:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:38 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1297, 676, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:38 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1297, 676), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:38 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1347, 560, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:17 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:36:38 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:17 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 879, 724, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:39 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:17 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 879, 724), kwargs: {}
+INFO: 04/25/2024 08:36:40 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 596, 865, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:18 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:40 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1017, 625, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:36:40 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 582, 943, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:36:40 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 582, 943), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:40 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:40 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1005, 645, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:36:40 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:20 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:36:40 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 647, 866, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:41 PM  | ('user_interface.py', 471, '__init__', None) | File apc_icon.png does not exist!
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 647, 866), kwargs: {}
+INFO: 04/25/2024 08:36:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:41 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1080, 504, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:41 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1080, 504), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:42 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:43 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1006, 733, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:36:43 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:21 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:44 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 987, 902, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:22 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1037, 636, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 987, 902), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:22 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1037, 636), kwargs: {}
+INFO: 04/25/2024 08:36:45 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1143, 738, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:36:45 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:36:45 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:45 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:45 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1370, 704, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:45 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 956, 436, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1370, 704), kwargs: {}
+INFO: 04/25/2024 08:36:45 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:45 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:46 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1309, 232, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:46 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:36:47 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 732, 371, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:36:47 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 732, 371), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 471, '__init__', None) | File apc_icon.png does not exist!
+INFO: 04/25/2024 08:36:47 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 677, 522, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:36:47 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:25 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 873, 568, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:48 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:25 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 873, 568), kwargs: {}
+INFO: 04/25/2024 08:36:51 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:27 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1148, 435, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:36:52 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 960, 351, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:27 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:36:52 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:27 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:53 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1247, 546, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:28 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1015, 596, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:36:53 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:28 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1015, 596), kwargs: {}
+INFO: 04/25/2024 08:36:54 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:30 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:36:57 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:30 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 779, 897, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:00 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1152, 498, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:30 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 779, 897), kwargs: {}
+INFO: 04/25/2024 08:37:00 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:32 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 957, 787, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:00 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:32 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:01 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1215, 546, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:33 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 814, 554, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:01 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:33 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 814, 554), kwargs: {}
+INFO: 04/25/2024 08:37:02 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1317, 438, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:33 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:02 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:35 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1086, 612, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:03 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1161, 411, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:35 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1086, 612), kwargs: {}
+INFO: 04/25/2024 08:37:03 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1161, 411), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:36 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1232, 554, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:03 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:36 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1232, 554), kwargs: {}
+INFO: 04/25/2024 08:37:06 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 921, 727, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:36 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:06 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:37 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1322, 437, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:06 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:37 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:06 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:38 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 987, 514, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:06 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:38 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 987, 514), kwargs: {}
+INFO: 04/25/2024 08:37:07 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 955, 764, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:39 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:07 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:41 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1286, 572, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:07 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1163, 822, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:41 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1286, 572), kwargs: {}
+INFO: 04/25/2024 08:37:07 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:42 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:08 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 926, 1003, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:43 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1354, 405, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:08 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 926, 1003), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:43 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:44 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 913, 559, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 913, 559), kwargs: {}
+INFO: 04/25/2024 08:37:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:45 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:46 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1111, 392, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:36:46 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:09 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 896, 203, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:47 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 285, 672, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:09 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 896, 203), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:47 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:09 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:47 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 801, 599, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:12 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 580, 388, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:47 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 801, 599), kwargs: {}
+INFO: 04/25/2024 08:37:12 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:48 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:12 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:50 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 910, 583, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:50 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 910, 583), kwargs: {}
+INFO: 04/25/2024 08:37:17 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 959, 427, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:51 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:17 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:53 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1128, 477, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:17 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:53 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:17 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:53 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 923, 537, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:18 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 934, 220, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:53 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 923, 537), kwargs: {}
+INFO: 04/25/2024 08:37:18 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 934, 220), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:54 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:18 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:58 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1201, 370, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:18 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:58 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:18 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:36:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:18 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:36:58 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1133, 266, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:18 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:36:58 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:36:59 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 898, 641, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:19 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1266, 387, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:36:59 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:19 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 938, 738, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:20 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 853, 722, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 938, 738), kwargs: {}
+INFO: 04/25/2024 08:37:20 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:20 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:20 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:21 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 902, 709, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:21 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:37:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:01 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 573, 773, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:23 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1164, 880, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:01 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 573, 773), kwargs: {}
+INFO: 04/25/2024 08:37:23 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:24 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1369, 807, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:24 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1369, 807), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:04 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 612, 634, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:04 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:05 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1016, 158, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:05 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:06 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 858, 504, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:06 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:06 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 990, 279, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:26 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 645, 814, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:06 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:26 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 645, 814), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:07 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 251, 621, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:07 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:08 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 490, 711, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:08 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 75, 987, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 75, 987), kwargs: {}
+INFO: 04/25/2024 08:37:28 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1062, 413, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:28 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1062, 413), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:29 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1068, 509, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:29 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:09 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:37:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1202, 266, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:10 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:31 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1156, 381, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:31 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1076, 371, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:32 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 758, 617, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:10 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1076, 371), kwargs: {}
+INFO: 04/25/2024 08:37:32 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:12 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 878, 619, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 819, 303, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:12 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 819, 303), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:13 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 868, 775, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:13 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 868, 775), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1151, 380, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1164, 399, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:34 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 716, 454, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1268, 447, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:34 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 716, 454), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1268, 447), kwargs: {}
+INFO: 04/25/2024 08:37:35 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 797, 509, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:35 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:35 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:37:35 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:37:35 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 854, 568, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:37:35 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:15 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 865, 600, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:36 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:37:15 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 865, 600), kwargs: {}
+INFO: 04/25/2024 08:37:36 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 4, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:37:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:16 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1038, 519, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:16 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:17 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: truck(id: 26, player.id: 4)
+INFO: 04/25/2024 08:37:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:20 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 829, 750, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:37:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:20 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:37:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:56 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 6, player.id: 4)
 NoneType: None
-INFO: 11/28/2023 04:37:23 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: truck(id: 30, player.id: 4)
+INFO: 04/25/2024 08:37:57 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 932, 335, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:37:57 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:25 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 858, 628, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:37:57 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:37:25 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 858, 628), kwargs: {}
+INFO: 04/25/2024 08:37:57 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 3, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:37:27 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: truck(id: 29, player.id: 4)
+INFO: 04/25/2024 08:37:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:00 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 643, 390, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:00 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 643, 390), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:31 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: truck(id: 28, player.id: 4)
+INFO: 04/25/2024 08:38:00 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 617, 397, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:32 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 661, 724, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:00 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 617, 397), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:32 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 661, 724), kwargs: {}
+INFO: 04/25/2024 08:38:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:00 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:00 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 657, 419, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 463, 644, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:00 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 657, 419), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:33 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 463, 644), kwargs: {}
+INFO: 04/25/2024 08:38:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:01 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 705, 453, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:35 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: truck(id: 27, player.id: 4)
+INFO: 04/25/2024 08:38:01 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 705, 453), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 890, 717, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:02 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 742, 477, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:02 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 742, 477), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:03 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 742, 512, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:03 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 742, 512), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1075, 775, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:36 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1075, 775), kwargs: {}
+INFO: 04/25/2024 08:38:05 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 786, 562, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:05 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 786, 562), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:05 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:05 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:05 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:05 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: apc(id: 12, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:06 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 31)
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1018, 279, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:06 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 748, 471, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:37 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:06 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:38 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 820, 261, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:38 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 507, 448, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:38 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 754, 472, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 507, 448), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:38 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 754, 472), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:39 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 539, 764, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:39 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:43 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1150, 269, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:08 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 488, 550, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:43 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:08 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 488, 550), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:44 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1052, 426, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:09 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 496, 582, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1052, 426), kwargs: {}
+INFO: 04/25/2024 08:38:09 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 496, 582), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:47 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1270, 229, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:12 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 725, 424, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:47 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:12 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 725, 424), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:47 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 31)
+INFO: 04/25/2024 08:38:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:48 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 877, 584, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:14 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:37:48 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 877, 584), kwargs: {}
+INFO: 04/25/2024 08:38:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:14 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:51 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:38:14 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: apc(id: 15, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:37:51 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:14 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 724, 424, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:51 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:14 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:51 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:15 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 934, 348, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:51 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: apc(id: 11, player.id: 2)
+INFO: 04/25/2024 08:38:15 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 934, 348), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:15 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:53 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 32)
+INFO: 04/25/2024 08:38:15 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:15 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:37:56 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 986, 491, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:15 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:37:56 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 986, 491), kwargs: {}
+INFO: 04/25/2024 08:38:15 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 33)
+INFO: 04/25/2024 08:38:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:38:16 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 792, 392, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:16 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 792, 392), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:21 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 743, 413, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:57 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: apc(id: 14, player.id: 2)
+INFO: 04/25/2024 08:38:21 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:37:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:01 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 34)
+INFO: 04/25/2024 08:38:22 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 746, 416, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:02 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:38:22 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 746, 416), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:02 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:22 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:02 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:22 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:22 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:03 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: apc(id: 15, player.id: 2)
+INFO: 04/25/2024 08:38:22 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:22 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:05 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 35)
+INFO: 04/25/2024 08:38:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:22 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 701, 438, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 615, 646, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:22 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 701, 438), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:24 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 753, 471, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:38:24 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 753, 471), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:26 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 32)
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:26 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 699, 484, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: apc(id: 12, player.id: 2)
+INFO: 04/25/2024 08:38:26 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 699, 484), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:27 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 33)
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 624, 651, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:28 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 749, 508, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 624, 651), kwargs: {}
+INFO: 04/25/2024 08:38:28 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 749, 508), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:30 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 787, 546, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:30 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 787, 546), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:32 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1004, 558, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:08 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:32 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:09 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 908, 418, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:09 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 908, 418), kwargs: {}
+INFO: 04/25/2024 08:38:35 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 34)
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1075, 559, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:40 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 785, 340, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:40 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 785, 340), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1138, 721, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:38:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:10 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1138, 721), kwargs: {}
+INFO: 04/25/2024 08:38:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:11 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:11 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:41 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:11 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:42 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 843, 738, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:11 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:42 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 843, 738), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:11 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:38:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:44 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 35)
 NoneType: None
-INFO: 11/28/2023 04:38:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:16 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1254, 429, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:47 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 567, 319, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:16 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:47 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 567, 319), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:38:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:16 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:38:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:19 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1178, 417, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:38:53 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 844, 738, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:19 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:38:53 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 844, 738), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:38:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:21 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 36)
+INFO: 04/25/2024 08:38:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:22 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 10, player.id: 4)
+INFO: 04/25/2024 08:39:03 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 879, 556, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:23 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:39:03 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:23 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 4, player.id: 2)
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:26 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 665, 786, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:03 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 762, 441, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:26 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 665, 786), kwargs: {}
+INFO: 04/25/2024 08:39:03 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 762, 441), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:03 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 309, 627, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:39:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:39:05 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 8, player.id: 4)
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:06 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 772, 506, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:06 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:27 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 37)
+INFO: 04/25/2024 08:39:06 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 762, 508, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:06 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 762, 508), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:28 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 523, 702, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:39:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:28 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:39:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:28 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 585, 726, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:28 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 585, 726), kwargs: {}
+INFO: 04/25/2024 08:39:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:07 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:07 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 857, 799, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:07 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 857, 799), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:08 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 870, 796, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1005, 599, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:08 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 870, 796), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:29 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1005, 599), kwargs: {}
+INFO: 04/25/2024 08:39:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:11 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1203, 289, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:32 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 38)
+INFO: 04/25/2024 08:39:11 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1203, 289), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 714, 661, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:12 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1204, 289, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 714, 661), kwargs: {}
+INFO: 04/25/2024 08:39:12 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1204, 289), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:21 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:35 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:39:21 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:35 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: apc(id: 13, player.id: 2)
+INFO: 04/25/2024 08:39:21 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 1, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:38:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:38 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1135, 477, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:22 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1076, 431, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:38 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1135, 477), kwargs: {}
+INFO: 04/25/2024 08:39:22 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:38 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 39)
+INFO: 04/25/2024 08:39:22 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1248, 440, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:22 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1248, 440), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:23 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:43 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1122, 489, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:23 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:43 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1122, 489), kwargs: {}
+INFO: 04/25/2024 08:39:23 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:45 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 8, player.id: 4)
+INFO: 04/25/2024 08:39:23 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:23 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:38:47 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1068, 510, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:23 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 964, 418, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:47 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1068, 510), kwargs: {}
+INFO: 04/25/2024 08:39:23 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 964, 418), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:39:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:32 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 605, 296, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:32 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 1, player.id: 2)
+INFO: 04/25/2024 08:39:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:38:52 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 40)
+INFO: 04/25/2024 08:39:33 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 565, 378, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:53 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 41)
+INFO: 04/25/2024 08:39:33 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:33 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 561, 371, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:38:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:33 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:34 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 920, 408, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:05 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 42)
+INFO: 04/25/2024 08:39:34 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 920, 408), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:06 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 6, player.id: 4)
+INFO: 04/25/2024 08:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:39:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:39:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:39:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:39:15 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 43)
+INFO: 04/25/2024 08:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:39:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:35 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 36)
 NoneType: None
-INFO: 11/28/2023 04:39:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:36 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 971, 617, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:22 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 44)
+INFO: 04/25/2024 08:39:36 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 971, 617), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:26 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 7, player.id: 4)
+INFO: 04/25/2024 08:39:42 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: tank_medium(id: 9, player.id: 4)
 NoneType: None
-INFO: 11/28/2023 04:39:27 PM  | ('units.py', 426, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
+INFO: 04/25/2024 08:39:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:44 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 944, 415, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 944, 415), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:27 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:46 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1293, 897, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:27 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 3, player.id: 2)
+INFO: 04/25/2024 08:39:46 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1293, 897), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:29 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1086, 552, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:48 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1242, 772, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:29 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1086, 552), kwargs: {}
+INFO: 04/25/2024 08:39:48 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:48 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 922, 483, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:39:48 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:39:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:51 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 37)
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 909, 698, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:39:55 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:39:33 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 909, 698), kwargs: {}
+INFO: 04/25/2024 08:39:55 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: apc(id: 14, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:55 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:55 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: apc(id: 13, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+INFO: 04/25/2024 08:39:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+INFO: 04/25/2024 08:39:55 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1227, 752, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+INFO: 04/25/2024 08:39:55 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:39:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:36 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 45)
+INFO: 04/25/2024 08:40:01 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1161, 386, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:01 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1161, 386), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:38 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 987, 577, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:40:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:38 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 987, 577), kwargs: {}
+INFO: 04/25/2024 08:40:01 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:39:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:01 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:39:42 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1076, 481, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:40:01 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:39:42 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:40:01 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:39:43 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:01 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
 NoneType: None
-INFO: 11/28/2023 04:39:46 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:02 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 903, 651, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:49 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:02 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 903, 651), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:52 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:52 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1157, 245, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:40:04 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 933, 318, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:52 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:40:04 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 933, 318), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:55 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:05 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 987, 213, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:56 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 46)
+INFO: 04/25/2024 08:40:05 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 987, 213), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:39:57 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 47)
+INFO: 04/25/2024 08:40:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:39:58 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:07 PM  | ('units.py', 418, 'animate_and_communicate_unit_death', None) | Sound: unit_lost.vaw not found!
 NoneType: None
-INFO: 11/28/2023 04:40:01 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:07 PM  | ('player.py', 761, 'kill', None) | Destroying GameObject: apc(id: 11, player.id: 2)
 NoneType: None
-INFO: 11/28/2023 04:40:04 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:07 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:12 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 38)
 NoneType: None
-INFO: 11/28/2023 04:40:10 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:11 PM  | ('player.py', 770, 'kill', None) | Destroying GameObject: tank_medium(id: 9, player.id: 4)
+INFO: 04/25/2024 08:40:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:12 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 749, 394, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:40:16 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1089, 276, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:12 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 749, 394), kwargs: {}
+INFO: 04/25/2024 08:40:16 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1089, 276), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:13 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:19 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 822, 304, 4, 0), kwargs: {}
+INFO: 04/25/2024 08:40:21 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1204, 549, 1, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+INFO: 04/25/2024 08:40:21 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1204, 549), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+INFO: 04/25/2024 08:40:22 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('game.py', 324, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
+INFO: 04/25/2024 08:40:23 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1250, 484, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('menu.py', 352, 'on_show_view', None) | Switched to View: Menu
+INFO: 04/25/2024 08:40:23 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 04/25/2024 08:40:24 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 997, 488, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:16 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 04/25/2024 08:40:24 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:17 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 315, 105, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:40:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
 NoneType: None
-INFO: 11/28/2023 04:40:17 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 315, 105), kwargs: {}
+INFO: 04/25/2024 08:40:24 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
 NoneType: None
-INFO: 11/28/2023 04:40:17 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1269754632576
+INFO: 04/25/2024 08:40:24 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 998, 431, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:17 PM  | ('user_interface.py', 1413, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+INFO: 04/25/2024 08:40:24 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:17 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+INFO: 04/25/2024 08:40:25 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 39)
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('game.py', 301, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 514, 545, 1, 0), kwargs: {}
+INFO: 04/25/2024 08:40:25 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 40)
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 514, 545), kwargs: {}
+INFO: 04/25/2024 08:40:25 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1270226791552
+INFO: 04/25/2024 08:40:28 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 44.82
+INFO: 04/25/2024 08:40:28 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 690, 690, 4, 0), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 04/25/2024 08:40:28 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
 NoneType: None
-INFO: 11/28/2023 04:40:18 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 04/25/2024 08:40:29 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1094, 567, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1094, 567), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:29 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 04/25/2024 08:40:30 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 886, 717, 4, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:30 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1144, 391, 4, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 921, 385, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:31 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 921, 385), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:32 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1229, 236, 4, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('mouse.py', 185, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1180, 233, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:33 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1180, 233), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('user_interface.py', 1445, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 04/25/2024 08:40:34 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 04/25/2024 08:40:37 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 04/25/2024 08:40:37 PM  | ('gameobject.py', 167, 'kill', None) | Destroying GameObject: Wreck(id: 41)
+NoneType: None
+INFO: 04/25/2024 08:40:40 PM  | ('scheduling.py', 46, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 04/25/2024 08:40:43 PM  | ('game.py', 325, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
+NoneType: None
+INFO: 04/25/2024 08:40:43 PM  | ('menu.py', 352, 'on_show_view', None) | Switched to View: Menu
+NoneType: None
+INFO: 04/25/2024 08:40:43 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 04/25/2024 08:40:43 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 230, 74, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 230, 74), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 293, 166, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 293, 166), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1840971309120
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('user_interface.py', 1413, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 566, 592, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:44 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 566, 592), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('game.py', 302, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 559, 549, 1, 0), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('mouse.py', 183, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 559, 549), kwargs: {}
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('user_interface.py', 372, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1841429524352
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 45.95
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('user_interface.py', 1416, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 04/25/2024 08:40:45 PM  | ('user_interface.py', 1423, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None

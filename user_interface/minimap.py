@@ -148,7 +148,7 @@ class MiniMap:
         for row, shape_list in self.shapes_lists.items():
             append = shape_list.append
             [append(create_rectangle_filled(grid_x * width, grid_y * height, width, height, SAND))
-             for (grid_x, grid_y) in [grid for grid in revealed_this_time if grid[1] is row]]
+             for (grid_x, grid_y) in (grid for grid in revealed_this_time if grid[1] is row)]
 
     def draw(self):
         # draw revealed map areas:

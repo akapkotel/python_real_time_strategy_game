@@ -95,10 +95,10 @@ def add_player_color_to_name(name: str, color: Color) -> str:
 def ignore_in_editor_mode(func):
     def wrapper(self, *args, **kwargs):
         try:
-            if self.settings.editor_mode:
+            if self.game.settings.editor_mode:
                 return
         except AttributeError:
-            if self.game.settings.editor_mode:
+            if self.settings.editor_mode:
                 return
         return func(self, *args, **kwargs)
     return wrapper

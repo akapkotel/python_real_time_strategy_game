@@ -165,7 +165,7 @@ class UnitsProducer:
             self.game.window.sound_player.play_random_sound(UNIT_PRODUCTION_FINISHED)
 
     def clear_spawning_point_for_new_unit(self):
-        if (unit := self.game.map.position_to_node(*self.spawn_point).unit) is not None:
+        if (unit := self.game.map.position_to_tile(*self.spawn_point).unit) is not None:
             node = self.game.pathfinder.get_closest_walkable_node(*self.spawn_point)
             unit.move_to(node.grid)
 
@@ -319,8 +319,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         if object_id is None:
             self.place_building_properly_on_the_grid()
 
-        self.occupied_nodes: Set[IsometricTile] = self.find_occupied_nodes()
-        self.block_map_tiles(self.occupied_nodes)
+        self.occupied_tiles: Set[IsometricTile] = self.find_occupied_nodes()
+        self.block_map_tiles(self.occupied_tiles)
 
         self.garrisoned_soldiers: List[Union[Soldier, int]] = []
         self.garrison_size: int = self.configs['garrison_size']
@@ -376,7 +376,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def block_map_tiles(self, occupied_tiles: Set[IsometricTile]):
         for tile in occupied_tiles:
             tile.remove_tree()
-            self.block_map_tile(tile)
+            tile.block(self)
 
     def spawn_soldiers_for_garrison(self, number_of_soldiers: int):
         """Called when Building is spawned with garrisoned Soldiers inside."""
@@ -388,17 +388,10 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def is_moving(self) -> bool:
         return False  # this is rather obvious, since this is a Building
 
-    @staticmethod
-    def unblock_map_tile(tile: IsometricTile):
-        tile.building = None
-
-    def block_map_tile(self, tile: IsometricTile):
-        tile.building = self
-
     def update_observed_area(self, *args, **kwargs):
-        if not self.observed_nodes:  # Building need calculate it only once
+        if not self.observed_tiles:  # Building need calculate it only once
             self.observed_grids = grids = self.calculate_observed_area()
-            self.observed_nodes = {self.map.tiles[grid] for grid in grids}
+            self.observed_tiles = self.map.get_tiles(grids)
 
     @ignore_in_editor_mode
     def update_battle_behaviour(self):
@@ -600,12 +593,12 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     def kill(self):
         if self.garrisoned_soldiers:
             self.kill_garrisoned_soldiers()
-        self.unblock_occupied_nodes()
+        self.unblock_occupied_tiles()
         super().kill()
 
-    def unblock_occupied_nodes(self):
-        for node in self.occupied_nodes:
-            self.unblock_map_tile(node)
+    def unblock_occupied_tiles(self):
+        for tile in self.occupied_tiles:
+            tile.unblock()
 
     def kill_garrisoned_soldiers(self):
         for soldier in self.garrisoned_soldiers:
