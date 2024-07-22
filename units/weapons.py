@@ -48,12 +48,13 @@ class Weapon:
     def reloaded(self) -> bool:
         return self.owner.timer.total_game_time >= self.next_firing_time and self.ammunition
 
-    def shoot(self, target: PlayerEntity):
+    def shoot(self, target: PlayerEntity) -> float:
         self.next_firing_time = self.owner.timer.total_game_time + self.rate_of_fire
         self.consume_ammunition()
-        if self.check_if_target_was_hit(target):
-            target.on_being_damaged(self.damage, self.penetration)
         self.create_shot_audio_visual_effects()
+        if self.check_if_target_was_hit(target):
+            return target.on_being_damaged(self.damage, self.penetration)
+        return 0
 
     def consume_ammunition(self, burst_size: int = 1):
         if self.magazine_size:
@@ -74,7 +75,7 @@ class Weapon:
                 BUILDING_HIT_CHANCE_BONUS * target.is_building,
                 MOVEMENT_HIT_PENALTY * self.owner.is_moving,
                 TARGET_MOVEMENT_HIT_PENALTY * target.is_moving,
-                INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry -self.owner.is_infantry)
+                INFANTRY_HIT_CHANCE_PENALTY * (target.is_infantry - self.owner.is_infantry)
             )
         )
         return uniform(0, 100) < hit_chance

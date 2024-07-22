@@ -618,7 +618,7 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        if self.should_reveal_map:
+        if self.is_controlled_by_local_human_player:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         if self.known_enemies or self._enemy_assigned_by_player:
@@ -674,12 +674,12 @@ class PlayerEntity(GameObject):
     def select_enemy_from_known_enemies(self) -> Optional[PlayerEntity]:
         if not self.known_enemies:
             return None
+        if self.experience < 30:
+            return random.choice(list(self.known_enemies))
         # if there are many enemies, prioritize armed enemies
-        if not (sorted_enemies := [e for e in self.known_enemies if e.weapons]):
-            sorted_enemies = self.known_enemies
+        sorted_enemies = [e for e in self.known_enemies if e.weapons] or self.known_enemies
         # then filter the weakest enemy to destroy it fast
-        if sorted_by_health := sorted(sorted_enemies, key=lambda e: e.health):
-            return sorted_by_health[0]
+        return min(sorted_enemies, key=lambda e: e.health, default=None)
 
     def in_attack_range(self, other: PlayerEntity) -> bool:
         if other.is_unit:
@@ -691,7 +691,8 @@ class PlayerEntity(GameObject):
     def attack(self, enemy):
         if self.ammunition:
             for weapon in (w for w in self._weapons if w.reloaded()):
-                weapon.shoot(enemy)
+                damage = weapon.shoot(enemy)
+                self.experience += round(damage / weapon.damage, 2)
             self.check_if_enemy_destroyed(enemy)
 
     def check_if_enemy_destroyed(self, enemy: PlayerEntity):
@@ -717,7 +718,7 @@ class PlayerEntity(GameObject):
     def is_damaged(self) -> bool:
         return self._health < self._max_health
 
-    def on_being_damaged(self, damage: float, penetration: float = 0):
+    def on_being_damaged(self, damage: float, penetration: float = 0) -> float:
         """
         :param damage: float -- damage dealt by the attacker
         :param penetration: float -- value of attacker's weapon penetration
@@ -725,18 +726,20 @@ class PlayerEntity(GameObject):
         it is propagated to the damage-dealer.
         """
         if self.game.settings.immortal_player_units and self.player.is_local_human_player:
-            return
+            return 0.0
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
-        self.health -= random.gauss(damage, deviation) * effectiveness
-        self.check_id_should_entity_die()
+        final_damage = random.gauss(damage, deviation) * effectiveness
+        self.health -= final_damage
+        self.check_if_should_entity_die()
+        return final_damage
 
-    def check_id_should_entity_die(self):
+    def check_if_should_entity_die(self):
         if self._health <= 0:
             self.kill()
 
     def kill(self):
-        if self.is_selected and self.player is self.game.local_human_player:
+        if self.is_selected:  # and self.player is self.game.local_human_player
             self.game.units_manager.unselect(self)
         self.known_enemies.clear()
         if self.quadtree is not None:

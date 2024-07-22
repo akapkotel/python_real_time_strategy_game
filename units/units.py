@@ -364,21 +364,17 @@ class Unit(PlayerEntity, ABC):
     def update_battle_behaviour(self):
         if not self.weapons or not self.ammunition:
             return self.run_away()
-        enemy = self._enemy_assigned_by_player or self.targeted_enemy or self.select_enemy_from_known_enemies()
-        if self.in_attack_range(enemy):
-            self.fight_enemy(enemy)
-            if enemy is self._enemy_assigned_by_player:
-                self.stop_completely()
-        else:
-            self.move_toward_enemy(enemy)
-        # enemies = (e for e in [self._enemy_assigned_by_player, self.select_enemy_from_known_enemies()] if e is not None)
-        # for enemy in enemies:
-        #     if self.in_attack_range(enemy):
-        #         self.fight_enemy(enemy)
-        #         if enemy is self._enemy_assigned_by_player:
-        #             self.stop_completely()
-        #     else:
-        #         self.move_toward_enemy(enemy)
+        if enemy := self._enemy_assigned_by_player or self.targeted_enemy or self.select_enemy_from_known_enemies():
+            self.targeted_enemy = enemy
+            if self.in_attack_range(enemy):
+                self.fight_enemy(enemy)
+                if enemy is self._enemy_assigned_by_player:
+                    self.stop_completely()
+            else:
+                self.move_toward_enemy(enemy)
+
+    def handle_enemy(self, enemy):
+        pass
 
     def move_toward_enemy(self, enemy: PlayerEntity):
         if not (enemy is self._enemy_assigned_by_player or self.has_destination):
@@ -453,6 +449,8 @@ class Unit(PlayerEntity, ABC):
         ]
         if self.weapons:
             informations.append(UiTextLabel(x, y - 55, f'Ammunition: {self.ammunition}/{self.max_ammunition}', 12, ammo_color, 'ammunition', active=False))
+        if self.is_controlled_by_local_human_player:
+            informations.append(UiTextLabel(x, y - 75, f'Experience: {self.experience}', 12, GREEN, 'XP', active=False))
         return informations
 
     def update_ui_information_about_unit(self):
@@ -466,6 +464,8 @@ class Unit(PlayerEntity, ABC):
                 info_label.text_color = value_to_color(value, max_value)
             except AttributeError:
                 continue
+        experience_label = selected_units_bundle.find_by_name('XP')
+        experience_label.text = f'Experience: {self.experience:.2f}'
 
     def create_actions_buttons_specific_for_this_unit(self, x, y) -> List[UiElement]:
         ...

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 from __future__ import annotations
 
@@ -5,6 +6,7 @@ from abc import abstractmethod, ABC
 from math import dist
 from typing import Optional
 from matplotlib import path as mpltPath
+from collections import defaultdict
 from numpy import array
 
 from arcade import draw_rectangle_outline, draw_text, draw_polygon_outline
@@ -63,7 +65,7 @@ class QuadTree(ABC):
         self.max_entities = max_entities
         self.entities_count = 0
         self.depth = depth
-        self.entities = {}
+        self.entities = defaultdict(set)
         self.children = []
 
     @abstractmethod
@@ -82,19 +84,15 @@ class QuadTree(ABC):
     def insert(self, entity) -> Optional[QuadTree]:
         raise NotImplementedError
 
-    def insert_to_children(self, entity) -> Optional[CartesianQuadTree]:
+    def insert_to_children(self, entity) -> Optional[QuadTree]:
         for child in self.children:
             if (quadtree := child.insert(entity)) is not None:
                 return quadtree
 
     def add_to_entities(self, entity):
         faction_id = entity.faction.id
-        try:
-            self.entities[faction_id].add(entity)
-        except KeyError:
-            self.entities[faction_id] = {entity, }
-        finally:
-            self.entities_count += 1
+        self.entities[faction_id].add(entity)
+        self.entities_count += 1
 
     def remove(self, entity):
         try:
@@ -167,12 +165,15 @@ class CartesianQuadTree(QuadTree, Rect):
 
     def add_to_entities(self, entity):
         faction_id = entity.faction.id
-        try:
-            self.entities[faction_id].add(entity)
-        except KeyError:
-            self.entities[faction_id] = {entity, }
-        finally:
-            self.entities_count += 1
+        self.entities[faction_id].add(entity)
+        self.entities_count += 1
+        # faction_id = entity.faction.id
+        # try:
+        #     self.entities[faction_id].add(entity)
+        # except KeyError:
+        #     self.entities[faction_id] = {entity, }
+        # finally:
+        #     self.entities_count += 1
 
     def remove(self, entity):
         try:

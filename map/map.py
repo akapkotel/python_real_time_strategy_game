@@ -555,7 +555,7 @@ class NavigatingUnitsGroup:
 
     def __init__(self, units: List[Unit], x: Number, y: Number):
         self.map = Map.instance
-        self.leader = units[0]
+        self.leader = max(units, key=lambda u: u.experience, default=units[0])
         self.destination = position_to_map_grid(x, y)
         self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
