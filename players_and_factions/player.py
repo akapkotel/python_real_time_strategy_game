@@ -730,16 +730,22 @@ class PlayerEntity(GameObject):
         """
         if self.game.settings.immortal_player_units and self.player.is_local_human_player:
             return 0.0
+        final_damage = self.calculate_final_damage(damage, penetration)
+        self.health -= final_damage
+        self.check_if_should_entity_die()
+        return final_damage
+
+    def calculate_final_damage(self, damage: float, penetration: float) -> float:
         deviation = self.game.settings.damage_randomness_factor
         effectiveness = 1 - max(self.armour - penetration, 0)
         final_damage = random.gauss(damage, deviation) * effectiveness
-        self.health -= final_damage
-        self.check_if_should_entity_die()
         return final_damage
 
     def check_if_should_entity_die(self):
         if self._health <= 0:
             self.kill()
+        elif self.is_selected:
+            self.game.update_unit_icon_health(self)
 
     def kill(self):
         if self.is_selected:  # and self.player is self.game.local_human_player

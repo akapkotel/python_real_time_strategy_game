@@ -177,27 +177,29 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def on_left_button_press(self, x: float, y: float):
         if (ui_element := self.pointed_ui_element) is not None:
             ui_element.on_mouse_press(MOUSE_BUTTON_LEFT)
-            self.evaluate_mini_map_click()
+            self.evaluate_mini_map_click(MOUSE_BUTTON_LEFT)
         if self.bound_text_input_field not in (ui_element, None):
             self.unbind_text_input_field()
         if self.placeable_gameobject is not None and self.placeable_gameobject.is_construction_possible():
             self.placeable_gameobject.build()
 
     @ignore_in_menu
-    def evaluate_mini_map_click(self):
+    def evaluate_mini_map_click(self, button: int):
         left, _, bottom, _ = self.game.viewport
         if self.cursor_over_minimap_position is not None:
-            if units := self.units_manager.selected_units:
-                self.units_manager.on_terrain_click_with_units(*self.cursor_over_minimap_position, units)
-            else:
+            if button == MOUSE_BUTTON_RIGHT or not self.units_manager.selected_units:
                 self.window.move_viewport_to_the_position(*self.cursor_over_minimap_position)
+            elif units := self.units_manager.selected_units:
+                self.units_manager.on_terrain_click_with_units(*self.cursor_over_minimap_position, units)
 
     @log_this_call()
     def on_right_button_press(self):
         if self.pointed_ui_element is not None:
             self.pointed_ui_element.on_mouse_press(MOUSE_BUTTON_RIGHT)
+            self.evaluate_mini_map_click(MOUSE_BUTTON_RIGHT)
 
     def on_mouse_release(self, x: float, y: float, button: int):
+        # TODO: fix issue with right-click over mini-map which clears all selected units and should not
         if button is MOUSE_BUTTON_LEFT:
             self.on_left_button_release(x, y)
         elif button is MOUSE_BUTTON_RIGHT:
@@ -464,6 +466,13 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
     def draw_cross_cursor(self):
         color = self.cross_color
         cx, cy = self.position
+
+        # debug cursor position over minimap
+        # draw_text(f'{self.cursor_over_minimap_position}', cx, cy, RED)
+
+        # debug cursor position over map
+        # draw_text(f'{cx, cy}', cx, cy, RED)
+
         if self.game is not None and self.game.is_running:
             x, width, y, height = self.game.viewport
             draw_lines([(x, cy), (x + width, cy), (cx, y + height), (cx, y)], color=color, line_width=2)

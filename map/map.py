@@ -501,7 +501,9 @@ class WaypointsQueue:
         self.waypoints = []
         self.units_waypoints = {unit: [] for unit in units}
         self.active = False
+        self.visible = True
         self.loop = False
+        self.map.game.units_ordered_destinations.new_waypoints_queue(self)
 
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units
@@ -528,6 +530,7 @@ class WaypointsQueue:
             if waypoints := self.units_waypoints[unit]:
                 self.evaluate_unit_waypoints(unit, waypoints)
             else:
+                unit.waypoints_queue = None
                 self.units.remove(unit)
 
     def evaluate_unit_waypoints(self, unit, waypoints):
@@ -537,7 +540,7 @@ class WaypointsQueue:
             if self.loop:
                 waypoints.insert(0, removed)
         elif not (unit.has_destination or unit.is_heading_to(destination)):
-            unit.move_to(destination)
+            unit.move_to(destination, forced=True)
 
     def start(self):
         self.active = True
@@ -676,8 +679,10 @@ class Pathfinder(EventsCreator):
     def finish_waypoints_queue(self):
         if (queue := self.created_waypoints_queue) is not None:
             self.waypoints_queues.append(queue)
+            queue.visible = False
             queue.start()
         self.created_waypoints_queue = None
+        self.map.game.units_manager.waypoints_mode = False
 
     def navigate_units_to_destination(self, units: List[Unit], x: int, y: int, forced: bool = False):
         if not self.map.position_to_node(x, y).is_walkable:
@@ -706,7 +711,11 @@ class Pathfinder(EventsCreator):
 
     def update_waypoints_queues(self):
         for queue in (q for q in self.waypoints_queues if q.active):
-            queue.update() if queue else self.waypoints_queues.remove(queue)
+            if queue:
+                queue.update()
+            else:
+                self.waypoints_queues.remove(queue)
+                self.map.game.units_ordered_destinations.remove_queue(queue)
 
     def update_navigating_groups(self):
         for group in self.navigating_groups:

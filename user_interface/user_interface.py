@@ -24,7 +24,7 @@ from arcade.key import BACKSPACE, ENTER
 from utils.constants import HORIZONTAL, VERTICAL, CONFIRMATION_DIALOG, PADDING_X, PADDING_Y
 from utils.observer import Observed, Observer
 from utils.geometry import clamp
-from utils.colors import rgb_to_rgba
+from utils.colors import rgb_to_rgba, value_to_color
 from utils.improved_spritelists import UiSpriteList
 from utils.functions import get_path_to_file, get_texture_size
 from utils.game_logging import log_here
@@ -504,11 +504,15 @@ class ProgressButton(Button):
                  subgroup: Optional[int] = None,
                  selectable_group: Optional[SelectableGroup] = None,
                  color: Optional[Color] = None,
+                 scale: float = 1.0,
                  counter: Optional[int] = None,
-                 hint: Optional[Hint] = None):
-        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color, hint=hint)
+                 hint: Optional[Hint] = None,
+                 health_bar: bool = False):
+        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color, scale, hint=hint)
         self._counter = counter
         self._progress = 0
+        self._progress_color = rgb_to_rgba(GREEN, alpha=150)
+        self._health_bar = health_bar
 
     @property
     def progress(self):
@@ -516,7 +520,9 @@ class ProgressButton(Button):
 
     @progress.setter
     def progress(self, value):
-        self._progress = clamp(value, 100, 0)
+        self._progress = progress = clamp(value, 100, 0)
+        if self._health_bar:
+            self._progress_color = value_to_color(progress, 100)
 
     @property
     def counter(self):
@@ -529,9 +535,9 @@ class ProgressButton(Button):
     def draw(self):
         super().draw()
         if self._progress:
-            top = self.bottom + (self.height * 0.01) * self._progress
-            color = rgb_to_rgba(GREEN, alpha=150)
-            draw_lrtb_rectangle_filled(self.left, self.right, top, self.bottom, color)
+            right = self.left + (self.width * 0.01) * self._progress if self._health_bar else self.right
+            top = self.bottom + (self.height * 0.01) * self._progress if not self._health_bar else self.bottom + 5
+            draw_lrtb_rectangle_filled(self.left, right, top, self.bottom, self._progress_color)
         if self._counter:
             draw_text(str(self._counter), self.left + 5, self.top - 20, RED, 15)
 

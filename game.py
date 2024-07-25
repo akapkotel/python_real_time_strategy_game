@@ -770,12 +770,12 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle, x, y):
         icon_scale = 0.75
         positions = generate_2d_grid(x - 135, y + 20, 3, 6, 75 * icon_scale, 75 * icon_scale)
-        # 1. Create list of all units icons for easy selection of a specific unit
         for (col, row), unit in zip(positions, context_units):
-            selected_units_bundle.append(Button(f'{unit.object_name}_icon.png', col, row, unit.object_name,
+            unit_button = ProgressButton(f'{unit.object_name}_icon.png', col, row, str(unit.id),
                                                          functions=partial(self.units_manager.select_units, unit),
-                                                         scale=icon_scale))
-            # TODO: add health bars for each unit icon
+                                                         scale=icon_scale, health_bar=True)
+            unit_button.progress = unit.health_ratio * 100
+            selected_units_bundle.append(unit_button)
 
     def create_ui_selection_buttons_for_many_units_types(self, selected_units_bundle, x, y):
         positions = generate_2d_grid(x - 135, y + 10, 2, 6, 75, 75)
@@ -796,6 +796,14 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             Button('game_button_waypoints.png', x - 50, y - 175, functions=self.units_manager.toggle_waypoint_mode,
                    hint=Hint('button_hint_waypoints.png', delay=self.settings.hints_delay_seconds)),
         ])
+
+    def update_unit_icon_health(self, unit: Unit):
+        selected_units_bundle = self.get_bundle(UI_UNITS_PANEL)
+        try:
+            progress_button = selected_units_bundle.find_by_name(str(unit.id))
+            progress_button.progress = unit.health_ratio * 100
+        except AttributeError:
+            pass
 
     def show_construction_options(self, construction_bundle_name: str):
         self._unload_all(exceptions=(UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, EDITOR))

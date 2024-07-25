@@ -11,7 +11,9 @@ from collections import deque
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
-from arcade import Sprite, load_textures, draw_circle_filled, Texture, load_texture, draw_line
+from arcade import (
+    Sprite, load_textures, draw_circle_filled, draw_circle_outline,draw_text, Texture, load_texture, draw_line
+)
 from arcade.arcade_types import Point
 
 from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL
@@ -83,6 +85,7 @@ class Unit(PlayerEntity, ABC):
 
         self.permanent_units_group: int = 0
         self.navigating_group = None
+        self.waypoints_queue = None
 
         self.tasks = []
         self.current_task = None
@@ -758,20 +761,32 @@ class UnitsOrderedDestinations:
     """
     When Player sends his Units somewhere on the map by mouse-clicking there,
     this class stores all positions each Unit was assigned as it's final
-    destination by the Pathfinder. Game uses these positions to display on the
-    ordered destinations on the screen for the Player convenience.
+    destination by the Pathfinder. It also keeps all WaypointsQueues.
+    Game uses these positions to display on the ordered destinations on the
+    screen for the Player convenience.
     """
     size = 1
 
     def __init__(self):
         self.destinations = []
+        self.waypoints_queues = []
         self.seconds_left = 0
 
     def new_destinations(self, destinations: List[Point], units: List[Unit]):
         self.seconds_left = 3
         self.destinations = [[x, y, self.size, GREEN, 4, unit] for ((x, y), unit) in zip(destinations, units)]
 
+    def new_waypoints_queue(self, queue):
+        self.waypoints_queues.append(queue)
+
+    def remove_queue(self, queue):
+        self.waypoints_queues.remove(queue)
+
     def on_update(self, delta_time):
+        self.update_destinations(delta_time)
+        self.update_waypoints_queues()
+
+    def update_destinations(self, delta_time):
         if self.seconds_left > 0:
             self.seconds_left -= delta_time
             for destination in self.destinations:
@@ -779,9 +794,32 @@ class UnitsOrderedDestinations:
         else:
             self.destinations.clear()
 
+    def update_waypoints_queues(self):
+        ...
+
     def draw(self):
+        self.draw_destinations()
+        self.draw_waypoints_queues()
+
+    def draw_destinations(self):
         for destination in self.destinations:
             draw_circle_filled(*destination[:-1])
             x1, y1 = destination[:2]
             x2, y2 = destination[-1].position
             draw_line(x1, y1, x2, y2, GREEN)
+
+    def draw_waypoints_queues(self):
+        for queue in self.waypoints_queues:
+            if queue.visible:
+                self.draw_waypoints(queue.waypoints)
+
+    @staticmethod
+    def draw_waypoints(waypoints):
+        px, py = None, None
+        for i, waypoint in enumerate(waypoints, start=1):
+            x, y = waypoint
+            draw_circle_outline(x, y, 20, GREEN)
+            draw_text(str(i), x, y, GREEN, font_size=20, anchor_x='center', anchor_y='center')
+            if px is not None:
+                draw_line(px, py, x, y, GREEN)
+            px, py = x, y
