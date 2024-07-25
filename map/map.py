@@ -536,7 +536,7 @@ class WaypointsQueue:
             removed = waypoints.pop()
             if self.loop:
                 waypoints.insert(0, removed)
-        elif not (unit.has_destination or unit.heading_to(destination)):
+        elif not (unit.has_destination or unit.is_heading_to(destination)):
             unit.move_to(destination)
 
     def start(self):
@@ -547,16 +547,17 @@ class WaypointsQueue:
 
 class NavigatingUnitsGroup:
     """
-    To avoid calling Pathfinde.a_star A* algorithm for very long paths for
+    To avoid calling Pathfinder A* algorithm for very long paths for
     many Units at once, we use this class. NavigatingUnitsGroup call a_star
     method for the full path only once, and then divides this path for shorter
     ones and call a_star for particular units for those shorter distances.
     """
 
-    def __init__(self, units: List[Unit], x: Number, y: Number):
+    def __init__(self, units: List[Unit], x: Number, y: Number, forced: bool = False):
         self.map = Map.instance
         self.leader = max(units, key=lambda u: u.experience, default=units[0])
         self.destination = position_to_map_grid(x, y)
+        self.forced_destination = forced
         self.units_paths: Dict[Unit, List] = {unit: [] for unit in units}
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
@@ -570,7 +571,7 @@ class NavigatingUnitsGroup:
     def __contains__(self, unit: Unit) -> bool:
         return unit in self.units_paths.keys()
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.units_paths)
 
     def discard(self, unit: Unit):
@@ -586,21 +587,22 @@ class NavigatingUnitsGroup:
 
     def create_units_group_paths(self, units: List[Unit]) -> List[GridPosition]:
         start = self.leader.current_node.grid
-        path = a_star(self.map, start, self.destination, True)
-        destinations = Pathfinder.instance.get_group_of_waypoints(*path[-1], len(units))
-        if len(path) > OPTIMAL_PATH_LENGTH:
-            self.slice_paths(units, path)
-        self.add_destinations_to_units_paths(destinations, units)
+        leader_path: List[GridPosition] = a_star(self.map, start, self.destination, True)
+        if len(leader_path) > OPTIMAL_PATH_LENGTH:
+            self.slice_paths(units, leader_path)
+        x, y = leader_path[-1]
+        destinations = Pathfinder.instance.get_group_of_waypoints(x, y, len(units))
+        self.add_waypoints_to_units_paths(units, destinations)
         return destinations
 
-    def slice_paths(self, units, path):
-        for i in range(1, len(path) // OPTIMAL_PATH_LENGTH, OPTIMAL_PATH_LENGTH):
-            step = path[i * OPTIMAL_PATH_LENGTH]
+    def slice_paths(self, units: List[Unit], leader_path: List[GridPosition]):
+        for i in range(1, len(leader_path) // OPTIMAL_PATH_LENGTH, OPTIMAL_PATH_LENGTH):
+            step = leader_path[i * OPTIMAL_PATH_LENGTH]
             units_steps = Pathfinder.instance.get_group_of_waypoints(*step, len(units))
-            self.add_destinations_to_units_paths(units_steps, units)
+            self.add_waypoints_to_units_paths(units, units_steps)
 
-    def add_destinations_to_units_paths(self, destinations, units):
-        for unit, grid in zip(units, destinations):
+    def add_waypoints_to_units_paths(self, units: List[Unit], waypoints: List[GridPosition]):
+        for unit, grid in zip(units, waypoints):
             self.units_paths[unit].append(grid)
 
     def reverse_units_paths(self):
@@ -610,8 +612,6 @@ class NavigatingUnitsGroup:
         """
         for unit, steps in self.units_paths.items():
             steps.reverse()
-            if len(steps) > 1:
-                steps.pop()
 
     def add_visible_indicators_of_destinations(self, destinations, units):
         positions = [map_grid_to_position(g) for g in destinations]
@@ -626,19 +626,17 @@ class NavigatingUnitsGroup:
                 to_remove.append(unit)
         self.remove_finished_paths(to_remove)
 
-    @staticmethod
-    def find_next_path_for_unit(unit, steps):
+    def find_next_path_for_unit(self, unit, steps):
         destination = steps[-1]
         if unit.reached_destination(destination):
             steps.pop()
-        # elif len(steps) > 1 and unit.nearby(destination):
-        #     steps.pop()
-        elif not (unit.has_destination or unit.heading_to(destination)):
-            unit.move_to(destination)
+        elif not (unit.has_destination or unit.is_heading_to(destination)):
+            unit.move_to(destination, self.forced_destination)
 
     @staticmethod
     def remove_finished_paths(finished_units: List[Unit]):
         for unit in finished_units:
+            unit.forced_destination = False
             unit.set_navigating_group(navigating_group=None)
 
 
@@ -681,10 +679,10 @@ class Pathfinder(EventsCreator):
             queue.start()
         self.created_waypoints_queue = None
 
-    def navigate_units_to_destination(self, units: List[Unit], x: int, y: int):
+    def navigate_units_to_destination(self, units: List[Unit], x: int, y: int, forced: bool = False):
         if not self.map.position_to_node(x, y).is_walkable:
             x, y = self.get_closest_walkable_position(x, y)
-        self.navigating_groups.append(NavigatingUnitsGroup(units, x, y))
+        self.navigating_groups.append(NavigatingUnitsGroup(units, x, y, forced))
 
     def update(self):
         self.update_waypoints_queues()
@@ -735,7 +733,8 @@ class Pathfinder(EventsCreator):
         Find requested number of valid waypoints around requested position.
         """
         center = position_to_map_grid(x, y)
-        if required_waypoints == 1: return [center, ]
+        if required_waypoints == 1:
+            return [center, ]
         radius = 1
         waypoints = []
         nodes = self.map.nodes

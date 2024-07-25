@@ -18,7 +18,7 @@ from utils.constants import EXPLOSION, MapPath, UI_UNITS_PANEL
 from effects.explosions import Explosion
 from map.map import (
     GridPosition, MapNode, Pathfinder, normalize_position,
-    position_to_map_grid, TerrainType
+    position_to_map_grid, TerrainType, map_grid_to_position
 )
 from players_and_factions.player import Player, PlayerEntity
 from user_interface.user_interface import UiElement, UiTextLabel
@@ -127,8 +127,8 @@ class Unit(PlayerEntity, ABC):
         except AttributeError:
             return destination == self.current_node.grid
 
-    def heading_to(self, destination: Union[MapNode, GridPosition]):
-        return self.path and self.path[0] == self.map.map_grid_to_position(destination)
+    def is_heading_to(self, destination: Union[MapNode, GridPosition]):
+        return self.path and self.path[-1] == map_grid_to_position(destination)
 
     def on_mouse_enter(self):
         if self.selection_marker is None:
@@ -277,20 +277,20 @@ class Unit(PlayerEntity, ABC):
         if len(path) > 20:
             self.path = deque(path)
         else:
-            destination_position = path[-1]
-            self.move_to(position_to_map_grid(*destination_position))
+            x, y = path[-1]
+            self.move_to(position_to_map_grid(x, y), self.forced_destination)
         self.awaited_path = None
 
     def follow_path(self):
         destination = self.path[0]
-        if (distance_left := dist(self.position, destination)) < CLOSE_ENOUGH_DISTANCE * self.max_speed:
+        if dist(self.position, destination) < CLOSE_ENOUGH_DISTANCE * self.max_speed:
             self.move_to_next_waypoint()
         else:
             angle_to_target = int(calculate_angle(*self.position, *destination))
             if self.virtual_angle != angle_to_target:
                 self.stop()
                 return self.rotate_towards_target(angle_to_target)
-            self.move_to_current_waypoint(destination, distance_left)
+            self.move_to_current_waypoint(destination)
 
     def rotate_towards_target(self, angle_to_target):
         """
@@ -317,13 +317,13 @@ class Unit(PlayerEntity, ABC):
     def move_to_next_waypoint(self):
         self.path.popleft()
 
-    def move_to_current_waypoint(self, destination, distance_left):
+    def move_to_current_waypoint(self, destination):
         angle = calculate_angle(*self.position, *destination)
         self.change_x, self.change_y = vector_2d(angle, self.max_speed * self.health_ratio)
 
-    def move_to(self, destination: GridPosition, force_destination=True):
+    def move_to(self, destination: GridPosition, forced: bool = False):
         self.cancel_path_requests()
-        self.forced_destination = force_destination
+        self.forced_destination = forced
         start = position_to_map_grid(*self.position)
         self.game.pathfinder.request_path(self, start, destination)
 
@@ -331,7 +331,6 @@ class Unit(PlayerEntity, ABC):
         self.path.clear()
         self.awaited_path = None
         self.path.extend(new_path[1:])
-        self.forced_destination = True
         self.unschedule_earlier_move_orders()
 
     def unschedule_earlier_move_orders(self):
@@ -364,17 +363,20 @@ class Unit(PlayerEntity, ABC):
     def update_battle_behaviour(self):
         if not self.weapons or not self.ammunition:
             return self.run_away()
-        if enemy := self._enemy_assigned_by_player or self.targeted_enemy or self.select_enemy_from_known_enemies():
+        if (enemy := self._enemy_assigned_by_player) is not None:
+            self.handle_enemy(enemy)
+        if (enemy := self.targeted_enemy or self.select_enemy_from_known_enemies()) is not None:
             self.targeted_enemy = enemy
-            if self.in_attack_range(enemy):
-                self.fight_enemy(enemy)
-                if enemy is self._enemy_assigned_by_player:
-                    self.stop_completely()
-            else:
-                self.move_toward_enemy(enemy)
+            self.handle_enemy(enemy)
 
-    def handle_enemy(self, enemy):
-        pass
+    def handle_enemy(self, enemy: PlayerEntity):
+        assigned = enemy is self._enemy_assigned_by_player
+        if self.in_attack_range(enemy):
+            if assigned or (self._enemy_assigned_by_player is None and not self.forced_destination):
+                self.stop_completely()
+            self.fight_enemy(enemy)
+        elif (assigned or self._enemy_assigned_by_player is None) and not self.forced_destination:
+            self.move_toward_enemy(enemy)
 
     def move_toward_enemy(self, enemy: PlayerEntity):
         if not (enemy is self._enemy_assigned_by_player or self.has_destination):
@@ -444,28 +446,26 @@ class Unit(PlayerEntity, ABC):
         health_color = value_to_color(self.health, self.max_health)
         ammo_color = value_to_color(self.ammunition, self.max_ammunition)
         informations = [
-            UiTextLabel(x, y + 20, self.object_name.title(), 15, GREEN, 'unit name', active=False),
+            UiTextLabel(x, y + 20, self.object_name.title().replace('_', ' '), 15, GREEN, 'unit name', active=False),
             UiTextLabel(x, y -5, f'Health: {int(self.health)}/{self.max_health}', 12, health_color, 'health', active=False),
         ]
         if self.weapons:
             informations.append(UiTextLabel(x, y - 55, f'Ammunition: {self.ammunition}/{self.max_ammunition}', 12, ammo_color, 'ammunition', active=False))
         if self.is_controlled_by_local_human_player:
-            informations.append(UiTextLabel(x, y - 75, f'Experience: {self.experience}', 12, GREEN, 'XP', active=False))
+            informations.append(UiTextLabel(x, y - 80, f'Experience: {self.experience}', 12, GREEN, 'experience', active=False))
         return informations
 
     def update_ui_information_about_unit(self):
         selected_units_bundle = self.game.get_bundle(UI_UNITS_PANEL)
-        for attribute in ('health', 'fuel', 'ammunition'):
+        for attribute in ('health', 'fuel', 'ammunition', 'experience'):
             try:
                 value = getattr(self, attribute)
                 max_value = getattr(self, f'max_{attribute}')
                 info_label = selected_units_bundle.find_by_name(attribute)
-                info_label.text = f'{attribute.title()}: {int(value)}/{max_value}'
+                info_label.text = f'{attribute.title()}: {int(value)} / {max_value}'
                 info_label.text_color = value_to_color(value, max_value)
             except AttributeError:
                 continue
-        experience_label = selected_units_bundle.find_by_name('XP')
-        experience_label.text = f'Experience: {self.experience:.2f}'
 
     def create_actions_buttons_specific_for_this_unit(self, x, y) -> List[UiElement]:
         ...

@@ -344,7 +344,7 @@ class UnitsManager(EventsCreator):
         self.window.sound_player.play_random_sound(UNITS_MOVE_ORDERS_CONFIRMATIONS)
 
     def send_units_to_pointed_location(self, units, x, y):
-        self.game.pathfinder.navigate_units_to_destination(units, x, y)
+        self.game.pathfinder.navigate_units_to_destination(units, x, y, True)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
         if self.game.editor_mode or clicked.is_controlled_by_local_human_player:
@@ -363,7 +363,7 @@ class UnitsManager(EventsCreator):
         units = self.selected_units
         if clicked.is_building:
             clicked: Building
-            if self.only_soldiers_selected:
+            if self.only_soldiers_selected and clicked.count_empty_garrison_slots:
                 self.send_soldiers_to_building(clicked)
             elif units:
                 self.send_units_to_attack_target(clicked, units)

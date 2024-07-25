@@ -17,12 +17,10 @@ __credits__ = {'Coding': __author__,
 import random
 import time
 import pathlib
-from pprint import pprint
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
 from functools import partial
 
-import PIL.Image
 import pyglet
 from arcade import (
     SpriteList, Window, draw_rectangle_filled, draw_text, run, Sprite, get_screens, MOUSE_BUTTON_RIGHT
@@ -73,8 +71,8 @@ SCREEN_CENTER = (SCREEN_X, SCREEN_Y) = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 
 UI_WIDTH = SCREEN_WIDTH // 5
 
-PLAYER_UNITS = 5
-CPU_UNITS = 5
+PLAYER_UNITS_COUNT = 5
+CPU_UNITS_COUNT = 5
 
 PROFILING_LEVEL = 0  # higher the level, more functions will be time-profiled
 
@@ -932,7 +930,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             for player in (self.players.values()):
                 node = random.choice(walkable)
                 walkable.remove(node)
-                names = [unit_name] * (PLAYER_UNITS if player.is_local_human_player else CPU_UNITS)
+                names = [unit_name] * (PLAYER_UNITS_COUNT if player.is_local_human_player else CPU_UNITS_COUNT)
                 self.spawn_group(names, player, node.position)
 
     def test_scenarios(self):
@@ -942,7 +940,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         events = (
             NoUnitsLeftTrigger(human).triggers(Defeat(human)),
             NoUnitsLeftTrigger(cpu_player).triggers(Victory(human)),
-            TimePassedTrigger(human, 3).triggers(Victory(human)),
+            TimePassedTrigger(human, 30).triggers(Victory(human)),
             MapRevealedTrigger(human).triggers(Victory(human)),
         )
         self.current_scenario = Scenario('Test Mission', 'Map 1')\
@@ -1079,6 +1077,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.timer.draw()
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
+
+        for unit in self.units:
+            draw_text(f'{unit._targeted_enemy}, {unit.forced_destination}', unit.right, unit.bottom, RED)
+            if unit.path:
+                draw_text(f'{unit.path[-1]}',unit.right, unit.top, WHITE)
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center

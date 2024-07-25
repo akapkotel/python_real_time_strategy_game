@@ -49,7 +49,7 @@ DIAGONAL_DIST = 14  # approx square root of 2
 ADJACENT_OFFSETS = [
     (-1, -1), (-1, 0), (-1, +1), (0, +1), (0, -1), (+1, -1), (+1, 0), (+1, +1)
 ]
-OPTIMAL_PATH_LENGTH = 50
+OPTIMAL_PATH_LENGTH = 25
 NormalizedPoint = Tuple[int, int]
 MapPath = Union[List[NormalizedPoint], List[GridPosition]]
 PathRequest = Tuple['Unit', GridPosition, GridPosition]

@@ -499,7 +499,13 @@ class MouseDragSelection:
         self.top = y
         self.bottom = y
         self.units: Set[Unit] = set()
-        self.all_selectable_units = self.game.units if self.game.editor_mode else self.game.local_human_player.units
+        self.all_selectable_units = self.find_all_selectable_units()
+
+    def find_all_selectable_units(self):
+        if self.game.editor_mode:
+            return self.game.units
+        else:
+            return {u for u in self.game.local_human_player.units if u.outside}
 
     def __contains__(self, item: PlayerEntity) -> bool:
         return item in self.units

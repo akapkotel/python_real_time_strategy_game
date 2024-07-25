@@ -101,3 +101,14 @@ class TaskEnterVehicle(TaskEnterBuilding):
         if self.target.current_node in soldier.current_node.adjacent_nodes:
             soldier.enter_vehicle(self.target)
             self.units.remove(soldier)
+
+
+class TaskMove(UnitTask):
+    identifier = 3
+
+    def __init__(self, units_manager, units, position):
+        super().__init__(units_manager, units)
+        self.target = position
+
+    def condition(self) -> bool:
+        return self.units[0].position != self.target

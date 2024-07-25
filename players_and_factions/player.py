@@ -531,6 +531,7 @@ class PlayerEntity(GameObject):
         self.max_ammunition = self.ammunition
 
         self.experience = 0
+        self.max_experience = 100
 
         self.attach_observers(observers=[self.game, self.player])
 
@@ -658,6 +659,8 @@ class PlayerEntity(GameObject):
         if enemies := self.scan_for_visible_enemies():
             self.player.update_known_enemies(enemies)
         self.known_enemies = enemies
+        if self._targeted_enemy not in enemies:
+            self._targeted_enemy = None
 
     def scan_for_visible_enemies(self) -> Set[PlayerEntity]:
         return self.map.quadtree.find_visible_entities_in_circle(

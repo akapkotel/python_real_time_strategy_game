@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from typing import Dict
 from functools import lru_cache
 from math import atan2, degrees, radians, sin, cos, dist
 from typing import Optional, Sequence, Tuple, List, Set
@@ -49,12 +50,12 @@ matrix = [(-8, -4), (-8, -3), (-8, -2), (-8, -1), (-8, 0), (-8, 1), (-8, 2),
           (8, 1), (8, 2), (8, 3), (8, 4)]
 
 
-def precalculate_possible_sprites_angles(rotations=ROTATIONS,
-                                         circle_slice=CIRCLE_SLICE,
-                                         rotation_step=ROTATION_STEP):
+def precalculate_possible_sprites_angles(rotations: int = ROTATIONS,
+                                   circle_slice: float = CIRCLE_SLICE,
+                                   rotation_step: float = ROTATION_STEP) -> Dict[int, int]:
     """
-    Build dict of int angles. We chop 360 degrees circle by 8 slices
-    each of 45 degrees. First slice has its center at 0/360 degrees,
+    Build dict of int angles. We chop 360 degrees circle by 16 slices
+    each of 22.5 degrees. First slice has its center at 0/360 degrees,
     second slice has its center at 22.5 degrees etc. This dict allows
     for fast replacing angle of range 0-359 to one of 16 pre-calculated
     angles.
