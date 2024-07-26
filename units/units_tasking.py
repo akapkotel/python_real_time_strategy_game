@@ -17,16 +17,17 @@ class UnitTask:
     def __init__(self, units_manager, units):
         self.manager = units_manager
         self.units = units
+        self.event = None
         self.bind_task_to_units()
         self.schedule_next_update()
 
     def bind_task_to_units(self):
         for unit in self.units:
-            self.remove_same_tasks(unit)
+            self.remove_tasks_of_the_same_type(unit)
             unit.tasks.append(self)
 
-    def remove_same_tasks(self, unit):
-        for task in [t for t in unit.tasks]:
+    def remove_tasks_of_the_same_type(self, unit):
+        for task in unit.tasks[::]:
             if task.identifier == self.identifier:
                 unit.tasks.remove(task)
                 task.remove(unit)
@@ -36,18 +37,14 @@ class UnitTask:
 
     def update(self):
         log_here(f'Updating task: {self}, units: {self.units}', True)
-        if self.condition():
-            self.schedule_next_update()
-        else:
+        if self.check_if_task_is_completed():
             self.kill_task()
-
-    def condition(self) -> bool:
-        return self.units
+        else:
+            self.schedule_next_update()
 
     def schedule_next_update(self):
-        self.manager.schedule_event(
-            ScheduledEvent(self.manager, 1, self.update)
-        )
+        self.event = event = ScheduledEvent(self.manager, 1, self.update)
+        self.manager.schedule_event(event)
 
     def remove(self, unit):
         try:
@@ -56,10 +53,16 @@ class UnitTask:
         except ValueError:
             pass
 
+    def check_if_task_is_completed(self):
+        ...
+
     def kill_task(self):
+        log_here(f'Killing task: {self}, units: {self.units}', True)
         self.manager.units_tasks.remove(self)
+        self.manager.unschedule_event(self.event)
         for unit in self.units:
             unit.tasks.remove(self)
+        self.units.clear()
 
 
 class TaskEnterBuilding(UnitTask):
@@ -74,13 +77,9 @@ class TaskEnterBuilding(UnitTask):
             self.check_if_soldier_can_enter(soldier)
         super().update()
 
-    def condition(self) -> bool:
-        return self.units and self.target and self.target.count_empty_garrison_slots
-
     def check_if_soldier_can_enter(self, soldier):
-        if self.target.occupied_nodes.intersection(soldier.adjacent_nodes):
-            if self.target.is_enemy(soldier) or self.target.count_empty_garrison_slots:
-                soldier.enter_building(self.target)
+        if self.target.occupied_nodes.intersection(soldier.adjacent_nodes) and self.target.count_empty_garrison_slots:
+            soldier.enter_building(self.target)
             self.remove(soldier)
         else:
             self.check_if_soldier_heading_to_target(soldier)
@@ -90,6 +89,10 @@ class TaskEnterBuilding(UnitTask):
             x, y = self.target.position
             self.manager.game_view.pathfinder.navigate_units_to_destination(soldier, x, y)
 
+    def check_if_task_is_completed(self):
+        if any((not self.units, not self.target.is_alive, not self.target.is_enemy)):
+            self.kill_task()
+
 
 class TaskEnterVehicle(TaskEnterBuilding):
     identifier = 2
@@ -97,18 +100,19 @@ class TaskEnterVehicle(TaskEnterBuilding):
     def __init__(self, units_manager, soldiers, vehicle):
         super().__init__(units_manager, soldiers, vehicle)
 
+
     def check_if_soldier_can_enter(self, soldier):
         if self.target.current_node in soldier.current_node.adjacent_nodes:
             soldier.enter_vehicle(self.target)
             self.units.remove(soldier)
 
 
-class TaskMove(UnitTask):
+class TaskAttackMove(UnitTask):
     identifier = 3
 
-    def __init__(self, units_manager, units, position):
+    def __init__(self, units_manager, units, x, y):
         super().__init__(units_manager, units)
-        self.target = position
+        self.target = self.manager.game.map.position_to_node(x, y)
 
-    def condition(self) -> bool:
-        return self.units[0].position != self.target
+    def check_if_task_is_completed(self) -> bool:
+        return not self.units or not any(u.has_destination for u in self.units)

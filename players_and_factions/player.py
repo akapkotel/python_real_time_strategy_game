@@ -187,7 +187,7 @@ class Player(EventsCreator, Observer, Observed):
         return self.name
 
     @cached_property
-    def is_local_human_player(self) -> bool:
+    def is_human_player(self) -> bool:
         return self is self.game.local_human_player
 
     def get_default_producer_of_unit(self, unit_name: str) -> Optional[UnitsProducer]:
@@ -271,7 +271,7 @@ class Player(EventsCreator, Observer, Observed):
         if costs:
             for resource, cost in costs.items():
                 if not self.has_resource(resource, cost):
-                    if self.is_local_human_player:
+                    if self.is_human_player:
                         self.notify_player_of_resource_deficit(resource)
                     return False
             return True
@@ -285,8 +285,8 @@ class Player(EventsCreator, Observer, Observed):
     def unlimited_resources(self) -> bool:
         return any((
             self.game.editor_mode,
-            self.is_local_human_player and self.game.settings.unlimited_player_resources,
-            not self.is_local_human_player and self.game.settings.unlimited_cpu_resources
+            self.is_human_player and self.game.settings.unlimited_player_resources,
+            not self.is_human_player and self.game.settings.unlimited_cpu_resources
         ))
 
     def _identify_expense_category(self, expense: str) -> str:
@@ -566,7 +566,7 @@ class PlayerEntity(GameObject):
 
     @property
     def should_reveal_map(self) -> bool:
-        return self.is_controlled_by_local_human_player
+        return self.is_controlled_by_human_player
         # TODO: use this when multiplayer is implemented
         #  flag used to avoid enemy units revealing map for human player, only
         #  player's units and his allies units reveal map for him:
@@ -597,6 +597,11 @@ class PlayerEntity(GameObject):
     def ammunition(self) -> int:
         return sum(w.ammunition for w in self._weapons)
 
+    @property
+    @abstractmethod
+    def adjacent_nodes(self) -> List[MapNode]:
+        ...
+
     def assign_enemy(self, enemy: Optional[PlayerEntity]):
         # used when Player orders this Entity to attack the particular enemy
         self._enemy_assigned_by_player = self._targeted_enemy = enemy
@@ -619,7 +624,7 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        if self.is_controlled_by_local_human_player:
+        if self.is_controlled_by_human_player:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         if self.known_enemies or self._enemy_assigned_by_player:
@@ -708,9 +713,9 @@ class PlayerEntity(GameObject):
     def is_enemy(self, other: PlayerEntity) -> bool:
         return self.faction.is_enemy(other.faction)
 
-    @property
-    def is_controlled_by_local_human_player(self) -> bool:
-        return self.player.is_local_human_player
+    @cached_property
+    def is_controlled_by_human_player(self) -> bool:
+        return self.player.is_human_player
 
     @property
     @abstractmethod
@@ -728,7 +733,7 @@ class PlayerEntity(GameObject):
         :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
-        if self.game.settings.immortal_player_units and self.player.is_local_human_player:
+        if self.game.settings.immortal_player_units and self.player.is_human_player:
             return 0.0
         final_damage = self.calculate_final_damage(damage, penetration)
         self.health -= final_damage

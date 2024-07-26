@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import random
 from collections import deque
-from functools import partial
+from functools import partial, cached_property
 from pathlib import Path
 from typing import Deque, List, Optional, Set, Tuple, Dict, Union, Iterable
 
@@ -26,7 +26,7 @@ from utils.functions import (
     add_player_color_to_name, get_texture_size,
     get_path_to_file, ignore_in_editor_mode, add_extension
 )
-from utils.geometry import generate_2d_grid
+from utils.geometry import generate_2d_grid, clamp
 from utils.constants import CURSOR_ENTER_TEXTURE, TILE_WIDTH, TILE_HEIGHT, FUEL, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, UI_BUILDINGS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, CONSTRUCTION_SITE
 
@@ -81,7 +81,7 @@ class UnitsProducer:
     def _start_production(self, unit_name: str, confirmation=False):
         self.set_production_progress_and_speed(unit_name)
         self._set_currently_produced_to(unit_name)
-        if self.player.is_local_human_player:
+        if self.player.is_human_player:
             self.update_ui_units_construction_section()
             if confirmation:
                 self.game.window.sound_player.play_sound('production_started.wav')
@@ -98,7 +98,7 @@ class UnitsProducer:
             if unit_name == self.currently_produced and unit_name not in queue:
                 self._set_currently_produced_to(None)
                 self.production_progress = 0.0
-        if self.player.is_local_human_player:
+        if self.player.is_human_player:
             self.update_ui_units_construction_section()
 
     def return_resources_to_the_pool(self, unit_name: str):
@@ -128,8 +128,9 @@ class UnitsProducer:
 
     def update_units_production(self, delta_time: float):
         if self.currently_produced is not None and self.is_powered:
-            self.production_progress += (self.health_ratio * self.power_ratio * delta_time)
-            if self.player.is_local_human_player:
+            power_ratio = clamp(self.power_ratio + self.player.unlimited_resources, 1, 0)
+            self.production_progress += (self.health_ratio * power_ratio * delta_time)
+            if self.player.is_human_player:
                 self.update_ui_units_construction_section()
             if self.production_progress >= self.production_time:
                 self.finish_production(self.production_queue.pop())
@@ -158,7 +159,7 @@ class UnitsProducer:
         self._set_currently_produced_to(None)
         self.clear_spawning_point_for_new_unit()
         self.spawn_finished_unit(finished_unit_name)
-        if self.player.is_local_human_player:
+        if self.player.is_human_player:
             self.update_ui_units_construction_section()
             self.game.window.sound_player.play_random_sound(UNIT_PRODUCTION_FINISHED)
 
@@ -174,7 +175,7 @@ class UnitsProducer:
 
     def create_production_buttons(self, x, y) -> List[ProgressButton]:
         production_buttons = []
-        positions = generate_2d_grid(x - 135, y - 120, 4, 4, 75, 75)
+        positions = generate_2d_grid(x - 135, y - 160, 4, 4, 75, 75)
         for i, unit_name in enumerate(self.produced_units):
             column, row = positions[i]
             hint = UnitProductionCostsHint(self.player, self.produced_units[unit_name], delay=0.5)
@@ -337,8 +338,8 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.layered_spritelist.swap_rendering_layers(
             self, 0, position_to_map_grid(*self.position)[1]
         )
-
         self.player.recalculate_energy_balance()
+
 
     @property
     def is_selected(self) -> bool:
@@ -351,6 +352,13 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
     @property
     def is_power_plant(self) -> bool:
         return self.produced_resource == ENERGY
+
+    @cached_property
+    def adjacent_nodes(self) -> List[MapNode]:
+        b_adjacent = []
+        for adjacent in (n.adjacent_nodes for n in self.occupied_nodes):
+            b_adjacent.extend([b for b in adjacent if b not in self.occupied_nodes])
+        return b_adjacent
 
     def place_building_properly_on_the_grid(self) -> Point:
         """
@@ -410,7 +418,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
                 self.check_soldiers_garrisoning_possibility()
 
     def check_soldiers_garrisoning_possibility(self):
-        friendly_building = self.is_controlled_by_local_human_player
+        friendly_building = self.is_controlled_by_human_player
         free_space = len(self.garrisoned_soldiers) < self.garrison_size
         if (friendly_building and free_space) or not friendly_building:
             self.game.mouse.force_cursor(index=CURSOR_ENTER_TEXTURE)
@@ -456,7 +464,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
             if self.autodestruction_progress:
                 self.update_demolish_button(panel)
 
-            if self.is_controlled_by_local_human_player and self.produced_units is not None:
+            if self.is_controlled_by_human_player and self.produced_units is not None:
                 self.update_production_buttons(panel)
 
     def create_ui_elements(self, x, y) -> List[UiElement]:
@@ -469,16 +477,17 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         :return: List[uiElement] -- buttons, icons and widgets available for this Building
         """
         ui_elements = self.create_building_ui_information(x, y)
-        if self.is_controlled_by_local_human_player:
+        if self.is_controlled_by_human_player:
             buttons = self.create_building_ui_buttons(x, y)
             ui_elements.extend(buttons)
         return ui_elements
 
     def create_building_ui_information(self, x, y) -> List[UiElement]:
-        text_color = GREEN if self.is_controlled_by_local_human_player else RED
+        text_color = GREEN if self.is_controlled_by_human_player else RED
         return [
             UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
-            UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health')
+            UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health'),
+            UiTextLabel(x, y - 15, f'Garrison: {len(self.garrisoned_soldiers)} / {self.garrison_size}', 12, text_color, name='garrison')
         ]
 
     def create_building_ui_buttons(self, x, y) -> List[Button]:
@@ -494,7 +503,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_garrison_button(self, x, y) -> ProgressButton:
         return ProgressButton(
-            'ui_leave_building_btn.png', x - 135, y - 45, 'leave',
+            'ui_leave_building_btn.png', x - 135, y - 75, 'leave',
             active=len(self.garrisoned_soldiers) > 0,
             functions=self.on_soldier_exit,
             counter=len(self.garrisoned_soldiers)
@@ -502,7 +511,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_demolish_button(self, x, y) -> Button:
         demolish_button = ProgressButton(
-            'game_button_destroy.png', x - 55, y - 45, 'demolish',
+            'game_button_destroy.png', x - 55, y - 75, 'demolish',
             functions=self.start_autodestruction,
         )
         demolish_button.bind_function(self.cancel_autodestruction, MOUSE_BUTTON_RIGHT)
@@ -548,7 +557,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         soldier.position = self.position
 
     def takeover_building(self, soldier: Soldier):
-        if soldier.player.is_local_human_player:
+        if soldier.player.is_human_player:
             self.game.sound_player.play_sound('enemy_building_captured.vaw')
         self.put_soldier_into_garrison(soldier=soldier)
         self.reconfigure_building(soldier.player)
@@ -581,7 +590,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         self.player.recalculate_energy_balance()
 
     def update_garrison_button(self):
-        if self.player.is_local_human_player and self.is_selected:
+        if self.player.is_human_player and self.is_selected:
             button = self.game.get_bundle(UI_BUILDINGS_PANEL).find_by_name('leave')
             button.counter = soldiers_count = len(self.garrisoned_soldiers)
             button.toggle(state=soldiers_count > 0)
@@ -595,7 +604,7 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         finally:
             self.update_garrison_button()
 
-    def on_being_damaged(self, damage: float, penetration: float = 0) -> bool:
+    def on_being_damaged(self, damage: float, penetration: float = 0) -> float:
         # TODO: killing personnel inside Building
         return super().on_being_damaged(damage)
 
@@ -677,11 +686,11 @@ class ConstructionSite(Building):
         self.construction_progress += 1
         if self.construction_progress >= self.maximum_construction_progress:
             self.finish_construction()
-        elif self.is_controlled_by_local_human_player:
+        elif self.is_controlled_by_human_player:
             self.construction_progress_bar.update()
 
     def draw(self):
-        if self.is_controlled_by_local_human_player:
+        if self.is_controlled_by_human_player:
             self.construction_progress_bar.draw()
 
     def finish_construction(self):
@@ -689,7 +698,7 @@ class ConstructionSite(Building):
         self.construction_progress_bar = None
         self.kill()
         self.game.spawn(self.constructed_building_name, self.player, self.constructed_building_position)
-        if self.player.is_local_human_player:
+        if self.player.is_human_player:
             self.game.sound_player.play_sound('construction_complete.wav')
 
     def save(self):

@@ -938,7 +938,7 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
             for player in (self.players.values()):
                 node = random.choice(walkable)
                 walkable.remove(node)
-                names = [unit_name] * (PLAYER_UNITS_COUNT if player.is_local_human_player else CPU_UNITS_COUNT)
+                names = [unit_name] * (PLAYER_UNITS_COUNT if player.is_human_player else CPU_UNITS_COUNT)
                 self.spawn_group(names, player, node.position)
 
     def test_scenarios(self):
@@ -1086,10 +1086,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         if self.dialog is not None:
             self.draw_dialog(*self.dialog)
 
-        for unit in self.units:
-            draw_text(f'{unit._targeted_enemy}, {unit.forced_destination}', unit.right, unit.bottom, RED)
-            if unit.path:
-                draw_text(f'{unit.path[-1]}',unit.right, unit.top, WHITE)
+        # for unit in self.units:
+        #     draw_text(f'{unit.current_node}, {unit.forced_destination}', unit.right, unit.bottom, RED)
+        #     if unit.path:
+        #         draw_text(f'{unit.path[-1]}',unit.right, unit.top, WHITE)
 
     def draw_dialog(self, text: str, txt_color: Color = WHITE, color: Color = BLACK):
         x, y = self.window.screen_center

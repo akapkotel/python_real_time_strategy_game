@@ -7,7 +7,7 @@ from enum import IntEnum
 
 from math import dist
 from abc import abstractmethod, ABC
-from collections import deque
+from collections import deque, defaultdict
 from functools import cached_property
 from typing import Deque, List, Dict, Optional, Union
 
@@ -88,7 +88,6 @@ class Unit(PlayerEntity, ABC):
         self.waypoints_queue = None
 
         self.tasks = []
-        self.current_task = None
 
         self.outside = True
 
@@ -408,7 +407,7 @@ class Unit(PlayerEntity, ABC):
     def animate_and_communicate_unit_death(self):
         if self.outside and self.is_rendered:
             self.create_death_animation()
-        if self.player.is_local_human_player:
+        if self.player.is_human_player:
             self.game.sound_player.play_sound('unit_lost.vaw')
 
     def cancel_tasks(self):
@@ -454,7 +453,7 @@ class Unit(PlayerEntity, ABC):
         ]
         if self.weapons:
             informations.append(UiTextLabel(x, y - 55, f'Ammunition: {self.ammunition}/{self.max_ammunition}', 12, ammo_color, 'ammunition', active=False))
-        if self.is_controlled_by_local_human_player:
+        if self.is_controlled_by_human_player:
             informations.append(UiTextLabel(x, y - 80, f'Experience: {self.experience}', 12, GREEN, 'experience', active=False))
         return informations
 
@@ -485,7 +484,7 @@ class Vehicle(Unit):
         self._load_textures()
         self.hit_box = self.texture.hit_box_points
 
-        thread_texture = ''.join((self.object_name, '_threads.png'))
+        thread_texture = f'{self.object_name}_threads.png'
         # texture of the VehicleThreads left by this Vehicle
         self.threads_texture = self.game.resources_manager.get(thread_texture)
         # when this Vehicle left its threads on the ground last time:
@@ -697,8 +696,8 @@ class Soldier(Unit):
         return self.outside and super().should_be_rendered
 
     @property
-    def is_controlled_by_local_human_player(self) -> bool:
-        return self.player.is_local_human_player and self.outside  # selecting Soldiers inside Buildings is forbidden
+    def is_controlled_by_human_player(self) -> bool:
+        return self.player.is_human_player and self.is_rendered  # selecting Soldiers in Buildings is forbidden
 
     def on_update(self, delta_time=1/60):
         super().on_update(delta_time)

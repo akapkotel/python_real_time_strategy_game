@@ -12,7 +12,7 @@ from buildings.buildings import Building
 from effects.sound import (
     UNITS_SELECTION_CONFIRMATIONS, UNITS_MOVE_ORDERS_CONFIRMATIONS
 )
-from units.units_tasking import UnitTask, TaskEnterBuilding
+from units.units_tasking import UnitTask, TaskEnterBuilding, TaskAttackMove
 from utils.colors import GREEN, RED, YELLOW
 from game import Game, UI_WIDTH
 from players_and_factions.player import PlayerEntity
@@ -341,13 +341,14 @@ class UnitsManager(EventsCreator):
             self.game.pathfinder.enqueue_waypoint(units, x, y)
         else:
             self.send_units_to_pointed_location(units, x, y)
+            # self.units_tasks.append(TaskAttackMove(self, units, x, y))
         self.window.sound_player.play_random_sound(UNITS_MOVE_ORDERS_CONFIRMATIONS)
 
     def send_units_to_pointed_location(self, units, x, y):
         self.game.pathfinder.navigate_units_to_destination(units, x, y, True)
 
     def on_player_entity_clicked(self, clicked: PlayerEntity):
-        if self.game.editor_mode or clicked.is_controlled_by_local_human_player:
+        if self.game.editor_mode or clicked.is_controlled_by_human_player:
             self.on_friendly_player_entity_clicked(clicked)
         else:
             self.on_hostile_player_entity_clicked(clicked)
@@ -393,12 +394,13 @@ class UnitsManager(EventsCreator):
             return False
         return all(s.is_infantry for s in self.selected_units)
 
-    def get_selected_soldiers(self) -> List[Soldier]:
+    def get_selected_soldiers(self, amount: int = -1) -> List[Soldier]:
         s: Soldier
-        return [s for s in self.selected_units if s.is_infantry]
+        soldiers = [s for s in self.selected_units if s.is_infantry]
+        return soldiers[0:amount]
 
     def send_soldiers_to_building(self, building: Building):
-        soldiers = self.get_selected_soldiers()
+        soldiers = self.get_selected_soldiers(amount=building.count_empty_garrison_slots)
         self.send_units_to_pointed_location(soldiers, *building.position)
         self.units_tasks.append(TaskEnterBuilding(self, soldiers, building))
 

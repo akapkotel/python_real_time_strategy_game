@@ -12,7 +12,7 @@ from typing import (
     Deque, Dict, List, Optional, Set, Tuple, Union, Generator, Collection, Any,
 )
 
-from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture, create_isometric_grid_lines
+from arcade import Sprite, Texture, load_spritesheet, make_soft_square_texture
 
 from game import PROFILING_LEVEL
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, VERTICAL_DIST, DIAGONAL_DIST, ADJACENT_OFFSETS, \
@@ -93,7 +93,7 @@ def diagonal(first_grid: GridPosition, second_grid: GridPosition) -> bool:
 
 def random_terrain_texture() -> Texture:
     texture = random.choice(MAP_TEXTURES['mud'])
-    texture.image.transpose(random.randint(0, 5))
+    texture.image.transpose(random.randint(0, 6))
     return texture
 
 
@@ -102,8 +102,7 @@ def set_terrain_texture(terrain_type: str,
                         rotation: int = None) -> Tuple[Texture, int, int]:
     index = index or random.randint(0, len(MAP_TEXTURES[terrain_type]) - 1)
     texture: Texture = MAP_TEXTURES[terrain_type][index]
-
-    rotation = rotation or random.randint(0, 5)
+    rotation = rotation or random.randint(0, 6)
     texture.image.transpose(rotation)
     return texture, index, rotation
 
@@ -213,15 +212,16 @@ class Map:
         self.game.after_load_functions.append(partial(self.plant_trees, trees))
 
     @log_this_call()
-    def plant_trees(self, trees):
+    def plant_trees(self, trees: Dict[GridPosition, int]):
         for node in self.nodes.values():
             if (tree_type := trees.get(node.grid)) is not None:
                 self.game.spawn(f'tree_leaf_{tree_type}', position=node.position)
 
     def generate_random_trees(self) -> Dict[GridPosition, int]:
         trees = len(all_files_of_type_named('.png', 'resources', 'tree_')) + 1
-        return {grid: random.randrange(1, trees) for grid in self.nodes.keys()
-                if random.random() < self.game.settings.percent_chance_for_spawning_tree}
+        forbidden = set(self.get_nodes_by_row(self.rows) + self.get_nodes_by_row(0) + self.get_nodes_by_column(self.columns) + self.get_nodes_by_column(0))
+        return {grid: random.randrange(1, trees) for grid, node in self.nodes.items()
+                if random.random() < self.game.settings.percent_chance_for_spawning_tree and node not in forbidden}
 
     def save(self) -> Dict:
         return {
@@ -279,15 +279,16 @@ class Map:
         return random.choice(tuple(self.all_walkable_nodes))
 
     @property
-    def all_walkable_nodes(self) -> Generator[MapNode]:
+    def all_walkable_nodes(self) -> Generator[MapNode, Any, None]:
         return (node for node in self.nodes.values() if node.is_walkable)
 
     @timer(1, global_profiling_level=PROFILING_LEVEL)
     @log_this_call(console=True)
     def generate_map_nodes_and_tiles(self):
-        for x in range(self.columns):
-            for y in range(self.rows):
-                terrain = TerrainType.VOID if x in(0, self.columns) or y in (0, self.rows) else TerrainType.GROUND
+        columns, rows = self.columns, self.rows
+        for x in range(columns):
+            for y in range(rows):
+                terrain = TerrainType.VOID if x in(0, columns) or y in (0, rows) else TerrainType.GROUND
                 self.nodes[(x, y)] = node = MapNode(x, y, terrain)
                 self.create_map_sprite(*node.position, node.terrain_type)
         log_here(f'Generated {len(self.nodes)} map nodes.', console=True)
@@ -295,7 +296,8 @@ class Map:
     def create_map_sprite(self, x: int, y: int, terrain_type: TerrainType):
         sprite = Sprite(center_x=x, center_y=y, hit_box_algorithm='None')
         sprite.texture = {
-            terrain_type.GROUND: MAP_TILE_TEXTURE_GROUND,
+            # terrain_type.GROUND: MAP_TILE_TEXTURE_GROUND,
+            terrain_type.GROUND: random_terrain_texture(),
             terrain_type.VOID: MAP_TILE_TEXTURE_VOID,
             terrain_type.WATER: MAP_TILE_TEXTURE_WATER
         }[terrain_type]
@@ -565,7 +567,7 @@ class NavigatingUnitsGroup:
         self.reset_units_navigating_groups(units)
         destinations = self.create_units_group_paths(units)
         self.reverse_units_paths()
-        if self.leader.is_controlled_by_local_human_player:
+        if self.leader.is_controlled_by_human_player:
             self.add_visible_indicators_of_destinations(destinations, units)
 
     def __str__(self) -> str:
@@ -742,11 +744,11 @@ class Pathfinder(EventsCreator):
         Find requested number of valid waypoints around requested position.
         """
         center = position_to_map_grid(x, y)
-        if required_waypoints == 1:
+        if required_waypoints is 1:
             return [center, ]
-        radius = 1
-        waypoints = []
+        waypoints: List[Tuple[int, int]] = []
         nodes = self.map.nodes
+        radius = 1
         while len(waypoints) < required_waypoints:
             waypoints = [w for w in calculate_circular_area(*center, radius) if
                          w in nodes and nodes[w].is_walkable]

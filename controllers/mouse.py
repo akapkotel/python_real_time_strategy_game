@@ -329,7 +329,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
         self.cross_color = self.cursor_default_color
 
     def set_cursor_cross_color(self, pointed: PlayerEntity):
-        if pointed.is_controlled_by_local_human_player:
+        if pointed.is_controlled_by_human_player:
             self.cross_color = GREEN
         else:
             self.cross_color = RED
@@ -399,7 +399,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.cursor_on_terrain_with_selected_units()
 
     def cursor_on_entity_with_selected_units(self, entity):
-        if entity.is_controlled_by_local_human_player:
+        if entity.is_controlled_by_human_player:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         elif entity.is_enemy(self.units_manager.selected_units[0]):
             self.set_texture(CURSOR_ATTACK_TEXTURE)
@@ -412,7 +412,7 @@ class MouseCursor(AnimatedTimeBasedSprite, ToggledElement, EventsCreator):
             self.set_texture(CURSOR_FORBIDDEN_TEXTURE)
 
     def cursor_texture_on_pointing_at_entity(self, entity: PlayerEntity):
-        if entity.is_controlled_by_local_human_player:
+        if entity.is_controlled_by_human_player:
             self.set_texture(CURSOR_SELECTION_TEXTURE)
         else:
             self.set_texture(CURSOR_NORMAL_TEXTURE)
@@ -514,7 +514,7 @@ class MouseDragSelection:
         if self.game.editor_mode:
             return self.game.units
         else:
-            return {u for u in self.game.local_human_player.units if u.outside}
+            return {u for u in self.game.local_human_player.units if u.is_rendered}
 
     def __contains__(self, item: PlayerEntity) -> bool:
         return item in self.units
