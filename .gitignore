@@ -129,6 +129,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /testing_things.py
+/testing_solutions.py
+/testing_ideas.py
 
 # real_time_strategy_game
 
@@ -144,5 +146,3 @@ dev_utils.py
 
 # logfiles
 .log
-
-/testing_solutions.py

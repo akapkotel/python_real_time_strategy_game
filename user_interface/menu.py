@@ -133,13 +133,19 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             elements=[],
             register_to=self
         )
+
         if self.window.settings.developer_mode or self.window.settings.cheats == 889267:  # cheats!
             game_tab.extend(
                 [
                     UiTextLabel(*next(positions), text='Cheats:', font_size=20, align_x='right'),
                     Checkbox('menu_checkbox.png', *next(positions), 'Immortal player units:',
                              20, ticked=window.settings.immortal_player_units,
+                             functions=partial(window.switch_immortality, True),
                              variable=(window.settings, 'immortal_player_units')),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Immortal AI units:',
+                             20, ticked=window.settings.immortal_cpu_units,
+                             functions=partial(window.switch_immortality, False),
+                             variable=(window.settings, 'immortal_cpu_units')),
                     Checkbox('menu_checkbox.png', *next(positions), 'AI Sleep:',
                              20, ticked=window.settings.ai_sleep,
                              variable=(window.settings, 'ai_sleep')),

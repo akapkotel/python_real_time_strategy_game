@@ -132,6 +132,7 @@ class Settings:
         self.difficulty: int = 3
 
         self.immortal_player_units: bool = False
+        self.immortal_cpu_units: bool = False
         self.ai_sleep: bool = False
         self.instant_production_time: bool = False
         self.unlimited_player_resources: bool = False
@@ -441,6 +442,12 @@ class GameWindow(Window, EventsCreator):
     def is_valid_file_selected(self):
         if (selected := self.mouse.selected_ui_element) is not None:
             return selected if self.save_manager.check_if_file_exists(selected.name) else None
+
+    def switch_immortality(self, human_player: bool):
+        if (game := self.game_view) is not None:
+            for player in game.players.values():
+                if (human_player and not player.cpu) or (not human_player and player.cpu):
+                    player.immortal = not player.immortal
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):

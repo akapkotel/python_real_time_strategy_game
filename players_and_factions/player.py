@@ -135,7 +135,7 @@ class Faction(EventsCreator, Observer, Observed):
 class Player(EventsCreator, Observer, Observed):
     resources = {FUEL: 50, ENERGY: 0, AMMUNITION: 100, STEEL: 100, ELECTRONICS: 100, FOOD: 75, CONSCRIPTS: 15}
     game = None
-    cpu = False
+    cpu = None
 
     def __init__(self,
                  id: Optional[int] = None,
@@ -149,6 +149,10 @@ class Player(EventsCreator, Observer, Observed):
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color
+        self.immortal = False
+
+        self.immortal = ((not self.cpu and self.game.settings.immortal_player_units) or
+                         (self.cpu and self.game.settings.immortal_cpu_units))
 
         units, buildings = ([], []) if not self.game.editor_mode else self.populate_units_and_buildings_options()
         self.units_possible_to_build: List[str] = units
@@ -186,9 +190,11 @@ class Player(EventsCreator, Observer, Observed):
     def __repr__(self) -> str:
         return self.name
 
-    @cached_property
+    @property
     def is_human_player(self) -> bool:
-        return self is self.game.local_human_player
+        # TODO: when multiplayer is implemented, this check must determine if player is local human player
+        #  return is self.game.local_human_player
+        return not self.cpu
 
     def get_default_producer_of_unit(self, unit_name: str) -> Optional[UnitsProducer]:
         for producer in (b for b in self.buildings if b.produced_units is not None and unit_name in b.produced_units):
@@ -362,6 +368,7 @@ class Player(EventsCreator, Observer, Observed):
 
 
 class HumanPlayer(Player):
+    cpu = False
 
     def update_ui_resource_panel(self):
         bundle = self.game.get_bundle(UI_RESOURCES_SECTION)
@@ -733,7 +740,7 @@ class PlayerEntity(GameObject):
         :return: bool -- if hit entity was destroyed/killed or not,
         it is propagated to the damage-dealer.
         """
-        if self.game.settings.immortal_player_units and self.player.is_human_player:
+        if self.player.immortal:
             return 0.0
         final_damage = self.calculate_final_damage(damage, penetration)
         self.health -= final_damage
