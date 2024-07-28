@@ -55,7 +55,7 @@ class FogOfWar(Rect):
         # Black or semi-transparent grey sprites are drawn_area on the screen
         # width normal SpriteLists. We divide map for smaller areas with
         # distinct spritelists to avoid updating too large sets each frame:
-        self.fog_sprite_lists = self.create_dark_sprites()
+        self.fog_sprite_lists = self.create_dark_sprites() if self.game.settings.fog_of_war else {}
 
     def in_bounds(self, item) -> bool:
         return self.left <= item[0] <= self.right and self.bottom <= item[1] <= self.top
@@ -86,6 +86,9 @@ class FogOfWar(Rect):
         self.visible.update(revealed)
 
     def update(self):
+        if not self.game.settings.fog_of_war:
+            self.game.mini_map.visible = self.unexplored.union(self.explored)
+            return
         # remove currently visible tiles from the fog-of-war:
         visible = self.visible
         grids_to_sprites = self.grids_to_sprites

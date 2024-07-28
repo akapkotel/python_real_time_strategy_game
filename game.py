@@ -137,6 +137,7 @@ class Settings:
         self.instant_production_time: bool = False
         self.unlimited_player_resources: bool = False
         self.unlimited_cpu_resources: bool = False
+        self.fog_of_war: bool = True
 
         self.vehicles_threads: bool = True
         self.threads_fadeout_seconds: int = 2

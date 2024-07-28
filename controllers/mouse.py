@@ -555,4 +555,4 @@ class MouseDragSelection:
         left, right, top, bottom = self.left, self.right, self.top, self.bottom
         draw_lrtb_rectangle_filled(left, right, top, bottom, CLEAR_GREEN)
         draw_lrtb_rectangle_outline(left, right, top, bottom, GREEN)
-        draw_text(str(len(self.units)), left, bottom, GREEN)
+        # draw_text(str(len(self.units)), left, bottom, GREEN)

@@ -340,7 +340,6 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
         )
         self.player.recalculate_energy_balance()
 
-
     @property
     def is_selected(self) -> bool:
         return self.game.units_manager.selected_building is self

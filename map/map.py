@@ -528,7 +528,7 @@ class WaypointsQueue:
             self.units_waypoints[unit].append(waypoints[i])
 
     def update(self):
-        for unit in self.units:
+        for unit in (u for u in self.units):
             if waypoints := self.units_waypoints[unit]:
                 self.evaluate_unit_waypoints(unit, waypoints)
             else:

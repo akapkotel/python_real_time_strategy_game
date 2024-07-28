@@ -631,7 +631,7 @@ class PlayerEntity(GameObject):
         raise NotImplementedError
 
     def on_update(self, delta_time: float = 1/60):
-        if self.is_controlled_by_human_player:
+        if self.is_controlled_by_human_player and self.game.settings.fog_of_war:
             self.game.fog_of_war.reveal_nodes(self.observed_grids)
         self.update_known_enemies_set()
         if self.known_enemies or self._enemy_assigned_by_player:

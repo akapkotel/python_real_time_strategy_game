@@ -158,6 +158,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                     Checkbox('menu_checkbox.png', *next(positions), 'Instant production time',
                               20, ticked=window.settings.instant_production_time,
                               variable=(window.settings, 'instant_production_time')),
+                    Checkbox('menu_checkbox.png', *next(positions), 'Fog of war',
+                             20, ticked=window.settings.fog_of_war,
+                             variable=(window.settings, 'fog_of_war')),
                 ]
             )
 
