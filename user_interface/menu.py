@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import Union, Tuple, Optional
 
 from utils.constants import MULTIPLAYER_MENU, SCENARIOS, PROJECTS, SAVED_GAMES, SCENARIO_EDITOR_MENU, NEW_GAME_MENU, \
     SKIRMISH_MENU, CAMPAIGN_MENU, LOADING_MENU, SAVING_MENU, MAIN_MENU, OPTIONS_SUBMENU, GRAPHICS_TAB, SOUND_TAB, \
@@ -14,6 +15,7 @@ from utils.geometry import generate_2d_grid
 from utils.views import LoadableWindowView
 
 LOADER = 'loader'
+BTN_TXT_SIZE = 35
 
 
 class Menu(LoadableWindowView, UiBundlesHandler):
@@ -21,13 +23,27 @@ class Menu(LoadableWindowView, UiBundlesHandler):
     def __init__(self):
         super().__init__()
         UiBundlesHandler.__init__(self)
+        self.previous = []
+        self.current = None
         self.set_updated_and_drawn_lists()
         self.create_submenus()
 
-    def create_back_to_menu_button(self) -> Button:
+    def create_back_to_menu_button(self, forced: Optional[str] = None) -> Button:
         return Button('menu_button_back.png', SCREEN_X, 150,
-                      text=self.window.localization_manager.get('BACK'), text_size=35,
-                      functions=partial(self.switch_to_bundle, MAIN_MENU))
+                      text=self.window.localization_manager.get('BACK'), text_size=BTN_TXT_SIZE,
+                      functions=partial(self.switch_back, forced) if forced is not None else self.switch_back)
+
+    def switch_to_bundle(self,
+                         bundle: Union[str, UiElementsBundle],
+                         exceptions: Union[Tuple[str], None] = None,
+                         back: bool = False):
+        if self.current is not None and not back:
+            self.previous.append(self.current)
+        self.current = bundle if isinstance(bundle, str) else bundle.name
+        super().switch_to_bundle(bundle, exceptions)
+
+    def switch_back(self, forced: Optional[str] = None):
+        self.switch_to_bundle(forced or self.previous.pop(), back=True)
 
     def create_submenus(self):
         window = self.window
@@ -39,34 +55,34 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=MAIN_MENU,
             elements=[
                 # left row:
-                Button('menu_button_exit.png', x, next(y), text=localize('EXIT'), text_size=35,
+                Button('menu_button_exit.png', x, next(y), text=localize('EXIT'), text_size=BTN_TXT_SIZE,
                        functions=window.close),
-                Button('menu_button_credits.png', x, next(y), text=localize('CREDITS'), text_size=35,
+                Button('menu_button_credits.png', x, next(y), text=localize('CREDITS'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, CREDITS_SUBMENU)),
-                Button('menu_button_options.png', x, next(y), text=localize('OPTIONS'), text_size=35,
+                Button('menu_button_options.png', x, next(y), text=localize('OPTIONS'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, OPTIONS_SUBMENU)),
-                Button('menu_button_loadgame.png', x, next(y), text=localize('LOAD_GAME'), text_size=35,
+                Button('menu_button_loadgame.png', x, next(y), text=localize('LOAD_GAME'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, LOADING_MENU)),
-                Button('menu_button_newgame.png', x, next(y), text=localize('NEW_GAME'), text_size=35,
+                Button('menu_button_newgame.png', x, next(y), text=localize('NEW_GAME'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, NEW_GAME_MENU)),
                 Button('menu_button_continue.png', x, next(y),
-                       name=CONTINUE_BUTTON, active=False, text=localize('CONTINUE'), text_size=35,
+                       name=CONTINUE_BUTTON, active=False, text=localize('CONTINUE'), text_size=BTN_TXT_SIZE,
                        functions=window.continue_game),
-                Button('menu_button_quit.png', x, next(y), text=localize('QUIT'), text_size=35,
+                Button('menu_button_quit.png', x, next(y), text=localize('QUIT'), text_size=BTN_TXT_SIZE,
                        name=QUIT_GAME_BUTTON, active=False, functions=window.quit_current_game),
-                Button('menu_button_savegame.png', x, next(y), text=localize('SAVE_GAME'), text_size=35,
+                Button('menu_button_savegame.png', x, next(y), text=localize('SAVE_GAME'), text_size=BTN_TXT_SIZE,
                        name=SAVE_GAME_BUTTON, functions=window.open_saving_menu, active=False),
                 # buttons in center:
                 Button('menu_button_skirmish.png', x * 4, SCREEN_HEIGHT * 0.75,
-                       text=localize('SKIRMISH'), text_size=35, functions=partial(switch, SKIRMISH_MENU)),
+                       text=localize('SKIRMISH'), text_size=BTN_TXT_SIZE, functions=partial(switch, SKIRMISH_MENU)),
                 Button('menu_button_campaign.png', x * 6, SCREEN_HEIGHT * 0.75,
-                       text=localize('CAMPAIGN'), text_size=35, functions=partial(switch, CAMPAIGN_MENU)),
+                       text=localize('CAMPAIGN'), text_size=BTN_TXT_SIZE, functions=partial(switch, CAMPAIGN_MENU)),
                 Button('menu_button_multiplayer.png', x * 4, SCREEN_HEIGHT * 0.25,
-                       text=localize('MULTIPLAYER'), text_size=35, functions=partial(switch, MULTIPLAYER_MENU)),
+                       text=localize('MULTIPLAYER'), text_size=BTN_TXT_SIZE, functions=partial(switch, MULTIPLAYER_MENU)),
                 Button('menu_button_editor.png', x * 6, SCREEN_HEIGHT * 0.25,
-                       text=localize('SCENARIO_EDITOR'), text_size=35, functions=partial(switch, SCENARIO_EDITOR_MENU))
+                       text=localize('SCENARIO_EDITOR'), text_size=BTN_TXT_SIZE, functions=partial(switch, SCENARIO_EDITOR_MENU))
             ],
-            register_to=self
+            register_to=self,
         )
 
         columns = 4
@@ -77,18 +93,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         options_menu = UiElementsBundle(
             name=OPTIONS_SUBMENU,
             elements=[
-                self.create_back_to_menu_button(),
+                self.create_back_to_menu_button(forced=MAIN_MENU),
                 Button('menu_tab_blank.png', 960, SCREEN_HEIGHT - 34,
-                       text=localize('GRAPHICS'), text_size=35,
+                       text=localize('GRAPHICS'), text_size=BTN_TXT_SIZE,
                        functions=(partial(switch, GRAPHICS_TAB, (OPTIONS_SUBMENU,)))),
                 Button('menu_tab_blank.png', 320, SCREEN_HEIGHT - 34,
-                       text=localize('SOUND'), text_size=35,
+                       text=localize('SOUND'), text_size=BTN_TXT_SIZE,
                        functions=(partial(switch, SOUND_TAB, (OPTIONS_SUBMENU,)))),
                 Button('menu_tab_blank.png', 1600, SCREEN_HEIGHT - 34,
-                       text=localize('GAME'), text_size=35,
+                       text=localize('GAME'), text_size=BTN_TXT_SIZE,
                        functions=(partial(switch, GAME_TAB, (OPTIONS_SUBMENU,))))
             ],
-            register_to=self
+            register_to=self,
         )
 
         positions = (p for p in generate_2d_grid(col_width, SCREEN_HEIGHT * 0.8, rows, columns, col_width, row_height))
@@ -172,9 +188,9 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=LOADING_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                Button('menu_button_loadgame.png', x, next(y),
+                Button('menu_button_loadsave.png', x, next(y), text=localize('LOAD'), text_size=BTN_TXT_SIZE,
                        functions=window.load_game),
-                Button('menu_button_deletesave.png', x, next(y),
+                Button('menu_button_deletesave.png', x, next(y), text=localize('DELETE'), text_size=BTN_TXT_SIZE,
                        functions=window.delete_saved_game),
                 ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.2, SCREEN_Y, 'scrollable')
@@ -189,7 +205,7 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=SAVING_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                Button('menu_button_savegame.png', x, next(y),
+                Button('menu_button_savegame.png', x, next(y), text=localize('SAVE'), text_size=BTN_TXT_SIZE,
                        functions=partial(window.save_game, text_input)),
                 text_input,
                 ImageSlot('image_slot.png', x, next(y) + 100, 'miniature_slot', None),
@@ -205,11 +221,11 @@ class Menu(LoadableWindowView, UiBundlesHandler):
             name=NEW_GAME_MENU,
             elements=[
                 self.create_back_to_menu_button(),
-                Button('menu_button_skirmish.png', x, y,
+                Button('menu_button_skirmish.png', x, y, text=localize('SKIRMISH'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, 'skirmish menu')),
-                Button('menu_button_campaign.png', 2 * x, y,
+                Button('menu_button_campaign.png', 2 * x, y, text=localize('CAMPAIGN'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, 'campaign menu')),
-                Button('menu_button_multiplayer.png', 3 * x, y,
+                Button('menu_button_multiplayer.png', 3 * x, y, text=localize('MULTIPLAYER'), text_size=BTN_TXT_SIZE,
                        functions=partial(switch, 'multiplayer menu')),
             ],
             register_to=self
@@ -227,21 +243,22 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         y = (i for i in range(300, 675, 75))
         skirmish_menu = UiElementsBundle(
             name=SKIRMISH_MENU,
-            elements=[
-                # TODO: create background image
+
+            elements=[          # TODO: create background image
                 # Background('background.png', SCREEN_X, SCREEN_Y),
                 self.create_back_to_menu_button(),
-                Button('menu_button_play.png', SCREEN_X, 300, functions=window.start_new_game),
-                Slider('slider.png',  *next(positions), 'Trees density:', 200,
+                Button('menu_button_continue.png', SCREEN_X, 300, text=localize('BEGIN'),
+                       text_size=BTN_TXT_SIZE, functions=window.start_new_game),
+                Slider('slider.png',  *next(positions), localize('TREES_DENSITY'), 200,
                        variable=(window.settings, 'percent_chance_for_spawning_tree'),
                        min_value=0.01, max_value=0.1),
-                Slider('slider.png',  *next(positions), 'Start resources:', 200,
+                Slider('slider.png',  *next(positions), localize('START_RESOURCES'), 200,
                        variable=(window.settings, 'starting_resources'),
                        min_value=0.25, max_value=1.0),
-                Slider('slider.png',  *next(positions), 'Map width:', 200,
+                Slider('slider.png',  *next(positions), localize('MAP_WIDTH'), 200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
-                Slider('slider.png',  *next(positions), 'Map height:', 200,
+                Slider('slider.png',  *next(positions), localize('MAP_HEIGHT'), 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable'),
@@ -282,18 +299,18 @@ class Menu(LoadableWindowView, UiBundlesHandler):
                 self.create_back_to_menu_button(),
                 # UiTextLabel(SCREEN_X, SCREEN_Y, NOT_AVAILABLE_NOTIFICATION, 20),
                 Button('menu_button_create.png', SCREEN_X * 0.4, 150,
-                       text=localize('CREATE_NEW_SCENARIO'), text_size=35, functions=window.open_scenario_editor),
+                       text=localize('CREATE_NEW_SCENARIO'), text_size=BTN_TXT_SIZE, functions=window.open_scenario_editor),
                 Button('menu_button_delete_project.png', SCREEN_X, 300,
-                       text=localize('DELETE_SCENARIO'), text_size=35, functions=window.delete_scenario),
+                       text=localize('DELETE_SCENARIO'), text_size=BTN_TXT_SIZE, functions=window.delete_scenario),
                 Button('menu_button_load_project.png', SCREEN_X, 425,
-                       text=localize('LOAD_SCENARIO'), text_size=35, functions=window.load_scenario),
+                       text=localize('LOAD_SCENARIO'), text_size=BTN_TXT_SIZE, functions=window.load_scenario),
                 Button('menu_button_load_project.png', SCREEN_X, 550,
-                       text=localize('SAVE_SCENARIO'), text_size=35, functions=partial(window.save_game, text_input)),
+                       text=localize('SAVE_SCENARIO'), text_size=BTN_TXT_SIZE, functions=partial(window.save_game, text_input)),
                 text_input,
-                Slider('slider.png', *next(positions), 'Map width:', 200,
+                Slider('slider.png', *next(positions), localize('MAP_WIDTH'),  200,
                        variable=(window.settings, 'map_width'),
                        min_value=60, max_value=260, step=20),
-                Slider('slider.png', *next(positions), 'Map height:', 200,
+                Slider('slider.png', *next(positions), localize('MAP_HEIGHT'), 200,
                        variable=(window.settings, 'map_height'),
                        min_value=60, max_value=260, step=20),
                 ScrollableContainer('ui_scrollable_frame.png', SCREEN_WIDTH * 0.8, SCREEN_Y, 'scrollable'),
@@ -362,8 +379,10 @@ class Menu(LoadableWindowView, UiBundlesHandler):
         for button in (CONTINUE_BUTTON, QUIT_GAME_BUTTON, SAVE_GAME_BUTTON):
             if self.window.game_view is not None:
                 bundle.activate_element(button)
+                bundle.show_element(button)
             else:
                 bundle.deactivate_element(button)
+                bundle.hide_element(button)
 
 
 if __name__:
