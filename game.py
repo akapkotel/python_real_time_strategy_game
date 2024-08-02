@@ -455,12 +455,12 @@ class GameWindow(Window, EventsCreator):
 
     def change_language(self, new_language: str):
         self.localization_manager.set_language(new_language)
-        self.retranslate_ui_elements()
+        self.retranslate_ui_elements(self.localization_manager)
 
-    def retranlslate_ui_elements(self):
+    def retranslate_ui_elements(self, localization_manager: LocalizationManager):
         for view in (self.game_view, self.menu_view):
             if view is not None:
-                view.retranlslate_ui_elements()
+                view.retranslate_ui_elements(localization_manager)
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
@@ -780,11 +780,11 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         self.create_ui_universal_units_buttons(selected_units_bundle, x, y)
         # TODO: 4. get specific UiElements for each unit type, and add them to the bundle only once for each unit type
 
-    @staticmethod
-    def create_selected_units_panel_labels(selected_units_bundle, x, y):
+    def create_selected_units_panel_labels(self, selected_units_bundle, x, y):
+        localize = self.window.localization_manager.get
         selected_units_bundle.extend(
-            [UiTextLabel(x, y + 60, 'Selected units:', 13, WHITE, active=False),
-             UiTextLabel(x, y - 130, 'Available actions:', 13, WHITE, active=False)]
+            [UiTextLabel(x, y + 60, localize('SELECTED_UNITS'), 13, WHITE, active=False),
+             UiTextLabel(x, y - 130, localize('AVAILABLE_ACTIONS'), 13, WHITE, active=False)]
         )
 
     def create_ui_selection_buttons_for_units_of_the_same_type(self, context_units, selected_units_bundle, x, y):

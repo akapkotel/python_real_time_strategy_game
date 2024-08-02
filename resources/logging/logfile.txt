@@ -1,156 +1,74 @@
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 196, '__init__', None) | ResourceManager found 189 files.
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 196, '__init__', None) | ResourceManager found 190 files.
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 203, '__init__', None) | Loaded 29 sounds.
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 203, '__init__', None) | Loaded 29 sounds.
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 203, '__init__', None) | Found 2 playlists
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 203, '__init__', None) | Found 2 playlists
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 205, '__init__', None) | Found 1 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 1 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 205, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('game.py', 205, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
+INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
+INFO: 08/02/2024 09:00:14 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
 NoneType: None
-INFO: 08/02/2024 03:39:41 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
+INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 08/02/2024 09:00:15 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x00000190405846A0>,), kwargs: {}
+INFO: 08/02/2024 09:00:15 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001873F4CD820>,), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000001903F563B50>,), kwargs: {}
+INFO: 08/02/2024 09:00:15 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000001873F476E20>,), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('menu.py', 351, 'on_show_view', None) | Switched to View: Menu
+INFO: 08/02/2024 09:00:15 PM  | ('menu.py', 368, 'on_show_view', None) | Switched to View: Menu
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 08/02/2024 03:39:42 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None
-INFO: 08/02/2024 03:39:44 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 312, 372, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:28 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 253, 140, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:44 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 312, 372), kwargs: {}
+INFO: 08/02/2024 09:00:28 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 253, 140), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:44 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049544832
+INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680393872128
 NoneType: None
-INFO: 08/02/2024 03:39:44 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu options
+INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
 NoneType: None
-INFO: 08/02/2024 03:39:44 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: options
+INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 488, 1064, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:37 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1439, 531, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 488, 1064), kwargs: {}
+INFO: 08/02/2024 09:00:37 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1439, 531), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049620224
+INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680300116736
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu sound tab
+INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('user_interface.py', 1467, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: options
+INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None
-INFO: 08/02/2024 03:39:45 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: sound tab
+INFO: 08/02/2024 09:00:38 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 246, 88, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:46 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 395, 735, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:38 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 246, 88), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:46 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 395, 735), kwargs: {}
+INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680393872128
 NoneType: None
-INFO: 08/02/2024 03:39:46 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
+INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
 NoneType: None
-INFO: 08/02/2024 03:39:53 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 484, 733, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
 NoneType: None
-INFO: 08/02/2024 03:39:53 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 484, 733), kwargs: {}
+INFO: 08/02/2024 09:00:39 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 438, 501, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:53 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 475, 735, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:39 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 438, 501), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:53 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 475, 735), kwargs: {}
+INFO: 08/02/2024 09:00:39 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 439, 523, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:53 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
+INFO: 08/02/2024 09:00:39 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 439, 523), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 03:39:56 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 377, 737, 1, 0), kwargs: {}
+INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680307760768
 NoneType: None
-INFO: 08/02/2024 03:39:56 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 377, 737), kwargs: {}
+INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 54.34
 NoneType: None
-INFO: 08/02/2024 03:39:56 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
+INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 08/02/2024 03:40:01 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 427, 734, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:01 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 427, 734), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:01 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
-NoneType: None
-INFO: 08/02/2024 03:40:03 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 310, 736, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:03 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 310, 736), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:03 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
-NoneType: None
-INFO: 08/02/2024 03:40:07 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 465, 693, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:07 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 465, 693), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:07 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 391, 740, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:07 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 391, 740), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:07 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
-NoneType: None
-INFO: 08/02/2024 03:40:11 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 412, 738, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:11 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 412, 738), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:11 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on _SliderHandle id: 1719049687168
-NoneType: None
-INFO: 08/02/2024 03:40:12 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 753, 643, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:12 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 753, 643), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:14 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 911, 195, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:14 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 911, 195), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:14 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049631360
-NoneType: None
-INFO: 08/02/2024 03:40:14 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 08/02/2024 03:40:14 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 08/02/2024 03:40:15 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 312, 387, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:15 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 312, 387), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:15 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049544832
-NoneType: None
-INFO: 08/02/2024 03:40:15 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu options
-NoneType: None
-INFO: 08/02/2024 03:40:15 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: options
-NoneType: None
-INFO: 08/02/2024 03:40:16 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 916, 124, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:16 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 916, 124), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:16 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049631360
-NoneType: None
-INFO: 08/02/2024 03:40:16 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 08/02/2024 03:40:16 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
-NoneType: None
-INFO: 08/02/2024 03:40:18 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 321, 104, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:18 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 321, 104), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:18 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719049543936
-NoneType: None
-INFO: 08/02/2024 03:40:18 PM  | ('user_interface.py', 1435, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
-NoneType: None
-INFO: 08/02/2024 03:40:18 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 523, 528, 1, 0), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 523, 528), kwargs: {}
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1719209842240
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 55.02
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('user_interface.py', 1438, 'switch_to_bundle', None) | Switched to submenu main menu
-NoneType: None
-INFO: 08/02/2024 03:40:19 PM  | ('user_interface.py', 1445, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None

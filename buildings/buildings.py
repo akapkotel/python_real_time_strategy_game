@@ -483,10 +483,11 @@ class Building(PlayerEntity, UnitsProducer, ResourceProducer, ResearchFacility):
 
     def create_building_ui_information(self, x, y) -> List[UiElement]:
         text_color = GREEN if self.is_controlled_by_human_player else RED
+        localize = self.game.window.localization_manager.get
         return [
-            UiTextLabel(x, y + 50, self.object_name.replace('_', ' ').title(), 15, text_color, name='building_name'),
+            UiTextLabel(x, y + 50, localize(self.object_name.upper()), 15, text_color, name='building_name'),
             UiTextLabel(x, y + 15, f'HP: {round(self.health)} / {self.max_health}', 12, text_color, name='health'),
-            UiTextLabel(x, y - 15, f'Garrison: {len(self.garrisoned_soldiers)} / {self.garrison_size}', 12, text_color, name='garrison')
+            UiTextLabel(x, y - 15, f'{localize("GARRISON")}: {len(self.garrisoned_soldiers)} / {self.garrison_size}', 12, text_color, name='garrison')
         ]
 
     def create_building_ui_buttons(self, x, y) -> List[Button]:

@@ -1229,7 +1229,7 @@ class UiElementsBundle(Observed):
     name: str
     elements: List[UiElement]
     register_to: Observer
-    owner = None
+    previous: Optional[str] = None
     _on_load: Optional[Callable] = None
     _on_unload: Optional[Callable] = None
     ui_bundles_handler: Optional[UiBundlesHandler] = None
@@ -1405,13 +1405,14 @@ class UiBundlesHandler(Observer):
                                  function_if_yes: Callable):
         x, y = position
         close_dialog = partial(self.close_confirmation_dialog, after_switch_to_bundle)
+        localize = self.window.localization_manager.get
         self.switch_to_bundle(UiElementsBundle(
             name=CONFIRMATION_DIALOG,
             elements=[
-                UiTextLabel(x, y * 1.5, 'Are you sure?', 30),
-                Button('menu_button_confirm.png', x // 2, y,
+                UiTextLabel(x, y * 1.5, localize('ARE_YOU_SURE'), 30),
+                Button('menu_button_confirm.png', x // 2, y, text=localize('CONFIRM'), text_size=35,
                        functions=(function_if_yes, close_dialog)),
-                Button('menu_button_cancel.png', x * 1.5, y,
+                Button('menu_button_cancel.png', x * 1.5, y, text=localize('CANCEL'), text_size=35,
                        functions=(close_dialog, ))
             ],
             register_to=self
@@ -1555,10 +1556,13 @@ class UiBundlesHandler(Observer):
                 if hasattr(element, 'variable') and element.variable is not None:
                     element.update_from_variable()
 
-    def retranslate_ui_elements(self):
-        for bundle in self.ui_elements_bundles:
+    def retranslate_ui_elements(self, translation_manager):
+        retranslations_table = translation_manager.retranslations_table
+        localize = translation_manager.get
+        for bundle in self.ui_elements_bundles.values():
             for element in (e for e in bundle if hasattr(e, 'text')):
-                element.text = ''
+                key = retranslations_table[element.text]
+                element.text = localize(key)
 
 
 # To avoid circular imports
