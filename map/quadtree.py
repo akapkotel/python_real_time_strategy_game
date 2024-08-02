@@ -94,7 +94,7 @@ class QuadTree(ABC):
         self.entities[faction_id].add(entity)
         self.entities_count += 1
 
-    def remove(self, entity):
+    def remove(self, entity) -> None:
         try:
             self.entities[entity.faction.id].remove(entity)
         except (KeyError, ValueError):

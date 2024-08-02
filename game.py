@@ -44,6 +44,7 @@ from user_interface.user_interface import (
     ProgressButton,
     Checkbox, UnitProductionCostsHint, Hint
 )
+from user_interface.localization import LocalizationManager
 from utils.observer import Observed
 from utils.colors import BLACK, GREEN, RED, WHITE, rgb_to_rgba, YELLOW
 from utils.data_types import Viewport
@@ -162,6 +163,7 @@ class Settings:
 
         self.hints_delay_seconds: float = 0.6
         self.scrolling_speed_factor: int = 15
+        self.language: str = 'en'
 
         self.load_settings_from_file()
 
@@ -190,8 +192,9 @@ class GameWindow(Window, EventsCreator):
         self.frames = 0
         self.current_fps = 0
 
-        self.resources_manager = ResourcesManager()
         self.settings = settings  # shared with Game
+        self.resources_manager = ResourcesManager()
+        self.localization_manager = LocalizationManager(default_language=settings.language)
         self.configs = read_csv_files('resources/configs')  # shared with Game
 
         self.campaigns: Dict[str, Campaign] = load_campaigns()
@@ -449,6 +452,15 @@ class GameWindow(Window, EventsCreator):
             for player in game.players.values():
                 if (human_player and not player.cpu) or (not human_player and player.cpu):
                     player.immortal = not player.immortal
+
+    def change_language(self, new_language: str):
+        self.localization_manager.set_language(new_language)
+        self.retranslate_ui_elements()
+
+    def retranlslate_ui_elements(self):
+        for view in (self.game_view, self.menu_view):
+            if view is not None:
+                view.retranlslate_ui_elements()
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):

@@ -328,6 +328,7 @@ class UiElement(Sprite, ToggledElement, CursorInteractive, Selectable):
         self.hint = hint
         self.subgroup = subgroup
         self.ui_spritelist = None
+        self.highlight_color = None
 
     @property
     def bundle(self):
@@ -452,10 +453,13 @@ class Frame(UiElement):
 
 class Button(UiElement):
 
-    def __init__(self, texture_name: str,
+    def __init__(self,
+                 texture_name: str,
                  x: int,
                  y: int,
                  name: Optional[str] = None,
+                 text: Optional[str] = None,
+                 text_size: Optional[int] = None,
                  active: bool = True,
                  visible: bool = True,
                  parent: Optional[Hierarchical | str] = None,
@@ -476,15 +480,27 @@ class Button(UiElement):
             load_texture(full_texture_name, width, 0, width, height)
         ]
         self.set_texture(0)
-        self.button_color = color
+        self.text = text
+        self.text_size = text_size
+        self.highlight_color = self.get_highlight_color()
+
+    def get_highlight_color(self):
+        name = self.textures[-1].name
+        return RED if any(name.__contains__(n) for n in ('exit', 'back', 'cancel', 'quit', 'delete', 'stop')) else GREEN
 
     def draw(self):
         super().draw()
-        if self.button_color is not None:
-            width, height = self.width * 0.8, self.height * 0.8
-            draw_rectangle_filled(*self.position, width, height, self.button_color)
+        if (text := self.text) is not None:
+            draw_text(text, self.center_x, self.center_y, self.highlight_color if self.pointed else BLACK, self.text_size,
+                      bold=True, anchor_x='center', anchor_y='center')
+        # if self.button_color is not None:
+        #     width, height = self.width * 0.8, self.height * 0.8
+        #     draw_rectangle_filled(*self.position, width, height, self.button_color)
         if not self._active:
             draw_rectangle_filled(*self.position, self.width, self.height, FOG)
+
+    def draw_highlight_around_element(self):
+        draw_rectangle_outline(*self.position, self.width + 4, self.height + 4, self.highlight_color, 2)
 
 
 class ProgressButton(Button):
@@ -508,7 +524,7 @@ class ProgressButton(Button):
                  counter: Optional[int] = None,
                  hint: Optional[Hint] = None,
                  health_bar: bool = False):
-        super().__init__(texture_name, x, y, name, active, visible, parent, functions, subgroup, selectable_group, color, scale, hint=hint)
+        super().__init__(texture_name, x, y, name, None, None, active, visible, parent, functions, subgroup, selectable_group, color, scale, hint=hint)
         self._counter = counter
         self._progress = 0
         self._progress_color = rgb_to_rgba(GREEN, alpha=150)
@@ -1538,6 +1554,11 @@ class UiBundlesHandler(Observer):
             for element in bundle:
                 if hasattr(element, 'variable') and element.variable is not None:
                     element.update_from_variable()
+
+    def retranslate_ui_elements(self):
+        for bundle in self.ui_elements_bundles:
+            for element in (e for e in bundle if hasattr(e, 'text')):
+                element.text = ''
 
 
 # To avoid circular imports

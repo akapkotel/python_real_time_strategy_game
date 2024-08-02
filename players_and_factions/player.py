@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 from arcade.arcade_types import Color, Point
 
+from map.quadtree import QuadTree
 from utils.constants import CONSTRUCTION_SITE, TILE_WIDTH, FUEL, FOOD, AMMUNITION, ENERGY, STEEL, ELECTRONICS, \
     CONSCRIPTS, YIELD_PER_SECOND, CONSUMPTION_PER_SECOND, PRODUCTION_EFFICIENCY, RESOURCES, FactionName, \
     UI_RESOURCES_SECTION
@@ -512,7 +513,7 @@ class PlayerEntity(GameObject):
         self.armour = 0
         self.cover = 0
 
-        self.quadtree = None
+        self.quadtree: Optional[QuadTree] = None
         self.insert_to_map_quadtree()
 
         # visibility matrix is a list of tuples containing (x, y) indices to be
@@ -640,7 +641,7 @@ class PlayerEntity(GameObject):
 
     @property
     def should_be_rendered(self) -> bool:
-        return self in self.game.local_drawn_units_and_buildings and self.on_screen
+        return self.on_screen and self in self.game.local_drawn_units_and_buildings
 
     def update_in_map_quadtree(self):
         self.remove_from_map_quadtree()
