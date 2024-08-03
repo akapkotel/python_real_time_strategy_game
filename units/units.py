@@ -447,15 +447,17 @@ class Unit(PlayerEntity, ABC):
     def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
         health_color = value_to_color(self.health, self.max_health)
         ammo_color = value_to_color(self.ammunition, self.max_ammunition)
-        informations = [
-            UiTextLabel(x, y + 20, self.object_name.title().replace('_', ' '), 15, GREEN, 'unit name', active=False),
-            UiTextLabel(x, y -5, f'Health: {int(self.health)}/{self.max_health}', 12, health_color, 'health', active=False),
+        info = [
+            UiTextLabel(x, y + 20, self.localize(self.object_name.upper()), 15, GREEN, 'unit name', active=False),
+            UiTextLabel(x, y -5, f'HP: {int(self.health)}/{self.max_health}', 12, health_color, 'health', active=False),
         ]
         if self.weapons:
-            informations.append(UiTextLabel(x, y - 55, f'Ammunition: {self.ammunition}/{self.max_ammunition}', 12, ammo_color, 'ammunition', active=False))
+            info.append(UiTextLabel(x, y - 55, f'{self.localize("AMMUNITION")}: {self.ammunition}/{self.max_ammunition}',
+                                            12, ammo_color, 'ammunition', active=False))
         if self.is_controlled_by_human_player:
-            informations.append(UiTextLabel(x, y - 80, f'Experience: {self.experience}', 12, GREEN, 'experience', active=False))
-        return informations
+            info.append(UiTextLabel(x, y - 80, f'{self.localize("EXPERIENCE")}: {self.experience}', 12, GREEN,
+                                            'experience', active=False))
+        return info
 
     def update_ui_information_about_unit(self):
         selected_units_bundle = self.game.get_bundle(UI_UNITS_PANEL)
@@ -464,7 +466,7 @@ class Unit(PlayerEntity, ABC):
                 value = getattr(self, attribute)
                 max_value = getattr(self, f'max_{attribute}')
                 info_label = selected_units_bundle.find_by_name(attribute)
-                info_label.text = f'{attribute.title()}: {int(value)} / {max_value}'
+                info_label.text = f'{self.localize(attribute.upper())}: {int(value)} / {max_value}'
                 info_label.text_color = value_to_color(value, max_value)
             except AttributeError:
                 continue
@@ -531,7 +533,8 @@ class Vehicle(Unit):
 
     def create_ui_information_about_unit(self, x, y) -> list[UiElement]:
         return super().create_ui_information_about_unit(x, y) + [
-            UiTextLabel(x, y - 30, f'Fuel: {int(self.fuel)}/{self.max_fuel}', 12, value_to_color(self.fuel, self.max_fuel), 'fuel', active=False),
+            UiTextLabel(x, y - 30, f'{self.localize("FUEL")}: {int(self.fuel)}/{self.max_fuel}',
+                        12, value_to_color(self.fuel, self.max_fuel), 'fuel', active=False),
         ]
 
 

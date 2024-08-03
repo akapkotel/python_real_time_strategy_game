@@ -174,6 +174,8 @@ class Settings:
                 attribute, value = uncommented.split(' = ')
                 if 'self' in value or '(' in value or ')' in value:
                     continue
+                elif attribute == 'language':
+                    self.__setattr__(attribute, str(value))
                 else:
                     self.__setattr__(attribute, eval(value))
 

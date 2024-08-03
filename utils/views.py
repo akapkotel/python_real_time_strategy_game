@@ -216,10 +216,7 @@ class ProgressBar:
         draw_lrtb_rectangle_filled(*self.progress_bar_data)
 
     def update(self, progress: Optional[float] = None):
-        if progress is None:
-            self.total_progress += self.progress_step
-        else:
-            self.total_progress += progress
+        self.total_progress += self.progress_step if progress is None else progress
         self.progress_bar_data[1] = self.left_margin + 1 + ((self.width - 1) / self.max_progress) * self.total_progress
 
 

@@ -1,74 +1,1963 @@
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 196, '__init__', None) | ResourceManager found 190 files.
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 198, '__init__', None) | ResourceManager found 190 files.
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 203, '__init__', None) | Loaded 29 sounds.
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 205, '__init__', None) | Loaded 29 sounds.
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 203, '__init__', None) | Found 2 playlists
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 205, '__init__', None) | Found 2 playlists
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 1 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 207, '__init__', None) | Found 1 saved games in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\saved_games.
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 0 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 207, '__init__', None) | Found 2 scenarios in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios.
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('game.py', 205, '__init__', None) | Found 1 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
+INFO: 08/03/2024 04:49:32 PM  | ('game.py', 207, '__init__', None) | Found 2 projects in D:\Programowanie\Python\Projekty\python_real_time_strategy_game\scenarios\projects.
 NoneType: None
-INFO: 08/02/2024 09:00:14 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
+INFO: 08/03/2024 04:49:32 PM  | ('user_interface.py', 320, '__init__', None) | File no_texture does not exist!
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
+INFO: 08/03/2024 04:49:33 PM  | ('user_interface.py', 320, '__init__', None) | File  does not exist!
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+INFO: 08/03/2024 04:49:33 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000001873F4CD820>,), kwargs: {}
+INFO: 08/03/2024 04:49:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x00000228082F7610>,), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x000001873F476E20>,), kwargs: {}
+INFO: 08/03/2024 04:49:33 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<user_interface.menu.Menu object at 0x00000228082E40D0>,), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('menu.py', 368, 'on_show_view', None) | Switched to View: Menu
+INFO: 08/03/2024 04:49:33 PM  | ('menu.py', 369, 'on_show_view', None) | Switched to View: Menu
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 08/03/2024 04:49:33 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
 NoneType: None
-INFO: 08/02/2024 09:00:15 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 08/03/2024 04:49:33 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None
-INFO: 08/02/2024 09:00:28 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 253, 140, 1, 0), kwargs: {}
+INFO: 08/03/2024 04:49:38 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 246, 610, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:28 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 253, 140), kwargs: {}
+INFO: 08/03/2024 04:49:38 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 246, 610), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680393872128
+INFO: 08/03/2024 04:49:38 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959310784
 NoneType: None
-INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+INFO: 08/03/2024 04:49:38 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu new game menu
 NoneType: None
-INFO: 08/02/2024 09:00:28 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+INFO: 08/03/2024 04:49:38 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: new game menu
 NoneType: None
-INFO: 08/02/2024 09:00:37 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1439, 531, 1, 0), kwargs: {}
+INFO: 08/03/2024 04:49:39 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1069, 470, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:37 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1439, 531), kwargs: {}
+INFO: 08/03/2024 04:49:39 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1069, 470), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680300116736
+INFO: 08/03/2024 04:49:39 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959527616
 NoneType: None
-INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 08/03/2024 04:49:39 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu campaign menu
 NoneType: None
-INFO: 08/02/2024 09:00:37 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 08/03/2024 04:49:39 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: campaign menu
 NoneType: None
-INFO: 08/02/2024 09:00:38 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 246, 88, 1, 0), kwargs: {}
+INFO: 08/03/2024 04:49:44 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 434, 93, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:38 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 246, 88), kwargs: {}
+INFO: 08/03/2024 04:49:44 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 434, 93), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680393872128
+INFO: 08/03/2024 04:50:07 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 542, 251, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+INFO: 08/03/2024 04:50:07 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 542, 251), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:38 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+INFO: 08/03/2024 04:50:07 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on GenericTextButton id: 2370861674560
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 438, 501, 1, 0), kwargs: {}
+INFO: 08/03/2024 04:50:09 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 491, 219, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 438, 501), kwargs: {}
+INFO: 08/03/2024 04:50:09 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 491, 219), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('game.py', 297, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 439, 523, 1, 0), kwargs: {}
+INFO: 08/03/2024 04:50:09 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on GenericTextButton id: 2370861670720
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 439, 523), kwargs: {}
+INFO: 08/03/2024 04:50:11 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 480, 261, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 1680307760768
+INFO: 08/03/2024 04:50:11 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 480, 261), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 54.34
+INFO: 08/03/2024 04:50:11 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on GenericTextButton id: 2370861674560
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+INFO: 08/03/2024 04:50:11 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 483, 231, 1, 0), kwargs: {}
 NoneType: None
-INFO: 08/02/2024 09:00:39 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+INFO: 08/03/2024 04:50:11 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 483, 231), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:11 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on GenericTextButton id: 2370861670720
+NoneType: None
+INFO: 08/03/2024 04:50:12 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 947, 342, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:12 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 947, 342), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:20 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 929, 171, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:20 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 929, 171), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:20 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959546432
+NoneType: None
+INFO: 08/03/2024 04:50:20 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu new game menu
+NoneType: None
+INFO: 08/03/2024 04:50:20 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: new game menu
+NoneType: None
+INFO: 08/03/2024 04:50:21 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1413, 489, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:21 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1413, 489), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:21 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959494464
+NoneType: None
+INFO: 08/03/2024 04:50:21 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu multiplayer menu
+NoneType: None
+INFO: 08/03/2024 04:50:21 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: multiplayer menu
+NoneType: None
+INFO: 08/03/2024 04:50:22 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1013, 170, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:22 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1013, 170), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:22 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959555008
+NoneType: None
+INFO: 08/03/2024 04:50:22 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu new game menu
+NoneType: None
+INFO: 08/03/2024 04:50:22 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: new game menu
+NoneType: None
+INFO: 08/03/2024 04:50:23 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 508, 442, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:23 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 508, 442), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:23 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959527296
+NoneType: None
+INFO: 08/03/2024 04:50:23 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu skirmish menu
+NoneType: None
+INFO: 08/03/2024 04:50:23 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: skirmish menu
+NoneType: None
+INFO: 08/03/2024 04:50:24 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1550, 216, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:24 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1550, 216), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:24 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on GenericTextButton id: 2371197652288
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 996, 286, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 996, 286), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959537472
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('game.py', 428, 'load_saved_game_or_scenario', None) | Game initialized successfully
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x00000228169939D0>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: timer...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: timer was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: settings...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: settings was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: viewports...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: viewports was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: map...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('save_handling.py', 225, 'load_map', None) | Generated QuadTree of depth: 0
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('timing.py', 20, 'wrapper', None) | func: generate_map_nodes_and_tiles args: (<map.map.Map object at 0x00000228169B5F40>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('game_logging.py', 46, 'wrapper', None) | Generated 3600 map nodes.
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('save_handling.py', 225, 'load_map', None) | Map was initialized successfully...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: map was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: factions...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: factions was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: players...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: players was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: local_human_player...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: local_human_player was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: units...
+NoneType: None
+INFO: 08/03/2024 04:50:25 PM  | ('save_handling.py', 251, 'load_entities', None) | GameObjectsSpawner was initialized successfully. Found 47 entities in config file.
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: units was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: buildings...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: buildings was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: scenario_descriptor...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: scenario_descriptor was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: permanent_units_groups...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: permanent_units_groups was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: fog_of_war...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: fog_of_war was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: mini_map...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: mini_map was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: scenario...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: scenario was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 167, 'on_show_view', None) | Switched to View: LoadingScreen
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Loading: scheduled_events...
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 141, 'unshelve_scheduled_events', None) | ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013)
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 140, 'unshelve_scheduled_events', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x00000228169A92E0>, ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013)), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 141, 'unshelve_scheduled_events', None) | ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013)
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 140, 'unshelve_scheduled_events', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x00000228169A92E0>, ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013)), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 141, 'unshelve_scheduled_events', None) | ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127)
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 140, 'unshelve_scheduled_events', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x00000228169A92E0>, ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127)), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 141, 'unshelve_scheduled_events', None) | ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013)
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 140, 'unshelve_scheduled_events', None) | func: schedule args: (<utils.scheduling.EventsScheduler object at 0x00000228169A92E0>, ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013)), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved data: scheduled_events was successfully loaded!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<utils.views.LoadingScreen object at 0x000002281B41A850>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 97, 'on_update', None) | func: update_loading args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 107, 'update_loading', None) | func: load_from_loader args: (<__main__.Game object at 0x0000022816993970>,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 124, 'load_from_loader', None) | Saved game: immortal.scn was loaded successfully!
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('game.py', 896, 'on_show_view', None) | Switched to View: Game
+Traceback (most recent call last):
+  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\views.py", line 124, in load_from_loader
+    self.loading_progress += next(self.loader)
+StopIteration
+INFO: 08/03/2024 04:50:26 PM  | ('game.py', 897, 'on_show_view', None) | func: load_timer args: (<__main__.Game object at 0x0000022816993970>, <__main__.Timer object at 0x00000228169A9760>), kwargs: {}
+Traceback (most recent call last):
+  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\views.py", line 124, in load_from_loader
+    self.loading_progress += next(self.loader)
+StopIteration
+INFO: 08/03/2024 04:50:26 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+Traceback (most recent call last):
+  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\views.py", line 124, in load_from_loader
+    self.loading_progress += next(self.loader)
+StopIteration
+INFO: 08/03/2024 04:50:26 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+Traceback (most recent call last):
+  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\views.py", line 124, in load_from_loader
+    self.loading_progress += next(self.loader)
+StopIteration
+INFO: 08/03/2024 04:50:26 PM  | ('views.py', 139, 'call_after_load_functions', None) | func: plant_trees args: (<map.map.Map object at 0x00000228169B5F40>, {(1, 38): 1, (2, 39): 1, (2, 49): 1, (3, 1): 1, (3, 5): 2, (3, 19): 2, (3, 48): 2, (5, 20): 1, (6, 7): 2, (7, 5): 2, (7, 29): 1, (7, 44): 2, (7, 47): 1, (7, 50): 2, (7, 52): 1, (8, 11): 2, (8, 12): 1, (8, 27): 1, (8, 42): 1, (9, 31): 2, (9, 46): 2, (10, 50): 1, (11, 31): 1, (11, 53): 2, (11, 58): 2, (12, 1): 1, (12, 4): 2, (12, 22): 1, (12, 23): 1, (12, 29): 2, (12, 45): 1, (12, 47): 1, (13, 34): 1, (13, 38): 2, (13, 57): 1, (14, 10): 2, (14, 18): 1, (14, 19): 2, (14, 26): 1, (14, 27): 1, (14, 52): 2, (15, 13): 2, (15, 26): 2, (15, 40): 2, (16, 9): 2, (16, 15): 1, (16, 25): 1, (16, 26): 1, (17, 18): 1, (17, 24): 1, (18, 11): 1, (18, 14): 2, (18, 43): 2, (19, 9): 2, (19, 11): 1, (19, 27): 1, (19, 42): 2, (19, 45): 2, (21, 17): 2, (21, 18): 2, (21, 30): 2, (21, 33): 2, (21, 55): 1, (21, 56): 1, (22, 3): 1, (23, 27): 2, (23, 29): 2, (24, 41): 2, (26, 3): 2, (26, 26): 1, (27, 37): 2, (29, 5): 1, (29, 9): 2, (29, 24): 2, (29, 26): 2, (29, 40): 2, (30, 44): 1, (31, 8): 1, (31, 23): 1, (32, 2): 1, (32, 9): 2, (33, 9): 2, (33, 18): 1, (33, 57): 1, (34, 27): 1, (34, 38): 2, (35, 11): 2, (35, 20): 1, (36, 8): 1, (36, 17): 2, (36, 20): 1, (36, 23): 1, (36, 40): 1, (36, 43): 2, (36, 52): 1, (37, 3): 1, (37, 33): 1, (38, 13): 1, (38, 23): 2, (38, 46): 2, (38, 58): 1, (39, 48): 1, (40, 14): 2, (40, 17): 1, (40, 19): 1, (41, 6): 2, (41, 32): 2, (41, 42): 2, (42, 8): 1, (42, 49): 2, (43, 16): 1, (44, 58): 2, (45, 14): 2, (45, 23): 2, (45, 40): 2, (46, 13): 2, (46, 26): 1, (46, 44): 1, (46, 51): 2, (46, 56): 1, (47, 53): 1, (48, 9): 1, (48, 22): 1, (48, 53): 2, (49, 7): 2, (49, 29): 2, (49, 35): 2, (49, 47): 2, (50, 23): 1, (50, 38): 2, (51, 40): 2, (52, 25): 1, (52, 35): 2, (52, 58): 1, (53, 14): 2, (53, 40): 2, (54, 5): 2, (54, 27): 2, (54, 51): 2, (55, 6): 1, (55, 11): 2, (55, 22): 1, (55, 51): 2, (55, 54): 2, (56, 41): 1, (56, 45): 2, (56, 51): 2, (57, 3): 1, (58, 5): 1, (58, 10): 2, (58, 30): 1, (58, 41): 2, (59, 18): 2, (59, 20): 2, (59, 43): 1, (59, 58): 1}), kwargs: {}
+Traceback (most recent call last):
+  File "D:\Programowanie\Python\Projekty\python_real_time_strategy_game\utils\views.py", line 124, in load_from_loader
+    self.loading_progress += next(self.loader)
+StopIteration
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:27 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1066, 276, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:27 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 937, 449, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 937, 449), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1083, 283, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1083, 283), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:32 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:34 PM  | ('player.py', 779, 'kill', None) | Destroying GameObject: construction_site(id: 195, player.id: 2)
+NoneType: None
+INFO: 08/03/2024 04:50:34 PM  | ('buildings.py', 701, 'finish_construction', None) | Sound: construction_complete.wav not found!
+NoneType: None
+INFO: 08/03/2024 04:50:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:35 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1085, 102, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1085, 102), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1294, 185, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:36 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:37 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1106, 301, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:37 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1106, 301), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:38 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1228, 400, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1228, 400, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:40 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:40 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:40 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1235, 457, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1235, 457), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1122, 1018, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1122, 1018), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1186, 657, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:42 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1186, 657, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1182, 696, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1176, 772, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:43 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1149, 801, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1149, 801), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_building_panel
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:47 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1294, 553, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1286, 487, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:48 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1286, 487), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:50 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:52 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 834, 819, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:52 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 826, 916, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:54 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 534, 590, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:54 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 467, 396, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 467, 396), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 475, '__init__', None) | File truck_icon.png does not exist!
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 515, 213, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 310, 274, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 310, 274), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:50:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('game.py', 322, 'on_key_press', None) | Pressed key: 65507, other pressed keys: set()
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 342, 175, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 342, 175), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 728, 176, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 728, 176), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1194, 180, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:58 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1194, 180), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1435, 339, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:50:59 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1435, 339), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:00 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1039, 466, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:00 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1039, 466), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 693, 607, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 693, 607), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 766, 923, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 766, 923), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 380, 984, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 380, 984), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 190, 779, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:02 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 190, 779), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:03 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 158, 453, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:03 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 158, 453), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:04 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 325, 166, 1, 2), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:04 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 325, 166), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 489, 379, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 275, 325, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 275, 325), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 471, 332, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 288, 307, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 288, 307), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 217, 482, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:11 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1091, 224, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1091, 224), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:14 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:17 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:20 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1316, 346, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:23 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:24 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1313, 541, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:24 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:25 PM  | ('player.py', 779, 'kill', None) | Destroying GameObject: medium_vehicles_factory(id: 163, player.id: 4)
+NoneType: None
+INFO: 08/03/2024 04:51:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1017, 546, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1017, 546), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:26 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 617, 605, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:27 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 617, 605), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 840, 634, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:28 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 890, 656, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:29 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:30 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 478, 102, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:30 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:30 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:31 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 602, 407, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:31 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 602, 407), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:31 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 475, '__init__', None) | File apc_icon.png does not exist!
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 668, 612, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:32 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 526, 787, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 526, 787), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 608, 668, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:33 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 619, 671, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 684, 513, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 681, 498, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:34 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 444, 295, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 444, 295), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:35 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:36 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 428, 296, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 428, 311, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 428, 311), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:37 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 608, 323, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 608, 323), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:38 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 814, 247, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:39 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:41 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:41 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:42 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:43 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:44 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:44 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:45 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:46 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:46 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 820, 224, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:46 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:47 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:47 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:48 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:49 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 638, 483, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 638, 483), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:50 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:51 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 902, 478, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:52 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 769, 656, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:53 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 651, 771, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 651, 771), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 679, 752, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:54 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 685, 825, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 685, 825), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:55 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 699, 732, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:56 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 552, 783, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 552, 783), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 674, 722, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:57 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 674, 722), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 547, 693, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 547, 693), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:51:58 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 431, 732, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 431, 732), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:51:59 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:00 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 444, 731, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:00 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 444, 731), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:00 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 701, 578, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 833, 792, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:01 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 833, 792), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:02 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:03 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 804, 703, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 698, 728, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 698, 728), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:04 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:52:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:05 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:05 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 917, 619, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 927, 850, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:06 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 927, 850), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:07 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 747, 544, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:08 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:09 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:10 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:11 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:11 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:12 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 416, 866, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 414, 866, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:13 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 414, 866, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:14 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 491, 961, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 491, 961), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 491, 960, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 491, 960), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:15 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_units_panel
+NoneType: None
+INFO: 08/03/2024 04:52:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:16 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:17 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:17 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:18 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:19 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:20 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:20 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:21 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:22 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:23 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: update_logic, args: (), kwargs: {}, time left: -3.0250847339630127),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:23 PM  | ('scheduling.py', 48, 'execute', None) | Updating CPU logic of player: Player 4 of faction: Interplanetary Industrial Conglomerate
+NoneType: None
+INFO: 08/03/2024 04:52:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:24 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:24 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 610, 772, 4, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:24 PM  | ('mouse.py', 174, 'on_mouse_press', None) | func: on_right_button_press args: (MouseCursor,), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_options_panel
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: ui_resources_section
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: HumanPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: CpuPlayer, function: _update_resources_stock, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('scheduling.py', 116, 'update', None) | func: execute args: (ScheduledEvent(creator: Scenario, function: evaluate_events_triggers, args: (), kwargs: {}, time left: -5.025084733963013),), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('game.py', 322, 'on_key_press', None) | Pressed key: 65307, other pressed keys: set()
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('menu.py', 369, 'on_show_view', None) | Switched to View: Menu
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 08/03/2024 04:52:25 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+NoneType: None
+INFO: 08/03/2024 04:52:27 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 334, 862, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:27 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 334, 862), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:27 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959327552
+NoneType: None
+INFO: 08/03/2024 04:52:27 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+NoneType: None
+INFO: 08/03/2024 04:52:27 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+NoneType: None
+INFO: 08/03/2024 04:52:28 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 554, 535, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:28 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 554, 535), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:28 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370867622912
+NoneType: None
+INFO: 08/03/2024 04:52:28 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 08/03/2024 04:52:28 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+NoneType: None
+INFO: 08/03/2024 04:52:29 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 681, 584, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:29 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 681, 584), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:30 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 309, 353, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:30 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 309, 353), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:30 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959293760
+NoneType: None
+INFO: 08/03/2024 04:52:30 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu options
+NoneType: None
+INFO: 08/03/2024 04:52:30 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: options
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 341, 1043, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 341, 1043), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959358016
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu sound tab
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: options
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: sound tab
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 857, 1029, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 857, 1029), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959324672
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu graphics tab
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: options
+NoneType: None
+INFO: 08/03/2024 04:52:31 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: graphics tab
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1550, 1041, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1550, 1041), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959335616
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu game tab
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('user_interface.py', 1468, 'load_bundle', None) | Loading Ui_Elemnts_Bundle: options
+NoneType: None
+INFO: 08/03/2024 04:52:32 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: game tab
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 1045, 130, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 1045, 130), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959358912
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 174, 102, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 174, 102), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370959292992
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 1436, 'switch_to_bundle', None) | Switched to submenu Confirmation dialog
+NoneType: None
+INFO: 08/03/2024 04:52:34 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: Confirmation dialog
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 541, 579, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 541, 579), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('game.py', 299, 'on_mouse_press', None) | func: on_mouse_press args: (MouseCursor, 547, 552, 1, 0), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('mouse.py', 172, 'on_mouse_press', None) | func: on_left_button_press args: (MouseCursor, 547, 552), kwargs: {}
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('user_interface.py', 373, 'on_mouse_press', None) | Mouse button 1 clicked on Button id: 2370867329600
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('user_interface.py', 182, '_call_bound_functions', None) | Terminating application... Average FPS: 52.13
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('user_interface.py', 1439, 'switch_to_bundle', None) | Switched to submenu main menu
+NoneType: None
+INFO: 08/03/2024 04:52:35 PM  | ('user_interface.py', 1446, '_switch_to_bundle', None) | Loading Ui_Elemnts_Bundle: main menu
 NoneType: None

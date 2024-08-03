@@ -7,7 +7,7 @@ from math import dist
 from abc import abstractmethod
 from collections import defaultdict
 from functools import cached_property
-from typing import Dict, List, Optional, Set, Tuple, Union, Any
+from typing import Dict, List, Optional, Set, Tuple, Union, Any, Callable
 
 from arcade.arcade_types import Color, Point
 
@@ -150,7 +150,6 @@ class Player(EventsCreator, Observer, Observed):
         self.faction: Faction = faction or Faction()
         self.name = name or f'Player {self.id} of faction: {self.faction}'
         self.color = color
-        self.immortal = False
 
         self.immortal = ((not self.cpu and self.game.settings.immortal_player_units) or
                          (self.cpu and self.game.settings.immortal_cpu_units))
@@ -366,6 +365,13 @@ class Player(EventsCreator, Observer, Observed):
         self.faction = self.game.factions[self.faction]
         self.observed_attributes = defaultdict(list)
         self.attach_observers(observers=[self.game, self.faction])
+        if not self.game.editor_mode:
+            self.remove_unavailable_units()
+
+    def remove_unavailable_units(self):
+        for unit_name in self.units_possible_to_build.copy():
+            if self.get_default_producer_of_unit(unit_name) is None:
+                self.units_possible_to_build.remove(unit_name)
 
 
 class HumanPlayer(Player):
@@ -542,6 +548,10 @@ class PlayerEntity(GameObject):
         self.max_experience = 100
 
         self.attach_observers(observers=[self.game, self.player])
+
+    @cached_property
+    def localize(self) -> Callable:
+        return self.game.window.localization_manager.get
 
     @staticmethod
     def get_texture_name_with_player_color(player, texture_name) -> str:

@@ -64,13 +64,14 @@ class SaveManager:
         self.saved_games: SavedGames = {}
         self.projects: SavedGames = {}
 
+        self.finished = False
+
         self.update_saves(SAVE_EXTENSION, self.saves_path)
         log_here(f'Found {len(self.saved_games)} saved games in {self.saves_path}.', True)
         self.update_scenarios(SCENARIO_EXTENSION, self.scenarios_path)
         log_here(f'Found {len(self.scenarios)} scenarios in {self.scenarios_path}.', True)
         self.update_projects(PROJECT_EXTENSION, self.projects_path)
         log_here(f'Found {len(self.projects)} projects in {self.projects_path}.', True)
-
 
     def update_scenarios(self, extension: str, scenarios_path: str):
         self.scenarios = self.find_all_files(extension, scenarios_path)
@@ -100,9 +101,16 @@ class SaveManager:
             extension = SAVE_EXTENSION
         return path, extension
 
+    def save_scenario(self, game: 'Game'):
+        finished = game.window.menu_view.get_bundle('scenario editor menu').find_by_name('finished').ticked
+        path = self.scenarios_path if finished else self.projects_path
+        extension = SCENARIO_EXTENSION if finished else PROJECT_EXTENSION
+
     def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
+        finished = game.window.menu_view.get_bundle('scenario editor menu').find_by_name('finished').ticked
+        game.settings.editor_mode = not finished
         path, extension = self.set_correct_path_and_extension(scenario, finished)
-        full_save_path = add_extension_to_file_name_if_required(path, save_name, extension)
+        full_save_path = add_extension_to_file_name_if_required(path, save_name.rstrip('.proj'), extension)
         self.delete_file(full_save_path)
         with shelve.open(full_save_path) as file:
             file['save_date'] = time.gmtime()
