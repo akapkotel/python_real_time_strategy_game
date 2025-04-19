@@ -3,13 +3,14 @@
 import json
 import os
 import pathlib
-from typing import Dict
+
+from user_interface.user_interface import UiBundlesHandler
 
 
 class LocalizationManager:
-    def __init__(self, default_language='en'):
+    def __init__(self, default_language='English'):
         """
-        :param default_language: one of following: 'en', 'pl', 'ger'
+        :param default_language: one of following: 'English', 'Polish', 'German'
         """
         self.current_language = default_language
         self._translations = {}
@@ -17,12 +18,8 @@ class LocalizationManager:
         self.json_files_path = os.path.abspath('resources\\languages')
         self._load_translations(default_language)
 
-    @property
-    def retranslations_table(self) -> Dict:
-        return self._retranslation_table
-
     def _load_translations(self, language: str):
-        file_path = pathlib.Path(self.json_files_path, f'{language}.json')
+        file_path = pathlib.Path(self.json_files_path, f'{language.lower()}.json')
         with open(file_path, 'r', encoding='utf-8') as file:
             self._translations = json.load(file)
         self.current_language = language
@@ -34,7 +31,18 @@ class LocalizationManager:
         return self._translations.get(key, key)
 
     def set_language(self, language: str):
-        """:param language: one of following: 'en', 'pl', 'ger'"""
+        """:param language: one of following: 'English', 'Polish', 'German'"""
         if self._translations:
             self._build_retranslation_table()
         self._load_translations(language)
+
+    def reload_translations(self, *views):
+        for view in views:
+            if isinstance(view, UiBundlesHandler):
+                self._retranslate_ui_elements(view)
+
+    def _retranslate_ui_elements(self, view):
+        for bundle in view.ui_elements_bundles.values():
+            for element in (e for e in bundle if hasattr(e, 'text')):
+                key = self._retranslation_table[element.text]
+                element.text = self.get(key)

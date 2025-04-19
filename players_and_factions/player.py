@@ -549,10 +549,6 @@ class PlayerEntity(GameObject):
 
         self.attach_observers(observers=[self.game, self.player])
 
-    @cached_property
-    def localize(self) -> Callable:
-        return self.game.window.localization_manager.get
-
     @staticmethod
     def get_texture_name_with_player_color(player, texture_name) -> str:
         if CONSTRUCTION_SITE in texture_name:

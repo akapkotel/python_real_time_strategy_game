@@ -19,7 +19,7 @@ import time
 import pathlib
 
 from typing import (Any, Dict, Tuple, List, Optional, Set, Union, Generator)
-from functools import partial
+from functools import partial, cached_property
 
 import pyglet
 from arcade import (
@@ -30,7 +30,7 @@ from arcade.arcade_types import Color, Point
 from effects.sound import SoundPlayer
 from utils.constants import TILE_WIDTH, TILE_HEIGHT, EDITOR, SAVED_GAMES, SCENARIO_EDITOR_MENU, LOADING_MENU, \
     SAVING_MENU, MAIN_MENU, MINIMAP_WIDTH, MINIMAP_HEIGHT, UI_OPTIONS_PANEL, UI_RESOURCES_SECTION, UI_BUILDINGS_PANEL, \
-    UI_UNITS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_TERRAIN_EDITING_PANEL
+    UI_UNITS_PANEL, UI_UNITS_CONSTRUCTION_PANEL, UI_BUILDINGS_CONSTRUCTION_PANEL, UI_TERRAIN_EDITING_PANEL, PROJECTS
 from persistency.configs_handling import read_csv_files
 from persistency.resources_manager import ResourcesManager
 from user_interface.user_interface import (
@@ -131,6 +131,9 @@ class Settings:
         self.pyprofiler: bool = False
 
         self.difficulty: int = 3
+        self.cpu_production_speed = 1.0
+        self.cpu_construction_speed = 1.0
+        self.cpu_damage_modifier = 1.0
 
         self.immortal_player_units: bool = False
         self.immortal_cpu_units: bool = False
@@ -163,7 +166,7 @@ class Settings:
 
         self.hints_delay_seconds: float = 0.6
         self.scrolling_speed_factor: int = 15
-        self.language: str = 'en'
+        self.language: str = 'English'
 
         self.load_settings_from_file()
 
@@ -228,6 +231,10 @@ class GameWindow(Window, EventsCreator):
     @property
     def game(self) -> Game:
         return self.game_view
+
+    @cached_property
+    def localize(self):
+        return self.localization_manager.get
 
     @property
     def screen_center(self) -> Point:
@@ -414,13 +421,21 @@ class GameWindow(Window, EventsCreator):
         new saved-game file should be read. If field is empty, automatic save
         name would be generated
         """
+        save_name = self.get_valid_save_file_name(text_input_field)
+        if self.settings.editor_mode:
+            self.save_manager.save_scenario(save_name, self.game_view)
+            self.menu_view.refresh_files_list_in_bundle(SCENARIO_EDITOR_MENU, PROJECTS)
+        else:
+            self.save_manager.save_game(save_name, self.game_view)
+            self.menu_view.refresh_files_list_in_bundle(SAVING_MENU, SAVED_GAMES)
+
+    def get_valid_save_file_name(self, text_input_field: Optional[TextInputField]) -> str:
         if (selected := self.is_valid_file_selected()) is not None:
             save_name = selected.name
         elif not (save_name := text_input_field.get_text()):
             now = time.gmtime()
             save_name = f'saved_game_({now.tm_year}_{now.tm_yday}_{now.tm_hour}_{now.tm_min}_{now.tm_sec})'
-        self.save_manager.save_game(save_name, self.game_view, scenario=self.settings.editor_mode)
-        self.menu_view.refresh_files_list_in_bundle(SAVING_MENU, SAVED_GAMES)
+        return save_name
 
     def load_saved_game_or_scenario(self, selected=None, editor_mode: bool = False):
         if self.is_valid_file_selected() is not None:
@@ -457,12 +472,7 @@ class GameWindow(Window, EventsCreator):
 
     def change_language(self, new_language: str):
         self.localization_manager.set_language(new_language)
-        self.retranslate_ui_elements(self.localization_manager)
-
-    def retranslate_ui_elements(self, localization_manager: LocalizationManager):
-        for view in (self.game_view, self.menu_view):
-            if view is not None:
-                view.retranslate_ui_elements(localization_manager)
+        self.localization_manager.reload_translations(self.game_view, self.menu_view)
 
     @ask_player_for_confirmation(SCREEN_CENTER, MAIN_MENU)
     def close(self):
@@ -585,6 +595,10 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
     @property
     def resources_manager(self) -> ResourcesManager:
         return self.window.resources_manager
+
+    @cached_property
+    def localize(self):
+        return self.window.localization_manager.get
 
     @property
     def sound_player(self) -> SoundPlayer:
@@ -757,7 +771,6 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         _, right, bottom, _ = self.viewport
         return right - UI_WIDTH // 2, bottom + SCREEN_Y
 
-    @ignore_in_editor_mode
     def configure_units_interface(self, context_units: tuple[Unit]):
         self.create_selected_units_panel(context_units)
         self.load_bundle(UI_UNITS_PANEL)
@@ -834,14 +847,22 @@ class Game(LoadableWindowView, UiBundlesHandler, EventsCreator):
         construction_bundle.clear()
 
         x, y = self.ui_position
-        positions = generate_2d_grid(x - 135, y + 20, 6, 4, 75, 75)
+
+        positions = generate_2d_grid(x - 135, y, 6, 4, 75, 75)
 
         if construction_bundle_name is UI_UNITS_CONSTRUCTION_PANEL:
+            label = 'AVAILABLE_UNITS'
             self.populate_construction_options_with_available_units(construction_bundle, positions)
         elif construction_bundle_name is UI_BUILDINGS_CONSTRUCTION_PANEL:
+            label = 'POSSIBLE_CONSTRUCTIONS'
             self.populate_construction_options_with_available_buildings(construction_bundle, positions)
         else:
+            label = 'TERRAIN_FEATURES'
             self.populate_construction_options_with_terrain_features(construction_bundle, positions)
+
+        construction_bundle.append(
+            UiTextLabel(x, y + 50, f'{self.localize(label)}', font_size=15, name='construction_options')
+        )
 
         self.load_bundle(construction_bundle_name)
 

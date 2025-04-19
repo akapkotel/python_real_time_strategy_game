@@ -59,5 +59,8 @@
 	"AMMUNITION": "Amunicja",
 	"EXPERIENCE": "Doświadczenie",
 	"FUEL": "Paliwo",
-	"HEALTH": "Wytrzymałość"
+	"HEALTH": "Wytrzymałość",
+	"POSSIBLE_CONSTRUCTIONS": "Możliwa budowa:",
+	"AVAILABLE_UNITS": "Możliwa rekrutacja:",
+	"TERRAIN_FEATURES": "Kafelki terenu"
 }

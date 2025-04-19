@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Optional, Union
+from typing import Optional, Union, Callable
 
 from PIL import Image
 
@@ -76,6 +76,10 @@ class GameObject(AnimatedTimeBasedSprite, EventsCreator, Observed):
         object for time greater than Settings.hints_delay.
         """
         return self.object_name.title().replace('_', ' ')
+
+    @cached_property
+    def localize(self) -> Callable:
+        return self.game.window.localization_manager.get
 
     @property
     def on_screen(self) -> bool:

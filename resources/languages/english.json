@@ -59,5 +59,8 @@
 	"AMMUNITION": "Ammunition",
 	"EXPERIENCE": "Experience",
 	"FUEL": "Fuel",
-	"HEALTH": "Health"
+	"HEALTH": "Health",
+	"POSSIBLE_CONSTRUCTIONS": "Possible construction options",
+	"AVAILABLE_UNITS": "Available units",
+	"TERRAIN_FEATURES": "Terrain features"
 }

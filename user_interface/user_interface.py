@@ -1556,13 +1556,13 @@ class UiBundlesHandler(Observer):
                 if hasattr(element, 'variable') and element.variable is not None:
                     element.update_from_variable()
 
-    def retranslate_ui_elements(self, translation_manager):
-        retranslations_table = translation_manager.retranslations_table
-        localize = translation_manager.get
-        for bundle in self.ui_elements_bundles.values():
-            for element in (e for e in bundle if hasattr(e, 'text')):
-                key = retranslations_table[element.text]
-                element.text = localize(key)
+    # def retranslate_ui_elements(self, translation_manager):
+    #     retranslations_table = translation_manager.retranslations_table
+    #     localize = translation_manager.get
+    #     for bundle in self.ui_elements_bundles.values():
+    #         for element in (e for e in bundle if hasattr(e, 'text')):
+    #             key = retranslations_table[element.text]
+    #             element.text = localize(key)
 
 
 # To avoid circular imports

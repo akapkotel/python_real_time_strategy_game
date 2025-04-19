@@ -101,15 +101,19 @@ class SaveManager:
             extension = SAVE_EXTENSION
         return path, extension
 
-    def save_scenario(self, game: 'Game'):
+    def save_scenario(self, save_name: str, game: 'Game'):
         finished = game.window.menu_view.get_bundle('scenario editor menu').find_by_name('finished').ticked
         path = self.scenarios_path if finished else self.projects_path
         extension = SCENARIO_EXTENSION if finished else PROJECT_EXTENSION
-
-    def save_game(self, save_name: str, game: 'Game', scenario: bool = False, finished: bool = False):
-        finished = game.window.menu_view.get_bundle('scenario editor menu').find_by_name('finished').ticked
         game.settings.editor_mode = not finished
-        path, extension = self.set_correct_path_and_extension(scenario, finished)
+        self._save_data_to_file(save_name, game, path, extension, finished)
+
+    def save_game(self, save_name: str, game: 'Game'):
+        finished = game.window.menu_view.get_bundle('scenario editor menu').find_by_name('finished').ticked
+        self._save_data_to_file(save_name, game, self.saves_path, SAVE_EXTENSION, finished)
+        log_here(f'Game saved successfully as: {save_name}', True)
+
+    def _save_data_to_file(self, save_name: str, game: 'Game', path: str, extension: str, finished: bool = False):
         full_save_path = add_extension_to_file_name_if_required(path, save_name.rstrip('.proj'), extension)
         self.delete_file(full_save_path)
         with shelve.open(full_save_path) as file:
@@ -135,7 +139,6 @@ class SaveManager:
         if os.name == 'nt':
             replace_bak_save_extension_with_sav(full_save_path)
         self.update_files(extension, path)
-        log_here(f'Game saved successfully as: {save_name}', True)
 
     def update_files(self, extension, path):
         if extension is SAVE_EXTENSION:
