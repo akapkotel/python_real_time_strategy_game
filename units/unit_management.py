@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import (
     Optional, Sequence, Set, Dict, Iterator, Union, Collection, List, Callable, Iterable
 )
+from collections import Counter
 
 from arcade import Sprite, SpriteSolidColor, load_textures, load_texture
 from arcade.arcade_types import Color, Point
@@ -265,7 +266,8 @@ class UnitsManager(EventsCreator):
         self.selected_units: HashedUnitsList[Unit] = HashedUnitsList()
         self.selected_building: Optional[Building] = None
 
-        self.selected_units_types: Dict[str, int] = {}
+        # self.selected_units_types: Dict[str, int] = {}
+        self.selected_units_types: Counter = Counter()
 
         # for each selected Unit create SelectedUnitMarker, a Sprite showing
         # that this unit is currently selected and will react for player's
@@ -429,8 +431,7 @@ class UnitsManager(EventsCreator):
         self.select_units(*[u for u in self.selected_units if u.object_name == units_type])
 
     def update_types_of_selected_units(self, units: Collection[Unit]):
-        for unit in units:
-            self.selected_units_types[unit.object_name] = self.selected_units_types.setdefault(unit.object_name, 0) + 1
+        self.selected_units_types.update(unit.object_name for unit in units)
 
     def create_units_selection_markers(self, units: Collection[Unit]):
         self.selection_markers.update(

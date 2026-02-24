@@ -27,6 +27,36 @@ class FogSprite(Sprite):
         self.texture = texture
 
 
+class FogSpritePool:
+    def __init__(self, size=100):
+        self.dark_pool = [FogSprite((0, 0), DARK_TEXTURE) for _ in range(size)]
+        self.fog_pool = [FogSprite((0, 0), FOG_TEXTURE) for _ in range(size)]
+        self.dark_available = self.dark_pool.copy()
+        self.fog_available = self.fog_pool.copy()
+
+    def get_dark_sprite(self, position):
+        if not self.dark_available:
+            sprite = FogSprite(position, DARK_TEXTURE)
+        else:
+            sprite = self.dark_available.pop()
+            sprite.center_x, sprite.center_y = position
+        return sprite
+
+    def get_fog_sprite(self, position):
+        if not self.fog_available:
+            sprite = FogSprite(position, FOG_TEXTURE)
+        else:
+            sprite = self.fog_available.pop()
+            sprite.center_x, sprite.center_y = position
+        return sprite
+
+    def return_sprite(self, sprite):
+        if sprite.texture == DARK_TEXTURE:
+            self.dark_available.append(sprite)
+        else:
+            self.fog_available.append(sprite)
+
+
 class FogOfWar(Rect):
     """
     TODO: merge this class with MiniMap (they use same GridPosition set)
@@ -35,10 +65,12 @@ class FogOfWar(Rect):
 
     def __init__(self, cx=0, cy=0, width=0, height=0):
         width = self.game.map.width // self.game.map.grid_width
-        height = self.game.map.height  // self.game.map.grid_height
+        height = self.game.map.height // self.game.map.grid_height
         x = width // 2
         y = height // 2
         super().__init__(x, y, width, height)
+
+        self.fog_sprite_pool = FogSpritePool()
 
         # grid-data of the game-map:
         self.map_grids: KeysView[GridPosition] = self.game.map.nodes.keys()
@@ -65,6 +97,7 @@ class FogOfWar(Rect):
         Fill whole map with black tiles representing unexplored, hidden area.
         """
         cols, rows = self.game.map.columns // FOG_SPRITELIST_SIZE, self.game.map.rows // FOG_SPRITELIST_SIZE
+        get_dark_sprite = self.fog_sprite_pool.get_dark_sprite
         sprite_lists = {}
         for col in range(cols+1):
             for row in range(rows+1):
@@ -73,7 +106,8 @@ class FogOfWar(Rect):
             get_tile_position = self.get_tile_position
             for x, y in self.unexplored:
                 sprite_list = sprite_lists[(x // FOG_SPRITELIST_SIZE, y // FOG_SPRITELIST_SIZE)]
-                sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
+                # sprite = FogSprite(get_tile_position(x, y), DARK_TEXTURE)
+                sprite = get_dark_sprite(get_tile_position(x, y))
                 self.grids_to_sprites[(x, y)] = sprite
                 sprite_list.append(sprite)
         return sprite_lists
@@ -102,9 +136,10 @@ class FogOfWar(Rect):
         # add grey-semi-transparent fog to the tiles which are no longer seen:
         fog = self.explored - visible
         get_tile_position = self.get_tile_position
+        get_fog_sprite = self.fog_sprite_pool.get_fog_sprite
         for grid_x, grid_y in fog.difference(grids_to_sprites):
             x, y = get_tile_position(grid_x, grid_y)
-            grids_to_sprites[(grid_x, grid_y)] = sprite = FogSprite((x, y), FOG_TEXTURE)
+            grids_to_sprites[(grid_x, grid_y)] = sprite = get_fog_sprite((x, y))  #  FogSprite((x, y), FOG_TEXTURE)
             sprite_list = self.fog_sprite_lists[(grid_x // FOG_SPRITELIST_SIZE, grid_y // FOG_SPRITELIST_SIZE)]
             sprite_list.append(sprite)
         self.explored.update(visible)
@@ -116,17 +151,43 @@ class FogOfWar(Rect):
     def get_tile_position(x, y):
         return x * TILE_WIDTH + OFFSET_X, y * TILE_HEIGHT + OFFSET_Y
 
+    # def draw(self):
+    #     if self.game.editor_mode:
+    #         return
+    #     left, right, bottom, top = self.game.viewport
+    #     screen_width, screen_height = left - right, top - bottom
+    #
+    #     for grid, sprite_list in self.fog_sprite_lists.items():
+    #         s_left, s_right = grid[0] * screen_width, (grid[0] + 1) * screen_width
+    #         s_bottom, s_top = grid[1] * screen_height, (grid[1] + 1) * screen_height
+    #         if (left < s_right or right > s_left) and (bottom < s_top or top > s_bottom):
+    #             sprite_list.draw()
+
     def draw(self):
         if self.game.editor_mode:
             return
+
         left, right, bottom, top = self.game.viewport
+
+        # Pre-calculate which grid cells are visible in the viewport
+        visible_grids = self._get_visible_grid_cells(left, right, bottom, top)
+
+        # Only draw those sprite lists
+        for grid in visible_grids:
+            if grid in self.fog_sprite_lists:
+                self.fog_sprite_lists[grid].draw()
+
+    def _get_visible_grid_cells(self, left, right, bottom, top):
+        # Calculate which grid cells are within the viewport
+        # This could be cached if viewport hasn't changed
         screen_width, screen_height = left - right, top - bottom
 
-        for grid, sprite_list in self.fog_sprite_lists.items():
-            s_left, s_right = grid[0] * screen_width, (grid[0] + 1) * screen_width
-            s_bottom, s_top = grid[1] * screen_height, (grid[1] + 1) * screen_height
-            if (left < s_right or right > s_left) and (bottom < s_top or top > s_bottom):
-                sprite_list.draw()
+        min_x = max(0, int(left / screen_width) - 1)
+        max_x = min(int(self.game.map.columns // FOG_SPRITELIST_SIZE), int(right / screen_width) + 1)
+        min_y = max(0, int(bottom / screen_height) - 1)
+        max_y = min(int(self.game.map.rows // FOG_SPRITELIST_SIZE), int(top / screen_height) + 1)
+
+        return [(x, y) for x in range(min_x, max_x + 1) for y in range(min_y, max_y + 1)]
 
     def __getstate__(self) -> Dict:
         saved_fow = self.__dict__.copy()
